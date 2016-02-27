@@ -1,8 +1,28 @@
 
 window.postRobot = (function() {
 
+    function noop() {}
+
+    if (!window.addEventListener || !window.postMessage) {
+
+        if (window.console && window.console.warn) {
+            console.warn('Browser does not support window.postMessage');
+        }
+
+        return {
+            message: noop,
+            listen: noop,
+
+            req: noop,
+            res: noop,
+
+            destroy: noop
+        };
+    }
+
     var POST_MESSAGE_REQUEST = 'post_message_request';
     var POST_MESSAGE_RESPONSE = 'post_message_response';
+    var POST_MESSAGE_ACK = 'post_message_ack';
 
     var POST_MESSAGE_RESPONSE_ACK_SUCCESS = 'success';
     var POST_MESSAGE_RESPONSE_ACK_ERROR = 'error';
@@ -43,21 +63,54 @@ window.postRobot = (function() {
         var hash = Math.random().toString();
         responseHandlers[hash] = options;
 
+        options.respond = once(function(err, response) {
+            delete responseHandlers[hash];
+            return options.response(err, response);
+        });
+
+        if (!options.window.postMessage) {
+            return options.respond(new Error('Target window does not have postMessage handler'));
+        }
+
+        if (options.window.closed) {
+            return options.respond(new Error('Target window is closed'));
+        }
+
         if (options.timeout) {
             setTimeout(function() {
-                if (responseHandlers[hash]) {
-                    var handler = responseHandlers[hash];
-                    delete responseHandlers[hash];
-                    return handler.response(new Error('Post message response timed out after ' + options.timeout + ' ms'));
-                }
+                options.respond(new Error('Post message response timed out after ' + options.timeout + ' ms'));
             }, options.timeout);
         }
 
-        return sendMessage(options.window, {
-            type: POST_MESSAGE_REQUEST,
-            hash: hash,
-            name: options.name,
-            data: options.data || {}
+        try {
+            sendMessage(options.window, {
+                type: POST_MESSAGE_REQUEST,
+                hash: hash,
+                name: options.name,
+                data: options.data || {}
+            });
+        } catch (err) {
+            options.respond(err);
+        }
+
+        setTimeout(function() {
+            if (!options.ack) {
+                return options.respond(new Error('No ack for postMessage'));
+            }
+        });
+    }
+
+    function quickPostMessageRequest(window, name, data, callback) {
+
+        if (!callback) {
+            callback = data;
+            data = {};
+        }
+
+        return postMessageRequest({
+            window: window,
+            name: name,
+            response: callback
         });
     }
 
@@ -76,6 +129,40 @@ window.postRobot = (function() {
         }
 
         requestListeners[options.name] = options;
+
+        if (options.window) {
+            var interval = setInterval(function() {
+                if (options.window.closed) {
+                    clearInterval(interval);
+                    delete requestListeners[options.name];
+
+                    if (options.successOnClose) {
+                        options.handler(null, null, noop);
+                    } else {
+                        options.handler(new Error('Post message target window is closed'), null, noop);
+                    }
+                }
+            }, 50);
+        }
+    }
+
+    function postMessageListenOnce(options) {
+        return postMessageListen(options);
+    }
+
+    function quickPostMessageListen(name, callback) {
+        return postMessageListen({
+            name: name,
+            handler: callback
+        });
+    }
+
+    function quickPostMessageListenOnce(name, callback) {
+        return postMessageListen({
+            name: name,
+            handler: callback,
+            once: true
+        });
     }
 
     function postMessageListener(event) {
@@ -92,7 +179,17 @@ window.postRobot = (function() {
             return;
         }
 
-        if (message.type === POST_MESSAGE_REQUEST) {
+        if (message.type === POST_MESSAGE_ACK) {
+
+            var options = responseHandlers[message.hash];
+
+            if (!options) {
+                throw new Error('No handler found for post message ack');
+            }
+
+            options.ack = true;
+
+        } else if (message.type === POST_MESSAGE_REQUEST) {
 
             var successResponse = once(function successResponse(response) {
                 return sendMessage(event.source, {
@@ -114,15 +211,26 @@ window.postRobot = (function() {
                 });
             });
 
-            if (!requestListeners[message.name]) {
+            var listener = requestListeners[message.name];
+
+            if (!listener) {
                 return errorResponse(new Error('No postmessage request handler for ' + message.name));
             }
+
+            if (listener.window && listener.window !== window) {
+                return;
+            }
+
+            sendMessage(event.source, {
+                type: POST_MESSAGE_ACK,
+                hash: message.hash
+            });
 
             var result;
 
             try {
 
-                result = requestListeners[message.name].handler(message.data, function(err, response) {
+                result = requestListeners[message.name].handler(null, message.data, function(err, response) {
                     return err ? errorResponse(err) : successResponse(response);
                 });
 
@@ -136,17 +244,16 @@ window.postRobot = (function() {
 
         } else if (message.type === POST_MESSAGE_RESPONSE) {
 
-            if (!responseHandlers[message.hash]) {
-                return;
+            var handler = responseHandlers[message.hash];
+
+            if (!handler) {
+                throw new Error('No handler found for post message response');
             }
 
-            var handler = responseHandlers[message.hash];
-            delete responseHandlers[message.hash];
-
             if (message.ack === POST_MESSAGE_RESPONSE_ACK_ERROR) {
-                return handler.response(message.error);
+                return handler.respond(message.error);
             } else if (message.ack === POST_MESSAGE_RESPONSE_ACK_SUCCESS) {
-                return handler.response(null, message.response);
+                return handler.respond(null, message.response);
             }
         }
     };
@@ -160,9 +267,11 @@ window.postRobot = (function() {
     return {
         request: postMessageRequest,
         listen: postMessageListen,
+
+        send: quickPostMessageRequest,
+        on: quickPostMessageListen,
+        once: quickPostMessageListenOnce,
+
         destroy: postMessageDestroy
     };
 })();
-
-
-

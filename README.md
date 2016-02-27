@@ -9,6 +9,18 @@ With this, you can set up a listener in one window, have it wait for a post mess
 and gracefully handle any errors that crop up. You can also set a timeout, to be sure that the other window is responding to you,
 and fail gracefully if it does not.
 
+## Features
+
+- Request/response pattern (avoids sending fire-and-forget messages back and forth)
+- Don't worry about serialization, just send javascript objects
+- Handle error cases gracefully
+  - The user closed the window you're trying to message
+  - You sent a message the other window wasn't expecting
+  - The other window doesn't have any listener set up for your message
+  - The other window didn't acknowledge your message
+  - You didn't get a response from the other window in enough time
+  - Somebody sent you a message you weren't listening for
+
 ## Example
 
 ```javascript
@@ -17,7 +29,7 @@ and fail gracefully if it does not.
 
 postRobot.listen({
 
-    name: 'get_cart',
+    name: 'getCart',
 
     handler: function(data, callback) {
         setTimeout(function() {
@@ -25,7 +37,7 @@ postRobot.listen({
                 amount: 1,
                 shipping: 2
             });
-        }, 3000)
+        }, 500)
     }
 });
 
@@ -34,7 +46,8 @@ postRobot.listen({
 postRobot.request({
 
     window: window,
-    name: 'get_cart',
+    name: 'getCart',
+    bridge: window.opener.frames.PayPalBridge.returnToParent,
 
     response: function(err, data) {
         if (err) {
@@ -46,4 +59,18 @@ postRobot.request({
     timeout: 1000
 });
 
+```
+
+## Shortcuts
+
+```
+postRobot.on('getCart', function(err, data, callback) {
+    return callback({
+        amount: 1
+    });
+});
+
+postRobot.send(window, 'getCart', function(err, data) {
+    console.log(data);
+});
 ```
