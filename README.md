@@ -27,7 +27,28 @@ and fail gracefully if it does not.
 
 // In one window
 
+postRobot.on('getCart', function(err, data, callback) {
+    return callback({
+        amount: 1
+    });
+});
+
+// In another window
+
+postRobot.send(window, 'getCart', function(err, data) {
+    console.log(data);
+});
+```
+
+## Long form
+
+```javascript
+
+// In one window
+
 postRobot.listen({
+
+    window: window.opener,
 
     name: 'getCart',
 
@@ -59,18 +80,4 @@ postRobot.request({
     timeout: 1000
 });
 
-```
-
-## Shortcuts
-
-```
-postRobot.on('getCart', function(err, data, callback) {
-    return callback({
-        amount: 1
-    });
-});
-
-postRobot.send(window, 'getCart', function(err, data) {
-    console.log(data);
-});
 ```
