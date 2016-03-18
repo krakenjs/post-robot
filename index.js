@@ -9,11 +9,14 @@ window.postRobot = (function() {
         }
 
         return {
-            message: noop,
+            request: noop,
             listen: noop,
 
-            req: noop,
-            res: noop,
+            send: noop,
+            on: noop,
+            once: noop,
+
+            proxy: noop,
 
             destroy: noop
         };
@@ -28,6 +31,7 @@ window.postRobot = (function() {
 
     var requestListeners = {};
     var responseHandlers = {};
+    var proxies = [];
 
     function once(method) {
         var called = false;
@@ -166,6 +170,12 @@ window.postRobot = (function() {
 
     function postMessageListener(event) {
 
+        for (var i=0; i<proxies.length; i++) {
+            if (event.source === proxies[i].from) {
+                return proxies[i].to.postMessage(event.data, '*');
+            }
+        }
+
         var message;
 
         try {
@@ -224,7 +234,7 @@ window.postRobot = (function() {
                 type: POST_MESSAGE_ACK,
                 hash: message.hash
             });
-            
+
             if (listener.once) {
                 delete requestListeners[message.name];
             }
@@ -261,6 +271,19 @@ window.postRobot = (function() {
         }
     };
 
+    function proxy(window1, window2) {
+
+        proxies.push({
+            from: window1,
+            to: window2
+        });
+
+        proxies.push({
+            from: window2,
+            to: window1
+        });
+    }
+
     window.addEventListener('message', postMessageListener);
 
     function postMessageDestroy() {
@@ -274,6 +297,8 @@ window.postRobot = (function() {
         send: quickPostMessageRequest,
         on: quickPostMessageListen,
         once: quickPostMessageListenOnce,
+
+        proxy: proxy,
 
         destroy: postMessageDestroy
     };
