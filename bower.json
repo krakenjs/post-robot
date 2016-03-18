@@ -1,0 +1,18 @@
+{
+  "name": "postRobot",
+  "main": "index.js",
+  "version": "0.0.1",
+  "authors": [
+    "Daniel Brain <dbrain@paypal.com>"
+  ],
+  "description": "Post Message helper",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "public/components",
+    "test",
+    "tests"
+  ]
+}
