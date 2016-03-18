@@ -40,6 +40,22 @@ postRobot.send(window, 'getCart', function(err, data) {
 });
 ```
 
+## One-off listener
+
+// In one window
+
+postRobot.once('init', function(err, data, callback) {
+    console.log('init!!');
+    return callback();
+});
+
+// In another window
+
+postRobot.send(window, 'init', function(err, data) {
+    console.log('init done');
+});
+```
+
 ## Long form
 
 ```javascript

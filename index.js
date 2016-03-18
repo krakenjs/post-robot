@@ -1,4 +1,3 @@
-
 window.postRobot = (function() {
 
     function noop() {}
@@ -225,12 +224,16 @@ window.postRobot = (function() {
                 type: POST_MESSAGE_ACK,
                 hash: message.hash
             });
+            
+            if (listener.once) {
+                delete requestListeners[message.name];
+            }
 
             var result;
 
             try {
 
-                result = requestListeners[message.name].handler(null, message.data, function(err, response) {
+                result = listener.handler(null, message.data, function(err, response) {
                     return err ? errorResponse(err) : successResponse(response);
                 });
 
