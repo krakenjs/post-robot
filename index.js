@@ -33,6 +33,14 @@ window.postRobot = (function() {
     var responseHandlers = {};
     var proxies = [];
 
+    var parent;
+
+    if (window.opener) {
+        parent = window.opener
+    } else if (window.parent && window !== window.parent) {
+        parent = window.parent;
+    }
+
     function once(method) {
         var called = false;
         return function onceWrapper() {
@@ -300,6 +308,7 @@ window.postRobot = (function() {
 
         proxy: proxy,
 
-        destroy: postMessageDestroy
+        destroy: postMessageDestroy,
+        parent: parent
     };
 })();
