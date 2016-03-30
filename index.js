@@ -10,6 +10,38 @@
 
     function noop() {}
 
+    function _log(level, args) {
+
+        args = Array.prototype.slice.call(args);
+        args.unshift('[post-robot]');
+        args.push(window.location.href);
+        if (window.name) {
+            args.push(window.name);
+        }
+
+        if (!window.console) {
+            return;
+        }
+
+        if (!window.console[level]) {
+            level = 'log';
+        }
+
+        if (!window.console[level]) {
+            return;
+        }
+
+        window.console[level].apply(window.console, args);
+    }
+
+    function log() {
+        _log('log', arguments);
+    }
+
+    function logError() {
+        _log('error', arguments);
+    }
+
     if (!window.postMessage) {
 
         if (window.console && window.console.warn) {
@@ -42,6 +74,7 @@
 
     var requestListeners = {};
     var responseHandlers = {};
+    var mockRequestListeners = {};
     var proxies = [];
 
     var parent;
@@ -66,8 +99,7 @@
     }
 
     function sendMessage(win, message) {
-        console.error('%% send', message);
-
+        log('#send', message.type, message.name, message);
         win.postMessage(JSON.stringify(message), '*');
     }
 
@@ -81,7 +113,10 @@
             throw new Error('Expected options.name');
         }
 
-        if (typeof options.window === 'string') {
+        if (requestListeners[options.name] && requestListeners[options.name].mock) {
+            options.window = window;
+
+        } else if (typeof options.window === 'string') {
             var el = document.getElementById(options.window);
 
             if (!el) {
@@ -169,7 +204,7 @@
             throw new Error('Expected options.name');
         }
 
-        if (requestListeners[options.name]) {
+        if (requestListeners[options.name] && !options.override) {
             throw new Error('Post message response handler already registered: ' + options.name);
         }
 
@@ -188,10 +223,18 @@
                 if (options.window.closed) {
                     clearInterval(interval);
                     delete requestListeners[options.name];
-                    options.handler(new Error('Post message target window is closed'), null, noop);
+                    options.handler(new Error('Post message target window is closed'), null, function(err) {
+                        logError('Unhandled error', err.stack || err.toString());
+                    });
                 }
             }, 50);
         }
+
+        return {
+            cancel: function() {
+                delete requestListeners[options.name];
+            }
+        };
     }
 
     function quickPostMessageListen(name, options, callback) {
@@ -204,7 +247,7 @@
         options.name = name;
         options.handler = options.handler || callback;
 
-        postMessageListen(options);
+        return postMessageListen(options);
     }
 
     function quickPostMessageListenOnce(name, options, callback) {
@@ -216,7 +259,19 @@
 
         options.once = true;
 
-        quickPostMessageListen(name, options, callback);
+        return quickPostMessageListen(name, options, callback);
+    }
+
+    function quickPostMessageListenMock(name, options, callback) {
+
+        if (!callback && options instanceof Function) {
+            callback = options;
+            options = {};
+        }
+
+        options.mock = true;
+
+        return quickPostMessageListen(name, options, callback);
     }
 
     var POST_MESSAGE_HANDLERS = {};
@@ -373,6 +428,7 @@
         if (allowProxy(message)) {
             for (var i=0; i<proxies.length; i++) {
                 if (event.source === proxies[i].from) {
+                    log('#proxy', proxies[i].from, 'to', proxies[i].to);
                     return proxies[i].to.postMessage(event.data, '*');
                 }
             }
@@ -382,7 +438,7 @@
             return;
         }
 
-        console.error('!! message', window.name, window.location.href, message.name, message);
+        log('#receive', message.type, message.name, message);
 
         POST_MESSAGE_HANDLERS[message.type](event, message);
     };
@@ -433,6 +489,8 @@
         send: quickPostMessageRequest,
         on: quickPostMessageListen,
         once: quickPostMessageListenOnce,
+
+        mock: quickPostMessageListenMock,
 
         sendToParent: function(name, data, callback) {
             return this.send(parent, name, data, callback);
