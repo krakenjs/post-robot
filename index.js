@@ -74,8 +74,9 @@
 
     var requestListeners = {};
     var responseHandlers = {};
-    var mockRequestListeners = {};
     var proxies = [];
+
+    var mockMode = false;
 
     var parent;
 
@@ -113,7 +114,7 @@
             throw new Error('Expected options.name');
         }
 
-        if (requestListeners[options.name] && requestListeners[options.name].mock) {
+        if (mockMode) {
             options.window = window;
 
         } else if (typeof options.window === 'string') {
@@ -204,7 +205,7 @@
             throw new Error('Expected options.name');
         }
 
-        if (requestListeners[options.name] && !options.override) {
+        if (requestListeners[options.name] && !options.override && !mockMode) {
             throw new Error('Post message response handler already registered: ' + options.name);
         }
 
@@ -258,18 +259,6 @@
         }
 
         options.once = true;
-
-        return quickPostMessageListen(name, options, callback);
-    }
-
-    function quickPostMessageListenMock(name, options, callback) {
-
-        if (!callback && options instanceof Function) {
-            callback = options;
-            options = {};
-        }
-
-        options.mock = true;
 
         return quickPostMessageListen(name, options, callback);
     }
@@ -472,6 +461,12 @@
         }
     }
 
+    function reset() {
+        requestListeners = {};
+        responseHandlers = {};
+        proxies = [];
+    }
+
     if (window.addEventListener) {
         window.addEventListener('message', postMessageListener);
     } else {
@@ -482,6 +477,23 @@
         window.removeEventListener('message', postMessageListener);
     }
 
+    function enableMockMode() {
+        mockMode = true;
+
+        postMessageDestroy();
+
+        var originalPostMessage = window.postMessage;
+
+        window.postMessage = function(data) {
+            originalPostMessage.apply(this, arguments);
+
+            postMessageListener({
+                source: window,
+                data: data
+            });
+        }
+    }
+
     return {
         request: postMessageRequest,
         listen: postMessageListen,
@@ -490,14 +502,16 @@
         on: quickPostMessageListen,
         once: quickPostMessageListenOnce,
 
-        mock: quickPostMessageListenMock,
-
         sendToParent: function(name, data, callback) {
             return this.send(parent, name, data, callback);
         },
 
         proxy: proxy,
         unproxy: unproxy,
+
+        enableMockMode: enableMockMode,
+
+        reset: reset,
 
         destroy: postMessageDestroy,
         parent: parent
