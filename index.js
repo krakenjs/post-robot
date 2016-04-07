@@ -106,12 +106,31 @@
 
     function postMessageRequest(options) {
 
-        if (!options.window) {
-            throw new Error('Expected options.window');
-        }
-
         if (!options.name) {
             throw new Error('Expected options.name');
+        }
+
+        var promise;
+
+        if (!options.callback) {
+            if (window.Promise) {
+                promise = new window.Promise(function (resolve, reject) {
+                    options.callback = function (err, result) {
+                        return err ? reject(err) : resolve(result);
+                    };
+                });
+            } else {
+                throw new Error('Expected callback or window.Promise');
+            }
+        }
+
+        options.respond = once(function(err, response) {
+            options.callback(err, response);
+            return promise;
+        });
+
+        if (!options.window) {
+            return options.respond(new Error('Expected options.window'));
         }
 
         if (mockMode) {
@@ -121,38 +140,22 @@
             var el = document.getElementById(options.window);
 
             if (!el) {
-                throw new Error('Expected options.window ' + options.window + ' to be a valid element id');
+                return options.respond(new Error('Expected options.window ' + options.window + ' to be a valid element id'));
             }
 
             if (el.tagName.toLowerCase() !== 'iframe') {
-                throw new Error('Expected options.window ' + options.window + ' to be an iframe');
+                return options.respond(new Error('Expected options.window ' + options.window + ' to be an iframe'));
             }
 
             options.window = el.contentWindow;
-        }
 
-        options.callback = once(options.callback);
-
-        var promise;
-
-        if (!options.callback && window.Promise) {
-            promise = new window.Promise(function(resolve, reject) {
-                options.callback = function(err, result) {
-                    return err ? reject(err) : resolve(result);
-                };
-            });
+            if (!options.window) {
+                return options.respond(new Error('Expected options.window'));
+            }
         }
 
         var hash = options.name + '_' + Math.random().toString();
         responseHandlers[hash] = options;
-
-        options.respond = once(function(err, response) {
-            return options.callback(err, response);
-        });
-
-        if (!options.window.postMessage) {
-            return options.respond(new Error('Target window does not have postMessage handler'));
-        }
 
         if (options.window.closed) {
             return options.respond(new Error('Target window is closed'));
