@@ -1021,7 +1021,7 @@
                     ack: CONSTANTS.POST_MESSAGE_ACK.SUCCESS,
                     hash: message.hash,
                     name: message.name,
-                    data: data || {},
+                    response: data || {},
                     target: target
                 });
             } catch (err) {
@@ -1101,7 +1101,7 @@
         if (message.ack === CONSTANTS.POST_MESSAGE_ACK.ERROR) {
             return options.respond(message.error);
         } else if (message.ack === CONSTANTS.POST_MESSAGE_ACK.SUCCESS) {
-            return options.respond(null, message.data);
+            return options.respond(null, message.response);
         }
     };
 
