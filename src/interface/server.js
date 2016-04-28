@@ -40,7 +40,7 @@ export function listen(options) {
     }
 
     return {
-        cancel: () => {
+        cancel() {
             delete listeners.request[options.name];
         }
     };

@@ -4,15 +4,15 @@ import { promise } from './promise';
 
 export let util = {
 
-    isPopup: () => {
+    isPopup() {
         return Boolean(window.opener);
     },
 
-    isIframe: () => {
+    isIframe() {
         return Boolean(window.parent && window !== window.parent);
     },
 
-    isFullpage: () => {
+    isFullpage() {
         return Boolean(!util.isIframe() && !util.isPopup());
     },
 
@@ -25,7 +25,7 @@ export let util = {
         window.addEventListener('load', resolve);
     }),
 
-    getType: () => {
+    getType() {
         if (util.isPopup()) {
             return CONSTANTS.WINDOW_TYPES.POPUP;
         }
@@ -48,7 +48,7 @@ export let util = {
         }
     },
 
-    getParent: () => {
+    getParent() {
         if (util.isPopup()) {
             return window.opener;
         }
@@ -76,11 +76,11 @@ export let util = {
 
     noop() {}, // eslint-disable-line no-empty-function
 
-    getDomain: () => {
+    getDomain() {
         return window.location.host;
     },
 
-    clearLogs: () => {
+    clearLogs() {
 
         if (window.console && window.console.clear) {
             window.console.clear();
@@ -177,17 +177,17 @@ export let util = {
         window.console[level].apply(window.console, args);
     },
 
-    log: () => {
+    log() {
         util.logLevel('info', arguments);
     },
 
-    debug: () => {
+    debug() {
         if (CONFIG.DEBUG) {
             util.logLevel('debug', arguments);
         }
     },
 
-    debugError: () => {
+    debugError() {
         if (CONFIG.DEBUG) {
             util.logLevel('error', arguments);
         }
@@ -205,11 +205,11 @@ export let util = {
         }
     },
 
-    warn: () => {
+    warn() {
         util.logLevel('warn', arguments);
     },
 
-    error: () => {
+    error() {
         util.logLevel('error', arguments);
     },
 
@@ -221,7 +221,7 @@ export let util = {
         }
 
         return {
-            cancel: () => {
+            cancel() {
                 if (win.removeEventListener) {
                     win.removeEventListener(event, handler);
                 } else {
@@ -296,7 +296,7 @@ export let util = {
         }
     },
 
-    uniqueID: () => {
+    uniqueID() {
 
         let chars = '0123456789abcdef';
 

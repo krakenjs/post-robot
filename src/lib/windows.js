@@ -72,7 +72,7 @@ export let childWindows = {
 
 let openWindow = window.open;
 
-window.open = (url, name, x, y) => {
+window.open = function(url, name, x, y) {
 
     if (!name) {
         name = util.uniqueID();

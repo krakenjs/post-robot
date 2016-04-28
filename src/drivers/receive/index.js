@@ -69,7 +69,7 @@ function getProxy(source, message) {
 
     }
 
-    if (message.target !== getWindowID()) {
+    if (message.target && message.target !== getWindowID()) {
 
         let win = childWindows.getWindowById(message.target);
 
