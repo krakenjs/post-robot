@@ -618,6 +618,10 @@
 
         var message = parseMessage(data);
 
+        if (!message) {
+            return;
+        }
+
         if (mockMode) {
             util.log('#receive', message.type, message.name, message);
             return POST_MESSAGE_HANDLERS[message.type](source, message);
@@ -628,19 +632,10 @@
                 var proxy = proxies[i];
 
                 if (source === proxy.from) {
-                    if (message) {
-                        delete message.target;
-                        return sendMessage(proxy.to, message)
-                    }
-
-                    util.debug('#rawproxy', proxy.from, 'to', proxy.to, data);
-                    return sendRawMessage(proxy.to, data);
+                    delete message.target;
+                    return sendMessage(proxy.to, message, true);
                 }
             }
-        }
-
-        if (!message) {
-            return;
         }
 
         childWindows.register(message.source, source, message.windowType);
