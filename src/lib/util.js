@@ -1,5 +1,6 @@
 
 import { CONSTANTS, CONFIG } from '../conf';
+import { promise } from './promise';
 
 export let util = {
 
@@ -16,7 +17,7 @@ export let util = {
     },
 
 
-    windowReady: new Promise((resolve, reject) => {
+    windowReady: new promise.Promise((resolve, reject) => {
         if (document.readyState === 'complete') {
             return resolve();
         }

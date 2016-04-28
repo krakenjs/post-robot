@@ -1,7 +1,7 @@
 
 export let listeners;
 
-function resetListeners() {
+export function resetListeners() {
     listeners = {
         request: {},
         response: {},

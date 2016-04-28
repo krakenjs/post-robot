@@ -1,8 +1,13 @@
 
+import { Promise as ES6Promise } from 'es6-promise-min';
 export let promise = {
 
+    get Promise() {
+        return window.Promise ? window.Promise : ES6Promise;
+    },
+
     asyncPromise(method) {
-        return new Promise((resolve, reject) => {
+        return new promise.Promise((resolve, reject) => {
             setTimeout(() => {
                 try {
                     return method(resolve, reject);
@@ -14,12 +19,12 @@ export let promise = {
     },
 
     run(method) {
-        return Promise.resolve().then(method);
+        return promise.Promise.resolve().then(method);
     },
 
     method(method) {
         return function promiseWrapper() {
-            return Promise.resolve().then(() => {
+            return promise.Promise.resolve().then(() => {
                 return method.apply(this, arguments);
             });
         }

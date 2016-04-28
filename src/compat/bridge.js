@@ -1,6 +1,6 @@
 
 import { CONSTANTS } from '../conf';
-import { util } from '../lib';
+import { util, promise } from '../lib';
 
 let bridge;
 
@@ -10,7 +10,7 @@ export let openBridge = util.memoize(url => {
         throw new Error('Only one bridge supported');
     }
 
-    bridge = new window.Promise((resolve, reject) => {
+    bridge = new promise.Promise((resolve, reject) => {
 
         util.debug('Opening bridge:', url);
 

@@ -106,7 +106,7 @@ export function propagate(id) {
         }).then(data => {
             childWindows.register(data.id, parentWindow, data.type);
         }, err => {
-            util.error('Error sending identify:', err.stack || err.toString());
+            util.debugError('Error sending identify:', err.stack || err.toString());
         });
     }
 

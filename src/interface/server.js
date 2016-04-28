@@ -74,5 +74,5 @@ export function once(name, options, handler, errorHandler) {
     options.errorHandler = errorHandler || options.errorHandler;
     options.once = true;
 
-    return on(options);
+    return listen(options);
 }

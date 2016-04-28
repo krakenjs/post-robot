@@ -6,7 +6,7 @@ import { util, promise } from '../lib';
 
 export function request(options) {
 
-    return promise.nodeify(new Promise((resolve, reject) => {
+    return promise.nodeify(new promise.Promise((resolve, reject) => {
 
         if (!options.name) {
             throw new Error('Expected options.name');

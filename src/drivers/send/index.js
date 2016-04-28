@@ -34,7 +34,7 @@ export let sendMessage = promise.method((win, message, isProxy) => {
 
         util.debug('Running send message strategies', message);
 
-        return Promise.all(util.map(util.keys(SEND_MESSAGE_STRATEGIES), strategyName => {
+        return promise.Promise.all(util.map(util.keys(SEND_MESSAGE_STRATEGIES), strategyName => {
 
             return SEND_MESSAGE_STRATEGIES[strategyName](win, message).then(() => {
                 util.debug(strategyName, 'success');

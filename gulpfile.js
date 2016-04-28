@@ -16,7 +16,12 @@ gulp.task('webpack', ['lint'], function() {
               loader: 'babel',
               query: {
                 presets: ['es2015'],
-                plugins: ['transform-object-rest-spread', 'syntax-object-rest-spread']
+                plugins: [
+                  'transform-object-rest-spread',
+                  'syntax-object-rest-spread',
+                  'transform-es3-property-literals',
+                  'transform-es3-member-expression-literals'
+                ]
               }
             }
           ]
@@ -54,7 +59,8 @@ gulp.task('lint', function() {
 
     "globals": {
       "window": true,
-      "document": true
+      "document": true,
+      "Promise": false
     },
 
     "fix": true,

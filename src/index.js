@@ -24,3 +24,5 @@ function init() {
 init();
 
 export * from './interface';
+
+export default module.exports;

@@ -42,6 +42,8 @@ postRobot.send(window, 'getCart', function(err, data) {
 
 ## One-off listener
 
+```javascript
+
 // In one window
 
 postRobot.once('init', function(err, data, callback) {
@@ -54,3 +56,4 @@ postRobot.once('init', function(err, data, callback) {
 postRobot.send(window, 'init', function(err, data) {
     console.log('init done');
 });
+```

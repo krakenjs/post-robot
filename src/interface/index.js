@@ -8,7 +8,7 @@ export * from './config';
 
 export let parent = util.getParent();
 
-export { resetListeners as reset } from '../drivers/receive';
+export { resetListeners as reset } from '../drivers';
 
 export { openBridge } from '../compat/bridge';
 
