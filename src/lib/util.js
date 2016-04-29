@@ -57,9 +57,13 @@ export let util = {
         }
     },
 
-    eachParent(method) {
+    eachParent(method, includeSelf) {
 
         let win = window;
+
+        if (includeSelf) {
+            method(window);
+        }
 
         while (true) {
             let parent = win.opener || win.parent;
@@ -71,6 +75,20 @@ export let util = {
             win = parent;
 
             method(win);
+        }
+    },
+
+    eachFrame(win, method) {
+        for (let i=0; i<win.frames.length; i++) {
+            let frame;
+            
+            try {
+                frame = win.frames[i];
+            } catch (err) {
+                continue;
+            }
+
+            method(frame);
         }
     },
 

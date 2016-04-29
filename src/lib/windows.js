@@ -2,7 +2,6 @@
 import { CONSTANTS } from '../conf';
 import { util } from '../lib';
 import { on, send } from '../interface';
-import { getBridgeFor } from '../compat';
 
 let windows = [];
 
@@ -38,7 +37,7 @@ export let childWindows = {
         }
 
         let isFrame = util.some(windows, childWin => {
-            return util.isFrameOwnedBy(win.win, childWin);
+            return util.isFrameOwnedBy(childWin.win, win);
         });
 
         if (isFrame) {
@@ -97,29 +96,39 @@ export function propagate(id) {
         }
     });
 
-    let parentWindow = util.getParent();
+    let registered = [];
 
-    if (parentWindow) {
-        send(parentWindow, CONSTANTS.POST_MESSAGE_NAMES.IDENTIFY, {
-            id,
-            type: util.getType()
-        }).then(data => {
-            childWindows.register(data.id, parentWindow, data.type);
-        }, err => {
-            util.debugError('Error sending identify:', err.stack || err.toString());
-        });
+    function register(win, identifier) {
+
+        if (!win || win === window || registered.indexOf(win) !== -1) {
+            return;
+        }
+
+        util.debug('propagating to', identifier, win);
+
+        registered.push(win);
+
+        if (util.safeHasProp(win, CONSTANTS.WINDOW_PROPS.POSTROBOT)) {
+            win[CONSTANTS.WINDOW_PROPS.POSTROBOT].registerSelf(id, window, util.getType())
+        } else {
+            send(win, CONSTANTS.POST_MESSAGE_NAMES.IDENTIFY, {
+                id,
+                type: util.getType()
+            }).then(data => {
+                childWindows.register(data.id, win, data.type);
+            }, err => {
+                util.debugError('Error sending identify:', err.stack || err.toString());
+            });
+        }
     }
 
     util.eachParent(parent => {
 
-        if (util.safeHasProp(parent, CONSTANTS.WINDOW_PROPS.POSTROBOT)) {
-            parent[CONSTANTS.WINDOW_PROPS.POSTROBOT].registerSelf(id, window, util.getType())
-        }
-
-        let parentBridge = getBridgeFor(window.opener);
-
-        if (parentBridge && util.safeHasProp(parentBridge, CONSTANTS.WINDOW_PROPS.POSTROBOT)) {
-            parentBridge[CONSTANTS.WINDOW_PROPS.POSTROBOT].registerSelf(id, window, util.getType());
-        }
-    });
+        register(parent, 'parent');
+        
+        util.eachFrame(parent, frame => {
+            register(frame, 'frame');
+        });
+        
+    }, true);
 }

@@ -85,13 +85,13 @@ you will need to set up an invisible bridge in an iframe on your parent page:
 
 Doing this is pretty simple:
 
-1. Create a bridge path, for example `http://yy.com/bridge.html`, and include post-robot:
+a. Create a bridge path, for example `http://yy.com/bridge.html`, and include post-robot:
 
 ```html
 <script src="http://xx.com/js/post-robot.js"></script>
 ```
 
-2. In the parent page, `xx.com`, include the following javascript:
+b. In the parent page, `xx.com`, include the following javascript:
 
 ```html
 <script>
