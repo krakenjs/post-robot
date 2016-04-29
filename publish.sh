@@ -7,8 +7,8 @@ gulp build;
 git add dist;
 git commit -m "Dist" || echo "Nothing to distribute";
 
-npm version patch;
 bower version patch;
+npm version patch --from-git;
 
 git push;
 git push --tags;
