@@ -8,7 +8,7 @@ git add dist;
 git commit -m "Dist" || echo "Nothing to distribute";
 
 bower version patch;
-npm version patch --from-git;
+npm version from-git;
 
 git push;
 git push --tags;
