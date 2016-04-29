@@ -475,9 +475,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return window.parent;
 	        }
 	    },
-	    eachParent: function eachParent(method) {
+	    eachParent: function eachParent(method, includeSelf) {
 
 	        var win = window;
+
+	        if (includeSelf) {
+	            method(window);
+	        }
 
 	        while (true) {
 	            var parent = win.opener || win.parent;
@@ -489,6 +493,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	            win = parent;
 
 	            method(win);
+	        }
+	    },
+	    eachFrame: function eachFrame(win, method) {
+	        for (var i = 0; i < win.frames.length; i++) {
+	            var frame = void 0;
+
+	            try {
+	                frame = win.frames[i];
+	            } catch (err) {
+	                continue;
+	            }
+
+	            method(frame);
 	        }
 	    },
 	    noop: function noop() {},
@@ -1164,8 +1181,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _interface = __webpack_require__(1);
 
-	var _compat = __webpack_require__(15);
-
 	var windows = [];
 
 	function getMap(key, value) {
@@ -1197,7 +1212,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 
 	        var isFrame = _lib.util.some(windows, function (childWin) {
-	            return _lib.util.isFrameOwnedBy(win.win, childWin);
+	            return _lib.util.isFrameOwnedBy(childWin.win, win);
 	        });
 
 	        if (isFrame) {
@@ -1253,31 +1268,40 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    });
 
-	    var parentWindow = _lib.util.getParent();
+	    var registered = [];
 
-	    if (parentWindow) {
-	        (0, _interface.send)(parentWindow, _conf.CONSTANTS.POST_MESSAGE_NAMES.IDENTIFY, {
-	            id: id,
-	            type: _lib.util.getType()
-	        }).then(function (data) {
-	            childWindows.register(data.id, parentWindow, data.type);
-	        }, function (err) {
-	            _lib.util.debugError('Error sending identify:', err.stack || err.toString());
-	        });
+	    function register(win, identifier) {
+
+	        if (!win || win === window || registered.indexOf(win) !== -1) {
+	            return;
+	        }
+
+	        _lib.util.debug('propagating to', identifier, win);
+
+	        registered.push(win);
+
+	        if (_lib.util.safeHasProp(win, _conf.CONSTANTS.WINDOW_PROPS.POSTROBOT)) {
+	            win[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].registerSelf(id, window, _lib.util.getType());
+	        } else {
+	            (0, _interface.send)(win, _conf.CONSTANTS.POST_MESSAGE_NAMES.IDENTIFY, {
+	                id: id,
+	                type: _lib.util.getType()
+	            }).then(function (data) {
+	                childWindows.register(data.id, win, data.type);
+	            }, function (err) {
+	                _lib.util.debugError('Error sending identify:', err.stack || err.toString());
+	            });
+	        }
 	    }
 
 	    _lib.util.eachParent(function (parent) {
 
-	        if (_lib.util.safeHasProp(parent, _conf.CONSTANTS.WINDOW_PROPS.POSTROBOT)) {
-	            parent[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].registerSelf(id, window, _lib.util.getType());
-	        }
+	        register(parent, 'parent');
 
-	        var parentBridge = (0, _compat.getBridgeFor)(window.opener);
-
-	        if (parentBridge && _lib.util.safeHasProp(parentBridge, _conf.CONSTANTS.WINDOW_PROPS.POSTROBOT)) {
-	            parentBridge[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].registerSelf(id, window, _lib.util.getType());
-	        }
-	    });
+	        _lib.util.eachFrame(parent, function (frame) {
+	            register(frame, 'frame');
+	        });
+	    }, true);
 	}
 
 /***/ },
@@ -1573,7 +1597,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    POST_MESSAGE_GLOBAL_METHOD: _lib.promise.method(function (win, message) {
 
-	        if (!win[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
+	        if (!_lib.util.safeHasProp(win, _conf.CONSTANTS.WINDOW_PROPS.POSTROBOT)) {
 	            throw new Error('postRobot not found on window');
 	        }
 
@@ -1588,7 +1612,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            throw new Error('No bridge available in window');
 	        }
 
-	        if (!frame[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
+	        if (!_lib.util.safeHasProp(frame, _conf.CONSTANTS.WINDOW_PROPS.POSTROBOT)) {
 	            throw new Error('postRobot not installed in bridge');
 	        }
 
