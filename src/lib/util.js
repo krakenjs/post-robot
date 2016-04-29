@@ -333,7 +333,7 @@ export let util = {
 
         let results = {};
 
-        return () => {
+        return function memoized() {
             let args = JSON.stringify(Array.prototype.slice.call(arguments));
             if (!results.hasOwnProperty(args)) {
                 results[args] = method.apply(this, arguments);
