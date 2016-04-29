@@ -31,7 +31,8 @@ gulp.task('webpack', ['lint'], function() {
           libraryTarget: 'umd',
           umdNamedDefine: true,
           library: 'postRobot'
-        }
+        },
+        bail: true
       }))
       .pipe(gulp.dest('dist'));
 });
@@ -309,4 +310,5 @@ gulp.task('lint', function() {
 
   }))
   .pipe(eslint.format())
+  .pipe(eslint.failAfterError());
 });
