@@ -1038,11 +1038,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return;
 	    }
 
-	    for (var i = 0; i < _listeners.listeners.proxies.length; i++) {
-	        var proxy = _listeners.listeners.proxies[i];
+	    var isResponseOrAck = (message.type === _conf.CONSTANTS.POST_MESSAGE_TYPE.REQUEST || message.type === _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK) && _listeners.listeners.response[message.hash];
 
-	        if (source === proxy.from) {
-	            return proxy.to;
+	    if (!isResponseOrAck) {
+	        for (var i = 0; i < _listeners.listeners.proxies.length; i++) {
+	            var proxy = _listeners.listeners.proxies[i];
+
+	            if (source === proxy.from) {
+	                return proxy.to;
+	            }
 	        }
 	    }
 
