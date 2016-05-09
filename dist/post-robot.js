@@ -1238,8 +1238,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            win: win,
 	            type: type
 	        });
-
-	        windows[id] = windows[id] || win;
 	    }
 	};
 
