@@ -64,8 +64,6 @@ export let childWindows = {
             win,
             type
         });
-
-        windows[id] = windows[id] || win;
     }
 };
 
