@@ -2,7 +2,7 @@
   "name": "post-robot",
   "version": "1.0.16",
   "description": "Simple postMessage based server.",
-  "main": "index.js",
+  "main": "dist/post-robot.min.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
