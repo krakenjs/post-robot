@@ -43,11 +43,15 @@ function getProxy(source, message) {
         return;
     }
 
-    for (let i = 0; i < listeners.proxies.length; i++) {
-        let proxy = listeners.proxies[i];
+    var isResponseOrAck = (message.type === CONSTANTS.POST_MESSAGE_TYPE.REQUEST || message.type === CONSTANTS.POST_MESSAGE_TYPE.ACK) && listeners.response[message.hash];
 
-        if (source === proxy.from) {
-            return proxy.to;
+    if (!isResponseOrAck) {
+        for (let i = 0; i < listeners.proxies.length; i++) {
+            let proxy = listeners.proxies[i];
+
+            if (source === proxy.from) {
+                return proxy.to;
+            }
         }
     }
 
