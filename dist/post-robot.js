@@ -753,6 +753,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	            return results[args];
 	        };
+	    },
+	    extend: function extend(obj, source) {
+	        if (!source) {
+	            return obj;
+	        }
+
+	        for (var key in source) {
+	            if (source.hasOwnProperty(key)) {
+	                obj[key] = source[key];
+	            }
+	        }
+
+	        return obj;
 	    }
 	};
 
@@ -1034,7 +1047,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return;
 	    }
 
-	    if (message.type === _conf.CONSTANTS.POST_MESSAGE_TYPE.REQUEST && message.name && _listeners.listeners.request[message.name] && _listeners.listeners.request[message.name].proxy === false) {
+	    var listener = (0, _listeners.getRequestListener)(message.name, source);
+
+	    if (message.type === _conf.CONSTANTS.POST_MESSAGE_TYPE.REQUEST && message.name && listener && listener.proxy === false) {
 	        return;
 	    }
 
@@ -1242,6 +1257,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	            win: win,
 	            type: type
 	        });
+	    },
+	    isEqual: function isEqual(win1, win2) {
+
+	        if (win1 === win2) {
+	            return true;
+	        }
+
+	        var id1 = this.getWindowId(win1);
+	        var id2 = this.getWindowId(win2);
+
+	        if (id1 && id2 && id1 === id2) {
+	            return true;
+	        }
+
+	        return false;
 	    }
 	};
 
@@ -1650,23 +1680,120 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 21 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
-	"use strict";
+	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
+	exports.listeners = undefined;
 	exports.resetListeners = resetListeners;
+	exports.getRequestListener = getRequestListener;
+	exports.removeRequestListener = removeRequestListener;
+	exports.addRequestListener = addRequestListener;
+
+	var _lib = __webpack_require__(13);
+
 	var listeners = exports.listeners = void 0;
 
 	function resetListeners() {
 	    exports.listeners = listeners = {
-	        request: {},
+	        request: [],
 	        response: {},
 	        proxies: []
 	    };
 	}
+
+	function getRequestListener(name, win) {
+	    var _iteratorNormalCompletion = true;
+	    var _didIteratorError = false;
+	    var _iteratorError = undefined;
+
+	    try {
+	        for (var _iterator = listeners.request[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	            var requestListener = _step.value;
+
+
+	            if (requestListener.name !== name) {
+	                continue;
+	            }
+
+	            if (!requestListener.win) {
+	                return requestListener.options;
+	            }
+
+	            if (win && _lib.childWindows.isEqual(win, requestListener.win)) {
+	                return requestListener.options;
+	            }
+	        }
+	    } catch (err) {
+	        _didIteratorError = true;
+	        _iteratorError = err;
+	    } finally {
+	        try {
+	            if (!_iteratorNormalCompletion && _iterator['return']) {
+	                _iterator['return']();
+	            }
+	        } finally {
+	            if (_didIteratorError) {
+	                throw _iteratorError;
+	            }
+	        }
+	    }
+	}
+
+	function removeRequestListener(options) {
+
+	    var listener = void 0;
+
+	    var _iteratorNormalCompletion2 = true;
+	    var _didIteratorError2 = false;
+	    var _iteratorError2 = undefined;
+
+	    try {
+	        for (var _iterator2 = listeners.request[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+	            var requestListener = _step2.value;
+
+	            if (requestListener.options === options) {
+	                listener = requestListener;
+	                break;
+	            }
+	        }
+	    } catch (err) {
+	        _didIteratorError2 = true;
+	        _iteratorError2 = err;
+	    } finally {
+	        try {
+	            if (!_iteratorNormalCompletion2 && _iterator2['return']) {
+	                _iterator2['return']();
+	            }
+	        } finally {
+	            if (_didIteratorError2) {
+	                throw _iteratorError2;
+	            }
+	        }
+	    }
+
+	    if (listener) {
+	        listeners.request.splice(listeners.request.indexOf(listener), 1);
+	    }
+	}
+
+	function addRequestListener(name, win, options, override) {
+
+	    var listener = getRequestListener(name, win);
+
+	    if (listener) {
+	        if (override) {
+	            removeRequestListener(listener.options);
+	        } else {
+	            throw new Error('Request listener already exists for ' + name);
+	        }
+	    }
+
+	    listeners.request.push({ name: name, win: win, options: options });
+	};
 
 	resetListeners();
 
@@ -1706,7 +1833,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    options.ack = true;
 	}), _defineProperty(_RECEIVE_MESSAGE_TYPE, _conf.CONSTANTS.POST_MESSAGE_TYPE.REQUEST, function (source, message) {
 
-	    var options = _listeners.listeners.request[message.name];
+	    var options = (0, _listeners.getRequestListener)(message.name, source);
 
 	    function respond(data) {
 	        return (0, _send.sendMessage)(source, _extends({
@@ -1754,7 +1881,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    try {
 
-	        result = options.handler(null, message.data, function (err, response) {
+	        result = options.handler(message.data, function (err, response) {
 	            return err ? errorResponse(err) : successResponse(response);
 	        });
 	    } catch (err) {
@@ -1808,10 +1935,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        throw new Error('Expected options.name');
 	    }
 
-	    if (_drivers.listeners.request[options.name] && !options.override && !_conf.CONFIG.MOCK_MODE) {
-	        throw new Error('Post message response handler already registered: ' + options.name);
-	    }
-
 	    if (!options.handler) {
 	        throw new Error('Expected options.handler');
 	    }
@@ -1822,10 +1945,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	        options.handler = _lib.util.once(options.handler);
 	    }
 
-	    _drivers.listeners.request[options.name] = options;
+	    var override = options.override || _conf.CONFIG.MOCK_MODE;
+
+	    (0, _drivers.addRequestListener)(options.name, options.window, options, override);
 
 	    options.handleError = function (err) {
-	        delete _drivers.listeners.request[options.name];
+	        (0, _drivers.removeRequestListener)(options);
 	        options.errorHandler(err);
 	    };
 
@@ -1842,7 +1967,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    return {
 	        cancel: function cancel() {
-	            delete _drivers.listeners.request[options.name];
+	            (0, _drivers.removeRequestListener)(options);
 	        }
 	    };
 	}
@@ -1875,7 +2000,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	    options.errorHandler = errorHandler || options.errorHandler;
 	    options.once = true;
 
-	    return listen(options);
+	    var prom = new _lib.promise.Promise(function (resolve, reject) {
+	        options.handler = options.handler || resolve;
+	        options.errorHandler = options.errorHandler || reject;
+	    });
+
+	    var listener = listen(options);
+
+	    _lib.util.extend(prom, listener);
+
+	    return prom;
 	}
 
 /***/ },
