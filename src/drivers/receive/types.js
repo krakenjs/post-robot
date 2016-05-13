@@ -69,7 +69,7 @@ export let RECEIVE_MESSAGE_TYPES = {
 
         try {
 
-            result = options.handler(null, message.data, (err, response) => {
+            result = options.handler(message.data, (err, response) => {
                 return err ? errorResponse(err) : successResponse(response);
             });
 
