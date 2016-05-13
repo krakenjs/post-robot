@@ -49,9 +49,11 @@ postRobot.once('init', function(data, callback) {
 
 ## Listen to a specific window
 
+```javascript
 postRobot.on('init', { window: window.parent }, function(data, callback) {
     ...
 });
+```
 
 ## Set a timeout for a response
 
@@ -99,6 +101,32 @@ postRobot.send(window, 'getCart').then(function(data) {
 });
 ```
 
+## Async / Await
+
+```javascript
+postRobot.on('getCart', async function(data) {
+    return {
+        bar: await bar
+    };
+});
+```
+
+```javascript
+
+try {
+    let data = await postRobot.once('getCart');
+} catch (err) {
+    ...
+}
+```
+
+```javascript
+try {
+    let data = await postRobot.send(window, 'getCart');
+} catch (err) {
+    ...
+}
+```
 
 ## IE9+
 
