@@ -64,6 +64,22 @@ export let childWindows = {
             win,
             type
         });
+    },
+
+    isEqual(win1, win2) {
+
+        if (win1 === win2) {
+            return true;
+        }
+
+        let id1 = this.getWindowId(win1);
+        let id2 = this.getWindowId(win2);
+
+        if (id1 && id2 && id1 === id2) {
+            return true;
+        }
+
+        return false;
     }
 };
 

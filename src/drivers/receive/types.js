@@ -3,7 +3,7 @@ import { CONSTANTS } from '../../conf';
 import { util, childWindows } from '../../lib';
 
 import { sendMessage } from '../send';
-import { listeners } from '../listeners';
+import { listeners, getRequestListener } from '../listeners';
 
 export let RECEIVE_MESSAGE_TYPES = {
 
@@ -20,7 +20,7 @@ export let RECEIVE_MESSAGE_TYPES = {
 
     [ CONSTANTS.POST_MESSAGE_TYPE.REQUEST ]: (source, message) => {
 
-        let options = listeners.request[message.name];
+        let options = getRequestListener(message.name, source);
 
         function respond(data) {
             return sendMessage(source, {

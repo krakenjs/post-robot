@@ -1,16 +1,12 @@
 
 import { CONFIG } from '../conf';
 import { util } from '../lib';
-import { listeners } from '../drivers';
+import { addRequestListener, removeRequestListener } from '../drivers';
 
 export function listen(options) {
 
     if (!options.name) {
         throw new Error('Expected options.name');
-    }
-
-    if (listeners.request[options.name] && !options.override && !CONFIG.MOCK_MODE) {
-        throw new Error(`Post message response handler already registered: ${options.name}`);
     }
 
     if (!options.handler) {
@@ -23,10 +19,12 @@ export function listen(options) {
         options.handler = util.once(options.handler);
     }
 
-    listeners.request[options.name] = options;
+    let override = options.override || CONFIG.MOCK_MODE;
+
+    addRequestListener(options.name, options.window, options, override);
 
     options.handleError = err => {
-        delete listeners.request[options.name];
+        removeRequestListener(options);
         options.errorHandler(err);
     };
 
@@ -41,7 +39,7 @@ export function listen(options) {
 
     return {
         cancel() {
-            delete listeners.request[options.name];
+            removeRequestListener(options);
         }
     };
 }

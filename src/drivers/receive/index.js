@@ -4,7 +4,7 @@ import { util, childWindows } from '../../lib';
 import { emulateIERestrictions } from '../../compat';
 
 import { sendMessage } from '../send';
-import { listeners } from '../listeners';
+import { listeners, getRequestListener } from '../listeners';
 
 import { RECEIVE_MESSAGE_TYPES } from './types';
 
@@ -39,7 +39,9 @@ function getProxy(source, message) {
         return;
     }
 
-    if (message.type === CONSTANTS.POST_MESSAGE_TYPE.REQUEST && message.name && listeners.request[message.name] && listeners.request[message.name].proxy === false) {
+    let listener = getRequestListener(message.name, source);
+
+    if (message.type === CONSTANTS.POST_MESSAGE_TYPE.REQUEST && message.name && listener && listener.proxy === false) {
         return;
     }
 
