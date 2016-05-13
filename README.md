@@ -47,6 +47,28 @@ postRobot.once('init', function(data, callback) {
 });
 ```
 
+## Listen to a specific window
+
+postRobot.on('init', { window: window.parent }, function(data, callback) {
+    ...
+});
+
+## Set a timeout for a response
+
+```javascript
+postRobot.send(window, 'getCart', { timeout: 5000 }, function(err, data) {
+    console.log(data);
+});
+```
+
+## Send a message to the direct parent
+
+```javascript
+postRobot.sendToParent(window, 'getCart', function(err, data) {
+    console.log(data);
+});
+```
+
 ## Promises
 
 All of the above can be done with promises rather than callbacks
@@ -63,7 +85,7 @@ postRobot.on('getCart', function(data) {
 
 ```javascript
 postRobot.once('getCart').then(function(data) {
-
+    ...
 }).catch(function(err) {
     ...
 });
