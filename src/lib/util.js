@@ -358,5 +358,19 @@ export let util = {
             }
             return results[args];
         }
+    },
+
+    extend(obj, source) {
+        if (!source) {
+            return obj;
+        }
+
+        for (let key in source) {
+            if (source.hasOwnProperty(key)) {
+                obj[key] = source[key];
+            }
+        }
+
+        return obj;
     }
 };
