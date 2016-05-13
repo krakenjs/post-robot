@@ -23,7 +23,7 @@ This also allows cross-domain post messages between two different windows (not j
   - You didn't get a response from the other window in enough time
   - Somebody sent you a message you weren't listening for
 
-## Example
+## Simple listener / sender
 
 ```javascript
 postRobot.on('getCart', function(data, callback) {
