@@ -6,7 +6,7 @@ Use this if you want to communicate between two different windows (or popups, or
 but you don't like the fire-and-forget nature of `window.postMessage` (which doesn't tell you if your message got through, if there was an error, and isn't fully supported in even the latest versions of IE for window to window communication).
 
 With this module, you can set up a listener in one window, have it wait for a post message, and then have it reply with data,
-while gracefully handling any errors that crop up.
+all while gracefully handling any errors that crop up.
 
 This also allows cross-domain post messages between two different windows (not just popups) in IE9+.
 
