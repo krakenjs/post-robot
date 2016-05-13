@@ -1,13 +1,12 @@
 # postRobot
 
-Simple postMessage based server.
+Post-messaging on the client side using a simple server/client pattern.
 
 Use this if you want to communicate between two different windows (or popups, or iframes) using `window.postMessage`,
-but you don't like the fire-and-forget nature of the native api.
+but you don't like the fire-and-forget nature of `window.postMessage`, which doesn't tell you if your message got through, if there was an error, and isn't fully supported in even the latest versions of IE for window to window communication.
 
-With this, you can set up a listener in one window, have it wait for a post message, and then have it reply with data,
-and gracefully handle any errors that crop up. You can also set a timeout, to be sure that the other window is responding to you,
-and fail gracefully if it does not.
+With this module, you can set up a listener in one window, have it wait for a post message, and then have it reply with data,
+while gracefully handling any errors that crop up.
 
 This also allows cross-domain post messages between two different windows (not just popups) in IE9+.
 
@@ -83,7 +82,7 @@ you will need to set up an invisible bridge in an iframe on your parent page:
 +---------------------+
 ```
 
-Doing this is pretty simple:
+Supporting IE9+ in your app is pretty simple:
 
 a. Create a bridge path, for example `http://yy.com/bridge.html`, and include post-robot:
 
