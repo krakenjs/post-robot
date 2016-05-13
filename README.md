@@ -26,16 +26,14 @@ This also allows cross-domain post messages between two different windows (not j
 ## Example
 
 ```javascript
-// In one window
-
-postRobot.on('getCart', function(err, data, callback) {
+postRobot.on('getCart', function(data, callback) {
     return callback({
-        amount: 1
+        foo: 'bar'
     });
 });
+```
 
-// In another window
-
+```javascript
 postRobot.send(window, 'getCart', function(err, data) {
     console.log(data);
 });
@@ -44,11 +42,41 @@ postRobot.send(window, 'getCart', function(err, data) {
 ## One-off listener
 
 ```javascript
-postRobot.once('init', function(err, data, callback) {
-    console.log('init!!');
-    return callback();
+postRobot.once('init', function(data, callback) {
+    ...
 });
 ```
+
+## Promises
+
+All of the above can be done with promises rather than callbacks
+
+```javascript
+postRobot.on('getCart', function(data) {
+    return getFoo(data).then(function(bar) {
+        return {
+            bar: bar
+        };
+    });
+});
+```
+
+```javascript
+postRobot.once('getCart').then(function(data) {
+
+}).catch(function(err) {
+    ...
+});
+```
+
+```javascript
+postRobot.send(window, 'getCart').then(function(data) {
+    ...
+}).catch(function(err) {
+    ...
+});
+```
+
 
 ## IE9+
 
