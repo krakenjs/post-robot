@@ -1,6 +1,6 @@
 
 import { CONFIG } from '../conf';
-import { util } from '../lib';
+import { util, promise } from '../lib';
 import { addRequestListener, removeRequestListener } from '../drivers';
 
 export function listen(options) {
@@ -72,5 +72,14 @@ export function once(name, options, handler, errorHandler) {
     options.errorHandler = errorHandler || options.errorHandler;
     options.once = true;
 
-    return listen(options);
+    let prom = new promise.Promise((resolve, reject) => {
+        options.handler = options.handler || resolve;
+        options.errorHandler = options.errorHandler || reject;
+    });
+
+    let listener = listen(options);
+
+    util.extend(prom, listener);
+
+    return prom;
 }
