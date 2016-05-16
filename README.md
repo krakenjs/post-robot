@@ -1,4 +1,4 @@
-# post-robot []-\\-<
+# post-robot [:]-\\-<
 
 Post-messaging on the client side using a simple server/client pattern.
 
