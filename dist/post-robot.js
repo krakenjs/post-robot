@@ -261,7 +261,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            type: _conf.CONSTANTS.POST_MESSAGE_TYPE.REQUEST,
 	            name: options.name,
 	            data: options.data || {}
-	        })['catch'](reject);
+	        }, options.domain || '*')['catch'](reject);
 
 	        setTimeout(function () {
 	            if (!options.ack) {
@@ -271,22 +271,37 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }), options.callback);
 	}
 
-	function send(window, name, data, callback) {
+	function send(window, name, data, options, callback) {
 
-	    if (!callback && data instanceof Function) {
-	        callback = data;
-	        data = {};
+	    if (!callback) {
+	        if (!options && data instanceof Function) {
+	            callback = data;
+	            options = {};
+	            data = {};
+	        } else if (options instanceof Function) {
+	            callback = options;
+	            options = {};
+	        }
 	    }
 
-	    return request({ window: window, name: name, data: data, callback: callback });
+	    options = options || {};
+	    options.window = window;
+	    options.name = name;
+	    options.data = data || {};
+	    options.callback = callback;
+
+	    return request(options);
 	}
 
-	function sendToParent(name, data, callback) {
-	    if (!_lib.util.getParent()) {
+	function sendToParent(name, data, options, callback) {
+
+	    var window = _lib.util.getParent();
+
+	    if (!window) {
 	        throw new Error('Window does not have a parent');
 	    }
 
-	    return send(_lib.util.getParent(), name, data, callback);
+	    return send(_lib.util.getParent(), name, data, options, callback);
 	}
 
 /***/ },
@@ -862,6 +877,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	var queueIndex = -1;
 
 	function cleanUpNextTick() {
+	    if (!draining || !currentQueue) {
+	        return;
+	    }
 	    draining = false;
 	    if (currentQueue.length) {
 	        queue = currentQueue.concat(queue);
@@ -1094,7 +1112,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	}
 
-	function receiveMessage(source, data) {
+	function receiveMessage(event) {
+	    var source = event.source;
+	    var origin = event.origin;
+	    var data = event.data;
+
 
 	    var message = parseMessage(data);
 
@@ -1114,26 +1136,29 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    if (proxyWindow) {
 	        delete message.target;
-	        return (0, _send.sendMessage)(proxyWindow, message, true);
+	        return (0, _send.sendMessage)(proxyWindow, message, '*', true);
 	    }
 
 	    _lib.util.log('#receive', message.type, message.name, message);
 
 	    if (_conf.CONFIG.MOCK_MODE) {
-	        return _types.RECEIVE_MESSAGE_TYPES[message.type](source, message);
+	        return _types.RECEIVE_MESSAGE_TYPES[message.type](source, message, origin);
 	    }
 
-	    _types.RECEIVE_MESSAGE_TYPES[message.type](source, message);
+	    _types.RECEIVE_MESSAGE_TYPES[message.type](source, message, origin);
 	}
 
 	function messageListener(event) {
 
-	    var source = event.source || event.sourceElement;
-	    var data = event.data;
+	    event = {
+	        source: event.source || event.sourceElement,
+	        origin: event.origin || event.originalEvent.origin,
+	        data: event.data
+	    };
 
-	    (0, _compat.emulateIERestrictions)(source, window);
+	    (0, _compat.emulateIERestrictions)(event.source, window);
 
-	    receiveMessage(source, data);
+	    receiveMessage(event);
 	}
 
 /***/ },
@@ -1454,7 +1479,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            try {
 	                var frame = win.frames[i];
 
-	                if (frame && frame[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
+	                if (frame && frame !== window && frame[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
 	                    return frame;
 	                }
 	            } catch (err) {
@@ -1496,12 +1521,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	        },
 
 
-	        postMessage: _lib.promise.method(function (source, data) {
-	            (0, _drivers.receiveMessage)(source, data);
+	        postMessage: _lib.promise.method(function (event) {
+	            (0, _drivers.receiveMessage)(event);
 	        }),
 
-	        postMessageParent: _lib.promise.method(function (source, message) {
-	            window.parent.postMessage(message, '*');
+	        postMessageParent: _lib.promise.method(function (source, message, domain) {
+	            if (window.parent && window.parent !== window) {
+	                window.parent.postMessage(message, domain);
+	            } else {
+	                throw new Error('Can not find parent to post message to');
+	            }
 	        })
 	    };
 	}
@@ -1554,7 +1583,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _strategies = __webpack_require__(20);
 
-	var sendMessage = exports.sendMessage = _lib.promise.method(function (win, message, isProxy) {
+	var sendMessage = exports.sendMessage = _lib.promise.method(function (win, message, domain, isProxy) {
 
 	    message.id = message.id || _lib.util.uniqueID();
 	    message.source = (0, _conf.getWindowID)();
@@ -1570,7 +1599,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    if (_conf.CONFIG.MOCK_MODE) {
 	        delete message.target;
-	        return window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessage(window, JSON.stringify(message));
+	        return window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessage({
+	            origin: window.location.protocol + '//' + window.location.host,
+	            source: window,
+	            data: JSON.stringify(message)
+	        });
 	    }
 
 	    if (win === window) {
@@ -1585,7 +1618,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        return _lib.promise.Promise.all(_lib.util.map(_lib.util.keys(_strategies.SEND_MESSAGE_STRATEGIES), function (strategyName) {
 
-	            return _strategies.SEND_MESSAGE_STRATEGIES[strategyName](win, message).then(function () {
+	            return _strategies.SEND_MESSAGE_STRATEGIES[strategyName](win, message, domain).then(function () {
 	                _lib.util.debug(strategyName, 'success');
 	                return true;
 	            }, function (err) {
@@ -1620,23 +1653,46 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var SEND_MESSAGE_STRATEGIES = exports.SEND_MESSAGE_STRATEGIES = {
 
-	    POST_MESSAGE: _lib.promise.method(function (win, message) {
+	    POST_MESSAGE: _lib.promise.method(function (win, message, domain) {
 
 	        (0, _compat.emulateIERestrictions)(window, win);
 
-	        return win.postMessage(JSON.stringify(message, 0, 2), '*');
+	        return win.postMessage(JSON.stringify(message, 0, 2), domain);
 	    }),
 
-	    POST_MESSAGE_GLOBAL_METHOD: _lib.promise.method(function (win, message) {
+	    POST_MESSAGE_GLOBAL_METHOD: _lib.promise.method(function (win, message, domain) {
+
+	        if (domain !== '*') {
+
+	            var winDomain = void 0;
+
+	            try {
+	                winDomain = win.location.protocol + '//' + win.location.host;
+	            } catch (err) {
+	                // pass
+	            }
+
+	            if (!winDomain) {
+	                throw new Error('Can post post through global method - domain set to ' + domain + ', but we can not verify the domain of the target window');
+	            }
+
+	            if (winDomain !== domain) {
+	                throw new Error('Can post post through global method - domain ' + domain + ' does not match target window domain ' + winDomain);
+	            }
+	        }
 
 	        if (!_lib.util.safeHasProp(win, _conf.CONSTANTS.WINDOW_PROPS.POSTROBOT)) {
 	            throw new Error('postRobot not found on window');
 	        }
 
-	        return win[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessage(window, JSON.stringify(message, 0, 2));
+	        return win[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessage({
+	            origin: window.location.protocol + '//' + window.location.host,
+	            source: window,
+	            data: JSON.stringify(message)
+	        });
 	    }),
 
-	    POST_MESSAGE_UP_THROUGH_BRIDGE: _lib.promise.method(function (win, message) {
+	    POST_MESSAGE_UP_THROUGH_BRIDGE: _lib.promise.method(function (win, message, domain) {
 
 	        var frame = (0, _compat.getBridgeFor)(win);
 
@@ -1648,10 +1704,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	            throw new Error('postRobot not installed in bridge');
 	        }
 
-	        return frame[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessageParent(window, JSON.stringify(message, 0, 2));
+	        return frame[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessageParent(window, JSON.stringify(message, 0, 2), domain);
 	    }),
 
-	    POST_MESSAGE_DOWN_THROUGH_BRIDGE: _lib.promise.method(function (win, message) {
+	    POST_MESSAGE_DOWN_THROUGH_BRIDGE: _lib.promise.method(function (win, message, domain) {
 
 	        var bridge = (0, _compat.getBridge)();
 
@@ -1673,7 +1729,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 
 	        return bridge.then(function (iframe) {
-	            iframe.contentWindow.postMessage(JSON.stringify(message, 0, 2), '*');
+	            iframe.contentWindow.postMessage(JSON.stringify(message, 0, 2), domain);
 	        });
 	    })
 	};
@@ -1822,7 +1878,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
-	var RECEIVE_MESSAGE_TYPES = exports.RECEIVE_MESSAGE_TYPES = (_RECEIVE_MESSAGE_TYPE = {}, _defineProperty(_RECEIVE_MESSAGE_TYPE, _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK, function (source, message) {
+	var RECEIVE_MESSAGE_TYPES = exports.RECEIVE_MESSAGE_TYPES = (_RECEIVE_MESSAGE_TYPE = {}, _defineProperty(_RECEIVE_MESSAGE_TYPE, _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK, function (source, message, origin) {
 
 	    var options = _listeners.listeners.response[message.hash];
 
@@ -1831,7 +1887,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    options.ack = true;
-	}), _defineProperty(_RECEIVE_MESSAGE_TYPE, _conf.CONSTANTS.POST_MESSAGE_TYPE.REQUEST, function (source, message) {
+	}), _defineProperty(_RECEIVE_MESSAGE_TYPE, _conf.CONSTANTS.POST_MESSAGE_TYPE.REQUEST, function (source, message, origin) {
 
 	    var options = (0, _listeners.getRequestListener)(message.name, source);
 
@@ -1840,7 +1896,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            target: message.originalSource ? message.originalSource : _lib.childWindows.getWindowId(source),
 	            hash: message.hash,
 	            name: message.name
-	        }, data))['catch'](function (error) {
+	        }, data), '*')['catch'](function (error) {
 	            if (options) {
 	                return options.handleError(error);
 	            } else {
@@ -1869,6 +1925,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return errorResponse(new Error('No postmessage request handler for ' + message.name + ' in ' + window.location.href));
 	    }
 
+	    if (options.domain) {
+	        var match = typeof options.domain === 'string' && origin === options.domain || options.domain instanceof RegExp && origin.match(options.domain);
+
+	        if (!match) {
+	            return errorResponse(new Error('Message origin ' + origin + ' does not match domain ' + options.domain));
+	        }
+	    }
+
 	    if (options.window && source && options.window !== source) {
 	        return;
 	    }
@@ -1893,7 +1957,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    } else if (options.handler.length <= 2) {
 	        return successResponse(result);
 	    }
-	}), _defineProperty(_RECEIVE_MESSAGE_TYPE, _conf.CONSTANTS.POST_MESSAGE_TYPE.RESPONSE, function (source, message) {
+	}), _defineProperty(_RECEIVE_MESSAGE_TYPE, _conf.CONSTANTS.POST_MESSAGE_TYPE.RESPONSE, function (source, message, origin) {
 
 	    var options = _listeners.listeners.response[message.hash];
 
