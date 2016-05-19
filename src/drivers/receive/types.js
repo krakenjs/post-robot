@@ -7,7 +7,7 @@ import { listeners, getRequestListener } from '../listeners';
 
 export let RECEIVE_MESSAGE_TYPES = {
 
-    [ CONSTANTS.POST_MESSAGE_TYPE.ACK ]: (source, message) => {
+    [ CONSTANTS.POST_MESSAGE_TYPE.ACK ]: (source, message, origin) => {
 
         let options = listeners.response[message.hash];
 
@@ -18,7 +18,7 @@ export let RECEIVE_MESSAGE_TYPES = {
         options.ack = true;
     },
 
-    [ CONSTANTS.POST_MESSAGE_TYPE.REQUEST ]: (source, message) => {
+    [ CONSTANTS.POST_MESSAGE_TYPE.REQUEST ]: (source, message, origin) => {
 
         let options = getRequestListener(message.name, source);
 
@@ -28,7 +28,7 @@ export let RECEIVE_MESSAGE_TYPES = {
                 hash: message.hash,
                 name: message.name,
                 ...data
-            }).catch(error => {
+            }, '*').catch(error => {
                 if (options) {
                     return options.handleError(error);
                 } else {
@@ -55,6 +55,15 @@ export let RECEIVE_MESSAGE_TYPES = {
 
         if (!options) {
             return errorResponse(new Error(`No postmessage request handler for ${message.name} in ${window.location.href}`));
+        }
+
+        if (options.domain) {
+            let match = (typeof options.domain === 'string' && origin === options.domain) ||
+                        (options.domain instanceof RegExp && origin.match(options.domain));
+
+            if (!match) {
+                return errorResponse(new Error(`Message origin ${origin} does not match domain ${options.domain}`));
+            }
         }
 
         if (options.window && source && options.window !== source) {
@@ -85,7 +94,7 @@ export let RECEIVE_MESSAGE_TYPES = {
         }
     },
 
-    [ CONSTANTS.POST_MESSAGE_TYPE.RESPONSE ]: (source, message) => {
+    [ CONSTANTS.POST_MESSAGE_TYPE.RESPONSE ]: (source, message, origin) => {
 
         let options = listeners.response[message.hash];
 

@@ -88,7 +88,9 @@ function getProxy(source, message) {
 }
 
 
-export function receiveMessage(source, data) {
+export function receiveMessage(event) {
+
+    let { source, origin, data } = event;
 
     let message = parseMessage(data);
 
@@ -108,24 +110,27 @@ export function receiveMessage(source, data) {
 
     if (proxyWindow) {
         delete message.target;
-        return sendMessage(proxyWindow, message, true);
+        return sendMessage(proxyWindow, message, '*', true);
     }
 
     util.log('#receive', message.type, message.name, message);
 
     if (CONFIG.MOCK_MODE) {
-        return RECEIVE_MESSAGE_TYPES[message.type](source, message);
+        return RECEIVE_MESSAGE_TYPES[message.type](source, message, origin);
     }
 
-    RECEIVE_MESSAGE_TYPES[message.type](source, message);
+    RECEIVE_MESSAGE_TYPES[message.type](source, message, origin);
 }
 
 export function messageListener(event) {
 
-    let source = event.source || event.sourceElement;
-    let data = event.data;
+    event = {
+        source: event.source || event.sourceElement,
+        origin: event.origin || event.originalEvent.origin,
+        data: event.data
+    };
 
-    emulateIERestrictions(source, window);
+    emulateIERestrictions(event.source, window);
 
-    receiveMessage(source, data);
+    receiveMessage(event);
 }

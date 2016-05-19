@@ -16,12 +16,16 @@ export function registerGlobals() {
             childWindows.register(id, win, type);
         },
 
-        postMessage: promise.method((source, data) => {
-            receiveMessage(source, data);
+        postMessage: promise.method(event => {
+            receiveMessage(event);
         }),
 
-        postMessageParent: promise.method((source, message) => {
-            window.parent.postMessage(message, '*');
+        postMessageParent: promise.method((source, message, domain) => {
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage(message, domain);
+            } else {
+                throw new Error('Can not find parent to post message to');
+            }
         })
     };
 }

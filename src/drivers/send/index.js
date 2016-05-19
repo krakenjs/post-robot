@@ -5,7 +5,7 @@ import { util, promise, childWindows } from '../../lib';
 import { SEND_MESSAGE_STRATEGIES } from './strategies';
 
 
-export let sendMessage = promise.method((win, message, isProxy) => {
+export let sendMessage = promise.method((win, message, domain, isProxy) => {
 
     message.id = message.id || util.uniqueID();
     message.source = getWindowID();
@@ -21,7 +21,11 @@ export let sendMessage = promise.method((win, message, isProxy) => {
 
     if (CONFIG.MOCK_MODE) {
         delete message.target;
-        return window[CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessage(window, JSON.stringify(message));
+        return window[CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessage({
+            origin: `${window.location.protocol}//${window.location.host}`,
+            source: window,
+            data: JSON.stringify(message)
+        });
     }
 
     if (win === window) {
@@ -36,7 +40,7 @@ export let sendMessage = promise.method((win, message, isProxy) => {
 
         return promise.Promise.all(util.map(util.keys(SEND_MESSAGE_STRATEGIES), strategyName => {
 
-            return SEND_MESSAGE_STRATEGIES[strategyName](win, message).then(() => {
+            return SEND_MESSAGE_STRATEGIES[strategyName](win, message, domain).then(() => {
                 util.debug(strategyName, 'success');
                 return true;
             }, err => {

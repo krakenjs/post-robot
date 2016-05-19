@@ -55,7 +55,7 @@ export function getBridgeFor(win) {
             try {
                 let frame = win.frames[i];
 
-                if (frame && frame[CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
+                if (frame && frame !== window && frame[CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
                     return frame;
                 }
 

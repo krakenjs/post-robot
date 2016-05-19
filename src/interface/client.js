@@ -60,7 +60,7 @@ export function request(options) {
             type: CONSTANTS.POST_MESSAGE_TYPE.REQUEST,
             name: options.name,
             data: options.data || {}
-        }).catch(reject);
+        }, options.domain || '*').catch(reject);
 
         setTimeout(() => {
             if (!options.ack) {
@@ -71,20 +71,35 @@ export function request(options) {
     }), options.callback);
 }
 
-export function send(window, name, data, callback) {
+export function send(window, name, data, options, callback) {
 
-    if (!callback && data instanceof Function) {
-        callback = data;
-        data = {};
+    if (!callback) {
+        if (!options && data instanceof Function) {
+            callback = data;
+            options = {};
+            data = {};
+        } else if (options instanceof Function) {
+            callback = options;
+            options = {};
+        }
     }
-    
-    return request({ window, name, data, callback });
+
+    options = options || {};
+    options.window = window;
+    options.name = name;
+    options.data = data || {};
+    options.callback = callback;
+
+    return request(options);
 }
 
-export function sendToParent(name, data, callback) {
-    if (!util.getParent()) {
+export function sendToParent(name, data, options, callback) {
+
+    let window = util.getParent();
+
+    if (!window) {
         throw new Error('Window does not have a parent');
     }
 
-    return send(util.getParent(), name, data, callback);
+    return send(util.getParent(), name, data, options, callback);
 }
