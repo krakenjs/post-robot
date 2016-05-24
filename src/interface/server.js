@@ -13,7 +13,9 @@ export function listen(options) {
         throw new Error('Expected options.handler');
     }
 
-    options.errorHandler = options.errorHandler || util.noop;
+    options.errorHandler = options.errorHandler || function(err) {
+        throw err;
+    };
 
     if (options.once) {
         options.handler = util.once(options.handler);

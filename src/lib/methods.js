@@ -20,6 +20,10 @@ export let listenForMethods = util.once(function listenForMethods() {
     });
 });
 
+function isSerializedMethod(item) {
+    return item instanceof Object && item.__type__ === CONSTANTS.SERIALIZATION_TYPES.METHOD && item.__id__
+}
+
 export function serializeMethods(destination, obj) {
 
     listenForMethods();
@@ -27,6 +31,8 @@ export function serializeMethods(destination, obj) {
     return util.walkObject(obj, item => {
         if (item instanceof Function) {
             return serializeMethod(destination, item);
+        } else if (isSerializedMethod(item)) {
+            throw new Error(`Attempting to serialize already serialized method`);
         }
     });
 }
@@ -34,7 +40,7 @@ export function serializeMethods(destination, obj) {
 export function deserializeMethods(source, obj) {
 
     return util.walkObject(obj, item => {
-        if (item instanceof Object && item.__type__ === CONSTANTS.SERIALIZATION_TYPES.METHOD && item.__id__) {
+        if (isSerializedMethod(item)) {
             return deserializeMethod(source, item);
         }
     });

@@ -28,13 +28,7 @@ export let RECEIVE_MESSAGE_TYPES = {
                 hash: message.hash,
                 name: message.name,
                 ...data
-            }, '*').catch(error => {
-                if (options) {
-                    return options.handleError(error);
-                } else {
-                    throw error;
-                }
-            });
+            }, '*').catch(options.handleError);
         }
 
         let successResponse = util.once(data => {
