@@ -45,7 +45,7 @@ function getProxy(source, message) {
         return;
     }
 
-    var isResponseOrAck = (message.type === CONSTANTS.POST_MESSAGE_TYPE.REQUEST || message.type === CONSTANTS.POST_MESSAGE_TYPE.ACK) && listeners.response[message.hash];
+    let isResponseOrAck = (message.type === CONSTANTS.POST_MESSAGE_TYPE.REQUEST || message.type === CONSTANTS.POST_MESSAGE_TYPE.ACK) && listeners.response[message.hash];
 
     if (!isResponseOrAck) {
         for (let i = 0; i < listeners.proxies.length; i++) {

@@ -5,8 +5,8 @@ import { on, send } from '../interface';
 
 let methods = {};
 
-export let listenForMethods = util.once(function listenForMethods() {
-    on(CONSTANTS.POST_MESSAGE_NAMES.METHOD, function(source, data) {
+export let listenForMethods = util.once(() => {
+    on(CONSTANTS.POST_MESSAGE_NAMES.METHOD, (source, data) => {
 
         if (!methods[data.id]) {
             throw new Error(`Could not find method with id: ${data.id}`);
@@ -24,6 +24,21 @@ function isSerializedMethod(item) {
     return item instanceof Object && item.__type__ === CONSTANTS.SERIALIZATION_TYPES.METHOD && item.__id__
 }
 
+export function serializeMethod(destination, method) {
+
+    let id = util.uniqueID();
+
+    methods[id] = {
+        win: destination,
+        method
+    };
+
+    return {
+        __type__: CONSTANTS.SERIALIZATION_TYPES.METHOD,
+        __id__: id
+    }
+}
+
 export function serializeMethods(destination, obj) {
 
     listenForMethods();
@@ -37,30 +52,6 @@ export function serializeMethods(destination, obj) {
     });
 }
 
-export function deserializeMethods(source, obj) {
-
-    return util.walkObject(obj, item => {
-        if (isSerializedMethod(item)) {
-            return deserializeMethod(source, item);
-        }
-    });
-}
-
-export function serializeMethod(destination, method) {
-
-    let id = util.uniqueID();
-
-    methods[id] = {
-        win: destination,
-        method: method
-    };
-
-    return {
-        __type__: CONSTANTS.SERIALIZATION_TYPES.METHOD,
-        __id__: id
-    }
-}
-
 export function deserializeMethod(source, obj) {
 
     return function() {
@@ -70,4 +61,13 @@ export function deserializeMethod(source, obj) {
             args
         });
     }
+}
+
+export function deserializeMethods(source, obj) {
+
+    return util.walkObject(obj, item => {
+        if (isSerializedMethod(item)) {
+            return deserializeMethod(source, item);
+        }
+    });
 }
