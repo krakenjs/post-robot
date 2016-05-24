@@ -372,5 +372,35 @@ export let util = {
         }
 
         return obj;
+    },
+
+    each(obj, callback) {
+        if (obj instanceof Array) {
+            for (let i=0; i<obj.length; i++) {
+                callback(obj[i], i)
+            }
+        } else if (obj instanceof Object && !(obj instanceof Function)) {
+            for (let key in obj) {
+                if (obj.hasOwnProperty(key)) {
+                    callback(obj[key], key);
+                }
+            }
+        }
+    },
+
+    walkObject(obj, callback) {
+
+        util.each(obj, (item, key) => {
+
+            let result = callback(item);
+
+            if (result !== undefined) {
+                obj[key] = result;
+            } else {
+                util.walkObject(item, callback);
+            }
+        });
+
+        return obj;
     }
 };

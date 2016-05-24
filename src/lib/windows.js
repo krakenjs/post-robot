@@ -102,12 +102,10 @@ window.open = function(url, name, x, y) {
 
 export function propagate(id) {
 
-    on(CONSTANTS.POST_MESSAGE_NAMES.IDENTIFY, (err, data, callback) => {
-        if (!err) {
-            return {
-                id
-            };
-        }
+    on(CONSTANTS.POST_MESSAGE_NAMES.IDENTIFY, (source, data, callback) => {
+        return {
+            id
+        };
     });
 
     let registered = [];

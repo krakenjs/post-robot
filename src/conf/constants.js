@@ -13,7 +13,8 @@ export let CONSTANTS = {
     },
 
     POST_MESSAGE_NAMES: {
-        IDENTIFY: 'identify'
+        IDENTIFY: 'postrobot_identify',
+        METHOD: 'postrobot_method'
     },
 
     WINDOW_TYPES: {
@@ -24,5 +25,9 @@ export let CONSTANTS = {
 
     WINDOW_PROPS: {
         POSTROBOT: '__postRobot__'
+    },
+
+    SERIALIZATION_TYPES: {
+        METHOD: 'postrobot_method'
     }
 };

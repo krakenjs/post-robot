@@ -1,6 +1,6 @@
 
 import { CONFIG, CONSTANTS, getWindowID } from '../../conf';
-import { util, childWindows } from '../../lib';
+import { util, childWindows, deserializeMethods } from '../../lib';
 import { emulateIERestrictions } from '../../compat';
 
 import { sendMessage } from '../send';
@@ -118,6 +118,8 @@ export function receiveMessage(event) {
     if (CONFIG.MOCK_MODE) {
         return RECEIVE_MESSAGE_TYPES[message.type](source, message, origin);
     }
+
+    deserializeMethods(source, message.data || message.response || {});
 
     RECEIVE_MESSAGE_TYPES[message.type](source, message, origin);
 }

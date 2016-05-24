@@ -1,6 +1,6 @@
 
 import { CONSTANTS, CONFIG, getWindowID } from '../../conf';
-import { util, promise, childWindows } from '../../lib';
+import { util, promise, childWindows, serializeMethods } from '../../lib';
 
 import { SEND_MESSAGE_STRATEGIES } from './strategies';
 
@@ -12,6 +12,8 @@ export let sendMessage = promise.method((win, message, domain, isProxy) => {
     message.originalSource = message.originalSource || getWindowID();
     message.windowType = util.getType();
     message.originalWindowType = message.originalWindowType || util.getType();
+
+    serializeMethods(win, message.data || message.response || {});
 
     if (!message.target) {
         message.target = childWindows.getWindowId(win);
