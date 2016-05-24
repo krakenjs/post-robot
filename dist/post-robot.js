@@ -78,7 +78,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _drivers = __webpack_require__(11);
 
-	var _compat = __webpack_require__(15);
+	var _compat = __webpack_require__(16);
 
 	function init() {
 
@@ -124,7 +124,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _server = __webpack_require__(23);
+	var _server = __webpack_require__(24);
 
 	Object.keys(_server).forEach(function (key) {
 	  if (key === "default") return;
@@ -136,7 +136,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _proxy = __webpack_require__(24);
+	var _proxy = __webpack_require__(25);
 
 	Object.keys(_proxy).forEach(function (key) {
 	  if (key === "default") return;
@@ -148,7 +148,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _config = __webpack_require__(25);
+	var _config = __webpack_require__(26);
 
 	Object.keys(_config).forEach(function (key) {
 	  if (key === "default") return;
@@ -169,7 +169,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	});
 
-	var _bridge = __webpack_require__(16);
+	var _bridge = __webpack_require__(17);
 
 	Object.defineProperty(exports, 'openBridge', {
 	  enumerable: true,
@@ -395,7 +395,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    },
 
 	    POST_MESSAGE_NAMES: {
-	        IDENTIFY: 'identify'
+	        IDENTIFY: 'postrobot_identify',
+	        METHOD: 'postrobot_method'
 	    },
 
 	    WINDOW_TYPES: {
@@ -406,6 +407,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    WINDOW_PROPS: {
 	        POSTROBOT: '__postRobot__'
+	    },
+
+	    SERIALIZATION_TYPES: {
+	        METHOD: 'postrobot_method'
 	    }
 	};
 
@@ -781,6 +786,34 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 
 	        return obj;
+	    },
+	    each: function each(obj, callback) {
+	        if (obj instanceof Array) {
+	            for (var i = 0; i < obj.length; i++) {
+	                callback(obj[i], i);
+	            }
+	        } else if (obj instanceof Object && !(obj instanceof Function)) {
+	            for (var key in obj) {
+	                if (obj.hasOwnProperty(key)) {
+	                    callback(obj[key], key);
+	                }
+	            }
+	        }
+	    },
+	    walkObject: function walkObject(obj, callback) {
+
+	        util.each(obj, function (item, key) {
+
+	            var result = callback(item);
+
+	            if (result !== undefined) {
+	                obj[key] = result;
+	            } else {
+	                util.walkObject(item, callback);
+	            }
+	        });
+
+	        return obj;
 	    }
 	};
 
@@ -986,7 +1019,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _send = __webpack_require__(19);
+	var _send = __webpack_require__(20);
 
 	Object.keys(_send).forEach(function (key) {
 	  if (key === "default") return;
@@ -998,7 +1031,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _listeners = __webpack_require__(21);
+	var _listeners = __webpack_require__(22);
 
 	Object.keys(_listeners).forEach(function (key) {
 	  if (key === "default") return;
@@ -1026,13 +1059,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _lib = __webpack_require__(13);
 
-	var _compat = __webpack_require__(15);
+	var _compat = __webpack_require__(16);
 
-	var _send = __webpack_require__(19);
+	var _send = __webpack_require__(20);
 
-	var _listeners = __webpack_require__(21);
+	var _listeners = __webpack_require__(22);
 
-	var _types = __webpack_require__(22);
+	var _types = __webpack_require__(23);
 
 	var receivedMessages = [];
 
@@ -1145,6 +1178,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return _types.RECEIVE_MESSAGE_TYPES[message.type](source, message, origin);
 	    }
 
+	    (0, _lib.deserializeMethods)(source, message.data || message.response || {});
+
 	    _types.RECEIVE_MESSAGE_TYPES[message.type](source, message, origin);
 	}
 
@@ -1203,6 +1238,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	    enumerable: true,
 	    get: function get() {
 	      return _windows[key];
+	    }
+	  });
+	});
+
+	var _methods = __webpack_require__(15);
+
+	Object.keys(_methods).forEach(function (key) {
+	  if (key === "default") return;
+	  Object.defineProperty(exports, key, {
+	    enumerable: true,
+	    get: function get() {
+	      return _methods[key];
 	    }
 	  });
 	});
@@ -1317,12 +1364,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function propagate(id) {
 
-	    (0, _interface.on)(_conf.CONSTANTS.POST_MESSAGE_NAMES.IDENTIFY, function (err, data, callback) {
-	        if (!err) {
-	            return {
-	                id: id
-	            };
-	        }
+	    (0, _interface.on)(_conf.CONSTANTS.POST_MESSAGE_NAMES.IDENTIFY, function (source, data, callback) {
+	        return {
+	            id: id
+	        };
 	    });
 
 	    var registered = [];
@@ -1368,10 +1413,94 @@ return /******/ (function(modules) { // webpackBootstrap
 	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.listenForMethods = undefined;
+	exports.serializeMethods = serializeMethods;
+	exports.deserializeMethods = deserializeMethods;
+	exports.serializeMethod = serializeMethod;
+	exports.deserializeMethod = deserializeMethod;
+
+	var _conf = __webpack_require__(3);
+
+	var _util = __webpack_require__(7);
+
+	var _interface = __webpack_require__(1);
+
+	var methods = {};
+
+	var listenForMethods = exports.listenForMethods = _util.util.once(function listenForMethods() {
+	    (0, _interface.on)(_conf.CONSTANTS.POST_MESSAGE_NAMES.METHOD, function (source, data) {
+
+	        if (!methods[data.id]) {
+	            throw new Error('Could not find method with id: ' + data.id);
+	        }
+
+	        if (methods[data.id].win !== source) {
+	            throw new Error('Method window does not match');
+	        }
+
+	        return methods[data.id].method.apply(null, data.args);
+	    });
+	});
+
+	function serializeMethods(destination, obj) {
+
+	    listenForMethods();
+
+	    return _util.util.walkObject(obj, function (item) {
+	        if (item instanceof Function) {
+	            return serializeMethod(destination, item);
+	        }
+	    });
+	}
+
+	function deserializeMethods(source, obj) {
+
+	    return _util.util.walkObject(obj, function (item) {
+	        if (item instanceof Object && item.__type__ === _conf.CONSTANTS.SERIALIZATION_TYPES.METHOD && item.__id__) {
+	            return deserializeMethod(source, item);
+	        }
+	    });
+	}
+
+	function serializeMethod(destination, method) {
+
+	    var id = _util.util.uniqueID();
+
+	    methods[id] = {
+	        win: destination,
+	        method: method
+	    };
+
+	    return {
+	        __type__: _conf.CONSTANTS.SERIALIZATION_TYPES.METHOD,
+	        __id__: id
+	    };
+	}
+
+	function deserializeMethod(source, obj) {
+
+	    return function () {
+	        var args = Array.prototype.slice.call(arguments);
+	        return (0, _interface.send)(source, _conf.CONSTANTS.POST_MESSAGE_NAMES.METHOD, {
+	            id: obj.__id__,
+	            args: args
+	        });
+	    };
+	}
+
+/***/ },
+/* 16 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
 
-	var _bridge = __webpack_require__(16);
+	var _bridge = __webpack_require__(17);
 
 	Object.keys(_bridge).forEach(function (key) {
 	  if (key === "default") return;
@@ -1383,7 +1512,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _global = __webpack_require__(17);
+	var _global = __webpack_require__(18);
 
 	Object.keys(_global).forEach(function (key) {
 	  if (key === "default") return;
@@ -1395,7 +1524,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _ie = __webpack_require__(18);
+	var _ie = __webpack_require__(19);
 
 	Object.keys(_ie).forEach(function (key) {
 	  if (key === "default") return;
@@ -1408,7 +1537,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 16 */
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1492,7 +1621,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 17 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1536,7 +1665,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 18 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1567,7 +1696,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 19 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1581,7 +1710,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _lib = __webpack_require__(13);
 
-	var _strategies = __webpack_require__(20);
+	var _strategies = __webpack_require__(21);
 
 	var sendMessage = exports.sendMessage = _lib.promise.method(function (win, message, domain, isProxy) {
 
@@ -1590,6 +1719,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    message.originalSource = message.originalSource || (0, _conf.getWindowID)();
 	    message.windowType = _lib.util.getType();
 	    message.originalWindowType = message.originalWindowType || _lib.util.getType();
+
+	    (0, _lib.serializeMethods)(win, message.data || message.response || {});
 
 	    if (!message.target) {
 	        message.target = _lib.childWindows.getWindowId(win);
@@ -1635,7 +1766,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 20 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1649,7 +1780,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _lib = __webpack_require__(13);
 
-	var _compat = __webpack_require__(15);
+	var _compat = __webpack_require__(16);
 
 	var SEND_MESSAGE_STRATEGIES = exports.SEND_MESSAGE_STRATEGIES = {
 
@@ -1735,7 +1866,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 21 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1854,7 +1985,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	resetListeners();
 
 /***/ },
-/* 22 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1872,9 +2003,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _lib = __webpack_require__(13);
 
-	var _send = __webpack_require__(19);
+	var _send = __webpack_require__(20);
 
-	var _listeners = __webpack_require__(21);
+	var _listeners = __webpack_require__(22);
 
 	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -1945,7 +2076,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    try {
 
-	        result = options.handler(message.data, function (err, response) {
+	        result = options.handler(source, message.data, function (err, response) {
 	            return err ? errorResponse(err) : successResponse(response);
 	        });
 	    } catch (err) {
@@ -1975,7 +2106,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}), _RECEIVE_MESSAGE_TYPE);
 
 /***/ },
-/* 23 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2077,7 +2208,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 24 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2120,7 +2251,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 25 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
