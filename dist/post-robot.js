@@ -442,6 +442,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.util = undefined;
 
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
 	var _conf = __webpack_require__(3);
 
 	var _promise = __webpack_require__(8);
@@ -800,20 +802,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	        }
 	    },
-	    walkObject: function walkObject(obj, callback) {
+	    replaceObject: function replaceObject(obj, callback) {
+
+	        var newobj = obj instanceof Array ? [] : {};
 
 	        util.each(obj, function (item, key) {
 
 	            var result = callback(item);
 
 	            if (result !== undefined) {
-	                obj[key] = result;
+	                newobj[key] = result;
+	            } else if ((typeof item === 'undefined' ? 'undefined' : _typeof(item)) === 'object') {
+	                newobj[key] = util.replaceObject(item, callback);
 	            } else {
-	                util.walkObject(item, callback);
+	                newobj[key] = item;
 	            }
 	        });
 
-	        return obj;
+	        return newobj;
 	    }
 	};
 
@@ -868,6 +874,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	            callback(null, result);
 	        }, function (err) {
 	            callback(err);
+	        });
+	    },
+	    deNodeify: function deNodeify(method) {
+	        for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+	            args[_key - 1] = arguments[_key];
+	        }
+
+	        return new promise.Promise(function (resolve, reject) {
+	            try {
+	                if (args.length < method.length) {
+	                    return method.apply(undefined, args.concat([function (err, result) {
+	                        return err ? reject(err) : resolve(result);
+	                    }]));
+	                }
+
+	                return promise.run(function () {
+	                    return method.apply(undefined, args);
+	                }).then(resolve, reject);
+	            } catch (err) {
+	                return reject(err);
+	            }
 	        });
 	    }
 	};
@@ -1178,7 +1205,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return _types.RECEIVE_MESSAGE_TYPES[message.type](source, message, origin);
 	    }
 
-	    (0, _lib.deserializeMethods)(source, message.data || message.response || {});
+	    message.data = (0, _lib.deserializeMethods)(source, message.data || {});
 
 	    _types.RECEIVE_MESSAGE_TYPES[message.type](source, message, origin);
 	}
@@ -1444,21 +1471,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	});
 
+	function isSerializedMethod(item) {
+	    return item instanceof Object && item.__type__ === _conf.CONSTANTS.SERIALIZATION_TYPES.METHOD && item.__id__;
+	}
+
 	function serializeMethods(destination, obj) {
 
 	    listenForMethods();
 
-	    return _util.util.walkObject(obj, function (item) {
+	    return _util.util.replaceObject(obj, function (item) {
 	        if (item instanceof Function) {
 	            return serializeMethod(destination, item);
+	        } else if (isSerializedMethod(item)) {
+	            throw new Error('Attempting to serialize already serialized method');
 	        }
 	    });
 	}
 
 	function deserializeMethods(source, obj) {
 
-	    return _util.util.walkObject(obj, function (item) {
-	        if (item instanceof Object && item.__type__ === _conf.CONSTANTS.SERIALIZATION_TYPES.METHOD && item.__id__) {
+	    return _util.util.replaceObject(obj, function (item) {
+	        if (isSerializedMethod(item)) {
 	            return deserializeMethod(source, item);
 	        }
 	    });
@@ -1720,7 +1753,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    message.windowType = _lib.util.getType();
 	    message.originalWindowType = message.originalWindowType || _lib.util.getType();
 
-	    (0, _lib.serializeMethods)(win, message.data || message.response || {});
+	    message.data = (0, _lib.serializeMethods)(win, message.data || {});
 
 	    if (!message.target) {
 	        message.target = _lib.childWindows.getWindowId(win);
@@ -2023,71 +2056,59 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var options = (0, _listeners.getRequestListener)(message.name, source);
 
 	    function respond(data) {
+
 	        return (0, _send.sendMessage)(source, _extends({
 	            target: message.originalSource ? message.originalSource : _lib.childWindows.getWindowId(source),
 	            hash: message.hash,
 	            name: message.name
-	        }, data), '*')['catch'](function (error) {
-	            if (options) {
-	                return options.handleError(error);
-	            } else {
-	                throw error;
+	        }, data), '*')['catch'](function (err) {
+
+	            if (options && options.handleError) {
+	                return options.handleError(err);
 	            }
+	            throw err;
 	        });
 	    }
 
-	    var successResponse = _lib.util.once(function (data) {
+	    return _lib.promise.run(function () {
+
+	        return respond({
+	            type: _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK
+	        });
+	    }).then(function () {
+
+	        if (!options) {
+	            throw new Error('No postmessage request handler for ' + message.name + ' in ' + window.location.href);
+	        }
+
+	        if (options.window && source && options.window !== source) {
+	            return;
+	        }
+
+	        if (options.domain) {
+	            var match = typeof options.domain === 'string' && origin === options.domain || options.domain instanceof RegExp && origin.match(options.domain);
+
+	            if (!match) {
+	                throw new Error('Message origin ' + origin + ' does not match domain ' + options.domain);
+	            }
+	        }
+
+	        return _lib.promise.deNodeify(options.handler, source, message.data);
+	    }).then(function (data) {
+
 	        return respond({
 	            type: _conf.CONSTANTS.POST_MESSAGE_TYPE.RESPONSE,
 	            ack: _conf.CONSTANTS.POST_MESSAGE_ACK.SUCCESS,
-	            response: data || {}
+	            data: data || {}
 	        });
-	    });
+	    }, function (err) {
 
-	    var errorResponse = _lib.util.once(function (err) {
 	        return respond({
 	            type: _conf.CONSTANTS.POST_MESSAGE_TYPE.RESPONSE,
 	            ack: _conf.CONSTANTS.POST_MESSAGE_ACK.ERROR,
 	            error: err.stack || err.toString()
 	        });
 	    });
-
-	    if (!options) {
-	        return errorResponse(new Error('No postmessage request handler for ' + message.name + ' in ' + window.location.href));
-	    }
-
-	    if (options.domain) {
-	        var match = typeof options.domain === 'string' && origin === options.domain || options.domain instanceof RegExp && origin.match(options.domain);
-
-	        if (!match) {
-	            return errorResponse(new Error('Message origin ' + origin + ' does not match domain ' + options.domain));
-	        }
-	    }
-
-	    if (options.window && source && options.window !== source) {
-	        return;
-	    }
-
-	    respond({
-	        type: _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK
-	    });
-
-	    var result = void 0;
-
-	    try {
-
-	        result = options.handler(source, message.data, function (err, response) {
-	            return err ? errorResponse(err) : successResponse(response);
-	        });
-	    } catch (err) {
-	        return errorResponse(err);
-	    }
-
-	    if (result && result.then instanceof Function) {
-	        return result.then(successResponse, errorResponse);
-	    } else if (options.handler.length <= 2) {
-	        return successResponse(result);
-	    }
 	}), _defineProperty(_RECEIVE_MESSAGE_TYPE, _conf.CONSTANTS.POST_MESSAGE_TYPE.RESPONSE, function (source, message, origin) {
 
 	    var options = _listeners.listeners.response[message.hash];
@@ -2101,7 +2122,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (message.ack === _conf.CONSTANTS.POST_MESSAGE_ACK.ERROR) {
 	        return options.respond(message.error);
 	    } else if (message.ack === _conf.CONSTANTS.POST_MESSAGE_ACK.SUCCESS) {
-	        return options.respond(null, message.response);
+	        return options.respond(null, message.data);
 	    }
 	}), _RECEIVE_MESSAGE_TYPE);
 
@@ -2134,7 +2155,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        throw new Error('Expected options.handler');
 	    }
 
-	    options.errorHandler = options.errorHandler || _lib.util.noop;
+	    options.errorHandler = options.errorHandler || function (err) {
+	        throw err;
+	    };
 
 	    if (options.once) {
 	        options.handler = _lib.util.once(options.handler);
