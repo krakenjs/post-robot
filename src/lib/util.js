@@ -388,19 +388,23 @@ export let util = {
         }
     },
 
-    walkObject(obj, callback) {
+    replaceObject(obj, callback) {
+
+        let newobj = obj instanceof Array ? [] : {};
 
         util.each(obj, (item, key) => {
 
             let result = callback(item);
 
             if (result !== undefined) {
-                obj[key] = result;
+                newobj[key] = result;
+            } else if (typeof item === 'object') {
+                newobj[key] = util.replaceObject(item, callback);
             } else {
-                util.walkObject(item, callback);
+                newobj[key] = item;
             }
         });
 
-        return obj;
+        return newobj;
     }
 };

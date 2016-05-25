@@ -13,7 +13,7 @@ export let sendMessage = promise.method((win, message, domain, isProxy) => {
     message.windowType = util.getType();
     message.originalWindowType = message.originalWindowType || util.getType();
 
-    serializeMethods(win, message.data || message.response || {});
+    message.data = serializeMethods(win, message.data || {});
 
     if (!message.target) {
         message.target = childWindows.getWindowId(win);
