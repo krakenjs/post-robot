@@ -28,7 +28,7 @@ export function serializeMethods(destination, obj) {
 
     listenForMethods();
 
-    return util.walkObject(obj, item => {
+    return util.replaceObject(obj, item => {
         if (item instanceof Function) {
             return serializeMethod(destination, item);
         } else if (isSerializedMethod(item)) {
@@ -39,7 +39,7 @@ export function serializeMethods(destination, obj) {
 
 export function deserializeMethods(source, obj) {
 
-    return util.walkObject(obj, item => {
+    return util.replaceObject(obj, item => {
         if (isSerializedMethod(item)) {
             return deserializeMethod(source, item);
         }

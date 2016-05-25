@@ -1,6 +1,6 @@
 
 import { CONSTANTS } from '../../conf';
-import { util, childWindows } from '../../lib';
+import { childWindows, promise } from '../../lib';
 
 import { sendMessage } from '../send';
 import { listeners, getRequestListener } from '../listeners';
@@ -23,69 +23,64 @@ export let RECEIVE_MESSAGE_TYPES = {
         let options = getRequestListener(message.name, source);
 
         function respond(data) {
+
             return sendMessage(source, {
                 target: message.originalSource ? message.originalSource : childWindows.getWindowId(source),
                 hash: message.hash,
                 name: message.name,
                 ...data
-            }, '*').catch(options.handleError);
+            }, '*').catch(err => {
+
+                if (options && options.handleError) {
+                    return options.handleError(err);
+                }
+                throw err;
+            });
         }
 
-        let successResponse = util.once(data => {
+        return promise.run(() => {
+
+            return respond({
+                type: CONSTANTS.POST_MESSAGE_TYPE.ACK
+            });
+
+        }).then(() => {
+
+            if (!options) {
+                throw new Error(`No postmessage request handler for ${message.name} in ${window.location.href}`);
+            }
+
+            if (options.window && source && options.window !== source) {
+                return;
+            }
+
+            if (options.domain) {
+                let match = (typeof options.domain === 'string' && origin === options.domain) ||
+                            (options.domain instanceof RegExp && origin.match(options.domain));
+
+                if (!match) {
+                    throw new Error(`Message origin ${origin} does not match domain ${options.domain}`);
+                }
+            }
+
+            return promise.deNodeify(options.handler, source, message.data);
+
+        }).then(data => {
+
             return respond({
                 type: CONSTANTS.POST_MESSAGE_TYPE.RESPONSE,
                 ack: CONSTANTS.POST_MESSAGE_ACK.SUCCESS,
-                response: data || {}
+                data: data || {}
             });
-        });
 
-        let errorResponse = util.once(err => {
+        }, err => {
+
             return respond({
                 type: CONSTANTS.POST_MESSAGE_TYPE.RESPONSE,
                 ack: CONSTANTS.POST_MESSAGE_ACK.ERROR,
                 error: err.stack || err.toString()
             });
         });
-
-        if (!options) {
-            return errorResponse(new Error(`No postmessage request handler for ${message.name} in ${window.location.href}`));
-        }
-
-        if (options.domain) {
-            let match = (typeof options.domain === 'string' && origin === options.domain) ||
-                        (options.domain instanceof RegExp && origin.match(options.domain));
-
-            if (!match) {
-                return errorResponse(new Error(`Message origin ${origin} does not match domain ${options.domain}`));
-            }
-        }
-
-        if (options.window && source && options.window !== source) {
-            return;
-        }
-
-        respond({
-            type: CONSTANTS.POST_MESSAGE_TYPE.ACK
-        });
-
-        let result;
-
-        try {
-
-            result = options.handler(source, message.data, (err, response) => {
-                return err ? errorResponse(err) : successResponse(response);
-            });
-
-        } catch (err) {
-            return errorResponse(err);
-        }
-
-        if (result && result.then instanceof Function) {
-            return result.then(successResponse, errorResponse);
-
-        } else if (options.handler.length <= 2) {
-            return successResponse(result);
-        }
     },
 
     [ CONSTANTS.POST_MESSAGE_TYPE.RESPONSE ]: (source, message, origin) => {
@@ -101,7 +96,7 @@ export let RECEIVE_MESSAGE_TYPES = {
         if (message.ack === CONSTANTS.POST_MESSAGE_ACK.ERROR) {
             return options.respond(message.error);
         } else if (message.ack === CONSTANTS.POST_MESSAGE_ACK.SUCCESS) {
-            return options.respond(null, message.response);
+            return options.respond(null, message.data);
         }
     }
 };

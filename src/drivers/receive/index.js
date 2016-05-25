@@ -119,7 +119,7 @@ export function receiveMessage(event) {
         return RECEIVE_MESSAGE_TYPES[message.type](source, message, origin);
     }
 
-    deserializeMethods(source, message.data || message.response || {});
+    message.data = deserializeMethods(source, message.data || {});
 
     RECEIVE_MESSAGE_TYPES[message.type](source, message, origin);
 }

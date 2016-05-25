@@ -1,5 +1,6 @@
 
 import { Promise as ES6Promise } from 'es6-promise-min';
+
 export let promise = {
 
     get Promise() {
@@ -38,6 +39,25 @@ export let promise = {
             callback(null, result);
         }, err => {
             callback(err);
+        });
+    },
+
+    deNodeify(method, ...args) {
+        return new promise.Promise(function(resolve, reject) {
+            try {
+                if (args.length < method.length) {
+                    return method(...args, function(err, result) {
+                        return err ? reject(err) : resolve(result);
+                    });
+                }
+
+                return promise.run(() => {
+                    return method(...args);
+                }).then(resolve, reject);
+
+            } catch (err) {
+                return reject(err);
+            }
         });
     }
 }
