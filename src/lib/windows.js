@@ -9,7 +9,7 @@ function getMap(key, value) {
     return util.find(windows, map => {
         return map[key] === value;
     }, {});
-};
+}
 
 export let childWindows = {
 
@@ -95,7 +95,7 @@ window.open = function(url, name, x, y) {
     let win = util.apply(openWindow, this, arguments);
 
     childWindows.register(name, win, CONSTANTS.WINDOW_TYPES.POPUP);
-    return win
+    return win;
 };
 
 
@@ -121,7 +121,7 @@ export function propagate(id) {
         registered.push(win);
 
         if (util.safeHasProp(win, CONSTANTS.WINDOW_PROPS.POSTROBOT)) {
-            win[CONSTANTS.WINDOW_PROPS.POSTROBOT].registerSelf(id, window, util.getType())
+            win[CONSTANTS.WINDOW_PROPS.POSTROBOT].registerSelf(id, window, util.getType());
         } else {
             send(win, CONSTANTS.POST_MESSAGE_NAMES.IDENTIFY, {
                 id,

@@ -51,7 +51,7 @@ export function getBridgeFor(win) {
             return;
         }
 
-        for (let i=0; i<win.frames.length; i++) {
+        for (let i = 0; i < win.frames.length; i++) {
             try {
                 let frame = win.frames[i];
 

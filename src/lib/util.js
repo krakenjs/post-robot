@@ -45,7 +45,7 @@ export let util = {
                 called = true;
                 return method.apply(this, arguments);
             }
-        }
+        };
     },
 
     getParent() {
@@ -79,7 +79,7 @@ export let util = {
     },
 
     eachFrame(win, method) {
-        for (let i=0; i<win.frames.length; i++) {
+        for (let i = 0; i < win.frames.length; i++) {
             let frame;
             
             try {
@@ -133,12 +133,12 @@ export let util = {
                     return item;
                 }
                 if (!item) {
-                    return toString.call(item)
+                    return toString.call(item);
                 }
                 let json;
                 try {
                     json = JSON.stringify(item, 0, 2);
-                } catch(e) {
+                } catch (e) {
                     json = '[object]';
                 }
 
@@ -146,7 +146,7 @@ export let util = {
             }).join(' ');
 
 
-            let msg = `${date} ${level} ${payload}`
+            let msg = `${date} ${level} ${payload}`;
             el.innerHTML = msg;
 
             let color = {
@@ -218,7 +218,7 @@ export let util = {
             } else {
                 return false;
             }
-        } catch(err) {
+        } catch (err) {
             return false;
         }
     },
@@ -235,7 +235,7 @@ export let util = {
         if (win.addEventListener) {
             win.addEventListener(event, handler);
         } else {
-            win.attachEvent(`on${event}`, handler)
+            win.attachEvent(`on${event}`, handler);
         }
 
         return {
@@ -260,7 +260,7 @@ export let util = {
         if (!collection) {
             return def;
         }
-        for (let i=0; i<collection.length; i++) {
+        for (let i = 0; i < collection.length; i++) {
             if (method(collection[i])) {
                 return collection[i];
             }
@@ -270,7 +270,7 @@ export let util = {
 
     map(collection, method) {
         let results = [];
-        for (let i=0; i<collection.length; i++) {
+        for (let i = 0; i < collection.length; i++) {
             results.push(method(collection[i]));
         }
         return results;
@@ -278,7 +278,7 @@ export let util = {
 
     some(collection, method) {
         method = method || Boolean;
-        for (let i=0; i<collection.length; i++) {
+        for (let i = 0; i < collection.length; i++) {
             if (method(collection[i])) {
                 return true;
             }
@@ -291,7 +291,7 @@ export let util = {
         for (let key in mapping) {
             if (mapping.hasOwnProperty(key)) {
                 result.push(key);
-            };
+            }
         }
         return result;
     },
@@ -301,7 +301,7 @@ export let util = {
         for (let key in mapping) {
             if (mapping.hasOwnProperty(key)) {
                 result.push(mapping[key]);
-            };
+            }
         }
         return result;
     },
@@ -334,12 +334,12 @@ export let util = {
         } catch (err) {
 
             try {
-                for (let i=0; i<win.frames.length; i++) {
+                for (let i = 0; i < win.frames.length; i++) {
                     if (win.frames[i] === frame) {
                         return true;
                     }
                 }
-            } catch(err2) {
+            } catch (err2) {
                 return false;
             }
         }
@@ -357,7 +357,7 @@ export let util = {
                 results[args] = method.apply(this, arguments);
             }
             return results[args];
-        }
+        };
     },
 
     extend(obj, source) {
@@ -376,8 +376,8 @@ export let util = {
 
     each(obj, callback) {
         if (obj instanceof Array) {
-            for (let i=0; i<obj.length; i++) {
-                callback(obj[i], i)
+            for (let i = 0; i < obj.length; i++) {
+                callback(obj[i], i);
             }
         } else if (obj instanceof Object && !(obj instanceof Function)) {
             for (let key in obj) {

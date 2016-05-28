@@ -28,7 +28,7 @@ export let promise = {
             return promise.Promise.resolve().then(() => {
                 return method.apply(this, arguments);
             });
-        }
+        };
     },
 
     nodeify(prom, callback) {
@@ -60,4 +60,4 @@ export let promise = {
             }
         });
     }
-}
+};

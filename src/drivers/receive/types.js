@@ -78,7 +78,7 @@ export let RECEIVE_MESSAGE_TYPES = {
             return respond({
                 type: CONSTANTS.POST_MESSAGE_TYPE.RESPONSE,
                 ack: CONSTANTS.POST_MESSAGE_ACK.ERROR,
-                error: err.stack || err.toString()
+                error: err.stack ? `${err.message}\n${err.stack}` : err.toString()
             });
         });
     },
@@ -94,7 +94,7 @@ export let RECEIVE_MESSAGE_TYPES = {
         delete listeners.response[message.hash];
 
         if (message.ack === CONSTANTS.POST_MESSAGE_ACK.ERROR) {
-            return options.respond(message.error);
+            return options.respond(new Error(message.error));
         } else if (message.ack === CONSTANTS.POST_MESSAGE_ACK.SUCCESS) {
             return options.respond(null, message.data);
         }

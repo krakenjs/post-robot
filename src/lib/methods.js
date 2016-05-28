@@ -13,7 +13,7 @@ export let listenForMethods = util.once(() => {
         }
 
         if (methods[data.id].win !== source) {
-            throw new Error(`Method window does not match`);
+            throw new Error('Method window does not match');
         }
 
         return methods[data.id].method.apply(null, data.args);
@@ -21,7 +21,7 @@ export let listenForMethods = util.once(() => {
 });
 
 function isSerializedMethod(item) {
-    return item instanceof Object && item.__type__ === CONSTANTS.SERIALIZATION_TYPES.METHOD && item.__id__
+    return item instanceof Object && item.__type__ === CONSTANTS.SERIALIZATION_TYPES.METHOD && item.__id__;
 }
 
 export function serializeMethod(destination, method) {
@@ -36,7 +36,7 @@ export function serializeMethod(destination, method) {
     return {
         __type__: CONSTANTS.SERIALIZATION_TYPES.METHOD,
         __id__: id
-    }
+    };
 }
 
 export function serializeMethods(destination, obj) {
@@ -47,7 +47,7 @@ export function serializeMethods(destination, obj) {
         if (item instanceof Function) {
             return serializeMethod(destination, item);
         } else if (isSerializedMethod(item)) {
-            throw new Error(`Attempting to serialize already serialized method`);
+            throw new Error('Attempting to serialize already serialized method');
         }
     });
 }
@@ -60,7 +60,7 @@ export function deserializeMethod(source, obj) {
             id: obj.__id__,
             args
         });
-    }
+    };
 }
 
 export function deserializeMethods(source, obj) {

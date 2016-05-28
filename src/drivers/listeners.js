@@ -8,7 +8,7 @@ export function resetListeners() {
         request: [],
         response: {},
         proxies: []
-    }
+    };
 }
 
 export function getRequestListener(name, win) {
@@ -52,11 +52,11 @@ export function addRequestListener(name, win, options, override) {
         if (override) {
             removeRequestListener(listener.options);
         } else {
-            throw new Error(`Request listener already exists for ${name}`)
+            throw new Error(`Request listener already exists for ${name}`);
         }
     }
 
     listeners.request.push({ name, win, options });
-};
+}
 
 resetListeners();
