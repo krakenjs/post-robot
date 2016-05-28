@@ -4,6 +4,7 @@ var eslint = require('gulp-eslint');
 var webpack = require('webpack');
 var gulpWebpack = require('gulp-webpack');
 var Server = require('karma').Server;
+var argv = require('yargs').argv;
 
 gulp.task('build', ['webpack', 'webpack-min']);
 
@@ -77,9 +78,9 @@ gulp.task('karma', function (done) {
 
     var server = new Server({
         configFile: __dirname + '/karma.conf.js',
-        singleRun: true,
+        singleRun: !Boolean(argv['keep-browser-open']),
         client: {
-            captureConsole: false
+            captureConsole: Boolean(argv['capture-console'])
         }
     });
 

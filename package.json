@@ -56,7 +56,8 @@
     "phantomjs-prebuilt": "^2.1.7",
     "sinon": "^1.17.4",
     "sinon-chai": "^2.8.0",
-    "webpack": "^1.13.0"
+    "webpack": "^1.13.0",
+    "yargs": "^4.7.1"
   },
   "dependencies": {
     "babel-eslint": "^6.0.4",

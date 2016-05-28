@@ -210,4 +210,25 @@ describe('post-robot', function() {
             assert.equal(count, 1);
         });
     });
+
+    it('should fail when postMessage or global methods are not available', function(done) {
+
+        delete window.postMessage;
+        delete window.__postRobot__;
+        delete window.frames;
+
+        Object.defineProperty(window, 'postMessage', {
+            value: function() {
+
+            }
+        })
+
+        postRobot.once('nowayin', function() {
+            done();
+        });
+
+        postRobot.send(childFrame, 'sendMessageToParent', {
+            messageName: 'nowayin'
+        });
+    });
 });

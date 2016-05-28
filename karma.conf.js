@@ -1,5 +1,4 @@
-// Karma configuration
-// Generated on Fri May 27 2016 17:32:45 GMT-0700 (PDT)
+var argv = require('yargs').argv;
 
 module.exports = function(config) {
     config.set({
@@ -86,7 +85,7 @@ module.exports = function(config) {
 
         // start these browsers
         // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-        browsers: ['PhantomJS'],
+        browsers: [argv.browser || 'PhantomJS'],
 
 
         // Continuous Integration mode
