@@ -12,47 +12,47 @@ var MODULE_NAME = 'postRobot';
 
 var WEBPACK_CONFIG = {
     module: {
-      loaders: [
-        {
-            test: /\.js$/,
-            exclude: /(node_modules|bower_components)/,
-            loader: 'babel',
-            query: {
-            presets: ['es2015'],
-            plugins: [
-              'transform-object-rest-spread',
-              'syntax-object-rest-spread',
-              'transform-es3-property-literals',
-              'transform-es3-member-expression-literals',
-            ['transform-es2015-for-of', {loose: true}]
-          ]
-        }
-        }
-    ]
-  },
+        loaders: [
+            {
+                test: /\.js$/,
+                exclude: /(node_modules|bower_components)/,
+                loader: 'babel',
+                query: {
+                    presets: ['es2015'],
+                    plugins: [
+                        'transform-object-rest-spread',
+                        'syntax-object-rest-spread',
+                        'transform-es3-property-literals',
+                        'transform-es3-member-expression-literals',
+                        ['transform-es2015-for-of', {loose: true}]
+                    ]
+                }
+            }
+        ]
+    },
     output: {
-      filename: `${FILE_NAME}.js`,
-      libraryTarget: 'umd',
-      umdNamedDefine: true,
-      library: MODULE_NAME
-  },
+        filename: `${FILE_NAME}.js`,
+        libraryTarget: 'umd',
+        umdNamedDefine: true,
+        library: MODULE_NAME
+    },
     bail: true
 };
 
 var WEBPACK_CONFIG_MIN = Object.assign({}, WEBPACK_CONFIG, {
     output: {
-      filename: `${FILE_NAME}.min.js`,
-      libraryTarget: 'umd',
-      umdNamedDefine: true,
-      library: MODULE_NAME
-  },
+        filename: `${FILE_NAME}.min.js`,
+        libraryTarget: 'umd',
+        umdNamedDefine: true,
+        library: MODULE_NAME
+    },
     plugins: [
-      new webpack.optimize.UglifyJsPlugin({
-        test: /\.js$/,
-        exclude: /(node_modules|bower_components)/,
-        minimize: true
-    })
-  ]
+        new webpack.optimize.UglifyJsPlugin({
+            test: /\.js$/,
+            exclude: /(node_modules|bower_components)/,
+            minimize: true
+        })
+    ]
 });
 
 gulp.task('webpack', ['lint'], function() {
@@ -76,24 +76,24 @@ gulp.task('lint', function() {
 gulp.task('karma', function (done) {
 
     var server = new Server({
-      configFile: __dirname + '/karma.conf.js',
-      singleRun: true,
-      client: {
-        captureConsole: false
-    }
-  });
+        configFile: __dirname + '/karma.conf.js',
+        singleRun: true,
+        client: {
+            captureConsole: true
+        }
+    });
 
     server.on('browser_error', function (browser, err) {
-      console.log('Karma Run Failed: ' + err.message);
-      throw err;
-  });
+        console.log('Karma Run Failed: ' + err.message);
+        throw err;
+    });
 
     server.on('run_complete', function (browsers, results) {
-      if (results.failed) {
-          return done(new Error('Karma: Tests Failed'));
-      }
-      done();
-  });
+        if (results.failed) {
+            return done(new Error('Karma: Tests Failed'));
+        }
+        done();
+    });
 
     server.start();
 });

@@ -28,7 +28,8 @@ module.exports = function(config) {
             require('karma-phantomjs-launcher'),
             require('karma-chrome-launcher'),
             require('karma-sinon-chai'),
-            require('karma-coverage')
+            require('karma-coverage'),
+            require('karma-spec-reporter')
         ],
 
 
@@ -47,7 +48,7 @@ module.exports = function(config) {
         // possible values: 'dots', 'progress'
         // available reporters: https://npmjs.org/browse/keyword/karma-reporter
         reporters: [
-            'progress',
+            'spec',
             'coverage'
         ],
 

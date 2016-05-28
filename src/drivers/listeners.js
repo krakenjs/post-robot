@@ -50,7 +50,7 @@ export function addRequestListener(name, win, options, override) {
 
     if (listener) {
         if (override) {
-            removeRequestListener(listener.options);
+            removeRequestListener(listener);
         } else {
             throw new Error(`Request listener already exists for ${name}`);
         }

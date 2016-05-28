@@ -1,4 +1,10 @@
 
+window.console.karma = function() {
+    var karma = window.karma || (window.top && window.top.karma) || (window.opener && window.opener.karma);
+    karma.log('debug', arguments);
+    console.log.apply(console, arguments);
+};
+
 function createIframe(name) {
     var frame = document.createElement('iframe');
     frame.src = '/base/test/' + name;
@@ -12,12 +18,12 @@ describe('post-robot', function() {
 
     it('should set up a simple server and listen for a request', function(done) {
 
-        postRobot.on('foo', function() {
+        postRobot.on('foobu', function() {
             done();
         });
 
         postRobot.send(child, 'sendMessageToParent', {
-            messageName: 'foo'
+            messageName: 'foobu'
         });
     });
 
@@ -44,13 +50,13 @@ describe('post-robot', function() {
 
             messageName: 'foo',
             data: {
-                foo: 'bar'
+                foo: 'bar2'
             }
 
         }).then(function() {
 
             return postRobot.send(child, 'foo', function(err, data) {
-                assert.equal(data.foo, 'bar');
+                assert.equal(data.foo, 'bar2');
                 done();
             });
 
@@ -74,6 +80,25 @@ describe('post-robot', function() {
                 throw new Error('Expected data to be blank');
             }
             done();
+        });
+    });
+
+    it('should pass a function across windows and be able to call it later', function(done) {
+
+        postRobot.send(child, 'setupListener', {
+
+            messageName: 'foo',
+            data: {
+                done: done
+            }
+
+        }).then(function() {
+
+            return postRobot.send(child, 'foo').then(function(data) {
+
+                console.karma(data);
+                data.done();
+            });
         });
     });
 
