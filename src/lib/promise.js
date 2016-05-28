@@ -7,18 +7,6 @@ export let promise = {
         return window.Promise ? window.Promise : ES6Promise;
     },
 
-    asyncPromise(method) {
-        return new promise.Promise((resolve, reject) => {
-            setTimeout(() => {
-                try {
-                    return method(resolve, reject);
-                } catch (err) {
-                    return reject(err);
-                }
-            });
-        });
-    },
-
     run(method) {
         return promise.Promise.resolve().then(method);
     },

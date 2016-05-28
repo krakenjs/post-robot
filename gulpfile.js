@@ -79,7 +79,7 @@ gulp.task('karma', function (done) {
         configFile: __dirname + '/karma.conf.js',
         singleRun: true,
         client: {
-            captureConsole: true
+            captureConsole: false
         }
     });
 
