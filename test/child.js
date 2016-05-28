@@ -8,11 +8,11 @@ window.console.karma = function() {
 };
 
 postRobot.on('sendMessageToParent', function(source, data) {
-    postRobot.sendToParent(data.messageName);
+    return postRobot.sendToParent(data.messageName, data.data);
 });
 
 postRobot.on('setupListener', function(source, data) {
-    postRobot.on(data.messageName, { override: true }, function() {
+    postRobot.once(data.messageName, function() {
         return data.data;
     });
 });

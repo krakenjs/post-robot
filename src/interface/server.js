@@ -18,7 +18,11 @@ export function listen(options) {
     };
 
     if (options.once) {
-        options.handler = util.once(options.handler);
+        let handler = options.handler;
+        options.handler = util.once(function() {
+            removeRequestListener(options)
+            return handler.apply(this, arguments);
+        });
     }
 
     let override = options.override || CONFIG.MOCK_MODE;
