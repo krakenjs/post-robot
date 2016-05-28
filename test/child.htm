@@ -1,0 +1,7 @@
+<script src="/base/dist/post-robot.js"></script>
+
+<script>
+    postRobot.on('sendMessageToParent', function(source, data) {
+        postRobot.sendToParent(data.messageName);
+    });
+</script>

@@ -3,6 +3,7 @@ var gulp = require('gulp');
 var eslint = require('gulp-eslint');
 var webpack = require('webpack');
 var gulpWebpack = require('gulp-webpack');
+var Server = require('karma').Server;
 
 gulp.task('build', ['webpack', 'webpack-min']);
 
@@ -22,7 +23,8 @@ var WEBPACK_CONFIG = {
             'transform-object-rest-spread',
             'syntax-object-rest-spread',
             'transform-es3-property-literals',
-            'transform-es3-member-expression-literals'
+            'transform-es3-member-expression-literals',
+            ['transform-es2015-for-of', {loose: true}]
           ]
         }
       }
@@ -343,4 +345,11 @@ gulp.task('lint', function() {
   return gulp.src('src/**').pipe(eslint(ESLINT_CONFIG))
   .pipe(eslint.format())
   .pipe(eslint.failAfterError());
+});
+
+gulp.task('karma', function (done) {
+  new Server({
+    configFile: __dirname + '/karma.conf.js',
+    singleRun: true
+  }, done).start();
 });
