@@ -1,11 +1,11 @@
 var argv = require('yargs').argv;
+var path = require('path');
 
 module.exports = function(config) {
     config.set({
 
         // base path that will be used to resolve all patterns (eg. files, exclude)
-        basePath: '',
-    
+        basePath: __dirname,
 
         // frameworks to use
         // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
@@ -17,19 +17,69 @@ module.exports = function(config) {
 
         // list of files / patterns to load in the browser
         files: [
-            { pattern: 'dist/post-robot.js', included: true, served: true },
-            { pattern: 'test/*.js', included: true, served: true },
-            { pattern: 'test/*.htm', included: false, served: true }
+            { pattern: 'test/test.js', included: true, served: true },
+            { pattern: 'test/child.js', included: false, served: true },
+            { pattern: 'test/child.htm', included: false, served: true }
         ],
 
         plugins: [
+            require('karma-webpack'),
             require('karma-mocha'),
             require('karma-phantomjs-launcher'),
             require('karma-chrome-launcher'),
             require('karma-sinon-chai'),
             require('karma-coverage'),
-            require('karma-spec-reporter')
+            require('karma-spec-reporter'),
+            require('karma-sourcemap-loader')
         ],
+
+        webpackMiddleware: {
+            noInfo: true,
+            stats: false
+        },
+
+        webpack: {
+            devtool: 'inline-source-map',
+
+            resolve: {
+                root: [
+                    __dirname
+                ],
+
+                modulesDirectories: [
+                    'node_modules'
+                ]
+            },
+
+            module: {
+                loaders: [
+                    {
+                        test: /\.js$/,
+                        exclude: /(node_modules|bower_components|dist)/,
+                        loader: 'babel',
+                        query: {
+                            presets: ['es2015'],
+                            plugins: [
+                                'transform-object-rest-spread',
+                                'syntax-object-rest-spread',
+                                'transform-es3-property-literals',
+                                'transform-es3-member-expression-literals',
+                                ['transform-es2015-for-of', {loose: true}]
+                            ]
+                        }
+                    }
+                ],
+
+                postLoaders: [
+                    {
+                        test: /\.js$/,
+                        exclude: /(node_modules|bower_components|dist)/,
+                        loader: 'istanbul-instrumenter'
+                    }
+                ]
+            },
+            bail: false
+        },
 
 
         // list of files to exclude
@@ -40,7 +90,8 @@ module.exports = function(config) {
         // preprocess matching files before serving them to the browser
         // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
         preprocessors: {
-            'dist/post-robot.js': ['coverage']
+            'test/**/*.js': ['webpack'],
+            'src/**/*.js': ['coverage',  'sourcemap'],
         },
 
         // test results reporter to use
@@ -67,7 +118,7 @@ module.exports = function(config) {
 
 
         // web server port
-            port: 9876,
+        port: 9876,
 
 
         // enable / disable colors in the output (reporters and logs)
@@ -76,7 +127,7 @@ module.exports = function(config) {
 
         // level of logging
         // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
-        logLevel: config.LOG_INFO,
+        logLevel: config.LOG_WARN,
 
 
         // enable / disable watching file and executing tests whenever any file changes
@@ -94,10 +145,6 @@ module.exports = function(config) {
 
         // Concurrency level
         // how many browser should be started simultaneous
-        concurrency: Infinity,
-
-        proxies: {
-            '/img/': '/base/app/img/'
-        }
+        concurrency: Infinity
     });
 };

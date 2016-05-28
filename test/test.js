@@ -1,4 +1,6 @@
 
+import postRobot from 'src/index';
+
 window.console.karma = function() {
     var karma = window.karma || (window.top && window.top.karma) || (window.opener && window.opener.karma);
     karma.log('debug', arguments);
@@ -211,6 +213,8 @@ describe('post-robot', function() {
         });
     });
 
+    /*
+
     it('should fail when postMessage or global methods are not available', function(done) {
 
         delete window.postMessage;
@@ -231,4 +235,6 @@ describe('post-robot', function() {
             messageName: 'nowayin'
         });
     });
+
+    */
 });
