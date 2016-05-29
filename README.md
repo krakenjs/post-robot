@@ -128,6 +128,34 @@ try {
 }
 ```
 
+## Functions
+
+Post robot lets you send across functions in your data payload, fairly seamlessly.
+
+For example:
+
+```javascript
+// Window 1:
+
+postRobot.on('getFoo', function(data) {
+    return {
+        bar: function() {
+            console.log('foobar!');
+        }
+    };
+});
+
+// Window 2:
+
+postRobot.send(myWindow, 'getFoo').then(function(data) {
+    data.bar();
+});
+```
+
+The function `data.bar()` will be called on the original window.
+Because this uses post-messaging behind the scenes and is therefore always async, `data.bar()` will **always** return a promise, and must be `.then`'d or `await`ed.
+
+
 ## IE9+
 
 In order to use post-robot in IE9+ between two different windows on different domains (like a parent window and a popup)
