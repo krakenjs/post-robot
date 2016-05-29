@@ -40,9 +40,17 @@ export let sendMessage = promise.method((win, message, domain, isProxy) => {
 
         util.debug('Running send message strategies', message);
 
-        return promise.Promise.all(util.map(util.keys(SEND_MESSAGE_STRATEGIES), strategyName => {
+        return promise.map(util.keys(SEND_MESSAGE_STRATEGIES), strategyName => {
 
-            return SEND_MESSAGE_STRATEGIES[strategyName](win, message, domain).then(() => {
+            return promise.run(() => {
+
+                if (!CONFIG.ALLOWED_POST_MESSAGE_METHODS[strategyName]) {
+                    throw new Error(`Strategy disallowed: ${strategyName}`);
+                }
+
+                return SEND_MESSAGE_STRATEGIES[strategyName](win, message, domain);
+
+            }).then(() => {
                 util.debug(strategyName, 'success');
                 return true;
             }, err => {
@@ -50,7 +58,7 @@ export let sendMessage = promise.method((win, message, domain, isProxy) => {
                 return false;
             });
 
-        })).then(results => {
+        }).then(results => {
 
             if (!util.some(results)) {
                 throw new Error('No post-message strategy succeeded');

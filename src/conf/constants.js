@@ -29,5 +29,12 @@ export let CONSTANTS = {
 
     SERIALIZATION_TYPES: {
         METHOD: 'postrobot_method'
+    },
+
+    SEND_STRATEGIES: {
+        POST_MESSAGE: 'postrobot_post_message',
+        POST_MESSAGE_GLOBAL_METHOD: 'postrobot_post_message_global_method',
+        POST_MESSAGE_UP_THROUGH_BRIDGE: 'postrobot_post_message_up_through_bridge',
+        POST_MESSAGE_DOWN_THROUGH_BRIDGE: 'postrobot_post_message_down_through_bridge'
     }
 };

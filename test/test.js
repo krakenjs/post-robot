@@ -1,6 +1,8 @@
 
 import postRobot from 'src/index';
 
+postRobot.CONFIG.LOG_TO_PAGE = true;
+
 window.console.karma = function() {
     var karma = window.karma || (window.top && window.top.karma) || (window.opener && window.opener.karma);
     karma.log('debug', arguments);
@@ -17,7 +19,7 @@ function createIframe(name) {
 }
 
 function createPopup(name) {
-    var popup = window.open('/base/test/' + name, 'childPopup');
+    var popup = window.open('/base/test/' + name, Math.random().toString());
     return popup;
 }
 
@@ -25,6 +27,8 @@ var childFrame = createIframe('child.htm');
 var childWindow = createPopup('child.htm');
 
 var otherChildFrame = createIframe('child.htm');
+
+let bridge = postRobot.openBridge('/base/test/bridge.htm');
 
 describe('[post-robot] happy cases', function() {
 
@@ -36,6 +40,25 @@ describe('[post-robot] happy cases', function() {
 
         postRobot.send(childFrame, 'sendMessageToParent', {
             messageName: 'foobu'
+        });
+    });
+
+    it('should set up a simple server and listen for multiple requests', function() {
+
+        var count = 0;
+
+        postRobot.on('multilistener', function() {
+            count += 1;
+        });
+
+        return postRobot.send(childFrame, 'sendMessageToParent', {
+            messageName: 'multilistener'
+        }).then(function() {
+            return postRobot.send(childFrame, 'sendMessageToParent', {
+                messageName: 'multilistener'
+            })
+        }).then(function() {
+            assert.equal(count, 2);
         });
     });
 
@@ -92,25 +115,21 @@ describe('[post-robot] happy cases', function() {
         });
     });
 
-    it.skip('should be able to proxy messsages from one window to another', function() {
+    it.skip('should be able to proxy messsages from one window to another', function(done) {
 
         postRobot.proxy(childFrame, otherChildFrame);
 
         return postRobot.send(childFrame, 'setupListener', {
 
-            messageName: 'foo',
-            data: {
-                foo: 'bar'
+            messageName: 'proxythis',
+            handler: function() {
+                done();
             }
 
         }).then(function() {
 
             return postRobot.send(otherChildFrame, 'sendMessageToParent', {
-                messageName: 'foo',
-
-
-            }).then(function(data) {
-                assert.equal(data.foo, 'bar');
+                messageName: 'proxythis'
             });
         });
     });
@@ -157,7 +176,7 @@ describe('[post-robot] options', function() {
         });
     });
 
-    it.skip('should be able to re-register the same once handler after the first is called', function() {
+    it('should be able to re-register the same once handler after the first is called', function() {
 
         var count = 0;
 
@@ -172,7 +191,7 @@ describe('[post-robot] options', function() {
             }
         }).then(function() {
 
-            postRobot.once('foobu', { override: true }, function() {
+            postRobot.once('foobu', { override: true }, function(source, data) {
                 count += data.add;
             });
 
@@ -263,23 +282,100 @@ describe('[post-robot] error cases', function() {
         throw new Error('Expected error handler to be called');
     });
 
-    it('should fail when postMessage or global methods are not available', function(done) {
+    it('should fail when no post message strategies are allowed', function() {
 
-        delete window.__postRobot__;
+        var allowedStrategies = postRobot.CONFIG.ALLOWED_POST_MESSAGE_METHODS;
 
-        Object.defineProperty(window, 'postMessage', {
-            value: function() {
+        postRobot.CONFIG.ALLOWED_POST_MESSAGE_METHODS = {};
 
-            }
-        })
+        return postRobot.send(childFrame, 'sendMessageToParent', {
+            messageName: 'foobu'
+        }).then(function() {
+            throw new Error('Expected success handler to not be called');
+        }, function(err) {
+            assert.ok(err);
+            postRobot.CONFIG.ALLOWED_POST_MESSAGE_METHODS = allowedStrategies;
+        });
+    });
 
-        postRobot.once('nowayin', function() {
+    it('should fail messaging popup when emulating IE and only allowing post messages', function() {
+
+        var allowedStrategies = postRobot.CONFIG.ALLOWED_POST_MESSAGE_METHODS;
+
+        postRobot.CONFIG.ALLOWED_POST_MESSAGE_METHODS = {
+            [ postRobot.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE ]: true
+        };
+
+        postRobot.CONFIG.ALLOW_POSTMESSAGE_POPUP = false;
+
+        return postRobot.send(childWindow, 'sendMessageToParent', {
+            messageName: 'foobu'
+        }).then(function() {
+            throw new Error('Expected success handler to not be called');
+        }, function(err) {
+            assert.ok(err);
+            postRobot.CONFIG.ALLOW_POSTMESSAGE_POPUP = true;
+            postRobot.CONFIG.ALLOWED_POST_MESSAGE_METHODS = allowedStrategies;
+        });
+    });
+
+    it.skip('should error out trying to set up a second bridge', function() {
+
+        try {
+            postRobot.openBridge('/base/test/child.htm');
+        } catch (err) {
+            assert.ok(err);
+            return;
+        }
+
+        throw new Error('Expected opening second bridge to throw an error');
+    });
+
+    it('should fail to send a message when the expected domain does not match', function() {
+
+        postRobot.on('foobu', { domain: 'http://www.zombo.com' }, function() {
             done();
         });
 
-        postRobot.send(childFrame, 'sendMessageToParent', {
-            messageName: 'nowayin'
+        return postRobot.send(childFrame, 'sendMessageToParent', {
+            messageName: 'foobu'
+        }).then(function() {
+            throw new Error('Expected success handler to not be called');
+        }, function(err) {
+            assert.ok(err);
         });
+    });
+
+    it('should fail to send a message when the target domain does not match', function() {
+
+        return postRobot.send(childFrame, 'setupListener', {
+
+            messageName: 'foo',
+            data: {
+                foo: 'bar'
+            }
+
+        }).then(function() {
+
+            return postRobot.send(childFrame, 'foo', {}, { domain: 'http://www.zombo.com' }).then(function() {
+                throw new Error('Expected success handler to not be called');
+            }, function(err) {
+                assert.ok(err);
+            });
+        });
+    });
+
+    it('should call the error handler if the target window closes', function(done) {
+
+        let targetWindow = createPopup('child.htm');
+
+        postRobot.on('foobar', { window: targetWindow, errorHandler: function() { done() }, errorOnClose: true }, function() {
+            throw new Error('Expected handler to not be called');
+        });
+
+        setTimeout(function() {
+            targetWindow.close();
+        }, 100);
     });
 });
 
@@ -300,6 +396,66 @@ describe('[post-robot] popup tests', function() {
             return postRobot.send(childWindow, 'foo').then(function(data) {
                 assert.equal(data.foo, 'bar');
             });
+        });
+    });
+
+    it('should succeed messaging popup when emulating IE with all strategies enabled', function() {
+
+        postRobot.CONFIG.ALLOW_POSTMESSAGE_POPUP = false;
+
+        return postRobot.send(childWindow, 'setupListener', {
+
+            messageName: 'foo',
+            data: {
+                foo: 'bar'
+            }
+
+        }).then(function() {
+
+            return postRobot.send(childWindow, 'foo');
+        });
+    });
+
+    it('should succeed in opening and messaging the bridge', function() {
+
+        return bridge.then(function(frame) {
+
+            return postRobot.send(frame.contentWindow, 'setupListener', {
+
+                messageName: 'foo',
+                data: {
+                    foo: 'bar'
+                }
+
+            }).then(function() {
+
+                return postRobot.send(frame.contentWindow, 'foo').then(function(data) {
+                    assert.equal(data.foo, 'bar');
+                });
+            });
+
+        });
+    });
+
+    it('should work when the only method is post down through bridge', function() {
+
+        var allowedStrategies = postRobot.CONFIG.ALLOWED_POST_MESSAGE_METHODS;
+
+        postRobot.CONFIG.ALLOWED_POST_MESSAGE_METHODS = {
+            [ postRobot.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE_DOWN_THROUGH_BRIDGE ]: true
+        };
+
+        return postRobot.send(childWindow, 'setupListener', {
+
+            messageName: 'foo',
+            data: {
+                foo: 'bar'
+            }
+
+        }).then(function() {
+            return postRobot.send(childWindow, 'foo');
+        }).then(function() {
+            postRobot.CONFIG.ALLOWED_POST_MESSAGE_METHODS = allowedStrategies;
         });
     });
 });

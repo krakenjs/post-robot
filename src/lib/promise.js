@@ -47,5 +47,16 @@ export let promise = {
                 return reject(err);
             }
         });
+    },
+
+    map(items, method) {
+
+        let results = [];
+        for (let i = 0; i < items.length; i++) {
+            results.push(promise.run(() => {
+                return method(items[i]);
+            }));
+        }
+        return promise.Promise.all(results);
     }
 };

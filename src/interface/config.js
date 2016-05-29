@@ -8,3 +8,5 @@ export function enableMockMode() {
 export function disableMockMode() {
     CONFIG.MOCK_MODE = false;
 }
+
+export { CONFIG, CONSTANTS } from '../conf';

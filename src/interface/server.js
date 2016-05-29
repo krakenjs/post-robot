@@ -20,7 +20,7 @@ export function listen(options) {
     if (options.once) {
         let handler = options.handler;
         options.handler = util.once(function() {
-            removeRequestListener(options)
+            removeRequestListener(options);
             return handler.apply(this, arguments);
         });
     }

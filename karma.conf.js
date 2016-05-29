@@ -18,8 +18,8 @@ module.exports = function(config) {
         // list of files / patterns to load in the browser
         files: [
             { pattern: 'test/test.js', included: true, served: true },
-            { pattern: 'test/child.js', included: false, served: true },
-            { pattern: 'test/child.htm', included: false, served: true }
+            { pattern: 'test/*.js', included: false, served: true },
+            { pattern: 'test/*.htm', included: false, served: true },
         ],
 
         plugins: [
@@ -73,7 +73,7 @@ module.exports = function(config) {
                 postLoaders: [
                     {
                         test: /\.js$/,
-                        exclude: /(node_modules|bower_components|dist)/,
+                        exclude: /(node_modules|bower_components|dist|test)/,
                         loader: 'istanbul-instrumenter'
                     }
                 ]

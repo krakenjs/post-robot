@@ -5,14 +5,14 @@ import { emulateIERestrictions, getBridge, getBridgeFor } from '../../compat';
 
 export let SEND_MESSAGE_STRATEGIES = {
 
-    POST_MESSAGE: promise.method((win, message, domain) => {
+    [ CONSTANTS.SEND_STRATEGIES.POST_MESSAGE ]: promise.method((win, message, domain) => {
 
         emulateIERestrictions(window, win);
 
         return win.postMessage(JSON.stringify(message, 0, 2), domain);
     }),
 
-    POST_MESSAGE_GLOBAL_METHOD: promise.method((win, message, domain) => {
+    [ CONSTANTS.SEND_STRATEGIES.POST_MESSAGE_GLOBAL_METHOD ]: promise.method((win, message, domain) => {
 
         if (domain !== '*') {
 
@@ -44,7 +44,7 @@ export let SEND_MESSAGE_STRATEGIES = {
         });
     }),
 
-    POST_MESSAGE_UP_THROUGH_BRIDGE: promise.method((win, message, domain) => {
+    [ CONSTANTS.SEND_STRATEGIES.POST_MESSAGE_UP_THROUGH_BRIDGE ]: promise.method((win, message, domain) => {
 
         let frame = getBridgeFor(win);
 
@@ -59,7 +59,7 @@ export let SEND_MESSAGE_STRATEGIES = {
         return frame[CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessageParent(window, JSON.stringify(message, 0, 2), domain);
     }),
 
-    POST_MESSAGE_DOWN_THROUGH_BRIDGE: promise.method((win, message, domain) => {
+    [ CONSTANTS.SEND_STRATEGIES.POST_MESSAGE_DOWN_THROUGH_BRIDGE ]: promise.method((win, message, domain) => {
 
         let bridge = getBridge();
 

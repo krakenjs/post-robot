@@ -1,5 +1,5 @@
 
-
+import { CONSTANTS } from './constants';
 
 export let CONFIG = {
     
@@ -7,9 +7,16 @@ export let CONFIG = {
 
     DEBUG: false,
 
-    ACK_TIMEOUT: 3000,
+    ACK_TIMEOUT: 1000,
 
     LOG_TO_PAGE: false,
     
-    MOCK_MODE: false
+    MOCK_MODE: false,
+
+    ALLOWED_POST_MESSAGE_METHODS: {
+        [ CONSTANTS.SEND_STRATEGIES.POST_MESSAGE ]: true,
+        [ CONSTANTS.SEND_STRATEGIES.POST_MESSAGE_GLOBAL_METHOD ]: true,
+        [ CONSTANTS.SEND_STRATEGIES.POST_MESSAGE_UP_THROUGH_BRIDGE ]: true,
+        [ CONSTANTS.SEND_STRATEGIES.POST_MESSAGE_DOWN_THROUGH_BRIDGE ]: true
+    }
 };
