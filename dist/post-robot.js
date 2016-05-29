@@ -352,24 +352,34 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 4 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
-	"use strict";
+	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
+	exports.CONFIG = undefined;
+
+	var _ALLOWED_POST_MESSAGE;
+
+	var _constants = __webpack_require__(5);
+
+	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 	var CONFIG = exports.CONFIG = {
 
 	    ALLOW_POSTMESSAGE_POPUP: true,
 
 	    DEBUG: false,
 
-	    ACK_TIMEOUT: 3000,
+	    ACK_TIMEOUT: 1000,
 
 	    LOG_TO_PAGE: false,
 
-	    MOCK_MODE: false
+	    MOCK_MODE: false,
+
+	    ALLOWED_POST_MESSAGE_METHODS: (_ALLOWED_POST_MESSAGE = {}, _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE, true), _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE_GLOBAL_METHOD, true), _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE_UP_THROUGH_BRIDGE, true), _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE_DOWN_THROUGH_BRIDGE, true), _ALLOWED_POST_MESSAGE)
 	};
 
 /***/ },
@@ -411,6 +421,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    SERIALIZATION_TYPES: {
 	        METHOD: 'postrobot_method'
+	    },
+
+	    SEND_STRATEGIES: {
+	        POST_MESSAGE: 'postrobot_post_message',
+	        POST_MESSAGE_GLOBAL_METHOD: 'postrobot_post_message_global_method',
+	        POST_MESSAGE_UP_THROUGH_BRIDGE: 'postrobot_post_message_up_through_bridge',
+	        POST_MESSAGE_DOWN_THROUGH_BRIDGE: 'postrobot_post_message_down_through_bridge'
 	    }
 	};
 
@@ -713,7 +730,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        for (var key in mapping) {
 	            if (mapping.hasOwnProperty(key)) {
 	                result.push(key);
-	            };
+	            }
 	        }
 	        return result;
 	    },
@@ -722,7 +739,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        for (var key in mapping) {
 	            if (mapping.hasOwnProperty(key)) {
 	                result.push(mapping[key]);
-	            };
+	            }
 	        }
 	        return result;
 	    },
@@ -842,17 +859,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return window.Promise ? window.Promise : _es6PromiseMin.Promise;
 	    },
 
-	    asyncPromise: function asyncPromise(method) {
-	        return new promise.Promise(function (resolve, reject) {
-	            setTimeout(function () {
-	                try {
-	                    return method(resolve, reject);
-	                } catch (err) {
-	                    return reject(err);
-	                }
-	            });
-	        });
-	    },
 	    run: function run(method) {
 	        return promise.Promise.resolve().then(method);
 	    },
@@ -896,6 +902,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	                return reject(err);
 	            }
 	        });
+	    },
+	    map: function map(items, method) {
+
+	        var results = [];
+
+	        var _loop = function _loop(i) {
+	            results.push(promise.run(function () {
+	                return method(items[i]);
+	            }));
+	        };
+
+	        for (var i = 0; i < items.length; i++) {
+	            _loop(i);
+	        }
+	        return promise.Promise.all(results);
 	    }
 	};
 
@@ -1305,7 +1326,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return _lib.util.find(windows, function (map) {
 	        return map[key] === value;
 	    }, {});
-	};
+	}
 
 	var childWindows = exports.childWindows = {
 	    getWindowId: function getWindowId(win) {
@@ -1443,10 +1464,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: true
 	});
 	exports.listenForMethods = undefined;
-	exports.serializeMethods = serializeMethods;
-	exports.deserializeMethods = deserializeMethods;
 	exports.serializeMethod = serializeMethod;
+	exports.serializeMethods = serializeMethods;
 	exports.deserializeMethod = deserializeMethod;
+	exports.deserializeMethods = deserializeMethods;
 
 	var _conf = __webpack_require__(3);
 
@@ -1456,7 +1477,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var methods = {};
 
-	var listenForMethods = exports.listenForMethods = _util.util.once(function listenForMethods() {
+	var listenForMethods = exports.listenForMethods = _util.util.once(function () {
 	    (0, _interface.on)(_conf.CONSTANTS.POST_MESSAGE_NAMES.METHOD, function (source, data) {
 
 	        if (!methods[data.id]) {
@@ -1475,28 +1496,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return item instanceof Object && item.__type__ === _conf.CONSTANTS.SERIALIZATION_TYPES.METHOD && item.__id__;
 	}
 
-	function serializeMethods(destination, obj) {
-
-	    listenForMethods();
-
-	    return _util.util.replaceObject(obj, function (item) {
-	        if (item instanceof Function) {
-	            return serializeMethod(destination, item);
-	        } else if (isSerializedMethod(item)) {
-	            throw new Error('Attempting to serialize already serialized method');
-	        }
-	    });
-	}
-
-	function deserializeMethods(source, obj) {
-
-	    return _util.util.replaceObject(obj, function (item) {
-	        if (isSerializedMethod(item)) {
-	            return deserializeMethod(source, item);
-	        }
-	    });
-	}
-
 	function serializeMethod(destination, method) {
 
 	    var id = _util.util.uniqueID();
@@ -1512,6 +1511,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	}
 
+	function serializeMethods(destination, obj) {
+
+	    listenForMethods();
+
+	    return _util.util.replaceObject(obj, function (item) {
+	        if (item instanceof Function) {
+	            return serializeMethod(destination, item);
+	        } else if (isSerializedMethod(item)) {
+	            throw new Error('Attempting to serialize already serialized method');
+	        }
+	    });
+	}
+
 	function deserializeMethod(source, obj) {
 
 	    return function () {
@@ -1521,6 +1533,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	            args: args
 	        });
 	    };
+	}
+
+	function deserializeMethods(source, obj) {
+
+	    return _util.util.replaceObject(obj, function (item) {
+	        if (isSerializedMethod(item)) {
+	            return deserializeMethod(source, item);
+	        }
+	    });
 	}
 
 /***/ },
@@ -1780,16 +1801,23 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        _lib.util.debug('Running send message strategies', message);
 
-	        return _lib.promise.Promise.all(_lib.util.map(_lib.util.keys(_strategies.SEND_MESSAGE_STRATEGIES), function (strategyName) {
+	        return _lib.promise.map(_lib.util.keys(_strategies.SEND_MESSAGE_STRATEGIES), function (strategyName) {
 
-	            return _strategies.SEND_MESSAGE_STRATEGIES[strategyName](win, message, domain).then(function () {
+	            return _lib.promise.run(function () {
+
+	                if (!_conf.CONFIG.ALLOWED_POST_MESSAGE_METHODS[strategyName]) {
+	                    throw new Error('Strategy disallowed: ' + strategyName);
+	                }
+
+	                return _strategies.SEND_MESSAGE_STRATEGIES[strategyName](win, message, domain);
+	            }).then(function () {
 	                _lib.util.debug(strategyName, 'success');
 	                return true;
 	            }, function (err) {
 	                _lib.util.debugError(strategyName, 'error\n\n', err.stack || err.toString());
 	                return false;
 	            });
-	        })).then(function (results) {
+	        }).then(function (results) {
 
 	            if (!_lib.util.some(results)) {
 	                throw new Error('No post-message strategy succeeded');
@@ -1809,94 +1837,89 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.SEND_MESSAGE_STRATEGIES = undefined;
 
+	var _SEND_MESSAGE_STRATEG;
+
 	var _conf = __webpack_require__(3);
 
 	var _lib = __webpack_require__(13);
 
 	var _compat = __webpack_require__(16);
 
-	var SEND_MESSAGE_STRATEGIES = exports.SEND_MESSAGE_STRATEGIES = {
+	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
-	    POST_MESSAGE: _lib.promise.method(function (win, message, domain) {
+	var SEND_MESSAGE_STRATEGIES = exports.SEND_MESSAGE_STRATEGIES = (_SEND_MESSAGE_STRATEG = {}, _defineProperty(_SEND_MESSAGE_STRATEG, _conf.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE, _lib.promise.method(function (win, message, domain) {
 
-	        (0, _compat.emulateIERestrictions)(window, win);
+	    (0, _compat.emulateIERestrictions)(window, win);
 
-	        return win.postMessage(JSON.stringify(message, 0, 2), domain);
-	    }),
+	    return win.postMessage(JSON.stringify(message, 0, 2), domain);
+	})), _defineProperty(_SEND_MESSAGE_STRATEG, _conf.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE_GLOBAL_METHOD, _lib.promise.method(function (win, message, domain) {
 
-	    POST_MESSAGE_GLOBAL_METHOD: _lib.promise.method(function (win, message, domain) {
+	    if (domain !== '*') {
 
-	        if (domain !== '*') {
+	        var winDomain = void 0;
 
-	            var winDomain = void 0;
-
-	            try {
-	                winDomain = win.location.protocol + '//' + win.location.host;
-	            } catch (err) {
-	                // pass
-	            }
-
-	            if (!winDomain) {
-	                throw new Error('Can post post through global method - domain set to ' + domain + ', but we can not verify the domain of the target window');
-	            }
-
-	            if (winDomain !== domain) {
-	                throw new Error('Can post post through global method - domain ' + domain + ' does not match target window domain ' + winDomain);
-	            }
+	        try {
+	            winDomain = win.location.protocol + '//' + win.location.host;
+	        } catch (err) {
+	            // pass
 	        }
 
-	        if (!_lib.util.safeHasProp(win, _conf.CONSTANTS.WINDOW_PROPS.POSTROBOT)) {
-	            throw new Error('postRobot not found on window');
+	        if (!winDomain) {
+	            throw new Error('Can post post through global method - domain set to ' + domain + ', but we can not verify the domain of the target window');
 	        }
 
-	        return win[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessage({
-	            origin: window.location.protocol + '//' + window.location.host,
-	            source: window,
-	            data: JSON.stringify(message)
-	        });
-	    }),
-
-	    POST_MESSAGE_UP_THROUGH_BRIDGE: _lib.promise.method(function (win, message, domain) {
-
-	        var frame = (0, _compat.getBridgeFor)(win);
-
-	        if (!frame) {
-	            throw new Error('No bridge available in window');
+	        if (winDomain !== domain) {
+	            throw new Error('Can post post through global method - domain ' + domain + ' does not match target window domain ' + winDomain);
 	        }
+	    }
 
-	        if (!_lib.util.safeHasProp(frame, _conf.CONSTANTS.WINDOW_PROPS.POSTROBOT)) {
-	            throw new Error('postRobot not installed in bridge');
+	    if (!_lib.util.safeHasProp(win, _conf.CONSTANTS.WINDOW_PROPS.POSTROBOT)) {
+	        throw new Error('postRobot not found on window');
+	    }
+
+	    return win[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessage({
+	        origin: window.location.protocol + '//' + window.location.host,
+	        source: window,
+	        data: JSON.stringify(message)
+	    });
+	})), _defineProperty(_SEND_MESSAGE_STRATEG, _conf.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE_UP_THROUGH_BRIDGE, _lib.promise.method(function (win, message, domain) {
+
+	    var frame = (0, _compat.getBridgeFor)(win);
+
+	    if (!frame) {
+	        throw new Error('No bridge available in window');
+	    }
+
+	    if (!_lib.util.safeHasProp(frame, _conf.CONSTANTS.WINDOW_PROPS.POSTROBOT)) {
+	        throw new Error('postRobot not installed in bridge');
+	    }
+
+	    return frame[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessageParent(window, JSON.stringify(message, 0, 2), domain);
+	})), _defineProperty(_SEND_MESSAGE_STRATEG, _conf.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE_DOWN_THROUGH_BRIDGE, _lib.promise.method(function (win, message, domain) {
+
+	    var bridge = (0, _compat.getBridge)();
+
+	    if (!bridge) {
+	        throw new Error('Bridge not initialized');
+	    }
+
+	    if (win === bridge.contentWindow) {
+	        throw new Error('Message target is bridge');
+	    }
+
+	    if (!message.target) {
+
+	        if (win === window.opener) {
+	            message.target = 'parent.opener';
+	        } else {
+	            throw new Error('Can not post message down through bridge without target');
 	        }
+	    }
 
-	        return frame[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessageParent(window, JSON.stringify(message, 0, 2), domain);
-	    }),
-
-	    POST_MESSAGE_DOWN_THROUGH_BRIDGE: _lib.promise.method(function (win, message, domain) {
-
-	        var bridge = (0, _compat.getBridge)();
-
-	        if (!bridge) {
-	            throw new Error('Bridge not initialized');
-	        }
-
-	        if (win === bridge.contentWindow) {
-	            throw new Error('Message target is bridge');
-	        }
-
-	        if (!message.target) {
-
-	            if (win === window.opener) {
-	                message.target = 'parent.opener';
-	            } else {
-	                throw new Error('Can not post message down through bridge without target');
-	            }
-	        }
-
-	        return bridge.then(function (iframe) {
-	            iframe.contentWindow.postMessage(JSON.stringify(message, 0, 2), domain);
-	        });
-	    })
-	};
+	    return bridge.then(function (iframe) {
+	        iframe.contentWindow.postMessage(JSON.stringify(message, 0, 2), domain);
+	    });
+	})), _SEND_MESSAGE_STRATEG);
 
 /***/ },
 /* 22 */
@@ -1926,39 +1949,31 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	function getRequestListener(name, win) {
-	    var _iteratorNormalCompletion = true;
-	    var _didIteratorError = false;
-	    var _iteratorError = undefined;
+	    for (var _iterator = listeners.request, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+	        var _ref;
 
-	    try {
-	        for (var _iterator = listeners.request[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-	            var requestListener = _step.value;
-
-
-	            if (requestListener.name !== name) {
-	                continue;
-	            }
-
-	            if (!requestListener.win) {
-	                return requestListener.options;
-	            }
-
-	            if (win && _lib.childWindows.isEqual(win, requestListener.win)) {
-	                return requestListener.options;
-	            }
+	        if (_isArray) {
+	            if (_i >= _iterator.length) break;
+	            _ref = _iterator[_i++];
+	        } else {
+	            _i = _iterator.next();
+	            if (_i.done) break;
+	            _ref = _i.value;
 	        }
-	    } catch (err) {
-	        _didIteratorError = true;
-	        _iteratorError = err;
-	    } finally {
-	        try {
-	            if (!_iteratorNormalCompletion && _iterator['return']) {
-	                _iterator['return']();
-	            }
-	        } finally {
-	            if (_didIteratorError) {
-	                throw _iteratorError;
-	            }
+
+	        var requestListener = _ref;
+
+
+	        if (requestListener.name !== name) {
+	            continue;
+	        }
+
+	        if (!requestListener.win) {
+	            return requestListener.options;
+	        }
+
+	        if (win && _lib.childWindows.isEqual(win, requestListener.win)) {
+	            return requestListener.options;
 	        }
 	    }
 	}
@@ -1967,31 +1982,23 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var listener = void 0;
 
-	    var _iteratorNormalCompletion2 = true;
-	    var _didIteratorError2 = false;
-	    var _iteratorError2 = undefined;
+	    for (var _iterator2 = listeners.request, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
+	        var _ref2;
 
-	    try {
-	        for (var _iterator2 = listeners.request[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-	            var requestListener = _step2.value;
-
-	            if (requestListener.options === options) {
-	                listener = requestListener;
-	                break;
-	            }
+	        if (_isArray2) {
+	            if (_i2 >= _iterator2.length) break;
+	            _ref2 = _iterator2[_i2++];
+	        } else {
+	            _i2 = _iterator2.next();
+	            if (_i2.done) break;
+	            _ref2 = _i2.value;
 	        }
-	    } catch (err) {
-	        _didIteratorError2 = true;
-	        _iteratorError2 = err;
-	    } finally {
-	        try {
-	            if (!_iteratorNormalCompletion2 && _iterator2['return']) {
-	                _iterator2['return']();
-	            }
-	        } finally {
-	            if (_didIteratorError2) {
-	                throw _iteratorError2;
-	            }
+
+	        var requestListener = _ref2;
+
+	        if (requestListener.options === options) {
+	            listener = requestListener;
+	            break;
 	        }
 	    }
 
@@ -2006,14 +2013,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    if (listener) {
 	        if (override) {
-	            removeRequestListener(listener.options);
+	            removeRequestListener(listener);
 	        } else {
 	            throw new Error('Request listener already exists for ' + name);
 	        }
 	    }
 
 	    listeners.request.push({ name: name, win: win, options: options });
-	};
+	}
 
 	resetListeners();
 
@@ -2106,7 +2113,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return respond({
 	            type: _conf.CONSTANTS.POST_MESSAGE_TYPE.RESPONSE,
 	            ack: _conf.CONSTANTS.POST_MESSAGE_ACK.ERROR,
-	            error: err.stack || err.toString()
+	            error: err.stack ? err.message + '\n' + err.stack : err.toString()
 	        });
 	    });
 	}), _defineProperty(_RECEIVE_MESSAGE_TYPE, _conf.CONSTANTS.POST_MESSAGE_TYPE.RESPONSE, function (source, message, origin) {
@@ -2120,7 +2127,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    delete _listeners.listeners.response[message.hash];
 
 	    if (message.ack === _conf.CONSTANTS.POST_MESSAGE_ACK.ERROR) {
-	        return options.respond(message.error);
+	        return options.respond(new Error(message.error));
 	    } else if (message.ack === _conf.CONSTANTS.POST_MESSAGE_ACK.SUCCESS) {
 	        return options.respond(null, message.data);
 	    }
@@ -2160,7 +2167,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 
 	    if (options.once) {
-	        options.handler = _lib.util.once(options.handler);
+	        (function () {
+	            var handler = options.handler;
+	            options.handler = _lib.util.once(function () {
+	                (0, _drivers.removeRequestListener)(options);
+	                return handler.apply(this, arguments);
+	            });
+	        })();
 	    }
 
 	    var override = options.override || _conf.CONFIG.MOCK_MODE;
@@ -2282,11 +2295,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
+	exports.CONSTANTS = exports.CONFIG = undefined;
 	exports.enableMockMode = enableMockMode;
 	exports.disableMockMode = disableMockMode;
 
 	var _conf = __webpack_require__(3);
 
+	Object.defineProperty(exports, 'CONFIG', {
+	    enumerable: true,
+	    get: function get() {
+	        return _conf.CONFIG;
+	    }
+	});
+	Object.defineProperty(exports, 'CONSTANTS', {
+	    enumerable: true,
+	    get: function get() {
+	        return _conf.CONSTANTS;
+	    }
+	});
 	function enableMockMode() {
 	    _conf.CONFIG.MOCK_MODE = true;
 	}
