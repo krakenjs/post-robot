@@ -113,7 +113,7 @@ export function receiveMessage(event) {
         return sendMessage(proxyWindow, message, '*', true);
     }
 
-    util.log('#receive', message.type, message.name, message);
+    util.debug('#receive', message.type, message.name, message);
 
     if (CONFIG.MOCK_MODE) {
         return RECEIVE_MESSAGE_TYPES[message.type](source, message, origin);

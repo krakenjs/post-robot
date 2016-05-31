@@ -19,7 +19,7 @@ export let sendMessage = promise.method((win, message, domain, isProxy) => {
         message.target = childWindows.getWindowId(win);
     }
 
-    util.log(isProxy ? '#proxy' : '#send', message.type, message.name, message);
+    util.debug(isProxy ? '#proxy' : '#send', message.type, message.name, message);
 
     if (CONFIG.MOCK_MODE) {
         delete message.target;
