@@ -14,6 +14,7 @@ This also allows cross-domain post messages between two different windows (not j
 
 - Request/response pattern (avoids sending fire-and-forget messages back and forth)
 - Don't worry about serialization, just send javascript objects
+- Send functions across domains and have them called on the original window
 - Handles all of the corner cases for IE9+, which is normally not able to send cross-domain post messages between two different windows, only iframes
 - Handle error cases gracefully
   - The user closed the window you're trying to message
