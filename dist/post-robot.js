@@ -849,6 +849,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	var queueIndex = -1;
 
 	function cleanUpNextTick() {
+	    if (!draining || !currentQueue) {
+	        return;
+	    }
 	    draining = false;
 	    if (currentQueue.length) {
 	        queue = currentQueue.concat(queue);
@@ -1722,7 +1725,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	        });
 	    }
 
-	    var successResponse = _lib.util.once(function (data) {
+	    var response = _lib.util.once(function (err, data) {
+
+	        if (err) {
+	            return respond({
+	                type: _conf.CONSTANTS.POST_MESSAGE_TYPE.RESPONSE,
+	                ack: _conf.CONSTANTS.POST_MESSAGE_ACK.ERROR,
+	                error: err.stack || err.toString()
+	            });
+	        }
+
 	        return respond({
 	            type: _conf.CONSTANTS.POST_MESSAGE_TYPE.RESPONSE,
 	            ack: _conf.CONSTANTS.POST_MESSAGE_ACK.SUCCESS,
@@ -1730,16 +1742,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        });
 	    });
 
-	    var errorResponse = _lib.util.once(function (err) {
-	        return respond({
-	            type: _conf.CONSTANTS.POST_MESSAGE_TYPE.RESPONSE,
-	            ack: _conf.CONSTANTS.POST_MESSAGE_ACK.ERROR,
-	            error: err.stack || err.toString()
-	        });
-	    });
-
 	    if (!options) {
-	        return errorResponse(new Error('No postmessage request handler for ' + message.name + ' in ' + window.location.href));
+	        return response(new Error('No postmessage request handler for ' + message.name + ' in ' + window.location.href));
 	    }
 
 	    if (options.window && source && options.window !== source) {
@@ -1754,17 +1758,22 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    try {
 
-	        result = options.handler(null, message.data, function (err, response) {
-	            return err ? errorResponse(err) : successResponse(response);
+	        result = options.handler(null, message.data, function (err, data) {
+	            return err ? response(err) : response(null, data);
 	        });
 	    } catch (err) {
-	        return errorResponse(err);
+	        return response(err);
 	    }
 
-	    if (result && result.then instanceof Function) {
-	        return result.then(successResponse, errorResponse);
-	    } else if (options.handler.length <= 2) {
-	        return successResponse(result);
+	    if (typeof result !== 'undefined') {
+
+	        if (result.then instanceof Function) {
+	            return result.then(function (data) {
+	                return response(null, data);
+	            }, response);
+	        }
+
+	        return response(null, result);
 	    }
 	}), _defineProperty(_RECEIVE_MESSAGE_TYPE, _conf.CONSTANTS.POST_MESSAGE_TYPE.RESPONSE, function (source, message) {
 
