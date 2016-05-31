@@ -1220,7 +1220,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return (0, _send.sendMessage)(proxyWindow, message, '*', true);
 	    }
 
-	    _lib.util.log('#receive', message.type, message.name, message);
+	    _lib.util.debug('#receive', message.type, message.name, message);
 
 	    if (_conf.CONFIG.MOCK_MODE) {
 	        return _types.RECEIVE_MESSAGE_TYPES[message.type](source, message, origin);
@@ -1780,7 +1780,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        message.target = _lib.childWindows.getWindowId(win);
 	    }
 
-	    _lib.util.log(isProxy ? '#proxy' : '#send', message.type, message.name, message);
+	    _lib.util.debug(isProxy ? '#proxy' : '#send', message.type, message.name, message);
 
 	    if (_conf.CONFIG.MOCK_MODE) {
 	        delete message.target;
