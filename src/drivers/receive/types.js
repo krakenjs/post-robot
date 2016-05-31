@@ -37,7 +37,16 @@ export let RECEIVE_MESSAGE_TYPES = {
             });
         }
 
-        let successResponse = util.once(data => {
+        let response = util.once((err, data) => {
+
+            if (err) {
+                return respond({
+                    type: CONSTANTS.POST_MESSAGE_TYPE.RESPONSE,
+                    ack: CONSTANTS.POST_MESSAGE_ACK.ERROR,
+                    error: err.stack || err.toString()
+                });
+            }
+
             return respond({
                 type: CONSTANTS.POST_MESSAGE_TYPE.RESPONSE,
                 ack: CONSTANTS.POST_MESSAGE_ACK.SUCCESS,
@@ -45,16 +54,8 @@ export let RECEIVE_MESSAGE_TYPES = {
             });
         });
 
-        let errorResponse = util.once(err => {
-            return respond({
-                type: CONSTANTS.POST_MESSAGE_TYPE.RESPONSE,
-                ack: CONSTANTS.POST_MESSAGE_ACK.ERROR,
-                error: err.stack || err.toString()
-            });
-        });
-
         if (!options) {
-            return errorResponse(new Error(`No postmessage request handler for ${message.name} in ${window.location.href}`));
+            return response(new Error(`No postmessage request handler for ${message.name} in ${window.location.href}`));
         }
 
         if (options.window && source && options.window !== source) {
@@ -69,19 +70,23 @@ export let RECEIVE_MESSAGE_TYPES = {
 
         try {
 
-            result = options.handler(null, message.data, (err, response) => {
-                return err ? errorResponse(err) : successResponse(response);
+            result = options.handler(null, message.data, (err, data) => {
+                return err ? response(err) : response(null, data);
             });
 
         } catch (err) {
-            return errorResponse(err);
+            return response(err);
         }
 
-        if (result && result.then instanceof Function) {
-            return result.then(successResponse, errorResponse);
+        if (typeof result !== 'undefined') {
 
-        } else if (options.handler.length <= 2) {
-            return successResponse(result);
+            if (result.then instanceof Function) {
+                return result.then(function(data) {
+                    return response(null, data);
+                }, response);
+            }
+
+            return response(null, result);
         }
     },
 
