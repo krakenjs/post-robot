@@ -43,7 +43,7 @@ postRobot.send(window, 'getCart', function(err, data) {
 ## One-off listener
 
 ```javascript
-postRobot.once('init', function(data, callback) {
+postRobot.once('init', function(source, data, callback) {
     ...
 });
 ```
@@ -51,7 +51,7 @@ postRobot.once('init', function(data, callback) {
 ## Listen to a specific window
 
 ```javascript
-postRobot.on('init', { window: window.parent }, function(data, callback) {
+postRobot.on('init', { window: window.parent }, function(source, data, callback) {
     ...
 });
 ```
@@ -77,7 +77,7 @@ postRobot.sendToParent(window, 'getCart', function(err, data) {
 All of the above can be done with promises rather than callbacks
 
 ```javascript
-postRobot.on('getCart', function(data) {
+postRobot.on('getCart', function(source, data) {
     return getFoo(data).then(function(bar) {
         return {
             bar: bar
@@ -105,7 +105,7 @@ postRobot.send(window, 'getCart').then(function(data) {
 ## Async / Await
 
 ```javascript
-postRobot.on('getCart', async function(data) {
+postRobot.on('getCart', async function(source, data) {
     return {
         bar: await bar
     };
@@ -138,7 +138,7 @@ For example:
 ```javascript
 // Window 1:
 
-postRobot.on('getFoo', function(data) {
+postRobot.on('getFoo', function(source, data) {
     return {
         bar: function() {
             console.log('foobar!');
@@ -148,7 +148,7 @@ postRobot.on('getFoo', function(data) {
 
 // Window 2:
 
-postRobot.send(myWindow, 'getFoo').then(function(data) {
+postRobot.send(myWindow, 'getFoo').then(function(source, data) {
     data.bar();
 });
 ```
