@@ -74,7 +74,7 @@ gulp.task('lint', function() {
   .pipe(eslint.failAfterError());
 });
 
-gulp.task('karma', function (done) {
+gulp.task('karma', ['lint'], function (done) {
 
     var server = new Server({
         configFile: __dirname + '/karma.conf.js',
