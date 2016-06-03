@@ -24,5 +24,6 @@ function init() {
 init();
 
 export * from './interface';
+export { Promise } from './lib';
 
 export default module.exports;

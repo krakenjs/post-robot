@@ -186,7 +186,7 @@ SyncPromise.all = function(promises) {
     return promise;
 };
 
-let Promise = SyncPromise;
+export let Promise = SyncPromise;
 
 export let promise = {
 
