@@ -10,7 +10,17 @@ export let openBridge = util.memoize(url => {
         throw new Error('Only one bridge supported');
     }
 
-    bridge = new promise.Promise((resolve, reject) => {
+    let documentReady = new promise.Promise(resolve => {
+        if (window.document.body) {
+            return resolve(window.document);
+        }
+
+        window.document.addEventListener('DOMContentLoaded', function(event) {
+            return resolve(window.document);
+        });
+    });
+
+    bridge = documentReady.then(document => {
 
         util.debug('Opening bridge:', url);
 
@@ -29,12 +39,13 @@ export let openBridge = util.memoize(url => {
         iframe.setAttribute('title', '');
         iframe.setAttribute('role', 'presentation');
 
-        iframe.onload = () => resolve(iframe);
-
-        iframe.onerror = reject;
-
         iframe.src = url;
         document.body.appendChild(iframe);
+
+        return new promise.Promise((resolve, reject) => {
+            iframe.onload = () => resolve(iframe);
+            iframe.onerror = reject;
+        });
     });
 
     return bridge;

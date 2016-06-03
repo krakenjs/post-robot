@@ -132,7 +132,13 @@ export function messageListener(event) {
         data: event.data
     };
 
-    emulateIERestrictions(event.source, window);
+    try {
+        emulateIERestrictions(event.source, window);
+    } catch (err) {
+        console.error(err.stack || err.toString());
+        return;
+    }
+
 
     receiveMessage(event);
 }

@@ -40,7 +40,7 @@ describe('[post-robot] happy cases', function() {
 
         postRobot.send(childFrame, 'sendMessageToParent', {
             messageName: 'foobu'
-        });
+        }).catch(done);
     });
 
     it('should set up a simple server and listen for multiple requests', function() {

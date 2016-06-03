@@ -88,7 +88,9 @@ export let util = {
                 continue;
             }
 
-            method(frame);
+            if (frame !== window) {
+                method(frame);
+            }
         }
     },
 

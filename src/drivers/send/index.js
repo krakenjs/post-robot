@@ -34,11 +34,9 @@ export let sendMessage = promise.method((win, message, domain, isProxy) => {
         throw new Error('Attemping to send message to self');
     }
 
-    util.debug('Waiting for window to be ready');
+    util.debug('Running send message strategies', message);
 
     return util.windowReady.then(() => {
-
-        util.debug('Running send message strategies', message);
 
         return promise.map(util.keys(SEND_MESSAGE_STRATEGIES), strategyName => {
 

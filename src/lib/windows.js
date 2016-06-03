@@ -123,13 +123,16 @@ export function propagate(id) {
         if (util.safeHasProp(win, CONSTANTS.WINDOW_PROPS.POSTROBOT)) {
             win[CONSTANTS.WINDOW_PROPS.POSTROBOT].registerSelf(id, window, util.getType());
         } else {
-            send(win, CONSTANTS.POST_MESSAGE_NAMES.IDENTIFY, {
-                id,
-                type: util.getType()
-            }).then(data => {
-                childWindows.register(data.id, win, data.type);
-            }, err => {
-                util.debugError('Error sending identify:', err.stack || err.toString());
+
+            util.windowReady.then(() => {
+                send(win, CONSTANTS.POST_MESSAGE_NAMES.IDENTIFY, {
+                    id,
+                    type: util.getType()
+                }).then(data => {
+                    childWindows.register(data.id, win, data.type);
+                }, err => {
+                    util.debugError('Error sending identify:', err.stack || err.toString());
+                });
             });
         }
     }

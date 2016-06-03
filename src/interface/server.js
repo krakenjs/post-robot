@@ -9,9 +9,7 @@ export function listen(options) {
         throw new Error('Expected options.name');
     }
 
-    if (!options.handler) {
-        throw new Error('Expected options.handler');
-    }
+    options.handler = options.handler || util.noop;
 
     options.errorHandler = options.errorHandler || function(err) {
         throw err;

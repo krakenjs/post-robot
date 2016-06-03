@@ -64,7 +64,7 @@ export function request(options) {
 
         setTimeout(() => {
             if (!options.ack) {
-                return reject(new Error(`No ack for postMessage ${options.name}`));
+                return reject(new Error(`No ack for postMessage ${options.name} in ${CONFIG.ACK_TIMEOUT}ms`));
             }
         }, CONFIG.ACK_TIMEOUT);
 
