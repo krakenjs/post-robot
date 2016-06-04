@@ -58,6 +58,11 @@ export var SyncPromise = function SyncPromise(handler) {
 };
 
 SyncPromise.resolve = function SyncPromiseResolve(value) {
+
+    if (value && value.then) {
+        return value;
+    }
+
     return new SyncPromise().resolve(value);
 };
 

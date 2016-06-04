@@ -43,13 +43,13 @@ export function serializeMethods(destination, obj) {
 
     listenForMethods();
 
-    return util.replaceObject(obj, item => {
+    return util.replaceObject({ obj }, item => {
         if (item instanceof Function) {
             return serializeMethod(destination, item);
         } else if (isSerializedMethod(item)) {
             throw new Error('Attempting to serialize already serialized method');
         }
-    });
+    }).obj;
 }
 
 export function deserializeMethod(source, obj) {
@@ -65,9 +65,9 @@ export function deserializeMethod(source, obj) {
 
 export function deserializeMethods(source, obj) {
 
-    return util.replaceObject(obj, item => {
+    return util.replaceObject({ obj }, item => {
         if (isSerializedMethod(item)) {
             return deserializeMethod(source, item);
         }
-    });
+    }).obj;
 }
