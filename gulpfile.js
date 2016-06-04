@@ -16,7 +16,6 @@ var WEBPACK_CONFIG = {
         loaders: [
             {
                 test: /\.js$/,
-                exclude: /(node_modules|bower_components)/,
                 loader: 'babel',
                 query: {
                     presets: ['es2015'],
@@ -29,6 +28,13 @@ var WEBPACK_CONFIG = {
                     ]
                 }
             }
+        ]
+    },
+    resolve: {
+        modulesDirectories: [
+            'node_modules',
+            'src',
+            'client'
         ]
     },
     output: {
