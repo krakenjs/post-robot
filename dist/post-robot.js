@@ -1316,7 +1316,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return _types.RECEIVE_MESSAGE_TYPES[message.type](source, message, origin);
 	    }
 
-	    message.data = (0, _lib.deserializeMethods)(source, message.data || {});
+	    if (message.data) {
+	        message.data = (0, _lib.deserializeMethods)(source, message.data);
+	    }
 
 	    _types.RECEIVE_MESSAGE_TYPES[message.type](source, message, origin);
 	}
@@ -1407,18 +1409,64 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: true
 	});
 	exports.childWindows = undefined;
+	exports.isSameDomain = isSameDomain;
 	exports.propagate = propagate;
 
 	var _conf = __webpack_require__(3);
 
-	var _lib = __webpack_require__(12);
+	var _util = __webpack_require__(7);
 
 	var _interface = __webpack_require__(1);
+
+	var domainMatches = [];
+
+	function isSameDomain(win) {
+
+	    for (var _iterator = domainMatches, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+	        var _ref;
+
+	        if (_isArray) {
+	            if (_i >= _iterator.length) break;
+	            _ref = _iterator[_i++];
+	        } else {
+	            _i = _iterator.next();
+	            if (_i.done) break;
+	            _ref = _i.value;
+	        }
+
+	        var _match = _ref;
+
+	        if (_match.win === win) {
+	            return _match.match;
+	        }
+	    }
+
+	    var windowDomain = window.location.protocol + '//' + window.location.host;
+	    var match = false;
+
+	    try {
+	        if (win.location.protocol && win.location.host) {
+	            var otherDomain = win.location.protocol + '//' + win.location.host;
+	            if (otherDomain === windowDomain) {
+	                match = true;
+	            }
+	        }
+	    } catch (err) {
+	        // pass
+	    }
+
+	    domainMatches.push({
+	        win: win,
+	        match: match
+	    });
+
+	    return match;
+	}
 
 	var windows = [];
 
 	function getMap(key, value) {
-	    return _lib.util.find(windows, function (map) {
+	    return _util.util.find(windows, function (map) {
 	        return map[key] === value;
 	    }, {});
 	}
@@ -1437,16 +1485,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return map.type;
 	        }
 
-	        if (_lib.util.safeHasProp(win, 'parent') && win.parent !== win) {
+	        if (_util.util.safeHasProp(win, 'parent') && win.parent !== win) {
 	            return _conf.CONSTANTS.WINDOW_TYPES.IFRAME;
 	        }
 
-	        if (_lib.util.safeHasProp(win, 'opener')) {
+	        if (_util.util.safeHasProp(win, 'opener')) {
 	            return _conf.CONSTANTS.WINDOW_TYPES.POPUP;
 	        }
 
-	        var isFrame = _lib.util.some(windows, function (childWin) {
-	            return _lib.util.isFrameOwnedBy(childWin.win, win);
+	        var isFrame = _util.util.some(windows, function (childWin) {
+	            return _util.util.isFrameOwnedBy(childWin.win, win);
 	        });
 
 	        if (isFrame) {
@@ -1457,7 +1505,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    },
 	    register: function register(id, win, type) {
 
-	        var existing = _lib.util.find(windows, function (map) {
+	        var existing = _util.util.find(windows, function (map) {
 	            return map.id === id && map.win === win;
 	        });
 
@@ -1465,7 +1513,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return;
 	        }
 
-	        _lib.util.debug('Registering window:', type, id, win);
+	        _util.util.debug('Registering window:', type, id, win);
 
 	        windows.push({
 	            id: id,
@@ -1495,11 +1543,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	window.open = function (url, name, x, y) {
 
 	    if (!name) {
-	        name = _lib.util.uniqueID();
+	        name = _util.util.uniqueID();
 	        arguments[1] = name;
 	    }
 
-	    var win = _lib.util.apply(openWindow, this, arguments);
+	    var win = _util.util.apply(openWindow, this, arguments);
 
 	    childWindows.register(name, win, _conf.CONSTANTS.WINDOW_TYPES.POPUP);
 	    return win;
@@ -1521,32 +1569,32 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return;
 	        }
 
-	        _lib.util.debug('propagating to', identifier, win);
+	        _util.util.debug('propagating to', identifier, win);
 
 	        registered.push(win);
 
-	        if (_lib.util.safeHasProp(win, _conf.CONSTANTS.WINDOW_PROPS.POSTROBOT)) {
-	            win[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].registerSelf(id, window, _lib.util.getType());
+	        if (isSameDomain(win) && _util.util.safeHasProp(win, _conf.CONSTANTS.WINDOW_PROPS.POSTROBOT)) {
+	            win[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].registerSelf(id, window, _util.util.getType());
 	        } else {
 
-	            _lib.util.windowReady.then(function () {
+	            _util.util.windowReady.then(function () {
 	                (0, _interface.send)(win, _conf.CONSTANTS.POST_MESSAGE_NAMES.IDENTIFY, {
 	                    id: id,
-	                    type: _lib.util.getType()
+	                    type: _util.util.getType()
 	                }).then(function (data) {
 	                    childWindows.register(data.id, win, data.type);
 	                }, function (err) {
-	                    _lib.util.debugError('Error sending identify:', err.stack || err.toString());
+	                    _util.util.debugError('Error sending identify:', err.stack || err.toString());
 	                });
 	            });
 	        }
 	    }
 
-	    _lib.util.eachParent(function (parent) {
+	    _util.util.eachParent(function (parent) {
 
 	        register(parent, 'parent');
 
-	        _lib.util.eachFrame(parent, function (frame) {
+	        _util.util.eachFrame(parent, function (frame) {
 	            register(frame, 'frame');
 	        });
 	    }, true);
@@ -1771,7 +1819,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            try {
 	                var frame = win.frames[i];
 
-	                if (frame && frame !== window && frame[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
+	                if (frame && frame !== window && (0, _lib.isSameDomain)(frame) && frame[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
 	                    return frame;
 	                }
 	            } catch (err) {
@@ -1980,6 +2028,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    }
 
+	    if (!(0, _lib.isSameDomain)(win)) {
+	        throw new Error('window is a different domain');
+	    }
+
 	    if (!_lib.util.safeHasProp(win, _conf.CONSTANTS.WINDOW_PROPS.POSTROBOT)) {
 	        throw new Error('postRobot not found on window');
 	    }
@@ -1995,6 +2047,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    if (!frame) {
 	        throw new Error('No bridge available in window');
+	    }
+
+	    if (!(0, _lib.isSameDomain)(frame)) {
+	        throw new Error('Bridge is different domain');
 	    }
 
 	    if (!_lib.util.safeHasProp(frame, _conf.CONSTANTS.WINDOW_PROPS.POSTROBOT)) {
@@ -2236,7 +2292,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (message.ack === _conf.CONSTANTS.POST_MESSAGE_ACK.ERROR) {
 	        return options.respond(new Error(message.error));
 	    } else if (message.ack === _conf.CONSTANTS.POST_MESSAGE_ACK.SUCCESS) {
-	        return options.respond(null, message.data);
+	        return options.respond(null, message.data || message.response);
 	    }
 	}), _RECEIVE_MESSAGE_TYPE);
 
