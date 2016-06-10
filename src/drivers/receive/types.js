@@ -103,7 +103,7 @@ export let RECEIVE_MESSAGE_TYPES = {
         if (message.ack === CONSTANTS.POST_MESSAGE_ACK.ERROR) {
             return options.respond(message.error);
         } else if (message.ack === CONSTANTS.POST_MESSAGE_ACK.SUCCESS) {
-            return options.respond(null, message.response);
+            return options.respond(null, message.response || message.data);
         }
     }
 };
