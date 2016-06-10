@@ -1,6 +1,6 @@
 
 import { CONSTANTS } from '../../conf';
-import { util, promise } from '../../lib';
+import { util, promise, isSameDomain } from '../../lib';
 import { emulateIERestrictions, getBridge, getBridgeFor } from '../../compat';
 
 export let SEND_MESSAGE_STRATEGIES = {
@@ -33,6 +33,10 @@ export let SEND_MESSAGE_STRATEGIES = {
             }
         }
 
+        if (!isSameDomain(win)) {
+            throw new Error('window is a different domain');
+        }
+
         if (!util.safeHasProp(win, CONSTANTS.WINDOW_PROPS.POSTROBOT)) {
             throw new Error('postRobot not found on window');
         }
@@ -50,6 +54,10 @@ export let SEND_MESSAGE_STRATEGIES = {
 
         if (!frame) {
             throw new Error('No bridge available in window');
+        }
+
+        if (!isSameDomain(frame)) {
+            throw new Error('Bridge is different domain');
         }
 
         if (!util.safeHasProp(frame, CONSTANTS.WINDOW_PROPS.POSTROBOT)) {

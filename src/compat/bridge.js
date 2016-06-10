@@ -1,6 +1,6 @@
 
 import { CONSTANTS } from '../conf';
-import { util, promise } from '../lib';
+import { util, promise, isSameDomain } from '../lib';
 
 let bridge;
 
@@ -66,7 +66,7 @@ export function getBridgeFor(win) {
             try {
                 let frame = win.frames[i];
 
-                if (frame && frame !== window && frame[CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
+                if (frame && frame !== window && isSameDomain(frame) && frame[CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
                     return frame;
                 }
 

@@ -1,7 +1,41 @@
 
 import { CONSTANTS } from '../conf';
-import { util } from '../lib';
+import { util } from './util';
 import { on, send } from '../interface';
+
+
+let domainMatches = [];
+
+export function isSameDomain(win) {
+
+    for (let match of domainMatches) {
+        if (match.win === win) {
+            return match.match;
+        }
+    }
+
+    let windowDomain = `${window.location.protocol}//${window.location.host}`;
+    let match = false;
+
+    try {
+        if (win.location.protocol && win.location.host) {
+            let otherDomain = `${win.location.protocol}//${win.location.host}`;
+            if (otherDomain === windowDomain) {
+                match = true;
+            }
+        }
+    } catch (err) {
+        // pass
+    }
+
+    domainMatches.push({
+        win: win,
+        match: match
+    });
+
+    return match;
+}
+
 
 let windows = [];
 
@@ -120,7 +154,7 @@ export function propagate(id) {
 
         registered.push(win);
 
-        if (util.safeHasProp(win, CONSTANTS.WINDOW_PROPS.POSTROBOT)) {
+        if (isSameDomain(win) && util.safeHasProp(win, CONSTANTS.WINDOW_PROPS.POSTROBOT)) {
             win[CONSTANTS.WINDOW_PROPS.POSTROBOT].registerSelf(id, window, util.getType());
         } else {
 
