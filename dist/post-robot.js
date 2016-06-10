@@ -1788,7 +1788,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (message.ack === _conf.CONSTANTS.POST_MESSAGE_ACK.ERROR) {
 	        return options.respond(message.error);
 	    } else if (message.ack === _conf.CONSTANTS.POST_MESSAGE_ACK.SUCCESS) {
-	        return options.respond(null, message.response);
+	        return options.respond(null, message.response || message.data);
 	    }
 	}), _RECEIVE_MESSAGE_TYPE);
 
