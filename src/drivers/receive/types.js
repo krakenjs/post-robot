@@ -70,7 +70,7 @@ export let RECEIVE_MESSAGE_TYPES = {
             return respond({
                 type: CONSTANTS.POST_MESSAGE_TYPE.RESPONSE,
                 ack: CONSTANTS.POST_MESSAGE_ACK.SUCCESS,
-                data: data || {}
+                data: data
             });
 
         }, err => {

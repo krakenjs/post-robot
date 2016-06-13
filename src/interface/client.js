@@ -59,7 +59,7 @@ export function request(options) {
             hash,
             type: CONSTANTS.POST_MESSAGE_TYPE.REQUEST,
             name: options.name,
-            data: options.data || {}
+            data: options.data
         }, options.domain || '*').catch(reject);
 
         setTimeout(() => {
@@ -87,7 +87,7 @@ export function send(window, name, data, options, callback) {
     options = options || {};
     options.window = window;
     options.name = name;
-    options.data = data || {};
+    options.data = data;
     options.callback = callback;
 
     return request(options);
