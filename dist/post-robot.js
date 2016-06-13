@@ -268,7 +268,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            hash: hash,
 	            type: _conf.CONSTANTS.POST_MESSAGE_TYPE.REQUEST,
 	            name: options.name,
-	            data: options.data || {}
+	            data: options.data
 	        }, options.domain || '*')['catch'](reject);
 
 	        setTimeout(function () {
@@ -295,7 +295,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    options = options || {};
 	    options.window = window;
 	    options.name = name;
-	    options.data = data || {};
+	    options.data = data;
 	    options.callback = callback;
 
 	    return request(options);
@@ -1931,7 +1931,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    message.windowType = _lib.util.getType();
 	    message.originalWindowType = message.originalWindowType || _lib.util.getType();
 
-	    message.data = (0, _lib.serializeMethods)(win, message.data || {});
+	    message.data = (0, _lib.serializeMethods)(win, message.data);
 
 	    if (!message.target) {
 	        message.target = _lib.childWindows.getWindowId(win);
@@ -2269,7 +2269,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return respond({
 	            type: _conf.CONSTANTS.POST_MESSAGE_TYPE.RESPONSE,
 	            ack: _conf.CONSTANTS.POST_MESSAGE_ACK.SUCCESS,
-	            data: data || {}
+	            data: data
 	        });
 	    }, function (err) {
 
