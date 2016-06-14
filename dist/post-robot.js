@@ -1952,6 +1952,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        throw new Error('Attemping to send message to self');
 	    }
 
+	    if (win.closed) {
+	        throw new Error('Window is closed');
+	    }
+
 	    _lib.util.debug('Running send message strategies', message);
 
 	    return _lib.util.windowReady.then(function () {
