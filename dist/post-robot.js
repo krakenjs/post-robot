@@ -2342,7 +2342,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    (0, _drivers.addRequestListener)(options.name, options.window, options, override);
 
 	    options.handleError = function (err) {
-	        (0, _drivers.removeRequestListener)(options);
+	        // removeRequestListener(options);
 	        options.errorHandler(err);
 	    };
 
