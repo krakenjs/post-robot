@@ -86,7 +86,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _drivers = __webpack_require__(10);
 
-	var _compat = __webpack_require__(15);
+	var _compat = __webpack_require__(16);
 
 	function init() {
 
@@ -132,7 +132,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _server = __webpack_require__(23);
+	var _server = __webpack_require__(24);
 
 	Object.keys(_server).forEach(function (key) {
 	  if (key === "default") return;
@@ -144,7 +144,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _proxy = __webpack_require__(24);
+	var _proxy = __webpack_require__(25);
 
 	Object.keys(_proxy).forEach(function (key) {
 	  if (key === "default") return;
@@ -156,7 +156,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _config = __webpack_require__(25);
+	var _config = __webpack_require__(26);
 
 	Object.keys(_config).forEach(function (key) {
 	  if (key === "default") return;
@@ -177,7 +177,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	});
 
-	var _bridge = __webpack_require__(16);
+	var _bridge = __webpack_require__(17);
 
 	Object.defineProperty(exports, 'openBridge', {
 	  enumerable: true,
@@ -1157,7 +1157,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _send = __webpack_require__(19);
+	var _send = __webpack_require__(20);
 
 	Object.keys(_send).forEach(function (key) {
 	  if (key === "default") return;
@@ -1169,7 +1169,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _listeners = __webpack_require__(21);
+	var _listeners = __webpack_require__(22);
 
 	Object.keys(_listeners).forEach(function (key) {
 	  if (key === "default") return;
@@ -1197,13 +1197,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _lib = __webpack_require__(12);
 
-	var _compat = __webpack_require__(15);
+	var _compat = __webpack_require__(16);
 
-	var _send = __webpack_require__(19);
+	var _send = __webpack_require__(20);
 
-	var _listeners = __webpack_require__(21);
+	var _listeners = __webpack_require__(22);
 
-	var _types = __webpack_require__(22);
+	var _types = __webpack_require__(23);
 
 	var receivedMessages = [];
 
@@ -1395,6 +1395,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	    enumerable: true,
 	    get: function get() {
 	      return _methods[key];
+	    }
+	  });
+	});
+
+	var _tick = __webpack_require__(15);
+
+	Object.keys(_tick).forEach(function (key) {
+	  if (key === "default") return;
+	  Object.defineProperty(exports, key, {
+	    enumerable: true,
+	    get: function get() {
+	      return _tick[key];
 	    }
 	  });
 	});
@@ -1692,6 +1704,30 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 15 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.nextTick = nextTick;
+
+	var queue = [];
+
+	window.addEventListener('message', function (event) {
+	    if (event.data === '__nextTick') {
+	        queue.shift().call();
+	    }
+	});
+
+	function nextTick(method) {
+	    queue.push(method);
+	    window.postMessage('__nextTick', '*');
+	}
+
+/***/ },
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1700,7 +1736,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  value: true
 	});
 
-	var _bridge = __webpack_require__(16);
+	var _bridge = __webpack_require__(17);
 
 	Object.keys(_bridge).forEach(function (key) {
 	  if (key === "default") return;
@@ -1712,7 +1748,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _global = __webpack_require__(17);
+	var _global = __webpack_require__(18);
 
 	Object.keys(_global).forEach(function (key) {
 	  if (key === "default") return;
@@ -1724,7 +1760,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _ie = __webpack_require__(18);
+	var _ie = __webpack_require__(19);
 
 	Object.keys(_ie).forEach(function (key) {
 	  if (key === "default") return;
@@ -1737,7 +1773,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 16 */
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1832,7 +1868,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 17 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1876,7 +1912,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 18 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1907,7 +1943,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 19 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1921,7 +1957,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _lib = __webpack_require__(12);
 
-	var _strategies = __webpack_require__(20);
+	var _strategies = __webpack_require__(21);
 
 	var sendMessage = exports.sendMessage = _lib.promise.method(function (win, message, domain, isProxy) {
 
@@ -1986,7 +2022,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 20 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2002,7 +2038,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _lib = __webpack_require__(12);
 
-	var _compat = __webpack_require__(15);
+	var _compat = __webpack_require__(16);
 
 	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -2040,10 +2076,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	        throw new Error('postRobot not found on window');
 	    }
 
-	    return win[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessage({
-	        origin: window.location.protocol + '//' + window.location.host,
-	        source: window,
-	        data: JSON.stringify(message)
+	    (0, _lib.nextTick)(function () {
+	        win[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessage({
+	            origin: window.location.protocol + '//' + window.location.host,
+	            source: window,
+	            data: JSON.stringify(message)
+	        });
 	    });
 	})), _defineProperty(_SEND_MESSAGE_STRATEG, _conf.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE_UP_THROUGH_BRIDGE, _lib.promise.method(function (win, message, domain) {
 
@@ -2089,7 +2127,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	})), _SEND_MESSAGE_STRATEG);
 
 /***/ },
-/* 21 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2192,7 +2230,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	resetListeners();
 
 /***/ },
-/* 22 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2210,9 +2248,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _lib = __webpack_require__(12);
 
-	var _send = __webpack_require__(19);
+	var _send = __webpack_require__(20);
 
-	var _listeners = __webpack_require__(21);
+	var _listeners = __webpack_require__(22);
 
 	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -2301,7 +2339,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}), _RECEIVE_MESSAGE_TYPE);
 
 /***/ },
-/* 23 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2409,7 +2447,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 24 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2452,7 +2490,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 25 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
