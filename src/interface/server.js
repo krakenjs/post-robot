@@ -28,7 +28,7 @@ export function listen(options) {
     addRequestListener(options.name, options.window, options, override);
 
     options.handleError = err => {
-        removeRequestListener(options);
+        // removeRequestListener(options);
         options.errorHandler(err);
     };
 
