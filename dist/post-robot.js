@@ -839,7 +839,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            if (result !== undefined) {
 	                newobj[key] = result;
-	            } else if ((typeof item === 'undefined' ? 'undefined' : _typeof(item)) === 'object') {
+	            } else if ((typeof item === 'undefined' ? 'undefined' : _typeof(item)) === 'object' && item !== null) {
 	                newobj[key] = util.replaceObject(item, callback);
 	            } else {
 	                newobj[key] = item;
