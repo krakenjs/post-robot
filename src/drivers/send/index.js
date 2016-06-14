@@ -34,6 +34,10 @@ export let sendMessage = promise.method((win, message, domain, isProxy) => {
         throw new Error('Attemping to send message to self');
     }
 
+    if (win.closed) {
+        throw new Error('Window is closed');
+    }
+
     util.debug('Running send message strategies', message);
 
     return util.windowReady.then(() => {
