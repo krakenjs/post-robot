@@ -18,11 +18,9 @@ This also allows cross-domain post messages between two different windows (not j
 - Handles all of the corner cases for IE9+, which is normally not able to send cross-domain post messages between two different windows, only iframes
 - Handle error cases gracefully
   - The user closed the window you're trying to message
-  - You sent a message the other window wasn't expecting
   - The other window doesn't have any listener set up for your message
   - The other window didn't acknowledge your message
   - You didn't get a response from the other window in enough time
-  - Somebody sent you a message you weren't listening for
 
 ## Simple listener / sender
 
