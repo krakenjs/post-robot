@@ -2268,58 +2268,59 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var options = (0, _listeners.getRequestListener)(message.name, source);
 
 	    function respond(data) {
-
 	        return (0, _send.sendMessage)(source, _extends({
 	            target: message.originalSource ? message.originalSource : _lib.childWindows.getWindowId(source),
 	            hash: message.hash,
 	            name: message.name
-	        }, data), '*')['catch'](function (err) {
-
-	            if (options && options.handleError) {
-	                return options.handleError(err);
-	            }
-	            throw err;
-	        });
+	        }, data), '*');
 	    }
 
-	    return _lib.promise.run(function () {
+	    return respond({
+	        type: _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK
 
-	        return respond({
-	            type: _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK
-	        });
 	    }).then(function () {
 
-	        if (!options) {
-	            throw new Error('No postmessage request handler for ' + message.name + ' in ' + window.location.href);
-	        }
+	        return _lib.promise.run(function () {
 
-	        if (options.window && source && options.window !== source) {
-	            return;
-	        }
-
-	        if (options.domain) {
-	            var match = typeof options.domain === 'string' && origin === options.domain || options.domain instanceof RegExp && origin.match(options.domain);
-
-	            if (!match) {
-	                throw new Error('Message origin ' + origin + ' does not match domain ' + options.domain);
+	            if (!options) {
+	                throw new Error('No postmessage request handler for ' + message.name + ' in ' + window.location.href);
 	            }
+
+	            if (options.window && source && options.window !== source) {
+	                return;
+	            }
+
+	            if (options.domain) {
+	                var match = typeof options.domain === 'string' && origin === options.domain || options.domain instanceof RegExp && origin.match(options.domain);
+
+	                if (!match) {
+	                    throw new Error('Message origin ' + origin + ' does not match domain ' + options.domain);
+	                }
+	            }
+
+	            return _lib.promise.deNodeify(options.handler, source, message.data);
+	        }).then(function (data) {
+
+	            return respond({
+	                type: _conf.CONSTANTS.POST_MESSAGE_TYPE.RESPONSE,
+	                ack: _conf.CONSTANTS.POST_MESSAGE_ACK.SUCCESS,
+	                data: data
+	            });
+	        }, function (err) {
+
+	            return respond({
+	                type: _conf.CONSTANTS.POST_MESSAGE_TYPE.RESPONSE,
+	                ack: _conf.CONSTANTS.POST_MESSAGE_ACK.ERROR,
+	                error: err.stack ? err.message + '\n' + err.stack : err.toString()
+	            });
+	        });
+	    })['catch'](function (err) {
+
+	        if (options && options.handleError) {
+	            return options.handleError(err);
+	        } else {
+	            console.error(err.stack || err.toString());
 	        }
-
-	        return _lib.promise.deNodeify(options.handler, source, message.data);
-	    }).then(function (data) {
-
-	        return respond({
-	            type: _conf.CONSTANTS.POST_MESSAGE_TYPE.RESPONSE,
-	            ack: _conf.CONSTANTS.POST_MESSAGE_ACK.SUCCESS,
-	            data: data
-	        });
-	    }, function (err) {
-
-	        return respond({
-	            type: _conf.CONSTANTS.POST_MESSAGE_TYPE.RESPONSE,
-	            ack: _conf.CONSTANTS.POST_MESSAGE_ACK.ERROR,
-	            error: err.stack ? err.message + '\n' + err.stack : err.toString()
-	        });
 	    });
 	}), _defineProperty(_RECEIVE_MESSAGE_TYPE, _conf.CONSTANTS.POST_MESSAGE_TYPE.RESPONSE, function (source, message, origin) {
 
