@@ -23,63 +23,64 @@ export let RECEIVE_MESSAGE_TYPES = {
         let options = getRequestListener(message.name, source);
 
         function respond(data) {
-
             return sendMessage(source, {
                 target: message.originalSource ? message.originalSource : childWindows.getWindowId(source),
                 hash: message.hash,
                 name: message.name,
                 ...data
-            }, '*').catch(err => {
-
-                if (options && options.handleError) {
-                    return options.handleError(err);
-                }
-                throw err;
-            });
+            }, '*');
         }
 
-        return promise.run(() => {
-
-            return respond({
-                type: CONSTANTS.POST_MESSAGE_TYPE.ACK
-            });
+        return respond({
+            type: CONSTANTS.POST_MESSAGE_TYPE.ACK
 
         }).then(() => {
 
-            if (!options) {
-                throw new Error(`No postmessage request handler for ${message.name} in ${window.location.href}`);
-            }
+            return promise.run(() => {
 
-            if (options.window && source && options.window !== source) {
-                return;
-            }
-
-            if (options.domain) {
-                let match = (typeof options.domain === 'string' && origin === options.domain) ||
-                            (options.domain instanceof RegExp && origin.match(options.domain));
-
-                if (!match) {
-                    throw new Error(`Message origin ${origin} does not match domain ${options.domain}`);
+                if (!options) {
+                    throw new Error(`No postmessage request handler for ${message.name} in ${window.location.href}`);
                 }
+
+                if (options.window && source && options.window !== source) {
+                    return;
+                }
+
+                if (options.domain) {
+                    let match = (typeof options.domain === 'string' && origin === options.domain) ||
+                                (options.domain instanceof RegExp && origin.match(options.domain));
+
+                    if (!match) {
+                        throw new Error(`Message origin ${origin} does not match domain ${options.domain}`);
+                    }
+                }
+
+                return promise.deNodeify(options.handler, source, message.data);
+
+            }).then(data => {
+
+                return respond({
+                    type: CONSTANTS.POST_MESSAGE_TYPE.RESPONSE,
+                    ack: CONSTANTS.POST_MESSAGE_ACK.SUCCESS,
+                    data: data
+                });
+
+            }, err => {
+
+                return respond({
+                    type: CONSTANTS.POST_MESSAGE_TYPE.RESPONSE,
+                    ack: CONSTANTS.POST_MESSAGE_ACK.ERROR,
+                    error: err.stack ? `${err.message}\n${err.stack}` : err.toString()
+                });
+            });
+
+        }).catch(err => {
+
+            if (options && options.handleError) {
+                return options.handleError(err);
+            } else {
+                console.error(err.stack || err.toString());
             }
-
-            return promise.deNodeify(options.handler, source, message.data);
-
-        }).then(data => {
-
-            return respond({
-                type: CONSTANTS.POST_MESSAGE_TYPE.RESPONSE,
-                ack: CONSTANTS.POST_MESSAGE_ACK.SUCCESS,
-                data: data
-            });
-
-        }, err => {
-
-            return respond({
-                type: CONSTANTS.POST_MESSAGE_TYPE.RESPONSE,
-                ack: CONSTANTS.POST_MESSAGE_ACK.ERROR,
-                error: err.stack ? `${err.message}\n${err.stack}` : err.toString()
-            });
         });
     },
 
