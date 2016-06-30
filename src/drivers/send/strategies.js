@@ -1,6 +1,6 @@
 
 import { CONSTANTS } from '../../conf';
-import { util, promise, isSameDomain, nextTick } from '../../lib';
+import { util, promise, isSameDomain } from '../../lib';
 import { emulateIERestrictions, getBridge, getBridgeFor } from '../../compat';
 
 export let SEND_MESSAGE_STRATEGIES = {
@@ -41,12 +41,10 @@ export let SEND_MESSAGE_STRATEGIES = {
             throw new Error('postRobot not found on window');
         }
 
-        nextTick(() => {
-            win[CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessage({
-                origin: `${window.location.protocol}//${window.location.host}`,
-                source: window,
-                data: JSON.stringify(message)
-            });
+        win[CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessage({
+            origin: `${window.location.protocol}//${window.location.host}`,
+            source: window,
+            data: JSON.stringify(message)
         });
     }),
 

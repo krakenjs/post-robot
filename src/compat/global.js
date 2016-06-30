@@ -1,6 +1,6 @@
 
 import { CONSTANTS } from '../conf';
-import { childWindows, promise } from '../lib';
+import { childWindows, promise, nextTick } from '../lib';
 import { receiveMessage } from '../drivers';
 
 export function registerGlobals() {
@@ -17,7 +17,9 @@ export function registerGlobals() {
         },
 
         postMessage: promise.method(event => {
-            receiveMessage(event);
+            nextTick(() => {
+                receiveMessage(event);
+            });
         }),
 
         postMessageParent: promise.method((source, message, domain) => {
