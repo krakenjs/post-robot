@@ -1898,7 +1898,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 	        postMessage: _lib.promise.method(function (event) {
-	            (0, _drivers.receiveMessage)(event);
+	            (0, _lib.nextTick)(function () {
+	                (0, _drivers.receiveMessage)(event);
+	            });
 	        }),
 
 	        postMessageParent: _lib.promise.method(function (source, message, domain) {
@@ -2076,12 +2078,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        throw new Error('postRobot not found on window');
 	    }
 
-	    (0, _lib.nextTick)(function () {
-	        win[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessage({
-	            origin: window.location.protocol + '//' + window.location.host,
-	            source: window,
-	            data: JSON.stringify(message)
-	        });
+	    win[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessage({
+	        origin: window.location.protocol + '//' + window.location.host,
+	        source: window,
+	        data: JSON.stringify(message)
 	    });
 	})), _defineProperty(_SEND_MESSAGE_STRATEG, _conf.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE_UP_THROUGH_BRIDGE, _lib.promise.method(function (win, message, domain) {
 
