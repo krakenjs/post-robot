@@ -5,19 +5,31 @@ import { util, promise, childWindows, serializeMethods, log } from '../../lib';
 import { SEND_MESSAGE_STRATEGIES } from './strategies';
 
 
+export function buildMessage(win, message, options = {}) {
+
+    let id     = util.uniqueID();
+    let source = getWindowID();
+    let type   = util.getType();
+    let target = childWindows.getWindowId(win);
+
+    return {
+        ...message,
+        ...options,
+        id:                 message.id || id,
+        source:             source,
+        originalSource:     message.originalSource || source,
+        windowType:         type,
+        originalWindowType: message.originalWindowType || type,
+        target:             message.target || target
+    };
+}
+
+
 export let sendMessage = promise.method((win, message, domain, isProxy) => {
 
-    message.id = message.id || util.uniqueID();
-    message.source = getWindowID();
-    message.originalSource = message.originalSource || getWindowID();
-    message.windowType = util.getType();
-    message.originalWindowType = message.originalWindowType || util.getType();
-
-    message.data = serializeMethods(win, message.data);
-
-    if (!message.target) {
-        message.target = childWindows.getWindowId(win);
-    }
+    message = buildMessage(win, message, {
+        data: serializeMethods(win, message.data)
+    });
 
     log.info(isProxy ? '#proxy' : '#send', message.type, message.name, message);
 
