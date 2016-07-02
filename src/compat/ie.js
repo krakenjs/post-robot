@@ -1,12 +1,12 @@
 
-import { CONSTANTS, CONFIG } from '../conf';
-import { util, childWindows } from '../lib';
+import {CONFIG } from '../conf';
+import { util } from '../lib';
 
 export function emulateIERestrictions(sourceWindow, targetWindow) {
     if (!CONFIG.ALLOW_POSTMESSAGE_POPUP) {
 
-        let isIframeMessagingParent = childWindows.getWindowType(sourceWindow) === CONSTANTS.WINDOW_TYPES.IFRAME && util.isFrameOwnedBy(targetWindow, sourceWindow);
-        let isParentMessagingIframe = childWindows.getWindowType(targetWindow) === CONSTANTS.WINDOW_TYPES.IFRAME && util.isFrameOwnedBy(sourceWindow, targetWindow);
+        let isIframeMessagingParent = util.isFrameOwnedBy(targetWindow, sourceWindow);
+        let isParentMessagingIframe = util.isFrameOwnedBy(sourceWindow, targetWindow);
 
         if (!isIframeMessagingParent && !isParentMessagingIframe) {
             if (sourceWindow === window) {

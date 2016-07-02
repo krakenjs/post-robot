@@ -66,7 +66,13 @@ export let util = {
         }
 
         while (true) {
-            let parent = win.opener || win.parent;
+            let parent;
+
+            try {
+                parent = win.opener || win.parent;
+            } catch (err) {
+                return;
+            }
 
             if (win === parent) {
                 return;
@@ -206,6 +212,10 @@ export let util = {
 
     isFrameOwnedBy(win, frame) {
 
+        if (frame.opener === win) {
+            return false;
+        }
+
         try {
             if (frame.parent === win) {
                 return true;
@@ -287,5 +297,22 @@ export let util = {
         });
 
         return newobj;
+    },
+
+    safeInterval(method, time) {
+        let timeout;
+
+        function runInterval() {
+            timeout = setTimeout(runInterval, time);
+            method.call();
+        }
+
+        timeout = setTimeout(runInterval, time);
+
+        return {
+            cancel() {
+                clearTimeout(timeout);
+            }
+        };
     }
 };

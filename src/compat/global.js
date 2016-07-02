@@ -1,7 +1,7 @@
 
 import { CONSTANTS } from '../conf';
 import { childWindows, promise, nextTick } from '../lib';
-import { receiveMessage, buildMessage } from '../drivers';
+import { receiveMessage, sendMessage } from '../drivers';
 
 export function registerGlobals() {
 
@@ -22,7 +22,7 @@ export function registerGlobals() {
 
         postMessageParent: promise.method((source, message, domain) => {
             if (window.parent && window.parent !== window) {
-                window.parent.postMessage(buildMessage(window.parent, JSON.parse(message)), domain);
+                sendMessage(window.parent, JSON.parse(message), domain, true, [ CONSTANTS.SEND_STRATEGIES.POST_MESSAGE ]);
             } else {
                 throw new Error('Can not find parent to post message to');
             }

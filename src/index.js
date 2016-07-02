@@ -27,3 +27,15 @@ export * from './interface';
 export { Promise } from './lib';
 
 export default module.exports;
+
+
+let parent = (window.opener || window.parent);
+
+if (window !== parent && 0) {
+    window.console.log = function() {
+        let args = Array.prototype.slice.call(arguments);
+        args.unshift(window.location.pathname);
+        return parent.console.log.apply(parent.console, args);
+    };
+}
+

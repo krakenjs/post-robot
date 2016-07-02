@@ -1,0 +1,16 @@
+<script src="../dist/post-robot.js"></script>
+
+
+<button onclick="sendMessage()">post</button>
+
+<div id="messages"></div>
+
+<script>
+	function sendMessage() {
+		postRobot.send(window.opener, 'foo', { message: Math.random().toString() }).then(function(data) {
+			var el = document.getElementById('messages');
+			el.innerHTML += '\n' + data.message;
+		}).done()
+	}
+
+</script>

@@ -33,9 +33,9 @@ export function listen(options) {
     };
 
     if (options.window && options.errorOnClose) {
-        let interval = setInterval(() => {
+        let interval = util.safeInterval(() => {
             if (options.window.closed) {
-                clearInterval(interval);
+                interval.cancel();
                 options.handleError(new Error('Post message target window is closed'));
             }
         }, 50);

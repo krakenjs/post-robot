@@ -15,7 +15,7 @@ export let openBridge = util.memoize(url => {
             return resolve(window.document);
         }
 
-        window.document.addEventListener('DOMContentLoaded', function(event) {
+        window.document.addEventListener('DOMContentLoaded', event => {
             return resolve(window.document);
         });
     });

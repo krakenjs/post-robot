@@ -50,6 +50,10 @@ export let SEND_MESSAGE_STRATEGIES = {
 
     [ CONSTANTS.SEND_STRATEGIES.POST_MESSAGE_UP_THROUGH_BRIDGE ]: promise.method((win, message, domain) => {
 
+        if (util.isFrameOwnedBy(window, win) ||  util.isFrameOwnedBy(win, window)) {
+            throw new Error('No need to use bridge for frame to frame message');
+        }
+
         let frame = getBridgeFor(win);
 
         if (!frame) {
@@ -69,26 +73,30 @@ export let SEND_MESSAGE_STRATEGIES = {
 
     [ CONSTANTS.SEND_STRATEGIES.POST_MESSAGE_DOWN_THROUGH_BRIDGE ]: promise.method((win, message, domain) => {
 
+        if (util.isFrameOwnedBy(window, win) ||  util.isFrameOwnedBy(win, window)) {
+            throw new Error('No need to use bridge for frame to frame message');
+        }
+
         let bridge = getBridge();
 
         if (!bridge) {
             throw new Error('Bridge not initialized');
         }
 
-        if (win === bridge.contentWindow) {
-            throw new Error('Message target is bridge');
+        if (win === window.opener) {
+            message.target = 'parent.opener';
         }
 
         if (!message.target) {
-
-            if (win === window.opener) {
-                message.target = 'parent.opener';
-            } else {
-                throw new Error('Can not post message down through bridge without target');
-            }
+            throw new Error('Can not post message down through bridge without target');
         }
 
         return bridge.then(iframe => {
+
+            if (win === iframe.contentWindow) {
+                throw new Error('Message target is bridge');
+            }
+
             iframe.contentWindow.postMessage(JSON.stringify(message, 0, 2), domain);
         });
     })

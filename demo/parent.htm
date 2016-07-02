@@ -1,0 +1,20 @@
+<script src="../dist/post-robot.js"></script>
+
+<button onclick="openWindow()">open</button>
+
+<div id="messages"></div>
+
+<script>
+	function openWindow() {
+		window.open('./child.htm');
+	}
+
+	postRobot.on('foo', function(source, data) {
+		var el = document.getElementById('messages');
+		el.innerHTML += '\n' + data.message;
+		return {
+			message: data.message
+		}
+	});
+
+</script>

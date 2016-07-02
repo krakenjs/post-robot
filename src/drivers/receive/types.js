@@ -1,6 +1,6 @@
 
 import { CONSTANTS } from '../../conf';
-import { childWindows, promise } from '../../lib';
+import { childWindows, promise, log } from '../../lib';
 
 import { sendMessage } from '../send';
 import { listeners, getRequestListener } from '../listeners';
@@ -62,7 +62,7 @@ export let RECEIVE_MESSAGE_TYPES = {
                 return respond({
                     type: CONSTANTS.POST_MESSAGE_TYPE.RESPONSE,
                     ack: CONSTANTS.POST_MESSAGE_ACK.SUCCESS,
-                    data: data
+                    data
                 });
 
             }, err => {
@@ -79,7 +79,7 @@ export let RECEIVE_MESSAGE_TYPES = {
             if (options && options.handleError) {
                 return options.handleError(err);
             } else {
-                console.error(err.stack || err.toString());
+                log.error(err.stack || err.toString());
             }
         });
     },

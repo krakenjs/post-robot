@@ -1,5 +1,5 @@
 
-import { CONFIG, CONSTANTS, getWindowID } from '../../conf';
+import { CONFIG, CONSTANTS, getWindowID, POST_MESSAGE_NAMES_LIST } from '../../conf';
 import { childWindows, deserializeMethods, log } from '../../lib';
 import { emulateIERestrictions } from '../../compat';
 
@@ -90,6 +90,12 @@ function getProxy(source, message) {
 
 export function receiveMessage(event) {
 
+    try {
+        event.source // eslint-disable-line
+    } catch (err) {
+        return;
+    }
+
     let { source, origin, data } = event;
 
     let message = parseMessage(data);
@@ -106,14 +112,21 @@ export function receiveMessage(event) {
 
     childWindows.register(message.source, source, message.windowType);
 
+    if (message.originalSource !== message.source) {
+        let originalSource = childWindows.getWindowById(message.originalSource);
+        if (originalSource) {
+            source = originalSource;
+        }
+    }
+
     let proxyWindow = getProxy(source, message);
+
+    log.logLevel(POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 ? 'debug' : 'info', [ proxyWindow ? '#receiveproxy' : '#receive', message.type, message.name, message ]);
 
     if (proxyWindow) {
         delete message.target;
-        return sendMessage(proxyWindow, message, '*', true);
+        return sendMessage(proxyWindow, message, message.domain || '*', true);
     }
-
-    log.info('#receive', message.type, message.name, message);
 
     if (CONFIG.MOCK_MODE) {
         return RECEIVE_MESSAGE_TYPES[message.type](source, message, origin);
@@ -127,6 +140,12 @@ export function receiveMessage(event) {
 }
 
 export function messageListener(event) {
+
+    try {
+        event.source // eslint-disable-line
+    } catch (err) {
+        return;
+    }
 
     event = {
         source: event.source || event.sourceElement,

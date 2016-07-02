@@ -1,5 +1,5 @@
 
-import { CONSTANTS, CONFIG, getWindowID } from '../../conf';
+import { CONSTANTS, CONFIG, getWindowID, POST_MESSAGE_NAMES_LIST } from '../../conf';
 import { util, promise, childWindows, serializeMethods, log } from '../../lib';
 
 import { SEND_MESSAGE_STRATEGIES } from './strategies';
@@ -16,7 +16,7 @@ export function buildMessage(win, message, options = {}) {
         ...message,
         ...options,
         id:                 message.id || id,
-        source:             source,
+        source,
         originalSource:     message.originalSource || source,
         windowType:         type,
         originalWindowType: message.originalWindowType || type,
@@ -25,13 +25,14 @@ export function buildMessage(win, message, options = {}) {
 }
 
 
-export let sendMessage = promise.method((win, message, domain, isProxy) => {
+export let sendMessage = promise.method((win, message, domain, isProxy, strategies) => {
 
     message = buildMessage(win, message, {
-        data: serializeMethods(win, message.data)
+        data: serializeMethods(win, message.data),
+        domain
     });
 
-    log.info(isProxy ? '#proxy' : '#send', message.type, message.name, message);
+    log.logLevel(POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 ? 'debug' : 'info', [ isProxy ? '#proxy' : '#send', message.type, message.name, message ]);
 
     if (CONFIG.MOCK_MODE) {
         delete message.target;
@@ -53,6 +54,8 @@ export let sendMessage = promise.method((win, message, domain, isProxy) => {
     log.debug('Running send message strategies', message);
 
     return util.windowReady.then(() => {
+
+        strategies = strategies || util.keys(SEND_MESSAGE_STRATEGIES);
 
         return promise.map(util.keys(SEND_MESSAGE_STRATEGIES), strategyName => {
 

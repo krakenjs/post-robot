@@ -38,3 +38,5 @@ export let CONSTANTS = {
         POST_MESSAGE_DOWN_THROUGH_BRIDGE: 'postrobot_post_message_down_through_bridge'
     }
 };
+
+export let POST_MESSAGE_NAMES_LIST = Object.keys(CONSTANTS.POST_MESSAGE_NAMES).map(key => CONSTANTS.POST_MESSAGE_NAMES[key]);

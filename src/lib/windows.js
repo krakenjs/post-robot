@@ -30,8 +30,8 @@ export function isSameDomain(win) {
     }
 
     domainMatches.push({
-        win: win,
-        match: match
+        win,
+        match
     });
 
     return match;
@@ -53,33 +53,11 @@ export let childWindows = {
     },
 
     getWindowById(id) {
+        if (window.frames && window.frames[id]) {
+            return window.frames[id];
+        }
+
         return getMap('id', id).win;
-    },
-
-    getWindowType(win) {
-        let map = getMap('win', win);
-
-        if (map && map.type) {
-            return map.type;
-        }
-
-        if (util.safeHasProp(win, 'parent') && win.parent !== win) {
-            return CONSTANTS.WINDOW_TYPES.IFRAME;
-        }
-
-        if (util.safeHasProp(win, 'opener')) {
-            return CONSTANTS.WINDOW_TYPES.POPUP;
-        }
-
-        let isFrame = util.some(windows, childWin => {
-            return util.isFrameOwnedBy(childWin.win, win);
-        });
-
-        if (isFrame) {
-            return CONSTANTS.WINDOW_TYPES.IFRAME;
-        }
-
-        return;
     },
 
     register(id, win, type) {
@@ -175,6 +153,12 @@ export function propagate(id) {
     util.eachParent(parent => {
 
         register(parent, 'parent');
+
+        try {
+            parent.frames.length; // eslint-disable-line
+        } catch (err) {
+            return;
+        }
         
         util.eachFrame(parent, frame => {
             register(frame, 'frame');

@@ -31,10 +31,10 @@ export let promise = {
     },
 
     deNodeify(method, ...args) {
-        return new Promise(function(resolve, reject) {
+        return new Promise((resolve, reject) => {
             try {
                 if (args.length < method.length) {
-                    return method(...args, function(err, result) {
+                    return method(...args, (err, result) => {
                         return err ? reject(err) : resolve(result);
                     });
                 }
