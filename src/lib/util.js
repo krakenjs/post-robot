@@ -1,5 +1,5 @@
 
-import { CONSTANTS, CONFIG } from '../conf';
+import { CONSTANTS } from '../conf';
 import { promise } from './promise';
 
 export let util = {
@@ -100,119 +100,6 @@ export let util = {
         return window.location.host;
     },
 
-    clearLogs() {
-
-        if (window.console && window.console.clear) {
-            window.console.clear();
-        }
-
-        if (CONFIG.LOG_TO_PAGE) {
-            let container = document.getElementById('postRobotLogs');
-
-            if (container) {
-                container.parentNode.removeChild(container);
-            }
-        }
-    },
-
-    writeToPage(level, args) {
-        setTimeout(() => {
-            let container = document.getElementById('postRobotLogs');
-
-            if (!container) {
-                container = document.createElement('div');
-                container.id = 'postRobotLogs';
-                container.style.cssText = 'width: 800px; font-family: monospace; white-space: pre-wrap;';
-                document.body.appendChild(container);
-            }
-
-            let el = document.createElement('div');
-
-            let date = (new Date()).toString().split(' ')[4];
-
-            let payload = util.map(args, item => {
-                if (typeof item === 'string') {
-                    return item;
-                }
-                if (!item) {
-                    return toString.call(item);
-                }
-                let json;
-                try {
-                    json = JSON.stringify(item, 0, 2);
-                } catch (e) {
-                    json = '[object]';
-                }
-
-                return `\n\n${json}\n\n`;
-            }).join(' ');
-
-
-            let msg = `${date} ${level} ${payload}`;
-            el.innerHTML = msg;
-
-            let color = {
-                log: '#ddd',
-                warn: 'orange',
-                error: 'red',
-                info: 'blue',
-                debug: '#aaa'
-            }[level];
-
-            el.style.cssText = `margin-top: 10px; color: ${color};`;
-
-            if (!container.childNodes.length) {
-                container.appendChild(el);
-            } else {
-                container.insertBefore(el, container.childNodes[0]);
-            }
-
-        });
-    },
-
-    logLevel(level, args) {
-
-        args = Array.prototype.slice.call(args);
-
-        args.unshift(util.getDomain());
-        args.unshift(util.getType().toLowerCase());
-        args.unshift('[post-robot]');
-
-        if (CONFIG.LOG_TO_PAGE) {
-            util.writeToPage(level, args);
-        }
-
-        if (!window.console) {
-            return;
-        }
-
-        if (!window.console[level]) {
-            level = 'log';
-        }
-
-        if (!window.console[level]) {
-            return;
-        }
-
-        window.console[level].apply(window.console, args);
-    },
-
-    log() {
-        util.logLevel('info', arguments);
-    },
-
-    debug() {
-        if (CONFIG.DEBUG) {
-            util.logLevel('debug', arguments);
-        }
-    },
-
-    debugError() {
-        if (CONFIG.DEBUG) {
-            util.logLevel('error', arguments);
-        }
-    },
-
     safeHasProp(obj, name) {
         try {
             if (obj[name]) {
@@ -223,14 +110,6 @@ export let util = {
         } catch (err) {
             return false;
         }
-    },
-
-    warn() {
-        util.logLevel('warn', arguments);
-    },
-
-    error() {
-        util.logLevel('error', arguments);
     },
 
     listen(win, event, handler) {

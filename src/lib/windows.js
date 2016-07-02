@@ -1,6 +1,7 @@
 
 import { CONSTANTS } from '../conf';
 import { util } from './util';
+import { log } from './log';
 import { on, send } from '../interface';
 
 
@@ -91,7 +92,7 @@ export let childWindows = {
             return;
         }
 
-        util.debug('Registering window:', type, id, win);
+        log.debug('Registering window:', type, id, win);
 
         windows.push({
             id,
@@ -150,7 +151,7 @@ export function propagate(id) {
             return;
         }
 
-        util.debug('propagating to', identifier, win);
+        log.debug('propagating to', identifier, win);
 
         registered.push(win);
 
@@ -165,7 +166,7 @@ export function propagate(id) {
                 }).then(data => {
                     childWindows.register(data.id, win, data.type);
                 }, err => {
-                    util.debugError('Error sending identify:', err.stack || err.toString());
+                    log.debug('Error sending identify:', err.stack || err.toString());
                 });
             });
         }

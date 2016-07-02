@@ -1,6 +1,6 @@
 
 import { getWindowID } from './conf';
-import { util, childWindows, propagate } from './lib';
+import { util, childWindows, propagate, log } from './lib';
 import { messageListener } from './drivers';
 import { registerGlobals } from './compat';
 
@@ -9,7 +9,7 @@ function init() {
     registerGlobals();
 
     // Log the window id
-    util.debug('ID', getWindowID());
+    log.debug('ID', getWindowID());
 
     // Listen for all incoming post-messages
     util.listen(window, 'message', messageListener);

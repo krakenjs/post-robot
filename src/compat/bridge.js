@@ -1,6 +1,6 @@
 
 import { CONSTANTS } from '../conf';
-import { util, promise, isSameDomain } from '../lib';
+import { util, promise, isSameDomain, log } from '../lib';
 
 let bridge;
 
@@ -22,7 +22,7 @@ export let openBridge = util.memoize(url => {
 
     bridge = documentReady.then(document => {
 
-        util.debug('Opening bridge:', url);
+        log.debug('Opening bridge:', url);
 
         let iframe = document.createElement('iframe');
 

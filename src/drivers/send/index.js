@@ -1,6 +1,6 @@
 
 import { CONSTANTS, CONFIG, getWindowID } from '../../conf';
-import { util, promise, childWindows, serializeMethods } from '../../lib';
+import { util, promise, childWindows, serializeMethods, log } from '../../lib';
 
 import { SEND_MESSAGE_STRATEGIES } from './strategies';
 
@@ -19,7 +19,7 @@ export let sendMessage = promise.method((win, message, domain, isProxy) => {
         message.target = childWindows.getWindowId(win);
     }
 
-    util.debug(isProxy ? '#proxy' : '#send', message.type, message.name, message);
+    log.info(isProxy ? '#proxy' : '#send', message.type, message.name, message);
 
     if (CONFIG.MOCK_MODE) {
         delete message.target;
@@ -38,7 +38,7 @@ export let sendMessage = promise.method((win, message, domain, isProxy) => {
         throw new Error('Window is closed');
     }
 
-    util.debug('Running send message strategies', message);
+    log.debug('Running send message strategies', message);
 
     return util.windowReady.then(() => {
 
@@ -53,10 +53,10 @@ export let sendMessage = promise.method((win, message, domain, isProxy) => {
                 return SEND_MESSAGE_STRATEGIES[strategyName](win, message, domain);
 
             }).then(() => {
-                util.debug(strategyName, 'success');
+                log.debug(strategyName, 'success');
                 return true;
             }, err => {
-                util.debugError(strategyName, 'error\n\n', err.stack || err.toString());
+                log.debug(strategyName, 'error\n\n', err.stack || err.toString());
                 return false;
             });
 

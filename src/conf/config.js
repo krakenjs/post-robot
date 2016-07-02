@@ -5,7 +5,7 @@ export let CONFIG = {
     
     ALLOW_POSTMESSAGE_POPUP: true,
 
-    DEBUG: false,
+    LOG_LEVEL: 'info',
 
     ACK_TIMEOUT: 1000,
 

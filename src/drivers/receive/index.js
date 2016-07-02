@@ -1,6 +1,6 @@
 
 import { CONFIG, CONSTANTS, getWindowID } from '../../conf';
-import { util, childWindows, deserializeMethods } from '../../lib';
+import { childWindows, deserializeMethods, log } from '../../lib';
 import { emulateIERestrictions } from '../../compat';
 
 import { sendMessage } from '../send';
@@ -113,7 +113,7 @@ export function receiveMessage(event) {
         return sendMessage(proxyWindow, message, '*', true);
     }
 
-    util.debug('#receive', message.type, message.name, message);
+    log.info('#receive', message.type, message.name, message);
 
     if (CONFIG.MOCK_MODE) {
         return RECEIVE_MESSAGE_TYPES[message.type](source, message, origin);
@@ -137,10 +137,9 @@ export function messageListener(event) {
     try {
         emulateIERestrictions(event.source, window);
     } catch (err) {
-        console.error(err.stack || err.toString());
+        log.error(err.stack || err.toString());
         return;
     }
-
 
     receiveMessage(event);
 }
