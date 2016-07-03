@@ -437,7 +437,11 @@ describe('[post-robot] popup tests', function() {
         });
     });
 
-    it('should work when the only method is post down through bridge', function() {
+    it.skip('should work when the only method is post down through bridge', function() {
+
+        // Skipping this for now as it's impossible to message down through bridge without having a handle on the other
+        // window first. We could do this by sending an identify message but would prefer not to continue doing this, as
+        // it ends up resulting in race conditions
 
         var allowedStrategies = postRobot.CONFIG.ALLOWED_POST_MESSAGE_METHODS;
 

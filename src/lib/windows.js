@@ -2,7 +2,6 @@
 import { CONSTANTS } from '../conf';
 import { util } from './util';
 import { log } from './log';
-import { on, send } from '../interface';
 
 
 let domainMatches = [];
@@ -15,15 +14,11 @@ export function isSameDomain(win) {
         }
     }
 
-    let windowDomain = `${window.location.protocol}//${window.location.host}`;
     let match = false;
 
     try {
-        if (win.location.protocol && win.location.host) {
-            let otherDomain = `${win.location.protocol}//${win.location.host}`;
-            if (otherDomain === windowDomain) {
-                match = true;
-            }
+        if (util.getDomain(window) === util.getDomain(win)) {
+            match = true;
         }
     } catch (err) {
         // pass
@@ -110,59 +105,3 @@ window.open = function(url, name, x, y) {
     childWindows.register(name, win, CONSTANTS.WINDOW_TYPES.POPUP);
     return win;
 };
-
-
-
-export function propagate(id) {
-
-    on(CONSTANTS.POST_MESSAGE_NAMES.IDENTIFY, (source, data, callback) => {
-        return {
-            id
-        };
-    });
-
-    let registered = [];
-
-    function register(win, identifier) {
-
-        if (!win || win === window || registered.indexOf(win) !== -1) {
-            return;
-        }
-
-        log.debug('propagating to', identifier, win);
-
-        registered.push(win);
-
-        if (isSameDomain(win) && util.safeHasProp(win, CONSTANTS.WINDOW_PROPS.POSTROBOT)) {
-            win[CONSTANTS.WINDOW_PROPS.POSTROBOT].registerSelf(id, window, util.getType());
-        } else {
-
-            util.windowReady.then(() => {
-                send(win, CONSTANTS.POST_MESSAGE_NAMES.IDENTIFY, {
-                    id,
-                    type: util.getType()
-                }).then(data => {
-                    childWindows.register(data.id, win, data.type);
-                }, err => {
-                    log.debug('Error sending identify:', err.stack || err.toString());
-                });
-            });
-        }
-    }
-
-    util.eachParent(parent => {
-
-        register(parent, 'parent');
-
-        try {
-            parent.frames.length; // eslint-disable-line
-        } catch (err) {
-            return;
-        }
-        
-        util.eachFrame(parent, frame => {
-            register(frame, 'frame');
-        });
-        
-    }, true);
-}

@@ -45,13 +45,27 @@ export function request(options) {
             throw new Error('Target window is closed');
         }
 
+        let hasResult = false;
+
         if (options.timeout) {
-            setTimeout(() => {
-                return reject(new Error(`Post message response timed out after ${options.timeout} ms`));
+            let timeout = util.intervalTimeout(options.timeout, 100, remaining => {
+
+                if (hasResult) {
+                    return timeout.cancel();
+                }
+
+                if (!remaining) {
+                    return reject(new Error(`Post message response timed out after ${options.timeout} ms`));
+                }
+
             }, options.timeout);
         }
 
         options.respond = (err, result) => {
+            if (!err) {
+                hasResult = true;
+            }
+
             return err ? reject(err) : resolve(result);
         };
 
@@ -62,11 +76,16 @@ export function request(options) {
             data: options.data
         }, options.domain || '*').catch(reject);
 
-        setTimeout(() => {
-            if (!options.ack) {
+        let ackTimeout = util.intervalTimeout(CONFIG.ACK_TIMEOUT, 100, remaining => {
+
+            if (options.ack) {
+                return ackTimeout.cancel();
+            }
+
+            if (!remaining) {
                 return reject(new Error(`No ack for postMessage ${options.name} in ${CONFIG.ACK_TIMEOUT}ms`));
             }
-        }, CONFIG.ACK_TIMEOUT);
+        });
 
     }), options.callback);
 }

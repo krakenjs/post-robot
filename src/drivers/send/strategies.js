@@ -19,7 +19,7 @@ export let SEND_MESSAGE_STRATEGIES = {
             let winDomain;
 
             try {
-                winDomain = `${win.location.protocol}//${win.location.host}`;
+                winDomain = util.getDomain(win);
             } catch (err) {
                 // pass
             }
@@ -42,9 +42,9 @@ export let SEND_MESSAGE_STRATEGIES = {
         }
 
         win[CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessage({
-            origin: `${window.location.protocol}//${window.location.host}`,
+            origin: util.getDomain(window),
             source: window,
-            data: JSON.stringify(message)
+            data: JSON.stringify(message, 0, 2)
         });
     }),
 
@@ -68,7 +68,23 @@ export let SEND_MESSAGE_STRATEGIES = {
             throw new Error('postRobot not installed in bridge');
         }
 
-        return frame[CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessageParent(window, JSON.stringify(message, 0, 2), domain);
+        // If we're messaging our parent
+
+        if (win === window.opener) {
+            message.targetHint = 'window.parent';
+        }
+
+        // If we're messaging our child
+
+        if (window === win.opener) {
+            message.sourceHint = 'window.opener';
+        }
+
+        return frame[CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessage({
+            origin: util.getDomain(window),
+            source: window,
+            data: JSON.stringify(message, 0, 2)
+        });
     }),
 
     [ CONSTANTS.SEND_STRATEGIES.POST_MESSAGE_DOWN_THROUGH_BRIDGE ]: promise.method((win, message, domain) => {
@@ -83,8 +99,16 @@ export let SEND_MESSAGE_STRATEGIES = {
             throw new Error('Bridge not initialized');
         }
 
+        // If we're messaging our parent
+
         if (win === window.opener) {
-            message.target = 'parent.opener';
+            message.targetHint = 'window.parent.opener';
+        }
+
+        // If we're messaging our child
+
+        if (window === win.opener) {
+            message.sourceHint = 'window.opener';
         }
 
         if (!message.target) {

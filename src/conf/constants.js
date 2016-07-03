@@ -13,7 +13,6 @@ export let CONSTANTS = {
     },
 
     POST_MESSAGE_NAMES: {
-        IDENTIFY: 'postrobot_identify',
         METHOD: 'postrobot_method'
     },
 

@@ -84,7 +84,7 @@ export let log = {
 
         args = Array.prototype.slice.call(args);
 
-        args.unshift(util.getDomain());
+        args.unshift(window.location.host);
         args.unshift(util.getType().toLowerCase());
         args.unshift('[post-robot]');
 

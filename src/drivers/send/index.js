@@ -25,7 +25,7 @@ export function buildMessage(win, message, options = {}) {
 }
 
 
-export let sendMessage = promise.method((win, message, domain, isProxy, strategies) => {
+export let sendMessage = promise.method((win, message, domain, isProxy) => {
 
     message = buildMessage(win, message, {
         data: serializeMethods(win, message.data),
@@ -37,7 +37,7 @@ export let sendMessage = promise.method((win, message, domain, isProxy, strategi
     if (CONFIG.MOCK_MODE) {
         delete message.target;
         return window[CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessage({
-            origin: `${window.location.protocol}//${window.location.host}`,
+            origin: util.getDomain(window),
             source: window,
             data: JSON.stringify(message)
         });
@@ -55,8 +55,6 @@ export let sendMessage = promise.method((win, message, domain, isProxy, strategi
 
     return util.windowReady.then(() => {
 
-        strategies = strategies || util.keys(SEND_MESSAGE_STRATEGIES);
-
         return promise.map(util.keys(SEND_MESSAGE_STRATEGIES), strategyName => {
 
             return promise.run(() => {
@@ -71,7 +69,7 @@ export let sendMessage = promise.method((win, message, domain, isProxy, strategi
                 log.debug(strategyName, 'success');
                 return true;
             }, err => {
-                log.debug(strategyName, 'error\n\n', err.stack || err.toString());
+                log.debug(strategyName, 'error\n\n', err.message);
                 return false;
             });
 

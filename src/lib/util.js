@@ -102,10 +102,6 @@ export let util = {
 
     noop() {}, // eslint-disable-line no-empty-function
 
-    getDomain() {
-        return window.location.host;
-    },
-
     safeHasProp(obj, name) {
         try {
             if (obj[name]) {
@@ -115,6 +111,14 @@ export let util = {
             }
         } catch (err) {
             return false;
+        }
+    },
+
+    safeGetProp(obj, name) {
+        try {
+            return obj[name];
+        } catch (err) {
+            return;
         }
     },
 
@@ -314,5 +318,26 @@ export let util = {
                 clearTimeout(timeout);
             }
         };
+    },
+
+    intervalTimeout(time, interval, method) {
+
+        let safeInterval = util.safeInterval(() => {
+            time -= interval;
+
+            time = time <= 0 ? 0 : time;
+
+            if (time === 0) {
+                safeInterval.cancel();
+            }
+
+            method(time);
+        }, interval);
+
+        return safeInterval;
+    },
+
+    getDomain(win) {
+        return win.mockDomain || `${win.location.protocol}//${win.location.host}`;
     }
 };

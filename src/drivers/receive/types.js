@@ -1,6 +1,6 @@
 
 import { CONSTANTS } from '../../conf';
-import { childWindows, promise, log } from '../../lib';
+import { promise, log } from '../../lib';
 
 import { sendMessage } from '../send';
 import { listeners, getRequestListener } from '../listeners';
@@ -24,7 +24,7 @@ export let RECEIVE_MESSAGE_TYPES = {
 
         function respond(data) {
             return sendMessage(source, {
-                target: message.originalSource ? message.originalSource : childWindows.getWindowId(source),
+                target: message.originalSource,
                 hash: message.hash,
                 name: message.name,
                 ...data

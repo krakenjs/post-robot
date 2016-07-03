@@ -3,11 +3,11 @@ import { CONSTANTS } from './constants';
 
 export let CONFIG = {
     
-    ALLOW_POSTMESSAGE_POPUP: true,
+    ALLOW_POSTMESSAGE_POPUP: false,
 
     LOG_LEVEL: 'info',
 
-    ACK_TIMEOUT: 1000,
+    ACK_TIMEOUT: 500,
 
     LOG_TO_PAGE: false,
     

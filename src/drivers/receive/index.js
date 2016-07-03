@@ -29,6 +29,29 @@ function parseMessage(message) {
     return message;
 }
 
+function getWindow(hint) {
+
+    let windowTargets = {
+        'window.parent': () => window.parent,
+        'window.opener': () => window.opener,
+        'window.parent.opener': () => window.parent.opener
+    };
+
+    let win;
+
+    try {
+        win = windowTargets[hint].call();
+    } catch (err) {
+        throw new Error(`Can not get ${hint}: ${err.message}`);
+    }
+
+    if (!win) {
+        throw new Error(`Can not get ${hint}: not available`);
+    }
+
+    return win;
+}
+
 function getProxy(source, message) {
 
     if (CONFIG.MOCK_MODE) {
@@ -57,22 +80,10 @@ function getProxy(source, message) {
         }
     }
 
-    if (message.target === 'parent.opener') {
-
-        let win;
-
-        try {
-            win = window.parent.opener;
-        } catch (err) {
-            throw new Error('Can not get window.parent.opener to proxy to');
-        }
-
-        if (!win) {
-            throw new Error('Can not get window.parent.opener to proxy to');
-        }
-
+    if (message.targetHint) {
+        let win = getWindow(message.targetHint);
+        delete message.targetHint;
         return win;
-
     }
 
     if (message.target && message.target !== getWindowID()) {
@@ -113,10 +124,20 @@ export function receiveMessage(event) {
     childWindows.register(message.source, source, message.windowType);
 
     if (message.originalSource !== message.source) {
-        let originalSource = childWindows.getWindowById(message.originalSource);
-        if (originalSource) {
-            source = originalSource;
+
+        if (message.sourceHint) {
+            source = getWindow(message.sourceHint);
+            delete message.sourceHint;
+        } else {
+            let originalSource = childWindows.getWindowById(message.originalSource);
+            if (originalSource) {
+                source = originalSource;
+            } else {
+                throw new Error(`Can not find original message source: ${message.originalSource}`);
+            }
         }
+
+        childWindows.register(message.originalSource, source, message.originalWindowType);
     }
 
     let proxyWindow = getProxy(source, message);
@@ -156,7 +177,6 @@ export function messageListener(event) {
     try {
         emulateIERestrictions(event.source, window);
     } catch (err) {
-        log.error(err.stack || err.toString());
         return;
     }
 

@@ -46,8 +46,6 @@ export function serializeMethods(destination, obj) {
     return util.replaceObject({ obj }, item => {
         if (item instanceof Function) {
             return serializeMethod(destination, item);
-        } else if (isSerializedMethod(item)) {
-            throw new Error('Attempting to serialize already serialized method');
         }
     }).obj;
 }

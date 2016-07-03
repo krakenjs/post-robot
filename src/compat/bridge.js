@@ -24,9 +24,12 @@ export let openBridge = util.memoize(url => {
 
         log.debug('Opening bridge:', url);
 
+        let id = `postrobot_bridge_${util.uniqueID()}`;
+
         let iframe = document.createElement('iframe');
 
-        iframe.setAttribute('id', 'postRobotBridge');
+        iframe.setAttribute('name', id);
+        iframe.setAttribute('id', id);
 
         iframe.setAttribute('style', 'margin: 0; padding: 0; border: 0px none; overflow: hidden;');
         iframe.setAttribute('frameborder', '0');
