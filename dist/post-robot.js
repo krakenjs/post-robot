@@ -86,23 +86,20 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _drivers = __webpack_require__(10);
 
-	var _compat = __webpack_require__(16);
+	var _compat = __webpack_require__(17);
 
 	function init() {
 
 	    (0, _compat.registerGlobals)();
 
 	    // Log the window id
-	    _lib.util.debug('ID', (0, _conf.getWindowID)());
+	    _lib.log.debug('ID', (0, _conf.getWindowID)());
 
 	    // Listen for all incoming post-messages
 	    _lib.util.listen(window, 'message', _drivers.messageListener);
 
 	    // Register the current window
 	    _lib.childWindows.register((0, _conf.getWindowID)(), window, _lib.util.getType());
-
-	    // Message up to all other parent windows with our id
-	    (0, _lib.propagate)((0, _conf.getWindowID)());
 	}
 
 	init();
@@ -132,7 +129,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _server = __webpack_require__(24);
+	var _server = __webpack_require__(25);
 
 	Object.keys(_server).forEach(function (key) {
 	  if (key === "default") return;
@@ -144,7 +141,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _proxy = __webpack_require__(25);
+	var _proxy = __webpack_require__(26);
 
 	Object.keys(_proxy).forEach(function (key) {
 	  if (key === "default") return;
@@ -156,7 +153,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _config = __webpack_require__(26);
+	var _config = __webpack_require__(27);
 
 	Object.keys(_config).forEach(function (key) {
 	  if (key === "default") return;
@@ -177,7 +174,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	});
 
-	var _bridge = __webpack_require__(17);
+	var _bridge = __webpack_require__(18);
 
 	Object.defineProperty(exports, 'openBridge', {
 	  enumerable: true,
@@ -254,13 +251,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	            throw new Error('Target window is closed');
 	        }
 
+	        var hasResult = false;
+
 	        if (options.timeout) {
-	            setTimeout(function () {
-	                return reject(new Error('Post message response timed out after ' + options.timeout + ' ms'));
-	            }, options.timeout);
+	            (function () {
+	                var timeout = _lib.util.intervalTimeout(options.timeout, 100, function (remaining) {
+
+	                    if (hasResult) {
+	                        return timeout.cancel();
+	                    }
+
+	                    if (!remaining) {
+	                        return reject(new Error('Post message response timed out after ' + options.timeout + ' ms'));
+	                    }
+	                }, options.timeout);
+	            })();
 	        }
 
 	        options.respond = function (err, result) {
+	            if (!err) {
+	                hasResult = true;
+	            }
+
 	            return err ? reject(err) : resolve(result);
 	        };
 
@@ -271,11 +283,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	            data: options.data
 	        }, options.domain || '*')['catch'](reject);
 
-	        setTimeout(function () {
-	            if (!options.ack) {
+	        var ackTimeout = _lib.util.intervalTimeout(_conf.CONFIG.ACK_TIMEOUT, 100, function (remaining) {
+
+	            if (options.ack) {
+	                return ackTimeout.cancel();
+	            }
+
+	            if (!remaining) {
 	                return reject(new Error('No ack for postMessage ' + options.name + ' in ' + _conf.CONFIG.ACK_TIMEOUT + 'ms'));
 	            }
-	        }, _conf.CONFIG.ACK_TIMEOUT);
+	        });
 	    }), options.callback);
 	}
 
@@ -377,11 +394,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var CONFIG = exports.CONFIG = {
 
-	    ALLOW_POSTMESSAGE_POPUP: true,
+	    ALLOW_POSTMESSAGE_POPUP: false,
 
-	    DEBUG: false,
+	    LOG_LEVEL: 'info',
 
-	    ACK_TIMEOUT: 1000,
+	    ACK_TIMEOUT: 500,
 
 	    LOG_TO_PAGE: false,
 
@@ -413,7 +430,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    },
 
 	    POST_MESSAGE_NAMES: {
-	        IDENTIFY: 'postrobot_identify',
 	        METHOD: 'postrobot_method'
 	    },
 
@@ -439,6 +455,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	};
 
+	var POST_MESSAGE_NAMES_LIST = exports.POST_MESSAGE_NAMES_LIST = Object.keys(CONSTANTS.POST_MESSAGE_NAMES).map(function (key) {
+	    return CONSTANTS.POST_MESSAGE_NAMES[key];
+	});
+
 /***/ },
 /* 6 */
 /***/ function(module, exports, __webpack_require__) {
@@ -453,7 +473,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _util = __webpack_require__(7);
 
 	var getWindowID = exports.getWindowID = _util.util.memoize(function () {
-	    return window.name || _util.util.uniqueID();
+	    return window.name || _util.util.getType() + '_' + _util.util.uniqueID();
 	});
 
 /***/ },
@@ -531,7 +551,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 
 	        while (true) {
-	            var parent = win.opener || win.parent;
+	            var parent = void 0;
+
+	            try {
+	                parent = win.opener || win.parent;
+	            } catch (err) {
+	                return;
+	            }
 
 	            if (win === parent) {
 	                return;
@@ -560,114 +586,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    noop: function noop() {},
 	    // eslint-disable-line no-empty-function
 
-	    getDomain: function getDomain() {
-	        return window.location.host;
-	    },
-	    clearLogs: function clearLogs() {
-
-	        if (window.console && window.console.clear) {
-	            window.console.clear();
-	        }
-
-	        if (_conf.CONFIG.LOG_TO_PAGE) {
-	            var container = document.getElementById('postRobotLogs');
-
-	            if (container) {
-	                container.parentNode.removeChild(container);
-	            }
-	        }
-	    },
-	    writeToPage: function writeToPage(level, args) {
-	        setTimeout(function () {
-	            var container = document.getElementById('postRobotLogs');
-
-	            if (!container) {
-	                container = document.createElement('div');
-	                container.id = 'postRobotLogs';
-	                container.style.cssText = 'width: 800px; font-family: monospace; white-space: pre-wrap;';
-	                document.body.appendChild(container);
-	            }
-
-	            var el = document.createElement('div');
-
-	            var date = new Date().toString().split(' ')[4];
-
-	            var payload = util.map(args, function (item) {
-	                if (typeof item === 'string') {
-	                    return item;
-	                }
-	                if (!item) {
-	                    return toString.call(item);
-	                }
-	                var json = void 0;
-	                try {
-	                    json = JSON.stringify(item, 0, 2);
-	                } catch (e) {
-	                    json = '[object]';
-	                }
-
-	                return '\n\n' + json + '\n\n';
-	            }).join(' ');
-
-	            var msg = date + ' ' + level + ' ' + payload;
-	            el.innerHTML = msg;
-
-	            var color = {
-	                log: '#ddd',
-	                warn: 'orange',
-	                error: 'red',
-	                info: 'blue',
-	                debug: '#aaa'
-	            }[level];
-
-	            el.style.cssText = 'margin-top: 10px; color: ' + color + ';';
-
-	            if (!container.childNodes.length) {
-	                container.appendChild(el);
-	            } else {
-	                container.insertBefore(el, container.childNodes[0]);
-	            }
-	        });
-	    },
-	    logLevel: function logLevel(level, args) {
-
-	        args = Array.prototype.slice.call(args);
-
-	        args.unshift(util.getDomain());
-	        args.unshift(util.getType().toLowerCase());
-	        args.unshift('[post-robot]');
-
-	        if (_conf.CONFIG.LOG_TO_PAGE) {
-	            util.writeToPage(level, args);
-	        }
-
-	        if (!window.console) {
-	            return;
-	        }
-
-	        if (!window.console[level]) {
-	            level = 'log';
-	        }
-
-	        if (!window.console[level]) {
-	            return;
-	        }
-
-	        window.console[level].apply(window.console, args);
-	    },
-	    log: function log() {
-	        util.logLevel('info', arguments);
-	    },
-	    debug: function debug() {
-	        if (_conf.CONFIG.DEBUG) {
-	            util.logLevel('debug', arguments);
-	        }
-	    },
-	    debugError: function debugError() {
-	        if (_conf.CONFIG.DEBUG) {
-	            util.logLevel('error', arguments);
-	        }
-	    },
 	    safeHasProp: function safeHasProp(obj, name) {
 	        try {
 	            if (obj[name]) {
@@ -679,11 +597,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return false;
 	        }
 	    },
-	    warn: function warn() {
-	        util.logLevel('warn', arguments);
-	    },
-	    error: function error() {
-	        util.logLevel('error', arguments);
+	    safeGetProp: function safeGetProp(obj, name) {
+	        try {
+	            return obj[name];
+	        } catch (err) {
+	            return;
+	        }
 	    },
 	    listen: function listen(win, event, handler) {
 	        if (win.addEventListener) {
@@ -770,6 +689,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    },
 	    isFrameOwnedBy: function isFrameOwnedBy(win, frame) {
 
+	        if (frame.opener === win) {
+	            return false;
+	        }
+
 	        try {
 	            if (frame.parent === win) {
 	                return true;
@@ -847,6 +770,41 @@ return /******/ (function(modules) { // webpackBootstrap
 	        });
 
 	        return newobj;
+	    },
+	    safeInterval: function safeInterval(method, time) {
+	        var timeout = void 0;
+
+	        function runInterval() {
+	            timeout = setTimeout(runInterval, time);
+	            method.call();
+	        }
+
+	        timeout = setTimeout(runInterval, time);
+
+	        return {
+	            cancel: function cancel() {
+	                clearTimeout(timeout);
+	            }
+	        };
+	    },
+	    intervalTimeout: function intervalTimeout(time, interval, method) {
+
+	        var safeInterval = util.safeInterval(function () {
+	            time -= interval;
+
+	            time = time <= 0 ? 0 : time;
+
+	            if (time === 0) {
+	                safeInterval.cancel();
+	            }
+
+	            method(time);
+	        }, interval);
+
+	        return safeInterval;
+	    },
+	    getDomain: function getDomain(win) {
+	        return win.mockDomain || win.location.protocol + '//' + win.location.host;
 	    }
 	};
 
@@ -1157,7 +1115,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _send = __webpack_require__(20);
+	var _send = __webpack_require__(21);
 
 	Object.keys(_send).forEach(function (key) {
 	  if (key === "default") return;
@@ -1169,7 +1127,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _listeners = __webpack_require__(22);
+	var _listeners = __webpack_require__(23);
 
 	Object.keys(_listeners).forEach(function (key) {
 	  if (key === "default") return;
@@ -1197,13 +1155,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _lib = __webpack_require__(12);
 
-	var _compat = __webpack_require__(16);
+	var _compat = __webpack_require__(17);
 
-	var _send = __webpack_require__(20);
+	var _send = __webpack_require__(21);
 
-	var _listeners = __webpack_require__(22);
+	var _listeners = __webpack_require__(23);
 
-	var _types = __webpack_require__(23);
+	var _types = __webpack_require__(24);
 
 	var receivedMessages = [];
 
@@ -1224,6 +1182,35 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    return message;
+	}
+
+	function getWindow(hint) {
+
+	    var windowTargets = {
+	        'window.parent': function windowParent() {
+	            return window.parent;
+	        },
+	        'window.opener': function windowOpener() {
+	            return window.opener;
+	        },
+	        'window.parent.opener': function windowParentOpener() {
+	            return window.parent.opener;
+	        }
+	    };
+
+	    var win = void 0;
+
+	    try {
+	        win = windowTargets[hint].call();
+	    } catch (err) {
+	        throw new Error('Can not get ' + hint + ': ' + err.message);
+	    }
+
+	    if (!win) {
+	        throw new Error('Can not get ' + hint + ': not available');
+	    }
+
+	    return win;
 	}
 
 	function getProxy(source, message) {
@@ -1254,20 +1241,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    }
 
-	    if (message.target === 'parent.opener') {
-
-	        var win = void 0;
-
-	        try {
-	            win = window.parent.opener;
-	        } catch (err) {
-	            throw new Error('Can not get window.parent.opener to proxy to');
-	        }
-
-	        if (!win) {
-	            throw new Error('Can not get window.parent.opener to proxy to');
-	        }
-
+	    if (message.targetHint) {
+	        var win = getWindow(message.targetHint);
+	        delete message.targetHint;
 	        return win;
 	    }
 
@@ -1284,6 +1260,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	function receiveMessage(event) {
+
+	    try {
+	        event.source; // eslint-disable-line
+	    } catch (err) {
+	        return;
+	    }
+
 	    var source = event.source;
 	    var origin = event.origin;
 	    var data = event.data;
@@ -1303,14 +1286,31 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    _lib.childWindows.register(message.source, source, message.windowType);
 
+	    if (message.originalSource !== message.source) {
+
+	        if (message.sourceHint) {
+	            source = getWindow(message.sourceHint);
+	            delete message.sourceHint;
+	        } else {
+	            var originalSource = _lib.childWindows.getWindowById(message.originalSource);
+	            if (originalSource) {
+	                source = originalSource;
+	            } else {
+	                throw new Error('Can not find original message source: ' + message.originalSource);
+	            }
+	        }
+
+	        _lib.childWindows.register(message.originalSource, source, message.originalWindowType);
+	    }
+
 	    var proxyWindow = getProxy(source, message);
+
+	    _lib.log.logLevel(_conf.POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 ? 'debug' : 'info', [proxyWindow ? '#receiveproxy' : '#receive', message.type, message.name, message]);
 
 	    if (proxyWindow) {
 	        delete message.target;
-	        return (0, _send.sendMessage)(proxyWindow, message, '*', true);
+	        return (0, _send.sendMessage)(proxyWindow, message, message.domain || '*', true);
 	    }
-
-	    _lib.util.debug('#receive', message.type, message.name, message);
 
 	    if (_conf.CONFIG.MOCK_MODE) {
 	        return _types.RECEIVE_MESSAGE_TYPES[message.type](source, message, origin);
@@ -1325,6 +1325,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function messageListener(event) {
 
+	    try {
+	        event.source; // eslint-disable-line
+	    } catch (err) {
+	        return;
+	    }
+
 	    event = {
 	        source: event.source || event.sourceElement,
 	        origin: event.origin || event.originalEvent.origin,
@@ -1334,7 +1340,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    try {
 	        (0, _compat.emulateIERestrictions)(event.source, window);
 	    } catch (err) {
-	        console.error(err.stack || err.toString());
 	        return;
 	    }
 
@@ -1375,7 +1380,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _windows = __webpack_require__(13);
+	var _log = __webpack_require__(13);
+
+	Object.keys(_log).forEach(function (key) {
+	  if (key === "default") return;
+	  Object.defineProperty(exports, key, {
+	    enumerable: true,
+	    get: function get() {
+	      return _log[key];
+	    }
+	  });
+	});
+
+	var _windows = __webpack_require__(14);
 
 	Object.keys(_windows).forEach(function (key) {
 	  if (key === "default") return;
@@ -1387,7 +1404,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _methods = __webpack_require__(14);
+	var _methods = __webpack_require__(15);
 
 	Object.keys(_methods).forEach(function (key) {
 	  if (key === "default") return;
@@ -1399,7 +1416,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _tick = __webpack_require__(15);
+	var _tick = __webpack_require__(16);
 
 	Object.keys(_tick).forEach(function (key) {
 	  if (key === "default") return;
@@ -1420,15 +1437,142 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
+	exports.log = undefined;
+
+	var _util = __webpack_require__(7);
+
+	var _conf = __webpack_require__(3);
+
+	var LOG_LEVELS = ['debug', 'info', 'warn', 'error'];
+
+	var log = exports.log = {
+	    clearLogs: function clearLogs() {
+
+	        if (window.console && window.console.clear) {
+	            window.console.clear();
+	        }
+
+	        if (_conf.CONFIG.LOG_TO_PAGE) {
+	            var container = document.getElementById('postRobotLogs');
+
+	            if (container) {
+	                container.parentNode.removeChild(container);
+	            }
+	        }
+	    },
+	    writeToPage: function writeToPage(level, args) {
+	        setTimeout(function () {
+	            var container = document.getElementById('postRobotLogs');
+
+	            if (!container) {
+	                container = document.createElement('div');
+	                container.id = 'postRobotLogs';
+	                container.style.cssText = 'width: 800px; font-family: monospace; white-space: pre-wrap;';
+	                document.body.appendChild(container);
+	            }
+
+	            var el = document.createElement('div');
+
+	            var date = new Date().toString().split(' ')[4];
+
+	            var payload = _util.util.map(args, function (item) {
+	                if (typeof item === 'string') {
+	                    return item;
+	                }
+	                if (!item) {
+	                    return toString.call(item);
+	                }
+	                var json = void 0;
+	                try {
+	                    json = JSON.stringify(item, 0, 2);
+	                } catch (e) {
+	                    json = '[object]';
+	                }
+
+	                return '\n\n' + json + '\n\n';
+	            }).join(' ');
+
+	            var msg = date + ' ' + level + ' ' + payload;
+	            el.innerHTML = msg;
+
+	            var color = {
+	                log: '#ddd',
+	                warn: 'orange',
+	                error: 'red',
+	                info: 'blue',
+	                debug: '#aaa'
+	            }[level];
+
+	            el.style.cssText = 'margin-top: 10px; color: ' + color + ';';
+
+	            if (!container.childNodes.length) {
+	                container.appendChild(el);
+	            } else {
+	                container.insertBefore(el, container.childNodes[0]);
+	            }
+	        });
+	    },
+	    logLevel: function logLevel(level, args) {
+
+	        if (LOG_LEVELS.indexOf(level) < LOG_LEVELS.indexOf(_conf.CONFIG.LOG_LEVEL)) {
+	            return;
+	        }
+
+	        args = Array.prototype.slice.call(args);
+
+	        args.unshift(window.location.host);
+	        args.unshift(_util.util.getType().toLowerCase());
+	        args.unshift('[post-robot]');
+
+	        if (_conf.CONFIG.LOG_TO_PAGE) {
+	            log.writeToPage(level, args);
+	        }
+
+	        if (!window.console) {
+	            return;
+	        }
+
+	        if (!window.console[level]) {
+	            level = 'log';
+	        }
+
+	        if (!window.console[level]) {
+	            return;
+	        }
+
+	        window.console[level].apply(window.console, args);
+	    },
+	    debug: function debug() {
+	        log.logLevel('debug', arguments);
+	    },
+	    info: function info() {
+	        log.logLevel('info', arguments);
+	    },
+	    warn: function warn() {
+	        log.logLevel('warn', arguments);
+	    },
+	    error: function error() {
+	        log.logLevel('error', arguments);
+	    }
+	};
+
+/***/ },
+/* 14 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
 	exports.childWindows = undefined;
 	exports.isSameDomain = isSameDomain;
-	exports.propagate = propagate;
 
 	var _conf = __webpack_require__(3);
 
 	var _util = __webpack_require__(7);
 
-	var _interface = __webpack_require__(1);
+	var _log = __webpack_require__(13);
 
 	var domainMatches = [];
 
@@ -1453,15 +1597,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    }
 
-	    var windowDomain = window.location.protocol + '//' + window.location.host;
 	    var match = false;
 
 	    try {
-	        if (win.location.protocol && win.location.host) {
-	            var otherDomain = win.location.protocol + '//' + win.location.host;
-	            if (otherDomain === windowDomain) {
-	                match = true;
-	            }
+	        if (_util.util.getDomain(window) === _util.util.getDomain(win)) {
+	            match = true;
 	        }
 	    } catch (err) {
 	        // pass
@@ -1488,32 +1628,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return getMap('win', win).id;
 	    },
 	    getWindowById: function getWindowById(id) {
+	        if (window.frames && window.frames[id]) {
+	            return window.frames[id];
+	        }
+
 	        return getMap('id', id).win;
-	    },
-	    getWindowType: function getWindowType(win) {
-	        var map = getMap('win', win);
-
-	        if (map && map.type) {
-	            return map.type;
-	        }
-
-	        if (_util.util.safeHasProp(win, 'parent') && win.parent !== win) {
-	            return _conf.CONSTANTS.WINDOW_TYPES.IFRAME;
-	        }
-
-	        if (_util.util.safeHasProp(win, 'opener')) {
-	            return _conf.CONSTANTS.WINDOW_TYPES.POPUP;
-	        }
-
-	        var isFrame = _util.util.some(windows, function (childWin) {
-	            return _util.util.isFrameOwnedBy(childWin.win, win);
-	        });
-
-	        if (isFrame) {
-	            return _conf.CONSTANTS.WINDOW_TYPES.IFRAME;
-	        }
-
-	        return;
 	    },
 	    register: function register(id, win, type) {
 
@@ -1525,7 +1644,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return;
 	        }
 
-	        _util.util.debug('Registering window:', type, id, win);
+	        _log.log.debug('Registering window:', type, id, win);
 
 	        windows.push({
 	            id: id,
@@ -1565,55 +1684,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return win;
 	};
 
-	function propagate(id) {
-
-	    (0, _interface.on)(_conf.CONSTANTS.POST_MESSAGE_NAMES.IDENTIFY, function (source, data, callback) {
-	        return {
-	            id: id
-	        };
-	    });
-
-	    var registered = [];
-
-	    function register(win, identifier) {
-
-	        if (!win || win === window || registered.indexOf(win) !== -1) {
-	            return;
-	        }
-
-	        _util.util.debug('propagating to', identifier, win);
-
-	        registered.push(win);
-
-	        if (isSameDomain(win) && _util.util.safeHasProp(win, _conf.CONSTANTS.WINDOW_PROPS.POSTROBOT)) {
-	            win[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].registerSelf(id, window, _util.util.getType());
-	        } else {
-
-	            _util.util.windowReady.then(function () {
-	                (0, _interface.send)(win, _conf.CONSTANTS.POST_MESSAGE_NAMES.IDENTIFY, {
-	                    id: id,
-	                    type: _util.util.getType()
-	                }).then(function (data) {
-	                    childWindows.register(data.id, win, data.type);
-	                }, function (err) {
-	                    _util.util.debugError('Error sending identify:', err.stack || err.toString());
-	                });
-	            });
-	        }
-	    }
-
-	    _util.util.eachParent(function (parent) {
-
-	        register(parent, 'parent');
-
-	        _util.util.eachFrame(parent, function (frame) {
-	            register(frame, 'frame');
-	        });
-	    }, true);
-	}
-
 /***/ },
-/* 14 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1676,8 +1748,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return _util.util.replaceObject({ obj: obj }, function (item) {
 	        if (item instanceof Function) {
 	            return serializeMethod(destination, item);
-	        } else if (isSerializedMethod(item)) {
-	            throw new Error('Attempting to serialize already serialized method');
 	        }
 	    }).obj;
 	}
@@ -1703,8 +1773,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 15 */
-/***/ function(module, exports) {
+/* 16 */
+/***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
@@ -1713,21 +1783,34 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.nextTick = nextTick;
 
+	var _util = __webpack_require__(7);
+
+	var tickMessageName = '__nextTick__postRobot__' + _util.util.uniqueID();
 	var queue = [];
 
 	window.addEventListener('message', function (event) {
-	    if (event.data === '__nextTick') {
-	        queue.shift().call();
+	    if (event.data === tickMessageName) {
+	        var method = queue.shift();
+	        method.call();
 	    }
 	});
 
 	function nextTick(method) {
+
+	    if (window.setImmediate) {
+	        return window.setImmediate.call(window, method);
+	    }
+
+	    if (window.nextTick) {
+	        return window.nextTick.call(window, method);
+	    }
+
 	    queue.push(method);
-	    window.postMessage('__nextTick', '*');
+	    window.postMessage(tickMessageName, '*');
 	}
 
 /***/ },
-/* 16 */
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1736,7 +1819,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  value: true
 	});
 
-	var _bridge = __webpack_require__(17);
+	var _bridge = __webpack_require__(18);
 
 	Object.keys(_bridge).forEach(function (key) {
 	  if (key === "default") return;
@@ -1748,7 +1831,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _global = __webpack_require__(18);
+	var _global = __webpack_require__(19);
 
 	Object.keys(_global).forEach(function (key) {
 	  if (key === "default") return;
@@ -1760,7 +1843,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _ie = __webpack_require__(19);
+	var _ie = __webpack_require__(20);
 
 	Object.keys(_ie).forEach(function (key) {
 	  if (key === "default") return;
@@ -1773,7 +1856,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 17 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1809,11 +1892,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    bridge = documentReady.then(function (document) {
 
-	        _lib.util.debug('Opening bridge:', url);
+	        _lib.log.debug('Opening bridge:', url);
+
+	        var id = 'postrobot_bridge_' + _lib.util.uniqueID();
 
 	        var iframe = document.createElement('iframe');
 
-	        iframe.setAttribute('id', 'postRobotBridge');
+	        iframe.setAttribute('name', id);
+	        iframe.setAttribute('id', id);
 
 	        iframe.setAttribute('style', 'margin: 0; padding: 0; border: 0px none; overflow: hidden;');
 	        iframe.setAttribute('frameborder', '0');
@@ -1868,7 +1954,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 18 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1887,34 +1973,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	function registerGlobals() {
 
 	    // Only allow ourselves to be loaded once
+
 	    if (window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
 	        throw new Error('Attempting to load postRobot twice on the same window');
 	    }
 
 	    window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT] = {
-	        registerSelf: function registerSelf(id, win, type) {
-	            _lib.childWindows.register(id, win, type);
-	        },
+	        postMessage: function postMessage(event) {
 
-
-	        postMessage: _lib.promise.method(function (event) {
-	            (0, _lib.nextTick)(function () {
-	                (0, _drivers.receiveMessage)(event);
-	            });
-	        }),
-
-	        postMessageParent: _lib.promise.method(function (source, message, domain) {
-	            if (window.parent && window.parent !== window) {
-	                window.parent.postMessage(message, domain);
-	            } else {
-	                throw new Error('Can not find parent to post message to');
+	            if (_lib.util.getDomain(event.source) !== _lib.util.getDomain(window)) {
+	                return;
 	            }
-	        })
+
+	            (0, _lib.nextTick)(function () {
+	                return (0, _drivers.receiveMessage)(event);
+	            });
+	        }
 	    };
 	}
 
 /***/ },
-/* 19 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1931,8 +2010,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	function emulateIERestrictions(sourceWindow, targetWindow) {
 	    if (!_conf.CONFIG.ALLOW_POSTMESSAGE_POPUP) {
 
-	        var isIframeMessagingParent = _lib.childWindows.getWindowType(sourceWindow) === _conf.CONSTANTS.WINDOW_TYPES.IFRAME && _lib.util.isFrameOwnedBy(targetWindow, sourceWindow);
-	        var isParentMessagingIframe = _lib.childWindows.getWindowType(targetWindow) === _conf.CONSTANTS.WINDOW_TYPES.IFRAME && _lib.util.isFrameOwnedBy(sourceWindow, targetWindow);
+	        var isIframeMessagingParent = _lib.util.isFrameOwnedBy(targetWindow, sourceWindow);
+	        var isParentMessagingIframe = _lib.util.isFrameOwnedBy(sourceWindow, targetWindow);
 
 	        if (!isIframeMessagingParent && !isParentMessagingIframe) {
 	            if (sourceWindow === window) {
@@ -1945,7 +2024,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 20 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1955,32 +2034,48 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.sendMessage = undefined;
 
+	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+	exports.buildMessage = buildMessage;
+
 	var _conf = __webpack_require__(3);
 
 	var _lib = __webpack_require__(12);
 
-	var _strategies = __webpack_require__(21);
+	var _strategies = __webpack_require__(22);
+
+	function buildMessage(win, message) {
+	    var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
+
+	    var id = _lib.util.uniqueID();
+	    var source = (0, _conf.getWindowID)();
+	    var type = _lib.util.getType();
+	    var target = _lib.childWindows.getWindowId(win);
+
+	    return _extends({}, message, options, {
+	        id: message.id || id,
+	        source: source,
+	        originalSource: message.originalSource || source,
+	        windowType: type,
+	        originalWindowType: message.originalWindowType || type,
+	        target: message.target || target
+	    });
+	}
 
 	var sendMessage = exports.sendMessage = _lib.promise.method(function (win, message, domain, isProxy) {
 
-	    message.id = message.id || _lib.util.uniqueID();
-	    message.source = (0, _conf.getWindowID)();
-	    message.originalSource = message.originalSource || (0, _conf.getWindowID)();
-	    message.windowType = _lib.util.getType();
-	    message.originalWindowType = message.originalWindowType || _lib.util.getType();
+	    message = buildMessage(win, message, {
+	        data: (0, _lib.serializeMethods)(win, message.data),
+	        domain: domain
+	    });
 
-	    message.data = (0, _lib.serializeMethods)(win, message.data);
-
-	    if (!message.target) {
-	        message.target = _lib.childWindows.getWindowId(win);
-	    }
-
-	    _lib.util.debug(isProxy ? '#proxy' : '#send', message.type, message.name, message);
+	    _lib.log.logLevel(_conf.POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 ? 'debug' : 'info', [isProxy ? '#proxy' : '#send', message.type, message.name, message]);
 
 	    if (_conf.CONFIG.MOCK_MODE) {
 	        delete message.target;
 	        return window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessage({
-	            origin: window.location.protocol + '//' + window.location.host,
+	            origin: _lib.util.getDomain(window),
 	            source: window,
 	            data: JSON.stringify(message)
 	        });
@@ -1994,7 +2089,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        throw new Error('Window is closed');
 	    }
 
-	    _lib.util.debug('Running send message strategies', message);
+	    _lib.log.debug('Running send message strategies', message);
 
 	    return _lib.util.windowReady.then(function () {
 
@@ -2008,10 +2103,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                return _strategies.SEND_MESSAGE_STRATEGIES[strategyName](win, message, domain);
 	            }).then(function () {
-	                _lib.util.debug(strategyName, 'success');
+	                _lib.log.debug(strategyName, 'success');
 	                return true;
 	            }, function (err) {
-	                _lib.util.debugError(strategyName, 'error\n\n', err.stack || err.toString());
+	                _lib.log.debug(strategyName, 'error\n\n', err.message);
 	                return false;
 	            });
 	        }).then(function (results) {
@@ -2024,7 +2119,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 21 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2040,7 +2135,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _lib = __webpack_require__(12);
 
-	var _compat = __webpack_require__(16);
+	var _compat = __webpack_require__(17);
 
 	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -2056,7 +2151,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var winDomain = void 0;
 
 	        try {
-	            winDomain = win.location.protocol + '//' + win.location.host;
+	            winDomain = _lib.util.getDomain(win);
 	        } catch (err) {
 	            // pass
 	        }
@@ -2079,11 +2174,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    win[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessage({
-	        origin: window.location.protocol + '//' + window.location.host,
+	        origin: _lib.util.getDomain(window),
 	        source: window,
-	        data: JSON.stringify(message)
+	        data: JSON.stringify(message, 0, 2)
 	    });
 	})), _defineProperty(_SEND_MESSAGE_STRATEG, _conf.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE_UP_THROUGH_BRIDGE, _lib.promise.method(function (win, message, domain) {
+
+	    if (_lib.util.isFrameOwnedBy(window, win) || _lib.util.isFrameOwnedBy(win, window)) {
+	        throw new Error('No need to use bridge for frame to frame message');
+	    }
 
 	    var frame = (0, _compat.getBridgeFor)(win);
 
@@ -2099,8 +2198,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	        throw new Error('postRobot not installed in bridge');
 	    }
 
-	    return frame[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessageParent(window, JSON.stringify(message, 0, 2), domain);
+	    // If we're messaging our parent
+
+	    if (win === window.opener) {
+	        message.targetHint = 'window.parent';
+	    }
+
+	    // If we're messaging our child
+
+	    if (window === win.opener) {
+	        message.sourceHint = 'window.opener';
+	    }
+
+	    return frame[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessage({
+	        origin: _lib.util.getDomain(window),
+	        source: window,
+	        data: JSON.stringify(message, 0, 2)
+	    });
 	})), _defineProperty(_SEND_MESSAGE_STRATEG, _conf.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE_DOWN_THROUGH_BRIDGE, _lib.promise.method(function (win, message, domain) {
+
+	    if (_lib.util.isFrameOwnedBy(window, win) || _lib.util.isFrameOwnedBy(win, window)) {
+	        throw new Error('No need to use bridge for frame to frame message');
+	    }
 
 	    var bridge = (0, _compat.getBridge)();
 
@@ -2108,26 +2227,34 @@ return /******/ (function(modules) { // webpackBootstrap
 	        throw new Error('Bridge not initialized');
 	    }
 
-	    if (win === bridge.contentWindow) {
-	        throw new Error('Message target is bridge');
+	    // If we're messaging our parent
+
+	    if (win === window.opener) {
+	        message.targetHint = 'window.parent.opener';
+	    }
+
+	    // If we're messaging our child
+
+	    if (window === win.opener) {
+	        message.sourceHint = 'window.opener';
 	    }
 
 	    if (!message.target) {
-
-	        if (win === window.opener) {
-	            message.target = 'parent.opener';
-	        } else {
-	            throw new Error('Can not post message down through bridge without target');
-	        }
+	        throw new Error('Can not post message down through bridge without target');
 	    }
 
 	    return bridge.then(function (iframe) {
+
+	        if (win === iframe.contentWindow) {
+	            throw new Error('Message target is bridge');
+	        }
+
 	        iframe.contentWindow.postMessage(JSON.stringify(message, 0, 2), domain);
 	    });
 	})), _SEND_MESSAGE_STRATEG);
 
 /***/ },
-/* 22 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2230,7 +2357,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	resetListeners();
 
 /***/ },
-/* 23 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2248,9 +2375,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _lib = __webpack_require__(12);
 
-	var _send = __webpack_require__(20);
+	var _send = __webpack_require__(21);
 
-	var _listeners = __webpack_require__(22);
+	var _listeners = __webpack_require__(23);
 
 	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -2269,7 +2396,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    function respond(data) {
 	        return (0, _send.sendMessage)(source, _extends({
-	            target: message.originalSource ? message.originalSource : _lib.childWindows.getWindowId(source),
+	            target: message.originalSource,
 	            hash: message.hash,
 	            name: message.name
 	        }, data), '*');
@@ -2319,7 +2446,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (options && options.handleError) {
 	            return options.handleError(err);
 	        } else {
-	            console.error(err.stack || err.toString());
+	            _lib.log.error(err.stack || err.toString());
 	        }
 	    });
 	}), _defineProperty(_RECEIVE_MESSAGE_TYPE, _conf.CONSTANTS.POST_MESSAGE_TYPE.RESPONSE, function (source, message, origin) {
@@ -2340,7 +2467,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}), _RECEIVE_MESSAGE_TYPE);
 
 /***/ },
-/* 24 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2391,9 +2518,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    if (options.window && options.errorOnClose) {
 	        (function () {
-	            var interval = setInterval(function () {
+	            var interval = _lib.util.safeInterval(function () {
 	                if (options.window.closed) {
-	                    clearInterval(interval);
+	                    interval.cancel();
 	                    options.handleError(new Error('Post message target window is closed'));
 	                }
 	            }, 50);
@@ -2448,7 +2575,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 25 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2491,7 +2618,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 26 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
