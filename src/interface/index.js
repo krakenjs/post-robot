@@ -1,12 +1,12 @@
 
-import { util } from '../lib/util';
+import { getParentWindow } from '../lib/windows';
 
 export * from './client';
 export * from './server';
 export * from './proxy';
 export * from './config';
 
-export let parent = util.getParent();
+export let parent = getParentWindow();
 
 export { resetListeners as reset } from '../drivers';
 

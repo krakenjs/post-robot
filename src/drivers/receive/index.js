@@ -1,6 +1,6 @@
 
 import { CONFIG, CONSTANTS, getWindowID, POST_MESSAGE_NAMES_LIST } from '../../conf';
-import { childWindows, deserializeMethods, log } from '../../lib';
+import { childWindows, deserializeMethods, log, getOpener } from '../../lib';
 import { emulateIERestrictions } from '../../compat';
 
 import { sendMessage } from '../send';
@@ -29,18 +29,18 @@ function parseMessage(message) {
     return message;
 }
 
-function getWindow(hint) {
+function getWindow(hint, windowID) {
 
     let windowTargets = {
-        'window.parent': () => window.parent,
-        'window.opener': () => window.opener,
-        'window.parent.opener': () => window.parent.opener
+        'window.parent': id => window.parent,
+        'window.opener': id => getOpener(window),
+        'window.parent.opener': id => getOpener(window.parent)
     };
 
     let win;
 
     try {
-        win = windowTargets[hint].call();
+        win = windowTargets[hint](windowID);
     } catch (err) {
         throw new Error(`Can not get ${hint}: ${err.message}`);
     }
@@ -81,7 +81,7 @@ function getProxy(source, message) {
     }
 
     if (message.targetHint) {
-        let win = getWindow(message.targetHint);
+        let win = getWindow(message.targetHint, message.target);
         delete message.targetHint;
         return win;
     }
@@ -123,10 +123,20 @@ export function receiveMessage(event) {
 
     childWindows.register(message.source, source, message.windowType);
 
+    let proxyWindow = getProxy(source, message);
+
+    let level = POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 ? 'debug' : 'info';
+    log.logLevel(level, [ proxyWindow ? '#receiveproxy' : '#receive', message.type, message.name, message ]);
+
+    if (proxyWindow) {
+        delete message.target;
+        return sendMessage(proxyWindow, message, message.domain || '*', true);
+    }
+
     if (message.originalSource !== message.source) {
 
         if (message.sourceHint) {
-            source = getWindow(message.sourceHint);
+            source = getWindow(message.sourceHint, message.originalSource);
             delete message.sourceHint;
         } else {
             let originalSource = childWindows.getWindowById(message.originalSource);
@@ -138,15 +148,6 @@ export function receiveMessage(event) {
         }
 
         childWindows.register(message.originalSource, source, message.originalWindowType);
-    }
-
-    let proxyWindow = getProxy(source, message);
-
-    log.logLevel(POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 ? 'debug' : 'info', [ proxyWindow ? '#receiveproxy' : '#receive', message.type, message.name, message ]);
-
-    if (proxyWindow) {
-        delete message.target;
-        return sendMessage(proxyWindow, message, message.domain || '*', true);
     }
 
     if (CONFIG.MOCK_MODE) {

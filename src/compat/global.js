@@ -1,6 +1,6 @@
 
 import { CONSTANTS } from '../conf';
-import { nextTick, util } from '../lib';
+import { nextTick } from '../lib';
 import { receiveMessage } from '../drivers';
 
 export function registerGlobals() {
@@ -13,11 +13,6 @@ export function registerGlobals() {
 
     window[CONSTANTS.WINDOW_PROPS.POSTROBOT] = {
         postMessage: event => {
-
-            if (util.getDomain(event.source) !== util.getDomain(window)) {
-                return;
-            }
-
             nextTick(() => receiveMessage(event));
         }
     };

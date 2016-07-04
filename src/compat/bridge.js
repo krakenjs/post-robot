@@ -1,6 +1,8 @@
 
 import { CONSTANTS } from '../conf';
-import { util, promise, isSameDomain, log } from '../lib';
+import { util, promise, isSameDomain, log, onWindowReady } from '../lib';
+
+const BRIDGE_NAME_PREFIX = 'postrobot_bridge';
 
 let bridge;
 
@@ -24,7 +26,7 @@ export let openBridge = util.memoize(url => {
 
         log.debug('Opening bridge:', url);
 
-        let id = `postrobot_bridge_${util.uniqueID()}`;
+        let id = `${BRIDGE_NAME_PREFIX}_${util.uniqueID()}`;
 
         let iframe = document.createElement('iframe');
 
@@ -46,8 +48,13 @@ export let openBridge = util.memoize(url => {
         document.body.appendChild(iframe);
 
         return new promise.Promise((resolve, reject) => {
-            iframe.onload = () => resolve(iframe);
+
+            iframe.onload = resolve;
             iframe.onerror = reject;
+
+        }).then(() => {
+
+            return onWindowReady(iframe.contentWindow);
         });
     });
 
@@ -55,7 +62,7 @@ export let openBridge = util.memoize(url => {
 });
 
 export function getBridge() {
-    return bridge;
+    return promise.Promise.resolve().then(() => bridge);
 }
 
 export function getBridgeFor(win) {

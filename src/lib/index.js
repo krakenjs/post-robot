@@ -5,3 +5,4 @@ export * from './log';
 export * from './windows';
 export * from './methods';
 export * from './tick';
+export * from './ready';

@@ -13,7 +13,8 @@ export let CONSTANTS = {
     },
 
     POST_MESSAGE_NAMES: {
-        METHOD: 'postrobot_method'
+        METHOD: 'postrobot_method',
+        READY: 'postrobot_ready'
     },
 
     WINDOW_TYPES: {
@@ -32,9 +33,9 @@ export let CONSTANTS = {
 
     SEND_STRATEGIES: {
         POST_MESSAGE: 'postrobot_post_message',
-        POST_MESSAGE_GLOBAL_METHOD: 'postrobot_post_message_global_method',
-        POST_MESSAGE_UP_THROUGH_BRIDGE: 'postrobot_post_message_up_through_bridge',
-        POST_MESSAGE_DOWN_THROUGH_BRIDGE: 'postrobot_post_message_down_through_bridge'
+        GLOBAL_METHOD: 'postrobot_global_method',
+        FOREIGN_BRIDGE: 'postrobot_foreign_bridge',
+        LOCAL_BRIDGE: 'postrobot_local_bridge'
     }
 };
 

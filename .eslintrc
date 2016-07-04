@@ -207,7 +207,9 @@
     "operator-linebreak": 0,
     "padded-blocks": 0,
     "quote-props": 0,
-    "quotes": [2, "single"],
+    "quotes": [2, "single", {
+      allowTemplateLiterals: true
+    }],
     "require-jsdoc": 0,
     "semi-spacing": 2,
     "semi": 2,
@@ -250,7 +252,7 @@
     // require method and property shorthand syntax for object literals
     "object-shorthand": 2,
     // suggest using arrow functions as callbacks
-    "prefer-arrow-callback": 2,
+    "prefer-arrow-callback": 1,
     // suggest using of const declaration for variables that are never modified after declared
     "prefer-const": 0,
     "prefer-rest-params": 0,

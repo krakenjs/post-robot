@@ -1,5 +1,6 @@
 
 import { SyncPromise } from 'sync-browser-mocks/src/promise';
+import { nextTick } from './tick';
 
 export let Promise = SyncPromise;
 
@@ -9,6 +10,14 @@ export let promise = {
 
     run(method) {
         return Promise.resolve().then(method);
+    },
+
+    nextTick(method) {
+        return new Promise((resolve, reject) => {
+            nextTick(() => {
+                return promise.run(method).then(resolve, reject);
+            });
+        });
     },
 
     method(method) {

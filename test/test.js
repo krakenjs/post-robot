@@ -1,7 +1,10 @@
 
 import postRobot from 'src/index';
 
+import { onWindowReady, promise } from 'src/lib';
+
 postRobot.CONFIG.LOG_TO_PAGE = true;
+window.mockDomain = 'http://test-post-robot.com';
 
 window.console.karma = function() {
     var karma = window.karma || (window.top && window.top.karma) || (window.opener && window.opener.karma);
@@ -9,26 +12,44 @@ window.console.karma = function() {
     console.log.apply(console, arguments);
 };
 
-function createIframe(name) {
+function createIframe(name, callback) {
     var frame = document.createElement('iframe');
     frame.src = '/base/test/' + name;
     frame.id = 'childframe';
-    frame.name = Math.random().toString();
+    frame.name = Math.random().toString() + '_' + name.replace(/[^a-zA-Z0-9]+/g, '_');
+    frame.onload = callback;
     document.body.appendChild(frame);
     return frame.contentWindow;
 }
 
 function createPopup(name) {
-    var popup = window.open('/base/test/' + name, Math.random().toString());
+    var popup = window.open('/base/test/' + name, Math.random().toString() + '_' + name.replace(/[^a-zA-Z0-9]+/g, '_'));
+    window.focus();
     return popup;
 }
 
-var childFrame = createIframe('child.htm');
-var childWindow = createPopup('child.htm');
+let bridge;
 
-var otherChildFrame = createIframe('child.htm');
+let childWindow, childFrame, otherChildFrame;
 
-let bridge = postRobot.openBridge('/base/test/bridge.htm');
+before(function() {
+    return postRobot.openBridge('/base/test/bridge.htm').then(frame => {
+        bridge = frame;
+    }).then(function() {
+
+        childWindow = createPopup('child.htm');
+        childFrame = createIframe('child.htm');
+        otherChildFrame = createIframe('child.htm');
+
+        return promise.Promise.all([
+            onWindowReady(childWindow),
+            onWindowReady(childFrame),
+            onWindowReady(otherChildFrame)
+        ]);
+    });
+});
+
+
 
 describe('[post-robot] happy cases', function() {
 
@@ -418,35 +439,28 @@ describe('[post-robot] popup tests', function() {
 
     it('should succeed in opening and messaging the bridge', function() {
 
-        return bridge.then(function(frame) {
+        return postRobot.send(bridge, 'setupListener', {
 
-            return postRobot.send(frame.contentWindow, 'setupListener', {
+            messageName: 'foo',
+            data: {
+                foo: 'bar'
+            }
 
-                messageName: 'foo',
-                data: {
-                    foo: 'bar'
-                }
+        }).then(function() {
 
-            }).then(function() {
-
-                return postRobot.send(frame.contentWindow, 'foo').then(function(data) {
-                    assert.equal(data.foo, 'bar');
-                });
+            return postRobot.send(bridge, 'foo').then(function(data) {
+                assert.equal(data.foo, 'bar');
             });
-
         });
+
     });
 
-    it.skip('should work when the only method is post down through bridge', function() {
-
-        // Skipping this for now as it's impossible to message down through bridge without having a handle on the other
-        // window first. We could do this by sending an identify message but would prefer not to continue doing this, as
-        // it ends up resulting in race conditions
+    it('should work when the only method is post down through bridge', function() {
 
         var allowedStrategies = postRobot.CONFIG.ALLOWED_POST_MESSAGE_METHODS;
 
         postRobot.CONFIG.ALLOWED_POST_MESSAGE_METHODS = {
-            [ postRobot.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE_DOWN_THROUGH_BRIDGE ]: true
+            [ postRobot.CONSTANTS.SEND_STRATEGIES.LOCAL_BRIDGE ]: true
         };
 
         return postRobot.send(childWindow, 'setupListener', {

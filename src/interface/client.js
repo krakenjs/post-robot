@@ -1,7 +1,7 @@
 
 import { CONFIG, CONSTANTS } from '../conf';
 import { listeners, sendMessage } from '../drivers';
-import { util, promise } from '../lib';
+import { util, promise, getParentWindow, onWindowReady } from '../lib';
 
 
 export function request(options) {
@@ -47,20 +47,6 @@ export function request(options) {
 
         let hasResult = false;
 
-        if (options.timeout) {
-            let timeout = util.intervalTimeout(options.timeout, 100, remaining => {
-
-                if (hasResult) {
-                    return timeout.cancel();
-                }
-
-                if (!remaining) {
-                    return reject(new Error(`Post message response timed out after ${options.timeout} ms`));
-                }
-
-            }, options.timeout);
-        }
-
         options.respond = (err, result) => {
             if (!err) {
                 hasResult = true;
@@ -69,23 +55,47 @@ export function request(options) {
             return err ? reject(err) : resolve(result);
         };
 
-        sendMessage(options.window, {
-            hash,
-            type: CONSTANTS.POST_MESSAGE_TYPE.REQUEST,
-            name: options.name,
-            data: options.data
-        }, options.domain || '*').catch(reject);
+        return promise.run(() => {
 
-        let ackTimeout = util.intervalTimeout(CONFIG.ACK_TIMEOUT, 100, remaining => {
-
-            if (options.ack) {
-                return ackTimeout.cancel();
+            if (getParentWindow(options.window) === window) {
+                return onWindowReady(options.window);
             }
 
-            if (!remaining) {
-                return reject(new Error(`No ack for postMessage ${options.name} in ${CONFIG.ACK_TIMEOUT}ms`));
+        }).then(() => {
+
+            if (options.timeout) {
+                let timeout = util.intervalTimeout(options.timeout, 100, remaining => {
+
+                    if (hasResult) {
+                        return timeout.cancel();
+                    }
+
+                    if (!remaining) {
+                        return reject(new Error(`Post message response timed out after ${options.timeout} ms`));
+                    }
+
+                }, options.timeout);
             }
-        });
+
+            sendMessage(options.window, {
+                hash,
+                type: CONSTANTS.POST_MESSAGE_TYPE.REQUEST,
+                name: options.name,
+                data: options.data
+            }, options.domain || '*').catch(reject);
+
+            let ackTimeout = util.intervalTimeout(CONFIG.ACK_TIMEOUT, 100, remaining => {
+
+                if (options.ack) {
+                    return ackTimeout.cancel();
+                }
+
+                if (!remaining) {
+                    return reject(new Error(`No ack for postMessage ${options.name} in ${CONFIG.ACK_TIMEOUT}ms`));
+                }
+            });
+
+        }).catch(reject);
 
     }), options.callback);
 }
@@ -114,11 +124,11 @@ export function send(window, name, data, options, callback) {
 
 export function sendToParent(name, data, options, callback) {
 
-    let window = util.getParent();
+    let win = getParentWindow();
 
     if (!window) {
         throw new Error('Window does not have a parent');
     }
 
-    return send(util.getParent(), name, data, options, callback);
+    return send(win, name, data, options, callback);
 }

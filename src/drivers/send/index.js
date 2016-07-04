@@ -25,35 +25,37 @@ export function buildMessage(win, message, options = {}) {
 }
 
 
-export let sendMessage = promise.method((win, message, domain, isProxy) => {
+export function sendMessage(win, message, domain, isProxy) {
+    return promise.run(() => {
 
-    message = buildMessage(win, message, {
-        data: serializeMethods(win, message.data),
-        domain
-    });
-
-    log.logLevel(POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 ? 'debug' : 'info', [ isProxy ? '#proxy' : '#send', message.type, message.name, message ]);
-
-    if (CONFIG.MOCK_MODE) {
-        delete message.target;
-        return window[CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessage({
-            origin: util.getDomain(window),
-            source: window,
-            data: JSON.stringify(message)
+        message = buildMessage(win, message, {
+            data: serializeMethods(win, message.data),
+            domain
         });
-    }
 
-    if (win === window) {
-        throw new Error('Attemping to send message to self');
-    }
+        let level = POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 ? 'debug' : 'info';
+        log.logLevel(level, [ isProxy ? '#sendproxy' : '#send', message.type, message.name, message ]);
 
-    if (win.closed) {
-        throw new Error('Window is closed');
-    }
+        if (CONFIG.MOCK_MODE) {
+            delete message.target;
+            return window[CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessage({
+                origin: util.getDomain(window),
+                source: window,
+                data: JSON.stringify(message)
+            });
+        }
 
-    log.debug('Running send message strategies', message);
+        if (win === window) {
+            throw new Error('Attemping to send message to self');
+        }
 
-    return util.windowReady.then(() => {
+        if (win.closed) {
+            throw new Error('Window is closed');
+        }
+
+        log.debug('Running send message strategies', message);
+
+        let messages = [];
 
         return promise.map(util.keys(SEND_MESSAGE_STRATEGIES), strategyName => {
 
@@ -66,18 +68,23 @@ export let sendMessage = promise.method((win, message, domain, isProxy) => {
                 return SEND_MESSAGE_STRATEGIES[strategyName](win, message, domain);
 
             }).then(() => {
-                log.debug(strategyName, 'success');
+                messages.push(`${strategyName}: success`);
                 return true;
             }, err => {
-                log.debug(strategyName, 'error\n\n', err.message);
+                messages.push(`${strategyName}: ${err.message}`);
                 return false;
             });
 
         }).then(results => {
 
-            if (!util.some(results)) {
-                throw new Error('No post-message strategy succeeded');
+            let success = util.some(results);
+            let status = `${message.type} ${message.name} ${success ? 'success' : 'error'}:\n  - ${messages.join('\n  - ')}\n`;
+
+            log.debug(status);
+
+            if (!success) {
+                throw new Error(status);
             }
         });
     });
-});
+}

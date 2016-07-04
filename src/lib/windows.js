@@ -1,7 +1,6 @@
 
 import { CONSTANTS } from '../conf';
 import { util } from './util';
-import { log } from './log';
 
 
 let domainMatches = [];
@@ -31,6 +30,55 @@ export function isSameDomain(win) {
 
     return match;
 }
+
+
+
+let openers = [];
+
+export function getOpener(win) {
+
+    if (!win) {
+        return;
+    }
+
+    for (let match of openers) {
+        if (match.win === win) {
+            return match.match;
+        }
+    }
+
+    let match = win.opener;
+
+    openers.push({
+        win,
+        match
+    });
+
+    return match;
+}
+
+
+getOpener(window);
+getOpener(window.parent);
+getOpener(window.opener);
+
+
+
+
+export function getParentWindow(win) {
+    win = win || window;
+
+    let opener = getOpener(win);
+
+    if (opener) {
+        return opener;
+    }
+
+    if (win.parent !== win) {
+        return win.parent;
+    }
+}
+
 
 
 let windows = [];
@@ -64,8 +112,6 @@ export let childWindows = {
         if (existing) {
             return;
         }
-
-        log.debug('Registering window:', type, id, win);
 
         windows.push({
             id,
@@ -103,5 +149,8 @@ window.open = function(url, name, x, y) {
     let win = util.apply(openWindow, this, arguments);
 
     childWindows.register(name, win, CONSTANTS.WINDOW_TYPES.POPUP);
+
+    getOpener(win);
+
     return win;
 };

@@ -1,6 +1,5 @@
 
 import { CONSTANTS } from '../conf';
-import { promise } from './promise';
 
 export let util = {
 
@@ -15,15 +14,6 @@ export let util = {
     isFullpage() {
         return Boolean(!util.isIframe() && !util.isPopup());
     },
-
-
-    windowReady: new promise.Promise((resolve, reject) => {
-        if (document.readyState === 'complete') {
-            return resolve();
-        }
-
-        window.addEventListener('load', resolve);
-    }),
 
     getType() {
         if (util.isPopup()) {
@@ -46,58 +36,6 @@ export let util = {
                 return method.apply(this, arguments);
             }
         };
-    },
-
-    getParent() {
-        if (util.isPopup()) {
-            return window.opener;
-        }
-        if (util.isIframe()) {
-            return window.parent;
-        }
-    },
-
-    eachParent(method, includeSelf) {
-
-        let win = window;
-
-        if (includeSelf) {
-            method(window);
-        }
-
-        while (true) {
-            let parent;
-
-            try {
-                parent = win.opener || win.parent;
-            } catch (err) {
-                return;
-            }
-
-            if (win === parent) {
-                return;
-            }
-
-            win = parent;
-
-            method(win);
-        }
-    },
-
-    eachFrame(win, method) {
-        for (let i = 0; i < win.frames.length; i++) {
-            let frame;
-            
-            try {
-                frame = win.frames[i];
-            } catch (err) {
-                continue;
-            }
-
-            if (frame !== window) {
-                method(frame);
-            }
-        }
     },
 
     noop() {}, // eslint-disable-line no-empty-function
