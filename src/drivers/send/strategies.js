@@ -1,6 +1,6 @@
 
 import { CONSTANTS } from '../../conf';
-import { util, isSameDomain, getOpener } from '../../lib';
+import { util, isSameDomain, getOpener, isSameTopWindow } from '../../lib';
 import { emulateIERestrictions, getBridge, getBridgeFor } from '../../compat';
 
 export let SEND_MESSAGE_STRATEGIES = {
@@ -48,8 +48,8 @@ export let SEND_MESSAGE_STRATEGIES = {
 
     [ CONSTANTS.SEND_STRATEGIES.FOREIGN_BRIDGE ](win, message, domain) {
 
-        if (getOpener(win) !== window && getOpener(window) !== win) {
-            throw new Error(`Can only use bridge to communicate between a window and a child or parent window`);
+        if (isSameTopWindow(window, win)) {
+            throw new Error(`Can only use bridge to communicate between two different windows, not between frames`);
         }
 
         let frame = getBridgeFor(win);
@@ -96,8 +96,8 @@ export let SEND_MESSAGE_STRATEGIES = {
 
     [ CONSTANTS.SEND_STRATEGIES.LOCAL_BRIDGE ](win, message, domain) {
 
-        if (getOpener(win) !== window && getOpener(window) !== win) {
-            throw new Error(`Can only use bridge to communicate between a window and a child or parent window`);
+        if (isSameTopWindow(window, win)) {
+            throw new Error(`Can only use bridge to communicate between two different windows, not between frames`);
         }
 
         if (!message.target) {

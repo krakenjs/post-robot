@@ -1,5 +1,5 @@
 
-import { childWindows } from '../lib';
+import { isWindowEqual } from '../lib';
 
 export let listeners;
 
@@ -22,7 +22,7 @@ export function getRequestListener(name, win) {
             return requestListener.options;
         }
 
-        if (win && childWindows.isEqual(win, requestListener.win)) {
+        if (win && isWindowEqual(win, requestListener.win)) {
             return requestListener.options;
         }
     }

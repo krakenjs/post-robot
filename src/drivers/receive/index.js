@@ -1,6 +1,6 @@
 
-import { CONFIG, CONSTANTS, getWindowID, POST_MESSAGE_NAMES_LIST } from '../../conf';
-import { childWindows, deserializeMethods, log, getOpener } from '../../lib';
+import { CONFIG, CONSTANTS, POST_MESSAGE_NAMES_LIST } from '../../conf';
+import { getWindowById, registerWindow, deserializeMethods, log, getOpener, getWindowId } from '../../lib';
 import { emulateIERestrictions } from '../../compat';
 
 import { sendMessage } from '../send';
@@ -86,9 +86,9 @@ function getProxy(source, message) {
         return win;
     }
 
-    if (message.target && message.target !== getWindowID()) {
+    if (message.target && message.target !== getWindowId(window)) {
 
-        let win = childWindows.getWindowById(message.target);
+        let win = getWindowById(message.target);
 
         if (!win) {
             throw new Error(`Unable to find window to proxy message to: ${message.target}`);
@@ -121,7 +121,7 @@ export function receiveMessage(event) {
         return;
     }
 
-    childWindows.register(message.source, source, message.windowType);
+    registerWindow(message.source, source);
 
     let proxyWindow = getProxy(source, message);
 
@@ -129,6 +129,11 @@ export function receiveMessage(event) {
     log.logLevel(level, [ proxyWindow ? '#receiveproxy' : '#receive', message.type, message.name, message ]);
 
     if (proxyWindow) {
+
+        if (proxyWindow.closed) {
+            return;
+        }
+
         delete message.target;
         return sendMessage(proxyWindow, message, message.domain || '*', true);
     }
@@ -139,7 +144,7 @@ export function receiveMessage(event) {
             source = getWindow(message.sourceHint, message.originalSource);
             delete message.sourceHint;
         } else {
-            let originalSource = childWindows.getWindowById(message.originalSource);
+            let originalSource = getWindowById(message.originalSource);
             if (originalSource) {
                 source = originalSource;
             } else {
@@ -147,7 +152,11 @@ export function receiveMessage(event) {
             }
         }
 
-        childWindows.register(message.originalSource, source, message.originalWindowType);
+        registerWindow(message.originalSource, source);
+    }
+
+    if (source.closed) {
+        return;
     }
 
     if (CONFIG.MOCK_MODE) {

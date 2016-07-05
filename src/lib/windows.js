@@ -1,7 +1,5 @@
 
-import { CONSTANTS } from '../conf';
 import { util } from './util';
-
 
 let domainMatches = [];
 
@@ -9,6 +7,19 @@ export function isSameDomain(win) {
 
     for (let match of domainMatches) {
         if (match.win === win) {
+
+            if (!match.match) {
+                return false;
+            }
+
+            match.match = false;
+
+            try {
+                match.match = util.getDomain(window) === util.getDomain(win);
+            } catch (err) {
+                return;
+            }
+
             return match.match;
         }
     }
@@ -82,60 +93,75 @@ export function getParentWindow(win) {
 
 
 let windows = [];
+let windowId = window.name || `${util.getType()}_${util.uniqueID()}`;
 
-function getMap(key, value) {
-    return util.find(windows, map => {
-        return map[key] === value;
-    }, {});
+
+export function getWindowId(win) {
+
+    if (win === window) {
+        return windowId;
+    }
+
+    for (let i = windows.length - 1; i >= 0; i--) {
+        let map = windows[i];
+        if (map.win === win) {
+            return map.id;
+        }
+    }
 }
 
-export let childWindows = {
+export function getWindowById(id) {
 
-    getWindowId(win) {
-        return getMap('win', win).id;
-    },
+    if (id === window.name || id === windowId) {
+        return window;
+    }
 
-    getWindowById(id) {
-        if (window.frames && window.frames[id]) {
-            return window.frames[id];
+    if (window.frames && window.frames[id]) {
+        return window.frames[id];
+    }
+
+    for (let i = windows.length - 1; i >= 0; i--) {
+        let map = windows[i];
+        if (map.id === id) {
+            return map.win;
         }
+    }
+}
 
-        return getMap('id', id).win;
-    },
+export function registerWindow(id, win) {
 
-    register(id, win, type) {
-
-        let existing = util.find(windows, map => {
-            return map.id === id && map.win === win;
-        });
-
-        if (existing) {
+    for (let map of windows) {
+        if (map.id === id && map.win === win) {
             return;
         }
-
-        windows.push({
-            id,
-            win,
-            type
-        });
-    },
-
-    isEqual(win1, win2) {
-
-        if (win1 === win2) {
-            return true;
-        }
-
-        let id1 = this.getWindowId(win1);
-        let id2 = this.getWindowId(win2);
-
-        if (id1 && id2 && id1 === id2) {
-            return true;
-        }
-
-        return false;
     }
-};
+
+    windows.push({
+        id,
+        win
+    });
+}
+
+export function isWindowEqual(win1, win2) {
+
+    if (win1 === win2) {
+        return true;
+    }
+
+    let id1 = getWindowId(win1);
+    let id2 = getWindowId(win2);
+
+    if (id1 && id2 && id1 === id2) {
+        return true;
+    }
+
+    return false;
+}
+
+export function isSameTopWindow(win1, win2) {
+    return win1.top === win2.top;
+}
+
 
 let openWindow = window.open;
 
@@ -148,7 +174,7 @@ window.open = function(url, name, x, y) {
 
     let win = util.apply(openWindow, this, arguments);
 
-    childWindows.register(name, win, CONSTANTS.WINDOW_TYPES.POPUP);
+    registerWindow(name, win);
 
     getOpener(win);
 

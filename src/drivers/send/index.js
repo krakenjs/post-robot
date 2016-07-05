@@ -1,6 +1,6 @@
 
-import { CONSTANTS, CONFIG, getWindowID, POST_MESSAGE_NAMES_LIST } from '../../conf';
-import { util, promise, childWindows, serializeMethods, log } from '../../lib';
+import { CONSTANTS, CONFIG, POST_MESSAGE_NAMES_LIST } from '../../conf';
+import { util, promise, getWindowId, serializeMethods, log } from '../../lib';
 
 import { SEND_MESSAGE_STRATEGIES } from './strategies';
 
@@ -8,9 +8,9 @@ import { SEND_MESSAGE_STRATEGIES } from './strategies';
 export function buildMessage(win, message, options = {}) {
 
     let id     = util.uniqueID();
-    let source = getWindowID();
+    let source = getWindowId(window);
     let type   = util.getType();
-    let target = childWindows.getWindowId(win);
+    let target = getWindowId(win);
 
     return {
         ...message,

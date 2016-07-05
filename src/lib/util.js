@@ -152,34 +152,6 @@ export let util = {
         });
     },
 
-    isFrameOwnedBy(win, frame) {
-
-        if (frame.opener === win) {
-            return false;
-        }
-
-        try {
-            if (frame.parent === win) {
-                return true;
-            } else {
-                return false;
-            }
-        } catch (err) {
-
-            try {
-                for (let i = 0; i < win.frames.length; i++) {
-                    if (win.frames[i] === frame) {
-                        return true;
-                    }
-                }
-            } catch (err2) {
-                return false;
-            }
-        }
-
-        return false;
-    },
-
     memoize(method) {
 
         let results = {};
