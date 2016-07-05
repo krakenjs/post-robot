@@ -73,7 +73,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	});
 
-	var _lib = __webpack_require__(10);
+	var _lib = __webpack_require__(8);
 
 	Object.defineProperty(exports, 'Promise', {
 	    enumerable: true,
@@ -82,11 +82,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	});
 
-	var _conf = __webpack_require__(3);
+	var _drivers = __webpack_require__(6);
 
-	var _drivers = __webpack_require__(8);
-
-	var _compat = __webpack_require__(18);
+	var _compat = __webpack_require__(17);
 
 	function init() {
 
@@ -94,9 +92,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    // Listen for all incoming post-messages
 	    _lib.util.listen(window, 'message', _drivers.messageListener);
-
-	    // Register the current window
-	    _lib.childWindows.register((0, _conf.getWindowID)(), window, _lib.util.getType());
 
 	    (0, _lib.initOnReady)();
 	}
@@ -128,7 +123,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _server = __webpack_require__(26);
+	var _server = __webpack_require__(25);
 
 	Object.keys(_server).forEach(function (key) {
 	  if (key === "default") return;
@@ -140,7 +135,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _proxy = __webpack_require__(27);
+	var _proxy = __webpack_require__(26);
 
 	Object.keys(_proxy).forEach(function (key) {
 	  if (key === "default") return;
@@ -152,7 +147,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _config = __webpack_require__(28);
+	var _config = __webpack_require__(27);
 
 	Object.keys(_config).forEach(function (key) {
 	  if (key === "default") return;
@@ -164,7 +159,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _drivers = __webpack_require__(8);
+	var _drivers = __webpack_require__(6);
 
 	Object.defineProperty(exports, 'reset', {
 	  enumerable: true,
@@ -173,7 +168,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	});
 
-	var _bridge = __webpack_require__(19);
+	var _bridge = __webpack_require__(18);
 
 	Object.defineProperty(exports, 'openBridge', {
 	  enumerable: true,
@@ -182,7 +177,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	});
 
-	var _util = __webpack_require__(7);
+	var _util = __webpack_require__(12);
 
 	Object.defineProperty(exports, 'util', {
 	  enumerable: true,
@@ -191,7 +186,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	});
 
-	var _windows = __webpack_require__(15);
+	var _windows = __webpack_require__(14);
 
 	var parent = exports.parent = (0, _windows.getParentWindow)();
 
@@ -210,9 +205,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _conf = __webpack_require__(3);
 
-	var _drivers = __webpack_require__(8);
+	var _drivers = __webpack_require__(6);
 
-	var _lib = __webpack_require__(10);
+	var _lib = __webpack_require__(8);
 
 	function request(options) {
 
@@ -373,18 +368,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _id = __webpack_require__(6);
-
-	Object.keys(_id).forEach(function (key) {
-	  if (key === "default") return;
-	  Object.defineProperty(exports, key, {
-	    enumerable: true,
-	    get: function get() {
-	      return _id[key];
-	    }
-	  });
-	});
-
 /***/ },
 /* 4 */
 /***/ function(module, exports, __webpack_require__) {
@@ -477,298 +460,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.getWindowID = undefined;
-
-	var _util = __webpack_require__(7);
-
-	var getWindowID = exports.getWindowID = _util.util.memoize(function () {
-	    return window.name || _util.util.getType() + '_' + _util.util.uniqueID();
-	});
-
-/***/ },
-/* 7 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.util = undefined;
-
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
-
-	var _conf = __webpack_require__(3);
-
-	var util = exports.util = {
-	    isPopup: function isPopup() {
-	        return Boolean(window.opener);
-	    },
-	    isIframe: function isIframe() {
-	        return Boolean(window.parent && window !== window.parent);
-	    },
-	    isFullpage: function isFullpage() {
-	        return Boolean(!util.isIframe() && !util.isPopup());
-	    },
-	    getType: function getType() {
-	        if (util.isPopup()) {
-	            return _conf.CONSTANTS.WINDOW_TYPES.POPUP;
-	        }
-	        if (util.isIframe()) {
-	            return _conf.CONSTANTS.WINDOW_TYPES.IFRAME;
-	        }
-	        return _conf.CONSTANTS.WINDOW_TYPES.FULLPAGE;
-	    },
-	    once: function once(method) {
-	        if (!method) {
-	            return method;
-	        }
-	        var called = false;
-	        return function onceWrapper() {
-	            if (!called) {
-	                called = true;
-	                return method.apply(this, arguments);
-	            }
-	        };
-	    },
-	    noop: function noop() {},
-	    // eslint-disable-line no-empty-function
-
-	    safeHasProp: function safeHasProp(obj, name) {
-	        try {
-	            if (obj[name]) {
-	                return true;
-	            } else {
-	                return false;
-	            }
-	        } catch (err) {
-	            return false;
-	        }
-	    },
-	    safeGetProp: function safeGetProp(obj, name) {
-	        try {
-	            return obj[name];
-	        } catch (err) {
-	            return;
-	        }
-	    },
-	    listen: function listen(win, event, handler) {
-	        if (win.addEventListener) {
-	            win.addEventListener(event, handler);
-	        } else {
-	            win.attachEvent('on' + event, handler);
-	        }
-
-	        return {
-	            cancel: function cancel() {
-	                if (win.removeEventListener) {
-	                    win.removeEventListener(event, handler);
-	                } else {
-	                    win.detachEvent('on' + event, handler);
-	                }
-	            }
-	        };
-	    },
-	    apply: function apply(method, context, args) {
-	        if (method.apply instanceof Function) {
-	            return method.apply(context, args);
-	        }
-	        return method(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9]);
-	    },
-	    find: function find(collection, method, def) {
-	        if (!collection) {
-	            return def;
-	        }
-	        for (var i = 0; i < collection.length; i++) {
-	            if (method(collection[i])) {
-	                return collection[i];
-	            }
-	        }
-	        return def;
-	    },
-	    map: function map(collection, method) {
-	        var results = [];
-	        for (var i = 0; i < collection.length; i++) {
-	            results.push(method(collection[i]));
-	        }
-	        return results;
-	    },
-	    some: function some(collection, method) {
-	        method = method || Boolean;
-	        for (var i = 0; i < collection.length; i++) {
-	            if (method(collection[i])) {
-	                return true;
-	            }
-	        }
-	        return false;
-	    },
-	    keys: function keys(mapping) {
-	        var result = [];
-	        for (var key in mapping) {
-	            if (mapping.hasOwnProperty(key)) {
-	                result.push(key);
-	            }
-	        }
-	        return result;
-	    },
-	    values: function values(mapping) {
-	        var result = [];
-	        for (var key in mapping) {
-	            if (mapping.hasOwnProperty(key)) {
-	                result.push(mapping[key]);
-	            }
-	        }
-	        return result;
-	    },
-	    getByValue: function getByValue(mapping, value) {
-	        for (var key in mapping) {
-	            if (mapping.hasOwnProperty(key) && mapping[key] === value) {
-	                return key;
-	            }
-	        }
-	    },
-	    uniqueID: function uniqueID() {
-
-	        var chars = '0123456789abcdef';
-
-	        return 'xxxxxxxxxx'.replace(/./g, function () {
-	            return chars.charAt(Math.floor(Math.random() * chars.length));
-	        });
-	    },
-	    isFrameOwnedBy: function isFrameOwnedBy(win, frame) {
-
-	        if (frame.opener === win) {
-	            return false;
-	        }
-
-	        try {
-	            if (frame.parent === win) {
-	                return true;
-	            } else {
-	                return false;
-	            }
-	        } catch (err) {
-
-	            try {
-	                for (var i = 0; i < win.frames.length; i++) {
-	                    if (win.frames[i] === frame) {
-	                        return true;
-	                    }
-	                }
-	            } catch (err2) {
-	                return false;
-	            }
-	        }
-
-	        return false;
-	    },
-	    memoize: function memoize(method) {
-
-	        var results = {};
-
-	        return function memoized() {
-	            var args = JSON.stringify(Array.prototype.slice.call(arguments));
-	            if (!results.hasOwnProperty(args)) {
-	                results[args] = method.apply(this, arguments);
-	            }
-	            return results[args];
-	        };
-	    },
-	    extend: function extend(obj, source) {
-	        if (!source) {
-	            return obj;
-	        }
-
-	        for (var key in source) {
-	            if (source.hasOwnProperty(key)) {
-	                obj[key] = source[key];
-	            }
-	        }
-
-	        return obj;
-	    },
-	    each: function each(obj, callback) {
-	        if (obj instanceof Array) {
-	            for (var i = 0; i < obj.length; i++) {
-	                callback(obj[i], i);
-	            }
-	        } else if (obj instanceof Object && !(obj instanceof Function)) {
-	            for (var key in obj) {
-	                if (obj.hasOwnProperty(key)) {
-	                    callback(obj[key], key);
-	                }
-	            }
-	        }
-	    },
-	    replaceObject: function replaceObject(obj, callback) {
-
-	        var newobj = obj instanceof Array ? [] : {};
-
-	        util.each(obj, function (item, key) {
-
-	            var result = callback(item);
-
-	            if (result !== undefined) {
-	                newobj[key] = result;
-	            } else if ((typeof item === 'undefined' ? 'undefined' : _typeof(item)) === 'object' && item !== null) {
-	                newobj[key] = util.replaceObject(item, callback);
-	            } else {
-	                newobj[key] = item;
-	            }
-	        });
-
-	        return newobj;
-	    },
-	    safeInterval: function safeInterval(method, time) {
-	        var timeout = void 0;
-
-	        function runInterval() {
-	            timeout = setTimeout(runInterval, time);
-	            method.call();
-	        }
-
-	        timeout = setTimeout(runInterval, time);
-
-	        return {
-	            cancel: function cancel() {
-	                clearTimeout(timeout);
-	            }
-	        };
-	    },
-	    intervalTimeout: function intervalTimeout(time, interval, method) {
-
-	        var safeInterval = util.safeInterval(function () {
-	            time -= interval;
-
-	            time = time <= 0 ? 0 : time;
-
-	            if (time === 0) {
-	                safeInterval.cancel();
-	            }
-
-	            method(time);
-	        }, interval);
-
-	        return safeInterval;
-	    },
-	    getDomain: function getDomain(win) {
-	        return win.mockDomain || win.location.protocol + '//' + win.location.host;
-	    }
-	};
-
-/***/ },
-/* 8 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
 
-	var _receive = __webpack_require__(9);
+	var _receive = __webpack_require__(7);
 
 	Object.keys(_receive).forEach(function (key) {
 	  if (key === "default") return;
@@ -780,7 +475,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _send = __webpack_require__(22);
+	var _send = __webpack_require__(21);
 
 	Object.keys(_send).forEach(function (key) {
 	  if (key === "default") return;
@@ -792,7 +487,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _listeners = __webpack_require__(24);
+	var _listeners = __webpack_require__(23);
 
 	Object.keys(_listeners).forEach(function (key) {
 	  if (key === "default") return;
@@ -805,7 +500,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 9 */
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -818,15 +513,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _conf = __webpack_require__(3);
 
-	var _lib = __webpack_require__(10);
+	var _lib = __webpack_require__(8);
 
-	var _compat = __webpack_require__(18);
+	var _compat = __webpack_require__(17);
 
-	var _send = __webpack_require__(22);
+	var _send = __webpack_require__(21);
 
-	var _listeners = __webpack_require__(24);
+	var _listeners = __webpack_require__(23);
 
-	var _types = __webpack_require__(25);
+	var _types = __webpack_require__(24);
 
 	var receivedMessages = [];
 
@@ -912,9 +607,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return win;
 	    }
 
-	    if (message.target && message.target !== (0, _conf.getWindowID)()) {
+	    if (message.target && message.target !== (0, _lib.getWindowId)(window)) {
 
-	        var _win = _lib.childWindows.getWindowById(message.target);
+	        var _win = (0, _lib.getWindowById)(message.target);
 
 	        if (!_win) {
 	            throw new Error('Unable to find window to proxy message to: ' + message.target);
@@ -949,7 +644,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return;
 	    }
 
-	    _lib.childWindows.register(message.source, source, message.windowType);
+	    (0, _lib.registerWindow)(message.source, source);
 
 	    var proxyWindow = getProxy(source, message);
 
@@ -957,6 +652,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _lib.log.logLevel(level, [proxyWindow ? '#receiveproxy' : '#receive', message.type, message.name, message]);
 
 	    if (proxyWindow) {
+
+	        if (proxyWindow.closed) {
+	            return;
+	        }
+
 	        delete message.target;
 	        return (0, _send.sendMessage)(proxyWindow, message, message.domain || '*', true);
 	    }
@@ -967,7 +667,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            source = getWindow(message.sourceHint, message.originalSource);
 	            delete message.sourceHint;
 	        } else {
-	            var originalSource = _lib.childWindows.getWindowById(message.originalSource);
+	            var originalSource = (0, _lib.getWindowById)(message.originalSource);
 	            if (originalSource) {
 	                source = originalSource;
 	            } else {
@@ -975,7 +675,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	        }
 
-	        _lib.childWindows.register(message.originalSource, source, message.originalWindowType);
+	        (0, _lib.registerWindow)(message.originalSource, source);
+	    }
+
+	    if (source.closed) {
+	        return;
 	    }
 
 	    if (_conf.CONFIG.MOCK_MODE) {
@@ -1013,7 +717,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 10 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1022,7 +726,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  value: true
 	});
 
-	var _promise = __webpack_require__(11);
+	var _promise = __webpack_require__(9);
 
 	Object.keys(_promise).forEach(function (key) {
 	  if (key === "default") return;
@@ -1034,7 +738,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _util = __webpack_require__(7);
+	var _util = __webpack_require__(12);
 
 	Object.keys(_util).forEach(function (key) {
 	  if (key === "default") return;
@@ -1046,7 +750,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _log = __webpack_require__(14);
+	var _log = __webpack_require__(13);
 
 	Object.keys(_log).forEach(function (key) {
 	  if (key === "default") return;
@@ -1058,7 +762,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _windows = __webpack_require__(15);
+	var _windows = __webpack_require__(14);
 
 	Object.keys(_windows).forEach(function (key) {
 	  if (key === "default") return;
@@ -1070,7 +774,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _methods = __webpack_require__(16);
+	var _methods = __webpack_require__(15);
 
 	Object.keys(_methods).forEach(function (key) {
 	  if (key === "default") return;
@@ -1082,7 +786,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _tick = __webpack_require__(13);
+	var _tick = __webpack_require__(11);
 
 	Object.keys(_tick).forEach(function (key) {
 	  if (key === "default") return;
@@ -1094,7 +798,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _ready = __webpack_require__(17);
+	var _ready = __webpack_require__(16);
 
 	Object.keys(_ready).forEach(function (key) {
 	  if (key === "default") return;
@@ -1107,7 +811,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 11 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1117,9 +821,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.promise = exports.Promise = undefined;
 
-	var _promise = __webpack_require__(12);
+	var _promise = __webpack_require__(10);
 
-	var _tick = __webpack_require__(13);
+	var _tick = __webpack_require__(11);
 
 	var Promise = exports.Promise = _promise.SyncPromise;
 
@@ -1196,7 +900,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 12 */
+/* 10 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -1401,7 +1105,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 13 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1411,7 +1115,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.nextTick = nextTick;
 
-	var _util = __webpack_require__(7);
+	var _util = __webpack_require__(12);
 
 	var tickMessageName = '__nextTick__postRobot__' + _util.util.uniqueID();
 	var queue = [];
@@ -1438,7 +1142,251 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 14 */
+/* 12 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.util = undefined;
+
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+	var _conf = __webpack_require__(3);
+
+	var util = exports.util = {
+	    isPopup: function isPopup() {
+	        return Boolean(window.opener);
+	    },
+	    isIframe: function isIframe() {
+	        return Boolean(window.parent && window !== window.parent);
+	    },
+	    isFullpage: function isFullpage() {
+	        return Boolean(!util.isIframe() && !util.isPopup());
+	    },
+	    getType: function getType() {
+	        if (util.isPopup()) {
+	            return _conf.CONSTANTS.WINDOW_TYPES.POPUP;
+	        }
+	        if (util.isIframe()) {
+	            return _conf.CONSTANTS.WINDOW_TYPES.IFRAME;
+	        }
+	        return _conf.CONSTANTS.WINDOW_TYPES.FULLPAGE;
+	    },
+	    once: function once(method) {
+	        if (!method) {
+	            return method;
+	        }
+	        var called = false;
+	        return function onceWrapper() {
+	            if (!called) {
+	                called = true;
+	                return method.apply(this, arguments);
+	            }
+	        };
+	    },
+	    noop: function noop() {},
+	    // eslint-disable-line no-empty-function
+
+	    safeHasProp: function safeHasProp(obj, name) {
+	        try {
+	            if (obj[name]) {
+	                return true;
+	            } else {
+	                return false;
+	            }
+	        } catch (err) {
+	            return false;
+	        }
+	    },
+	    safeGetProp: function safeGetProp(obj, name) {
+	        try {
+	            return obj[name];
+	        } catch (err) {
+	            return;
+	        }
+	    },
+	    listen: function listen(win, event, handler) {
+	        if (win.addEventListener) {
+	            win.addEventListener(event, handler);
+	        } else {
+	            win.attachEvent('on' + event, handler);
+	        }
+
+	        return {
+	            cancel: function cancel() {
+	                if (win.removeEventListener) {
+	                    win.removeEventListener(event, handler);
+	                } else {
+	                    win.detachEvent('on' + event, handler);
+	                }
+	            }
+	        };
+	    },
+	    apply: function apply(method, context, args) {
+	        if (method.apply instanceof Function) {
+	            return method.apply(context, args);
+	        }
+	        return method(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9]);
+	    },
+	    find: function find(collection, method, def) {
+	        if (!collection) {
+	            return def;
+	        }
+	        for (var i = 0; i < collection.length; i++) {
+	            if (method(collection[i])) {
+	                return collection[i];
+	            }
+	        }
+	        return def;
+	    },
+	    map: function map(collection, method) {
+	        var results = [];
+	        for (var i = 0; i < collection.length; i++) {
+	            results.push(method(collection[i]));
+	        }
+	        return results;
+	    },
+	    some: function some(collection, method) {
+	        method = method || Boolean;
+	        for (var i = 0; i < collection.length; i++) {
+	            if (method(collection[i])) {
+	                return true;
+	            }
+	        }
+	        return false;
+	    },
+	    keys: function keys(mapping) {
+	        var result = [];
+	        for (var key in mapping) {
+	            if (mapping.hasOwnProperty(key)) {
+	                result.push(key);
+	            }
+	        }
+	        return result;
+	    },
+	    values: function values(mapping) {
+	        var result = [];
+	        for (var key in mapping) {
+	            if (mapping.hasOwnProperty(key)) {
+	                result.push(mapping[key]);
+	            }
+	        }
+	        return result;
+	    },
+	    getByValue: function getByValue(mapping, value) {
+	        for (var key in mapping) {
+	            if (mapping.hasOwnProperty(key) && mapping[key] === value) {
+	                return key;
+	            }
+	        }
+	    },
+	    uniqueID: function uniqueID() {
+
+	        var chars = '0123456789abcdef';
+
+	        return 'xxxxxxxxxx'.replace(/./g, function () {
+	            return chars.charAt(Math.floor(Math.random() * chars.length));
+	        });
+	    },
+	    memoize: function memoize(method) {
+
+	        var results = {};
+
+	        return function memoized() {
+	            var args = JSON.stringify(Array.prototype.slice.call(arguments));
+	            if (!results.hasOwnProperty(args)) {
+	                results[args] = method.apply(this, arguments);
+	            }
+	            return results[args];
+	        };
+	    },
+	    extend: function extend(obj, source) {
+	        if (!source) {
+	            return obj;
+	        }
+
+	        for (var key in source) {
+	            if (source.hasOwnProperty(key)) {
+	                obj[key] = source[key];
+	            }
+	        }
+
+	        return obj;
+	    },
+	    each: function each(obj, callback) {
+	        if (obj instanceof Array) {
+	            for (var i = 0; i < obj.length; i++) {
+	                callback(obj[i], i);
+	            }
+	        } else if (obj instanceof Object && !(obj instanceof Function)) {
+	            for (var key in obj) {
+	                if (obj.hasOwnProperty(key)) {
+	                    callback(obj[key], key);
+	                }
+	            }
+	        }
+	    },
+	    replaceObject: function replaceObject(obj, callback) {
+
+	        var newobj = obj instanceof Array ? [] : {};
+
+	        util.each(obj, function (item, key) {
+
+	            var result = callback(item);
+
+	            if (result !== undefined) {
+	                newobj[key] = result;
+	            } else if ((typeof item === 'undefined' ? 'undefined' : _typeof(item)) === 'object' && item !== null) {
+	                newobj[key] = util.replaceObject(item, callback);
+	            } else {
+	                newobj[key] = item;
+	            }
+	        });
+
+	        return newobj;
+	    },
+	    safeInterval: function safeInterval(method, time) {
+	        var timeout = void 0;
+
+	        function runInterval() {
+	            timeout = setTimeout(runInterval, time);
+	            method.call();
+	        }
+
+	        timeout = setTimeout(runInterval, time);
+
+	        return {
+	            cancel: function cancel() {
+	                clearTimeout(timeout);
+	            }
+	        };
+	    },
+	    intervalTimeout: function intervalTimeout(time, interval, method) {
+
+	        var safeInterval = util.safeInterval(function () {
+	            time -= interval;
+
+	            time = time <= 0 ? 0 : time;
+
+	            if (time === 0) {
+	                safeInterval.cancel();
+	            }
+
+	            method(time);
+	        }, interval);
+
+	        return safeInterval;
+	    },
+	    getDomain: function getDomain(win) {
+	        return win.mockDomain || win.location.protocol + '//' + win.location.host;
+	    }
+	};
+
+/***/ },
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1448,7 +1396,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.log = undefined;
 
-	var _util = __webpack_require__(7);
+	var _util = __webpack_require__(12);
 
 	var _conf = __webpack_require__(3);
 
@@ -1566,7 +1514,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 15 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1574,14 +1522,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	exports.childWindows = undefined;
 	exports.isSameDomain = isSameDomain;
 	exports.getOpener = getOpener;
 	exports.getParentWindow = getParentWindow;
+	exports.getWindowId = getWindowId;
+	exports.getWindowById = getWindowById;
+	exports.registerWindow = registerWindow;
+	exports.isWindowEqual = isWindowEqual;
+	exports.isSameTopWindow = isSameTopWindow;
 
-	var _conf = __webpack_require__(3);
-
-	var _util = __webpack_require__(7);
+	var _util = __webpack_require__(12);
 
 	var domainMatches = [];
 
@@ -1602,6 +1552,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var _match = _ref;
 
 	        if (_match.win === win) {
+
+	            if (!_match.match) {
+	                return false;
+	            }
+
+	            _match.match = false;
+
+	            try {
+	                _match.match = _util.util.getDomain(window) === _util.util.getDomain(win);
+	            } catch (err) {
+	                return;
+	            }
+
 	            return _match.match;
 	        }
 	    }
@@ -1680,56 +1643,86 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	var windows = [];
+	var windowId = window.name || _util.util.getType() + '_' + _util.util.uniqueID();
 
-	function getMap(key, value) {
-	    return _util.util.find(windows, function (map) {
-	        return map[key] === value;
-	    }, {});
+	function getWindowId(win) {
+
+	    if (win === window) {
+	        return windowId;
+	    }
+
+	    for (var i = windows.length - 1; i >= 0; i--) {
+	        var map = windows[i];
+	        if (map.win === win) {
+	            return map.id;
+	        }
+	    }
 	}
 
-	var childWindows = exports.childWindows = {
-	    getWindowId: function getWindowId(win) {
-	        return getMap('win', win).id;
-	    },
-	    getWindowById: function getWindowById(id) {
-	        if (window.frames && window.frames[id]) {
-	            return window.frames[id];
+	function getWindowById(id) {
+
+	    if (id === window.name || id === windowId) {
+	        return window;
+	    }
+
+	    if (window.frames && window.frames[id]) {
+	        return window.frames[id];
+	    }
+
+	    for (var i = windows.length - 1; i >= 0; i--) {
+	        var map = windows[i];
+	        if (map.id === id) {
+	            return map.win;
+	        }
+	    }
+	}
+
+	function registerWindow(id, win) {
+
+	    for (var _iterator3 = windows, _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
+	        var _ref3;
+
+	        if (_isArray3) {
+	            if (_i3 >= _iterator3.length) break;
+	            _ref3 = _iterator3[_i3++];
+	        } else {
+	            _i3 = _iterator3.next();
+	            if (_i3.done) break;
+	            _ref3 = _i3.value;
 	        }
 
-	        return getMap('id', id).win;
-	    },
-	    register: function register(id, win, type) {
+	        var map = _ref3;
 
-	        var existing = _util.util.find(windows, function (map) {
-	            return map.id === id && map.win === win;
-	        });
-
-	        if (existing) {
+	        if (map.id === id && map.win === win) {
 	            return;
 	        }
-
-	        windows.push({
-	            id: id,
-	            win: win,
-	            type: type
-	        });
-	    },
-	    isEqual: function isEqual(win1, win2) {
-
-	        if (win1 === win2) {
-	            return true;
-	        }
-
-	        var id1 = this.getWindowId(win1);
-	        var id2 = this.getWindowId(win2);
-
-	        if (id1 && id2 && id1 === id2) {
-	            return true;
-	        }
-
-	        return false;
 	    }
-	};
+
+	    windows.push({
+	        id: id,
+	        win: win
+	    });
+	}
+
+	function isWindowEqual(win1, win2) {
+
+	    if (win1 === win2) {
+	        return true;
+	    }
+
+	    var id1 = getWindowId(win1);
+	    var id2 = getWindowId(win2);
+
+	    if (id1 && id2 && id1 === id2) {
+	        return true;
+	    }
+
+	    return false;
+	}
+
+	function isSameTopWindow(win1, win2) {
+	    return win1.top === win2.top;
+	}
 
 	var openWindow = window.open;
 
@@ -1742,7 +1735,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var win = _util.util.apply(openWindow, this, arguments);
 
-	    childWindows.register(name, win, _conf.CONSTANTS.WINDOW_TYPES.POPUP);
+	    registerWindow(name, win);
 
 	    getOpener(win);
 
@@ -1750,7 +1743,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 16 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1766,7 +1759,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _conf = __webpack_require__(3);
 
-	var _util = __webpack_require__(7);
+	var _util = __webpack_require__(12);
 
 	var _interface = __webpack_require__(1);
 
@@ -1838,7 +1831,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 17 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1851,13 +1844,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _conf = __webpack_require__(3);
 
-	var _windows = __webpack_require__(15);
+	var _windows = __webpack_require__(14);
 
 	var _interface = __webpack_require__(1);
 
-	var _log = __webpack_require__(14);
+	var _log = __webpack_require__(13);
 
-	var _promise = __webpack_require__(11);
+	var _promise = __webpack_require__(9);
 
 	var readyWindows = [];
 	var readyPromises = [];
@@ -1910,7 +1903,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 18 */
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1919,7 +1912,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  value: true
 	});
 
-	var _bridge = __webpack_require__(19);
+	var _bridge = __webpack_require__(18);
 
 	Object.keys(_bridge).forEach(function (key) {
 	  if (key === "default") return;
@@ -1931,7 +1924,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _global = __webpack_require__(20);
+	var _global = __webpack_require__(19);
 
 	Object.keys(_global).forEach(function (key) {
 	  if (key === "default") return;
@@ -1943,7 +1936,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _ie = __webpack_require__(21);
+	var _ie = __webpack_require__(20);
 
 	Object.keys(_ie).forEach(function (key) {
 	  if (key === "default") return;
@@ -1956,7 +1949,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 19 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1970,7 +1963,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _conf = __webpack_require__(3);
 
-	var _lib = __webpack_require__(10);
+	var _lib = __webpack_require__(8);
 
 	var BRIDGE_NAME_PREFIX = 'postrobot_bridge';
 
@@ -2060,7 +2053,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 20 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2072,9 +2065,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _conf = __webpack_require__(3);
 
-	var _lib = __webpack_require__(10);
+	var _lib = __webpack_require__(8);
 
-	var _drivers = __webpack_require__(8);
+	var _drivers = __webpack_require__(6);
 
 	function registerGlobals() {
 
@@ -2094,7 +2087,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 21 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2106,26 +2099,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _conf = __webpack_require__(3);
 
-	var _lib = __webpack_require__(10);
+	var _lib = __webpack_require__(8);
 
 	function emulateIERestrictions(sourceWindow, targetWindow) {
 	    if (!_conf.CONFIG.ALLOW_POSTMESSAGE_POPUP) {
 
-	        var isIframeMessagingParent = _lib.util.isFrameOwnedBy(targetWindow, sourceWindow);
-	        var isParentMessagingIframe = _lib.util.isFrameOwnedBy(sourceWindow, targetWindow);
-
-	        if (!isIframeMessagingParent && !isParentMessagingIframe) {
-	            if (sourceWindow === window) {
-	                throw new Error('Can not send post messages to another window (disabled by config to emulate IE)');
-	            } else {
-	                throw new Error('Can not receive post messages sent from another window (disabled by config to emulate IE)');
-	            }
+	        if (!(0, _lib.isSameTopWindow)(sourceWindow, targetWindow)) {
+	            throw new Error('Can not send and receive post messages between two different windows (disabled to emulate IE)');
 	        }
 	    }
 	}
 
 /***/ },
-/* 22 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2141,18 +2127,18 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _conf = __webpack_require__(3);
 
-	var _lib = __webpack_require__(10);
+	var _lib = __webpack_require__(8);
 
-	var _strategies = __webpack_require__(23);
+	var _strategies = __webpack_require__(22);
 
 	function buildMessage(win, message) {
 	    var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
 
 	    var id = _lib.util.uniqueID();
-	    var source = (0, _conf.getWindowID)();
+	    var source = (0, _lib.getWindowId)(window);
 	    var type = _lib.util.getType();
-	    var target = _lib.childWindows.getWindowId(win);
+	    var target = (0, _lib.getWindowId)(win);
 
 	    return _extends({}, message, options, {
 	        id: message.id || id,
@@ -2227,7 +2213,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 23 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2241,9 +2227,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _conf = __webpack_require__(3);
 
-	var _lib = __webpack_require__(10);
+	var _lib = __webpack_require__(8);
 
-	var _compat = __webpack_require__(18);
+	var _compat = __webpack_require__(17);
 
 	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -2286,8 +2272,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	}), _defineProperty(_SEND_MESSAGE_STRATEG, _conf.CONSTANTS.SEND_STRATEGIES.FOREIGN_BRIDGE, function (win, message, domain) {
 
-	    if ((0, _lib.getOpener)(win) !== window && (0, _lib.getOpener)(window) !== win) {
-	        throw new Error('Can only use bridge to communicate between a window and a child or parent window');
+	    if ((0, _lib.isSameTopWindow)(window, win)) {
+	        throw new Error('Can only use bridge to communicate between two different windows, not between frames');
 	    }
 
 	    var frame = (0, _compat.getBridgeFor)(win);
@@ -2332,8 +2318,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	}), _defineProperty(_SEND_MESSAGE_STRATEG, _conf.CONSTANTS.SEND_STRATEGIES.LOCAL_BRIDGE, function (win, message, domain) {
 
-	    if ((0, _lib.getOpener)(win) !== window && (0, _lib.getOpener)(window) !== win) {
-	        throw new Error('Can only use bridge to communicate between a window and a child or parent window');
+	    if ((0, _lib.isSameTopWindow)(window, win)) {
+	        throw new Error('Can only use bridge to communicate between two different windows, not between frames');
 	    }
 
 	    if (!message.target) {
@@ -2367,7 +2353,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}), _SEND_MESSAGE_STRATEG);
 
 /***/ },
-/* 24 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2381,7 +2367,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.removeRequestListener = removeRequestListener;
 	exports.addRequestListener = addRequestListener;
 
-	var _lib = __webpack_require__(10);
+	var _lib = __webpack_require__(8);
 
 	var listeners = exports.listeners = void 0;
 
@@ -2417,7 +2403,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return requestListener.options;
 	        }
 
-	        if (win && _lib.childWindows.isEqual(win, requestListener.win)) {
+	        if (win && (0, _lib.isWindowEqual)(win, requestListener.win)) {
 	            return requestListener.options;
 	        }
 	    }
@@ -2470,7 +2456,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	resetListeners();
 
 /***/ },
-/* 25 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2486,11 +2472,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _conf = __webpack_require__(3);
 
-	var _lib = __webpack_require__(10);
+	var _lib = __webpack_require__(8);
 
-	var _send = __webpack_require__(22);
+	var _send = __webpack_require__(21);
 
-	var _listeners = __webpack_require__(24);
+	var _listeners = __webpack_require__(23);
 
 	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -2580,7 +2566,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}), _RECEIVE_MESSAGE_TYPE);
 
 /***/ },
-/* 26 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2594,9 +2580,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _conf = __webpack_require__(3);
 
-	var _lib = __webpack_require__(10);
+	var _lib = __webpack_require__(8);
 
-	var _drivers = __webpack_require__(8);
+	var _drivers = __webpack_require__(6);
 
 	function listen(options) {
 
@@ -2688,7 +2674,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 27 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2699,7 +2685,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.proxy = proxy;
 	exports.unproxy = unproxy;
 
-	var _drivers = __webpack_require__(8);
+	var _drivers = __webpack_require__(6);
 
 	function proxy(window1, window2) {
 
@@ -2731,7 +2717,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 28 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
