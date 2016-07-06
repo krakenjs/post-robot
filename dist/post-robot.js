@@ -1594,46 +1594,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return match;
 	}
 
-	var openers = [];
-
 	function getOpener(win) {
 
 	    if (!win) {
 	        return;
 	    }
 
-	    for (var _iterator2 = openers, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
-	        var _ref2;
-
-	        if (_isArray2) {
-	            if (_i2 >= _iterator2.length) break;
-	            _ref2 = _iterator2[_i2++];
-	        } else {
-	            _i2 = _iterator2.next();
-	            if (_i2.done) break;
-	            _ref2 = _i2.value;
-	        }
-
-	        var _match2 = _ref2;
-
-	        if (_match2.win === win) {
-	            return _match2.match;
-	        }
+	    try {
+	        return win.opener;
+	    } catch (err) {
+	        return;
 	    }
-
-	    var match = win.opener;
-
-	    openers.push({
-	        win: win,
-	        match: match
-	    });
-
-	    return match;
 	}
-
-	getOpener(window);
-	getOpener(window.parent);
-	getOpener(window.opener);
 
 	function getParentWindow(win) {
 	    win = win || window;
@@ -1696,19 +1668,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function registerWindow(id, win) {
 
-	    for (var _iterator3 = windows, _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
-	        var _ref3;
+	    for (var _iterator2 = windows, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
+	        var _ref2;
 
-	        if (_isArray3) {
-	            if (_i3 >= _iterator3.length) break;
-	            _ref3 = _iterator3[_i3++];
+	        if (_isArray2) {
+	            if (_i2 >= _iterator2.length) break;
+	            _ref2 = _iterator2[_i2++];
 	        } else {
-	            _i3 = _iterator3.next();
-	            if (_i3.done) break;
-	            _ref3 = _i3.value;
+	            _i2 = _iterator2.next();
+	            if (_i2.done) break;
+	            _ref2 = _i2.value;
 	        }
 
-	        var map = _ref3;
+	        var map = _ref2;
 
 	        try {
 	            if (map.id === id && map.win === win) {
@@ -1765,8 +1737,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var win = _util.util.apply(openWindow, this, arguments);
 
 	    registerWindow(name, win);
-
-	    getOpener(win);
 
 	    return win;
 	};
