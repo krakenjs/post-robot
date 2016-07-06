@@ -123,7 +123,13 @@ export function receiveMessage(event) {
 
     registerWindow(message.source, source);
 
-    let proxyWindow = getProxy(source, message);
+    let proxyWindow;
+
+    try {
+        proxyWindow = getProxy(source, message);
+    } catch (err) {
+        return log.debug(err.message);
+    }
 
     let level = POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 ? 'debug' : 'info';
     log.logLevel(level, [ proxyWindow ? '#receiveproxy' : '#receive', message.type, message.name, message ]);
@@ -131,7 +137,7 @@ export function receiveMessage(event) {
     if (proxyWindow) {
 
         if (isWindowClosed(proxyWindow)) {
-            throw new Error(`Target window is closed: ${message.target} - can not proxy ${message.type} ${message.name}`);
+            return log.debug(`Target window is closed: ${message.target} - can not proxy ${message.type} ${message.name}`);
         }
 
         delete message.target;
@@ -156,7 +162,7 @@ export function receiveMessage(event) {
     }
 
     if (isWindowClosed(source)) {
-        throw new Error(`Source window is closed: ${message.originalSource} - can not send ${message.type} ${message.name}`);
+        return log.debug(`Source window is closed: ${message.originalSource} - can not send ${message.type} ${message.name}`);
     }
 
     if (CONFIG.MOCK_MODE) {
