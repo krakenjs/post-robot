@@ -104,8 +104,13 @@ export function getWindowId(win) {
 
     for (let i = windows.length - 1; i >= 0; i--) {
         let map = windows[i];
-        if (map.win === win) {
-            return map.id;
+
+        try {
+            if (map.win === win) {
+                return map.id;
+            }
+        } catch (err) {
+            continue;
         }
     }
 }
@@ -122,8 +127,13 @@ export function getWindowById(id) {
 
     for (let i = windows.length - 1; i >= 0; i--) {
         let map = windows[i];
-        if (map.id === id) {
-            return map.win;
+
+        try {
+            if (map.id === id) {
+                return map.win;
+            }
+        } catch (err) {
+            continue;
         }
     }
 }
@@ -131,8 +141,16 @@ export function getWindowById(id) {
 export function registerWindow(id, win) {
 
     for (let map of windows) {
-        if (map.id === id && map.win === win) {
-            return;
+        try {
+            if (map.id === id && map.win === win) {
+                return;
+            }
+        } catch (err) {
+            continue;
+        }
+
+        if (map.id === id && map.win !== win) {
+            throw new Error(`Can not register a duplicate window with name ${id}`);
         }
     }
 
@@ -159,7 +177,11 @@ export function isWindowEqual(win1, win2) {
 }
 
 export function isSameTopWindow(win1, win2) {
-    return win1.top === win2.top;
+    try {
+        return win1.top === win2.top;
+    } catch (err) {
+        return false;
+    }
 }
 
 
@@ -180,3 +202,24 @@ window.open = function(url, name, x, y) {
 
     return win;
 };
+
+function safeGet(obj, prop) {
+
+    let result;
+
+    try {
+        result = obj[prop];
+    } catch (err) {
+        // pass
+    }
+
+    return result;
+}
+
+export function isWindowClosed(win) {
+    try {
+        return !win || win.closed || typeof win.closed === 'undefined' || (isSameDomain(win) && safeGet(win, 'mockclosed'));
+    } catch (err) {
+        return true;
+    }
+}

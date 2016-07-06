@@ -1,6 +1,6 @@
 
 import { CONSTANTS, CONFIG, POST_MESSAGE_NAMES_LIST } from '../../conf';
-import { util, promise, getWindowId, serializeMethods, log } from '../../lib';
+import { util, promise, getWindowId, serializeMethods, log, isWindowClosed } from '../../lib';
 
 import { SEND_MESSAGE_STRATEGIES } from './strategies';
 
@@ -49,7 +49,7 @@ export function sendMessage(win, message, domain, isProxy) {
             throw new Error('Attemping to send message to self');
         }
 
-        if (win.closed) {
+        if (isWindowClosed(win)) {
             throw new Error('Window is closed');
         }
 

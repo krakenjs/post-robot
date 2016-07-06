@@ -1,6 +1,6 @@
 
 import { CONFIG } from '../conf';
-import { util, promise } from '../lib';
+import { util, promise, isWindowClosed } from '../lib';
 import { addRequestListener, removeRequestListener } from '../drivers';
 
 export function listen(options) {
@@ -34,7 +34,7 @@ export function listen(options) {
 
     if (options.window && options.errorOnClose) {
         let interval = util.safeInterval(() => {
-            if (options.window.closed) {
+            if (isWindowClosed(options.window)) {
                 interval.cancel();
                 options.handleError(new Error('Post message target window is closed'));
             }

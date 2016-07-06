@@ -1,6 +1,6 @@
 
 import { CONSTANTS } from '../../conf';
-import { promise, log } from '../../lib';
+import { promise, log, isWindowClosed } from '../../lib';
 
 import { sendMessage } from '../send';
 import { listeners, getRequestListener } from '../listeners';
@@ -23,6 +23,11 @@ export let RECEIVE_MESSAGE_TYPES = {
         let options = getRequestListener(message.name, source);
 
         function respond(data) {
+
+            if (isWindowClosed(source)) {
+                return;
+            }
+
             return sendMessage(source, {
                 target: message.originalSource,
                 hash: message.hash,
@@ -40,10 +45,6 @@ export let RECEIVE_MESSAGE_TYPES = {
 
                 if (!options) {
                     throw new Error(`No postmessage request handler for ${message.name} in ${window.location.href}`);
-                }
-
-                if (options.window && source && options.window !== source) {
-                    return;
                 }
 
                 if (options.domain) {

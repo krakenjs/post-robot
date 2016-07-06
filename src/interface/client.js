@@ -1,7 +1,7 @@
 
 import { CONFIG, CONSTANTS } from '../conf';
 import { listeners, sendMessage } from '../drivers';
-import { util, promise, getParentWindow, onWindowReady } from '../lib';
+import { util, promise, getParentWindow, onWindowReady, isWindowClosed } from '../lib';
 
 
 export function request(options) {
@@ -41,7 +41,7 @@ export function request(options) {
         let hash = `${options.name}_${util.uniqueID()}`;
         listeners.response[hash] = options;
 
-        if (options.window.closed) {
+        if (isWindowClosed(options.window)) {
             throw new Error('Target window is closed');
         }
 

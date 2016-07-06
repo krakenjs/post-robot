@@ -1,6 +1,6 @@
 
 import { CONFIG, CONSTANTS, POST_MESSAGE_NAMES_LIST } from '../../conf';
-import { getWindowById, registerWindow, deserializeMethods, log, getOpener, getWindowId } from '../../lib';
+import { getWindowById, registerWindow, deserializeMethods, log, getOpener, getWindowId, isWindowClosed } from '../../lib';
 import { emulateIERestrictions } from '../../compat';
 
 import { sendMessage } from '../send';
@@ -130,8 +130,8 @@ export function receiveMessage(event) {
 
     if (proxyWindow) {
 
-        if (proxyWindow.closed) {
-            return;
+        if (isWindowClosed(proxyWindow)) {
+            throw new Error(`Target window is closed: ${message.target} - can not proxy ${message.type} ${message.name}`);
         }
 
         delete message.target;
@@ -155,8 +155,8 @@ export function receiveMessage(event) {
         registerWindow(message.originalSource, source);
     }
 
-    if (source.closed) {
-        return;
+    if (isWindowClosed(source)) {
+        throw new Error(`Source window is closed: ${message.originalSource} - can not send ${message.type} ${message.name}`);
     }
 
     if (CONFIG.MOCK_MODE) {
