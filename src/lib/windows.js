@@ -42,36 +42,18 @@ export function isSameDomain(win) {
     return match;
 }
 
-
-
-let openers = [];
-
 export function getOpener(win) {
 
     if (!win) {
         return;
     }
 
-    for (let match of openers) {
-        if (match.win === win) {
-            return match.match;
-        }
+    try {
+        return win.opener;
+    } catch (err) {
+        return;
     }
-
-    let match = win.opener;
-
-    openers.push({
-        win,
-        match
-    });
-
-    return match;
 }
-
-
-getOpener(window);
-getOpener(window.parent);
-getOpener(window.opener);
 
 
 
@@ -197,8 +179,6 @@ window.open = function(url, name, x, y) {
     let win = util.apply(openWindow, this, arguments);
 
     registerWindow(name, win);
-
-    getOpener(win);
 
     return win;
 };
