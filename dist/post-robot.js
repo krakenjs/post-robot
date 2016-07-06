@@ -646,7 +646,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    (0, _lib.registerWindow)(message.source, source);
 
-	    var proxyWindow = getProxy(source, message);
+	    var proxyWindow = void 0;
+
+	    try {
+	        proxyWindow = getProxy(source, message);
+	    } catch (err) {
+	        return _lib.log.debug(err.message);
+	    }
 
 	    var level = _conf.POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 ? 'debug' : 'info';
 	    _lib.log.logLevel(level, [proxyWindow ? '#receiveproxy' : '#receive', message.type, message.name, message]);
@@ -654,7 +660,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (proxyWindow) {
 
 	        if ((0, _lib.isWindowClosed)(proxyWindow)) {
-	            throw new Error('Target window is closed: ' + message.target + ' - can not proxy ' + message.type + ' ' + message.name);
+	            return _lib.log.debug('Target window is closed: ' + message.target + ' - can not proxy ' + message.type + ' ' + message.name);
 	        }
 
 	        delete message.target;
@@ -679,7 +685,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    if ((0, _lib.isWindowClosed)(source)) {
-	        throw new Error('Source window is closed: ' + message.originalSource + ' - can not send ' + message.type + ' ' + message.name);
+	        return _lib.log.debug('Source window is closed: ' + message.originalSource + ' - can not send ' + message.type + ' ' + message.name);
 	    }
 
 	    if (_conf.CONFIG.MOCK_MODE) {
