@@ -244,7 +244,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var hash = options.name + '_' + _lib.util.uniqueID();
 	        _drivers.listeners.response[hash] = options;
 
-	        if (options.window.closed) {
+	        if ((0, _lib.isWindowClosed)(options.window)) {
 	            throw new Error('Target window is closed');
 	        }
 
@@ -653,8 +653,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    if (proxyWindow) {
 
-	        if (proxyWindow.closed) {
-	            return;
+	        if ((0, _lib.isWindowClosed)(proxyWindow)) {
+	            throw new Error('Target window is closed: ' + message.target + ' - can not proxy ' + message.type + ' ' + message.name);
 	        }
 
 	        delete message.target;
@@ -678,8 +678,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        (0, _lib.registerWindow)(message.originalSource, source);
 	    }
 
-	    if (source.closed) {
-	        return;
+	    if ((0, _lib.isWindowClosed)(source)) {
+	        throw new Error('Source window is closed: ' + message.originalSource + ' - can not send ' + message.type + ' ' + message.name);
 	    }
 
 	    if (_conf.CONFIG.MOCK_MODE) {
@@ -1530,6 +1530,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.registerWindow = registerWindow;
 	exports.isWindowEqual = isWindowEqual;
 	exports.isSameTopWindow = isSameTopWindow;
+	exports.isWindowClosed = isWindowClosed;
 
 	var _util = __webpack_require__(12);
 
@@ -1653,8 +1654,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    for (var i = windows.length - 1; i >= 0; i--) {
 	        var map = windows[i];
-	        if (map.win === win) {
-	            return map.id;
+
+	        try {
+	            if (map.win === win) {
+	                return map.id;
+	            }
+	        } catch (err) {
+	            continue;
 	        }
 	    }
 	}
@@ -1671,8 +1677,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    for (var i = windows.length - 1; i >= 0; i--) {
 	        var map = windows[i];
-	        if (map.id === id) {
-	            return map.win;
+
+	        try {
+	            if (map.id === id) {
+	                return map.win;
+	            }
+	        } catch (err) {
+	            continue;
 	        }
 	    }
 	}
@@ -1693,8 +1704,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        var map = _ref3;
 
-	        if (map.id === id && map.win === win) {
-	            return;
+	        try {
+	            if (map.id === id && map.win === win) {
+	                return;
+	            }
+	        } catch (err) {
+	            continue;
+	        }
+
+	        if (map.id === id && map.win !== win) {
+	            throw new Error('Can not register a duplicate window with name ' + id);
 	        }
 	    }
 
@@ -1721,7 +1740,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	function isSameTopWindow(win1, win2) {
-	    return win1.top === win2.top;
+	    try {
+	        return win1.top === win2.top;
+	    } catch (err) {
+	        return false;
+	    }
 	}
 
 	var openWindow = window.open;
@@ -1741,6 +1764,27 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    return win;
 	};
+
+	function safeGet(obj, prop) {
+
+	    var result = void 0;
+
+	    try {
+	        result = obj[prop];
+	    } catch (err) {
+	        // pass
+	    }
+
+	    return result;
+	}
+
+	function isWindowClosed(win) {
+	    try {
+	        return !win || win.closed || typeof win.closed === 'undefined' || isSameDomain(win) && safeGet(win, 'mockclosed');
+	    } catch (err) {
+	        return true;
+	    }
+	}
 
 /***/ },
 /* 15 */
@@ -2174,7 +2218,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            throw new Error('Attemping to send message to self');
 	        }
 
-	        if (win.closed) {
+	        if ((0, _lib.isWindowClosed)(win)) {
 	            throw new Error('Window is closed');
 	        }
 
@@ -2494,6 +2538,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var options = (0, _listeners.getRequestListener)(message.name, source);
 
 	    function respond(data) {
+
+	        if ((0, _lib.isWindowClosed)(source)) {
+	            return;
+	        }
+
 	        return (0, _send.sendMessage)(source, _extends({
 	            target: message.originalSource,
 	            hash: message.hash,
@@ -2510,10 +2559,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            if (!options) {
 	                throw new Error('No postmessage request handler for ' + message.name + ' in ' + window.location.href);
-	            }
-
-	            if (options.window && source && options.window !== source) {
-	                return;
 	            }
 
 	            if (options.domain) {
@@ -2618,7 +2663,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (options.window && options.errorOnClose) {
 	        (function () {
 	            var interval = _lib.util.safeInterval(function () {
-	                if (options.window.closed) {
+	                if ((0, _lib.isWindowClosed)(options.window)) {
 	                    interval.cancel();
 	                    options.handleError(new Error('Post message target window is closed'));
 	                }
