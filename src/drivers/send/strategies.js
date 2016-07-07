@@ -18,6 +18,10 @@ export let SEND_MESSAGE_STRATEGIES = {
             throw new Error(`Window is not on the same domain`);
         }
 
+        if (isSameTopWindow(window, win)) {
+            throw new Error(`Can only use global method to communicate between two different windows, not between frames`);
+        }
+
         let sourceDomain = util.getDomain(window);
         let targetDomain;
 
