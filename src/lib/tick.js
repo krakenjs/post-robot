@@ -13,14 +13,6 @@ window.addEventListener('message', event => {
 
 export function nextTick(method) {
 
-    if (window.setImmediate) {
-        return window.setImmediate.call(window, method);
-    }
-
-    if (window.nextTick) {
-        return window.nextTick.call(window, method);
-    }
-
     queue.push(method);
     window.postMessage(tickMessageName, '*');
 }

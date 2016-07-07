@@ -1,6 +1,5 @@
 
 import { CONSTANTS } from '../conf';
-import { nextTick } from '../lib';
 import { receiveMessage } from '../drivers';
 
 export function registerGlobals() {
@@ -13,7 +12,7 @@ export function registerGlobals() {
 
     window[CONSTANTS.WINDOW_PROPS.POSTROBOT] = {
         postMessage: event => {
-            nextTick(() => receiveMessage(event));
+            receiveMessage(event);
         }
     };
 }
