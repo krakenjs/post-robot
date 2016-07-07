@@ -654,7 +654,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return _lib.log.debug(err.message);
 	    }
 
-	    var level = _conf.POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 ? 'debug' : 'info';
+	    var level = _conf.POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 || message.type === _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK || proxyWindow ? 'debug' : 'info';
 	    _lib.log.logLevel(level, [proxyWindow ? '#receiveproxy' : '#receive', message.type, message.name, message]);
 
 	    if (proxyWindow) {
@@ -1135,14 +1135,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function nextTick(method) {
 
-	    if (window.setImmediate) {
-	        return window.setImmediate.call(window, method);
-	    }
-
-	    if (window.nextTick) {
-	        return window.nextTick.call(window, method);
-	    }
-
 	    queue.push(method);
 	    window.postMessage(tickMessageName, '*');
 	}
@@ -1529,6 +1521,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: true
 	});
 	exports.isSameDomain = isSameDomain;
+	exports.isWindowClosed = isWindowClosed;
 	exports.getOpener = getOpener;
 	exports.getParentWindow = getParentWindow;
 	exports.getWindowId = getWindowId;
@@ -1536,9 +1529,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.registerWindow = registerWindow;
 	exports.isWindowEqual = isWindowEqual;
 	exports.isSameTopWindow = isSameTopWindow;
-	exports.isWindowClosed = isWindowClosed;
 
 	var _util = __webpack_require__(12);
+
+	function safeGet(obj, prop) {
+
+	    var result = void 0;
+
+	    try {
+	        result = obj[prop];
+	    } catch (err) {
+	        // pass
+	    }
+
+	    return result;
+	}
 
 	var domainMatches = [];
 
@@ -1592,6 +1597,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 
 	    return match;
+	}
+
+	function isWindowClosed(win) {
+	    try {
+	        return !win || win.closed || typeof win.closed === 'undefined' || isSameDomain(win) && safeGet(win, 'mockclosed');
+	    } catch (err) {
+	        return true;
+	    }
 	}
 
 	function getOpener(win) {
@@ -1691,7 +1704,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 
 	        if (map.id === id && map.win !== win) {
-	            throw new Error('Can not register a duplicate window with name ' + id);
+	            if (!isWindowClosed(map.win)) {
+	                throw new Error('Can not register a duplicate window with name ' + id);
+	            }
 	        }
 	    }
 
@@ -1740,27 +1755,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    return win;
 	};
-
-	function safeGet(obj, prop) {
-
-	    var result = void 0;
-
-	    try {
-	        result = obj[prop];
-	    } catch (err) {
-	        // pass
-	    }
-
-	    return result;
-	}
-
-	function isWindowClosed(win) {
-	    try {
-	        return !win || win.closed || typeof win.closed === 'undefined' || isSameDomain(win) && safeGet(win, 'mockclosed');
-	    } catch (err) {
-	        return true;
-	    }
-	}
 
 /***/ },
 /* 15 */
@@ -2085,8 +2079,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _conf = __webpack_require__(3);
 
-	var _lib = __webpack_require__(8);
-
 	var _drivers = __webpack_require__(6);
 
 	function registerGlobals() {
@@ -2099,9 +2091,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT] = {
 	        postMessage: function postMessage(event) {
-	            (0, _lib.nextTick)(function () {
-	                return (0, _drivers.receiveMessage)(event);
-	            });
+	            (0, _drivers.receiveMessage)(event);
 	        }
 	    };
 	}
@@ -2178,7 +2168,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            domain: domain
 	        });
 
-	        var level = _conf.POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 ? 'debug' : 'info';
+	        var level = _conf.POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 || message.type === _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK || isProxy ? 'debug' : 'info';
 	        _lib.log.logLevel(level, [isProxy ? '#sendproxy' : '#send', message.type, message.name, message]);
 
 	        if (_conf.CONFIG.MOCK_MODE) {
@@ -2262,6 +2252,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    if (!(0, _lib.isSameDomain)(win)) {
 	        throw new Error('Window is not on the same domain');
+	    }
+
+	    if ((0, _lib.isSameTopWindow)(window, win)) {
+	        throw new Error('Can only use global method to communicate between two different windows, not between frames');
 	    }
 
 	    var sourceDomain = _lib.util.getDomain(window);
