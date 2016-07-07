@@ -1,6 +1,19 @@
 
 import { util } from './util';
 
+function safeGet(obj, prop) {
+
+    let result;
+
+    try {
+        result = obj[prop];
+    } catch (err) {
+        // pass
+    }
+
+    return result;
+}
+
 let domainMatches = [];
 
 export function isSameDomain(win) {
@@ -41,6 +54,15 @@ export function isSameDomain(win) {
 
     return match;
 }
+
+export function isWindowClosed(win) {
+    try {
+        return !win || win.closed || typeof win.closed === 'undefined' || (isSameDomain(win) && safeGet(win, 'mockclosed'));
+    } catch (err) {
+        return true;
+    }
+}
+
 
 export function getOpener(win) {
 
@@ -184,24 +206,3 @@ window.open = function(url, name, x, y) {
 
     return win;
 };
-
-function safeGet(obj, prop) {
-
-    let result;
-
-    try {
-        result = obj[prop];
-    } catch (err) {
-        // pass
-    }
-
-    return result;
-}
-
-export function isWindowClosed(win) {
-    try {
-        return !win || win.closed || typeof win.closed === 'undefined' || (isSameDomain(win) && safeGet(win, 'mockclosed'));
-    } catch (err) {
-        return true;
-    }
-}
