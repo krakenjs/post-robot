@@ -132,7 +132,9 @@ export function registerWindow(id, win) {
         }
 
         if (map.id === id && map.win !== win) {
-            throw new Error(`Can not register a duplicate window with name ${id}`);
+            if (!isWindowClosed(map.win)) {
+                throw new Error(`Can not register a duplicate window with name ${id}`);
+            }
         }
     }
 
