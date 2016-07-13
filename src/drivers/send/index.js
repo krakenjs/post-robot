@@ -33,7 +33,16 @@ export function sendMessage(win, message, domain, isProxy) {
             domain
         });
 
-        let level = (POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 || message.type === CONSTANTS.POST_MESSAGE_TYPE.ACK || isProxy) ? 'debug' : 'info';
+        let level;
+
+        if (POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 || message.type === CONSTANTS.POST_MESSAGE_TYPE.ACK || isProxy) {
+            level = 'debug';
+        } else if (message.ack === 'error') {
+            level = 'error';
+        } else {
+            level = 'info';
+        }
+
         log.logLevel(level, [ isProxy ? '#sendproxy' : '#send', message.type, message.name, message ]);
 
         if (CONFIG.MOCK_MODE) {
