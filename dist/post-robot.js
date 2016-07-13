@@ -265,11 +265,34 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	        }).then(function () {
 
+	            (0, _drivers.sendMessage)(options.window, {
+	                hash: hash,
+	                type: _conf.CONSTANTS.POST_MESSAGE_TYPE.REQUEST,
+	                name: options.name,
+	                data: options.data,
+	                fireAndForget: options.fireAndForget
+	            }, options.domain || '*')['catch'](reject);
+
+	            if (options.fireAndForget) {
+	                return resolve();
+	            }
+
+	            var ackTimeout = _lib.util.intervalTimeout(_conf.CONFIG.ACK_TIMEOUT, 100, function (remaining) {
+
+	                if (options.ack || (0, _lib.isWindowClosed)(options.window)) {
+	                    return ackTimeout.cancel();
+	                }
+
+	                if (!remaining) {
+	                    return reject(new Error('No ack for postMessage ' + options.name + ' in ' + _conf.CONFIG.ACK_TIMEOUT + 'ms'));
+	                }
+	            });
+
 	            if (options.timeout) {
 	                (function () {
 	                    var timeout = _lib.util.intervalTimeout(options.timeout, 100, function (remaining) {
 
-	                        if (hasResult) {
+	                        if (hasResult || (0, _lib.isWindowClosed)(options.window)) {
 	                            return timeout.cancel();
 	                        }
 
@@ -279,24 +302,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    }, options.timeout);
 	                })();
 	            }
-
-	            (0, _drivers.sendMessage)(options.window, {
-	                hash: hash,
-	                type: _conf.CONSTANTS.POST_MESSAGE_TYPE.REQUEST,
-	                name: options.name,
-	                data: options.data
-	            }, options.domain || '*')['catch'](reject);
-
-	            var ackTimeout = _lib.util.intervalTimeout(_conf.CONFIG.ACK_TIMEOUT, 100, function (remaining) {
-
-	                if (options.ack) {
-	                    return ackTimeout.cancel();
-	                }
-
-	                if (!remaining) {
-	                    return reject(new Error('No ack for postMessage ' + options.name + ' in ' + _conf.CONFIG.ACK_TIMEOUT + 'ms'));
-	                }
-	            });
 	        })['catch'](reject);
 	    }), options.callback);
 	}
@@ -654,7 +659,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return _lib.log.debug(err.message);
 	    }
 
-	    var level = _conf.POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 || message.type === _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK || proxyWindow ? 'debug' : 'info';
+	    var level = void 0;
+
+	    if (_conf.POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 || message.type === _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK || proxyWindow) {
+	        level = 'debug';
+	    } else if (message.ack === 'error') {
+	        level = 'error';
+	    } else {
+	        level = 'info';
+	    }
+
 	    _lib.log.logLevel(level, [proxyWindow ? '#receiveproxy' : '#receive', message.type, message.name, message]);
 
 	    if (proxyWindow) {
@@ -1043,7 +1057,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 
 	        if (result === this) {
-	            throw new Error('Can not return a promise from the the same promise');
+	            throw new Error('Can not return a promise from the the then handler of the same promise');
 	        }
 
 	        if (error) {
@@ -1079,9 +1093,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return this.then(null, onError);
 	};
 
-	SyncPromise.prototype.done = function (successHandler, errorHandler) {
-	    this.then(successHandler, errorHandler || function (err) {
-	        console.error(err.stack || err.toString());
+	SyncPromise.prototype['finally'] = function (handler) {
+	    return this.then(function (result) {
+	        handler();
+	        return result;
+	    }, function (error) {
+	        handler();
+	        throw error;
 	    });
 	};
 
@@ -1333,7 +1351,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        util.each(obj, function (item, key) {
 
-	            var result = callback(item);
+	            var result = callback(item, key);
 
 	            if (result !== undefined) {
 	                newobj[key] = result;
@@ -1777,6 +1795,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _interface = __webpack_require__(1);
 
+	var _log = __webpack_require__(13);
+
+	var _promise = __webpack_require__(9);
+
 	var methods = {};
 
 	var listenForMethods = exports.listenForMethods = _util.util.once(function () {
@@ -1790,7 +1812,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	            throw new Error('Method window does not match');
 	        }
 
-	        return methods[data.id].method.apply(null, data.args);
+	        var method = methods[data.id].method;
+
+	        _log.log.debug('Call local method', data.name, data.args);
+
+	        return _promise.promise.run(function () {
+	            return method.apply(null, data.args);
+	        }).then(function (result) {
+
+	            return {
+	                result: result,
+	                id: data.id,
+	                name: data.name
+	            };
+	        });
 	    });
 	});
 
@@ -1798,7 +1833,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return item instanceof Object && item.__type__ === _conf.CONSTANTS.SERIALIZATION_TYPES.METHOD && item.__id__;
 	}
 
-	function serializeMethod(destination, method) {
+	function serializeMethod(destination, method, name) {
 
 	    var id = _util.util.uniqueID();
 
@@ -1809,7 +1844,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    return {
 	        __type__: _conf.CONSTANTS.SERIALIZATION_TYPES.METHOD,
-	        __id__: id
+	        __id__: id,
+	        __name__: name
 	    };
 	}
 
@@ -1817,27 +1853,38 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    listenForMethods();
 
-	    return _util.util.replaceObject({ obj: obj }, function (item) {
+	    return _util.util.replaceObject({ obj: obj }, function (item, key) {
 	        if (item instanceof Function) {
-	            return serializeMethod(destination, item);
+	            return serializeMethod(destination, item, key);
 	        }
 	    }).obj;
 	}
 
 	function deserializeMethod(source, obj) {
 
-	    return function () {
+	    function wrapper() {
 	        var args = Array.prototype.slice.call(arguments);
+	        _log.log.debug('Call foreign method', obj.__name__, args);
 	        return (0, _interface.send)(source, _conf.CONSTANTS.POST_MESSAGE_NAMES.METHOD, {
 	            id: obj.__id__,
+	            name: obj.__name__,
 	            args: args
+
+	        }).then(function (data) {
+
+	            _log.log.debug('Got foreign method result', obj.__name__, data.result);
+	            return data.result;
 	        });
-	    };
+	    }
+
+	    wrapper.__name__ = obj.__name__;
+
+	    return wrapper;
 	}
 
 	function deserializeMethods(source, obj) {
 
-	    return _util.util.replaceObject({ obj: obj }, function (item) {
+	    return _util.util.replaceObject({ obj: obj }, function (item, key) {
 	        if (isSerializedMethod(item)) {
 	            return deserializeMethod(source, item);
 	        }
@@ -2168,7 +2215,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	            domain: domain
 	        });
 
-	        var level = _conf.POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 || message.type === _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK || isProxy ? 'debug' : 'info';
+	        var level = void 0;
+
+	        if (_conf.POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 || message.type === _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK || isProxy) {
+	            level = 'debug';
+	        } else if (message.ack === 'error') {
+	            level = 'error';
+	        } else {
+	            level = 'info';
+	        }
+
 	        _lib.log.logLevel(level, [isProxy ? '#sendproxy' : '#send', message.type, message.name, message]);
 
 	        if (_conf.CONFIG.MOCK_MODE) {
@@ -2509,8 +2565,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    function respond(data) {
 
-	        if ((0, _lib.isWindowClosed)(source)) {
-	            return;
+	        if (message.fireAndForget || (0, _lib.isWindowClosed)(source)) {
+	            return _lib.promise.Promise.resolve();
 	        }
 
 	        return (0, _send.sendMessage)(source, _extends({
