@@ -24,8 +24,8 @@ export let RECEIVE_MESSAGE_TYPES = {
 
         function respond(data) {
 
-            if (isWindowClosed(source)) {
-                return;
+            if (message.fireAndForget || isWindowClosed(source)) {
+                return promise.Promise.resolve();
             }
 
             return sendMessage(source, {

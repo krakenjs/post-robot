@@ -63,10 +63,33 @@ export function request(options) {
 
         }).then(() => {
 
+            sendMessage(options.window, {
+                hash,
+                type: CONSTANTS.POST_MESSAGE_TYPE.REQUEST,
+                name: options.name,
+                data: options.data,
+                fireAndForget: options.fireAndForget
+            }, options.domain || '*').catch(reject);
+
+            if (options.fireAndForget) {
+                return resolve();
+            }
+
+            let ackTimeout = util.intervalTimeout(CONFIG.ACK_TIMEOUT, 100, remaining => {
+
+                if (options.ack || isWindowClosed(options.window)) {
+                    return ackTimeout.cancel();
+                }
+
+                if (!remaining) {
+                    return reject(new Error(`No ack for postMessage ${options.name} in ${CONFIG.ACK_TIMEOUT}ms`));
+                }
+            });
+
             if (options.timeout) {
                 let timeout = util.intervalTimeout(options.timeout, 100, remaining => {
 
-                    if (hasResult) {
+                    if (hasResult || isWindowClosed(options.window)) {
                         return timeout.cancel();
                     }
 
@@ -76,24 +99,6 @@ export function request(options) {
 
                 }, options.timeout);
             }
-
-            sendMessage(options.window, {
-                hash,
-                type: CONSTANTS.POST_MESSAGE_TYPE.REQUEST,
-                name: options.name,
-                data: options.data
-            }, options.domain || '*').catch(reject);
-
-            let ackTimeout = util.intervalTimeout(CONFIG.ACK_TIMEOUT, 100, remaining => {
-
-                if (options.ack) {
-                    return ackTimeout.cancel();
-                }
-
-                if (!remaining) {
-                    return reject(new Error(`No ack for postMessage ${options.name} in ${CONFIG.ACK_TIMEOUT}ms`));
-                }
-            });
 
         }).catch(reject);
 

@@ -199,7 +199,7 @@ export let util = {
 
         util.each(obj, (item, key) => {
 
-            let result = callback(item);
+            let result = callback(item, key);
 
             if (result !== undefined) {
                 newobj[key] = result;
