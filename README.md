@@ -66,7 +66,7 @@ postRobot.send(window, 'getCart', { timeout: 5000 }, function(err, data) {
 ## Send a message to the direct parent
 
 ```javascript
-postRobot.sendToParent(window, 'getCart', function(err, data) {
+postRobot.sendToParent('getCart', function(err, data) {
     console.log(data);
 });
 ```
