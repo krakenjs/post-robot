@@ -30,7 +30,7 @@ export let openBridge = util.memoize(url => {
 
         let iframe = document.createElement('iframe');
 
-        iframe.setAttribute('name', id);
+        iframe.setAttribute('name', '__postrobot_bridge__');
         iframe.setAttribute('id', id);
 
         iframe.setAttribute('style', 'margin: 0; padding: 0; border: 0px none; overflow: hidden;');
@@ -62,10 +62,23 @@ export let openBridge = util.memoize(url => {
 });
 
 export function getBridge() {
-    return promise.Promise.resolve().then(() => bridge);
+    return promise.Promise.resolve().then(() => {
+        return bridge || getBridgeFor(window);
+    });
 }
 
 export function getBridgeFor(win) {
+
+    try {
+        let frame = win.frames.__postrobot_bridge__;
+
+        if (frame && frame !== window && isSameDomain(frame) && frame[CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
+            return frame;
+        }
+
+    } catch (err) {
+        // pass
+    }
 
     try {
         if (!win || !win.frames || !win.frames.length) {
