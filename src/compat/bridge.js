@@ -2,14 +2,15 @@
 import { CONSTANTS } from '../conf';
 import { util, promise, isSameDomain, log, onWindowReady } from '../lib';
 
-const BRIDGE_NAME_PREFIX = 'postrobot_bridge';
+const BRIDGE_NAME_PREFIX = '__postrobot_bridge__';
+let id = `${BRIDGE_NAME_PREFIX}_${util.uniqueID()}`;
 
 let bridge;
 
-export let openBridge = util.memoize(url => {
+export function openBridge(url) {
 
     if (bridge) {
-        throw new Error('Only one bridge supported');
+        throw new Error('Only one bridge supported!');
     }
 
     let documentReady = new promise.Promise(resolve => {
@@ -26,11 +27,9 @@ export let openBridge = util.memoize(url => {
 
         log.debug('Opening bridge:', url);
 
-        let id = `${BRIDGE_NAME_PREFIX}_${util.uniqueID()}`;
-
         let iframe = document.createElement('iframe');
 
-        iframe.setAttribute('name', '__postrobot_bridge__');
+        iframe.setAttribute('name', id);
         iframe.setAttribute('id', id);
 
         iframe.setAttribute('style', 'margin: 0; padding: 0; border: 0px none; overflow: hidden;');
@@ -59,12 +58,12 @@ export let openBridge = util.memoize(url => {
     });
 
     return bridge;
-});
+}
 
 export function getBridgeFor(win) {
 
     try {
-        let frame = win.frames.__postrobot_bridge__;
+        let frame = win.frames[id];
 
         if (frame && frame !== window && isSameDomain(frame) && frame[CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
             return frame;
