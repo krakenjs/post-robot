@@ -560,6 +560,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        },
 	        'window.parent.opener': function windowParentOpener(id) {
 	            return (0, _lib.getOpener)(window.parent);
+	        },
+	        'window.opener.parent': function windowOpenerParent(id) {
+	            return (0, _lib.getOpener)(window).parent;
 	        }
 	    };
 
@@ -1493,8 +1496,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        args = Array.prototype.slice.call(args);
 
+	        args.unshift(window.location.pathname);
 	        args.unshift(window.location.host);
-	        args.unshift(_util.util.getType().toLowerCase());
+	        args.unshift('<' + _util.util.getType().toLowerCase() + '>');
 	        args.unshift('[post-robot]');
 
 	        if (_conf.CONFIG.LOG_TO_PAGE) {
@@ -2019,8 +2023,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: true
 	});
 	exports.openBridge = undefined;
-	exports.getBridge = getBridge;
 	exports.getBridgeFor = getBridgeFor;
+	exports.getBridge = getBridge;
 
 	var _conf = __webpack_require__(3);
 
@@ -2054,7 +2058,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        var iframe = document.createElement('iframe');
 
-	        iframe.setAttribute('name', id);
+	        iframe.setAttribute('name', '__postrobot_bridge__');
 	        iframe.setAttribute('id', id);
 
 	        iframe.setAttribute('style', 'margin: 0; padding: 0; border: 0px none; overflow: hidden;');
@@ -2084,13 +2088,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return bridge;
 	});
 
-	function getBridge() {
-	    return _lib.promise.Promise.resolve().then(function () {
-	        return bridge;
-	    });
-	}
-
 	function getBridgeFor(win) {
+
+	    try {
+	        var frame = win.frames.__postrobot_bridge__;
+
+	        if (frame && frame !== window && (0, _lib.isSameDomain)(frame) && frame[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
+	            return frame;
+	        }
+	    } catch (err) {
+	        // pass
+	    }
 
 	    try {
 	        if (!win || !win.frames || !win.frames.length) {
@@ -2099,10 +2107,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        for (var i = 0; i < win.frames.length; i++) {
 	            try {
-	                var frame = win.frames[i];
+	                var _frame = win.frames[i];
 
-	                if (frame && frame !== window && (0, _lib.isSameDomain)(frame) && frame[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
-	                    return frame;
+	                if (_frame && _frame !== window && (0, _lib.isSameDomain)(_frame) && _frame[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
+	                    return _frame;
 	                }
 	            } catch (err) {
 	                continue;
@@ -2111,6 +2119,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    } catch (err) {
 	        return;
 	    }
+	}
+
+	function getBridge() {
+	    return _lib.promise.Promise.resolve().then(function () {
+	        return bridge || getBridgeFor(window);
+	    });
 	}
 
 /***/ },
@@ -2406,6 +2420,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    if (window === (0, _lib.getOpener)(win)) {
 	        message.sourceHint = 'window.opener';
+	    }
+
+	    if (window === (0, _lib.getOpener)(win).parent) {
+	        message.sourceHint = 'window.opener.parent';
 	    }
 
 	    return (0, _compat.getBridge)().then(function (bridge) {
