@@ -4,6 +4,12 @@ import { CONFIG } from '../conf';
 
 const LOG_LEVELS = ['debug', 'info', 'warn', 'error'];
 
+if (Function.prototype.bind && window.console && typeof console.log === 'object') {
+    [ 'log', 'info', 'warn', 'error' ].forEach(function(method) {
+        console[method] = this.bind(console[method], console);
+    }, Function.prototype.call);
+}
+
 export let log = {
 
     clearLogs() {
