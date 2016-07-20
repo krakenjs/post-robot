@@ -61,12 +61,6 @@ export let openBridge = util.memoize(url => {
     return bridge;
 });
 
-export function getBridge() {
-    return promise.Promise.resolve().then(() => {
-        return bridge || getBridgeFor(window);
-    });
-}
-
 export function getBridgeFor(win) {
 
     try {
@@ -100,4 +94,10 @@ export function getBridgeFor(win) {
     } catch (err) {
         return;
     }
+}
+
+export function getBridge() {
+    return promise.Promise.resolve().then(() => {
+        return bridge || getBridgeFor(window);
+    });
 }
