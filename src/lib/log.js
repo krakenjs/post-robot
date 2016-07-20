@@ -84,8 +84,9 @@ export let log = {
 
         args = Array.prototype.slice.call(args);
 
+        args.unshift(window.location.pathname);
         args.unshift(window.location.host);
-        args.unshift(util.getType().toLowerCase());
+        args.unshift(`<${util.getType().toLowerCase()}>`);
         args.unshift('[post-robot]');
 
         if (CONFIG.LOG_TO_PAGE) {
