@@ -968,12 +968,51 @@ return /******/ (function(modules) { // webpackBootstrap
 	    flush();
 	}
 
+	var possiblyUnhandledPromises = [];
+	var possiblyUnhandledPromiseTimeout;
+
+	function addPossiblyUnhandledPromise(promise) {
+	    if (!promise.resolved && !promise.hasErrorHandlers) {
+	        possiblyUnhandledPromises.push(promise);
+	        possiblyUnhandledPromiseTimeout = possiblyUnhandledPromiseTimeout || setTimeout(flushPossiblyUnhandledPromises, 1);
+	    }
+	}
+
+	function flushPossiblyUnhandledPromises() {
+	    possiblyUnhandledPromiseTimeout = null;
+	    var promises = possiblyUnhandledPromises;
+	    possiblyUnhandledPromises = [];
+	    for (var i = 0; i < promises.length; i++) {
+	        var promise = promises[i];
+	        if (!promise.hasErrorHandlers) {
+	            promise.handlers.push({
+	                onError: logError
+	            });
+	            promise.dispatch();
+	        }
+	    }
+	}
+
+	function logError(err) {
+	    err = err.stack || err.toString();
+	    if (window.console && window.console.error) {
+	        window.console.error(err);
+	    } else if (window.console && window.console.log) {
+	        window.console.log(err);
+	    }
+	}
+
 	var SyncPromise = exports.SyncPromise = function SyncPromise(handler) {
 
 	    this.resolved = false;
 	    this.rejected = false;
 
+	    this.hasErrorHandlers = false;
+	    this.hasSuccessHandlers = false;
+
 	    this.handlers = [];
+
+	    addPossiblyUnhandledPromise(this);
 
 	    if (!handler) {
 	        return;
@@ -1034,33 +1073,36 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 	SyncPromise.prototype.dispatch = function () {
+	    var _this = this;
 
 	    if (!this.resolved && !this.rejected) {
 	        return;
 	    }
 
-	    while (this.handlers.length) {
+	    var _loop = function _loop() {
 
-	        var handler = this.handlers.shift();
-
-	        var result, error;
+	        var handler = _this.handlers.shift();
 
 	        try {
-	            if (this.resolved) {
-	                result = handler.onSuccess ? handler.onSuccess(this.value) : this.value;
+	            if (_this.resolved) {
+	                result = handler.onSuccess ? handler.onSuccess(_this.value) : _this.value;
 	            } else {
 	                if (handler.onError) {
-	                    result = handler.onError(this.value);
+	                    result = handler.onError(_this.value);
 	                } else {
-	                    error = this.value;
+	                    error = _this.value;
 	                }
 	            }
 	        } catch (err) {
 	            error = err;
 	        }
 
-	        if (result === this) {
+	        if (result === _this) {
 	            throw new Error('Can not return a promise from the the then handler of the same promise');
+	        }
+
+	        if (!handler.promise) {
+	            return 'continue';
 	        }
 
 	        if (error) {
@@ -1074,12 +1116,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	        } else {
 	            handler.promise.resolve(result);
 	        }
+	    };
+
+	    while (this.handlers.length) {
+	        var result, error;
+
+	        var _ret = _loop();
+
+	        if (_ret === 'continue') continue;
 	    }
 	};
 
 	SyncPromise.prototype.then = function (onSuccess, onError) {
 
 	    var promise = new SyncPromise();
+
+	    if (onSuccess) {
+	        this.hasSuccessHandlers = true;
+	    }
+
+	    if (onError) {
+	        this.hasErrorHandlers = true;
+	    }
 
 	    this.handlers.push({
 	        promise: promise,
@@ -1415,11 +1473,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.log = undefined;
 
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
 	var _util = __webpack_require__(12);
 
 	var _conf = __webpack_require__(3);
 
 	var LOG_LEVELS = ['debug', 'info', 'warn', 'error'];
+
+	if (Function.prototype.bind && window.console && _typeof(console.log) === 'object') {
+	    ['log', 'info', 'warn', 'error'].forEach(function (method) {
+	        console[method] = this.bind(console[method], console);
+	    }, Function.prototype.call);
+	}
 
 	var log = exports.log = {
 	    clearLogs: function clearLogs() {
@@ -2022,7 +2088,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	exports.openBridge = undefined;
+	exports.openBridge = openBridge;
 	exports.getBridgeFor = getBridgeFor;
 	exports.getBridge = getBridge;
 
@@ -2030,14 +2096,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _lib = __webpack_require__(8);
 
-	var BRIDGE_NAME_PREFIX = 'postrobot_bridge';
+	var BRIDGE_NAME_PREFIX = '__postrobot_bridge__';
+	var id = BRIDGE_NAME_PREFIX + '_' + _lib.util.uniqueID();
 
 	var bridge = void 0;
 
-	var openBridge = exports.openBridge = _lib.util.memoize(function (url) {
+	function openBridge(url) {
 
 	    if (bridge) {
-	        throw new Error('Only one bridge supported');
+	        throw new Error('Only one bridge supported!');
 	    }
 
 	    var documentReady = new _lib.promise.Promise(function (resolve) {
@@ -2054,11 +2121,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        _lib.log.debug('Opening bridge:', url);
 
-	        var id = BRIDGE_NAME_PREFIX + '_' + _lib.util.uniqueID();
-
 	        var iframe = document.createElement('iframe');
 
-	        iframe.setAttribute('name', '__postrobot_bridge__');
+	        iframe.setAttribute('name', id);
 	        iframe.setAttribute('id', id);
 
 	        iframe.setAttribute('style', 'margin: 0; padding: 0; border: 0px none; overflow: hidden;');
@@ -2086,12 +2151,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 
 	    return bridge;
-	});
+	}
 
 	function getBridgeFor(win) {
 
 	    try {
-	        var frame = win.frames.__postrobot_bridge__;
+	        var frame = win.frames[id];
 
 	        if (frame && frame !== window && (0, _lib.isSameDomain)(frame) && frame[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
 	            return frame;
@@ -2418,11 +2483,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    // If we're messaging our child
 
-	    if (window === (0, _lib.getOpener)(win)) {
+	    var opener = (0, _lib.getOpener)(win);
+
+	    if (opener && window === opener) {
 	        message.sourceHint = 'window.opener';
 	    }
 
-	    if (window === (0, _lib.getOpener)(win).parent) {
+	    if (opener && window === opener.parent) {
 	        message.sourceHint = 'window.opener.parent';
 	    }
 
