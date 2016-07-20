@@ -34,7 +34,8 @@ function getWindow(hint, windowID) {
     let windowTargets = {
         'window.parent': id => window.parent,
         'window.opener': id => getOpener(window),
-        'window.parent.opener': id => getOpener(window.parent)
+        'window.parent.opener': id => getOpener(window.parent),
+        'window.opener.parent': id => getOpener(window).parent
     };
 
     let win;

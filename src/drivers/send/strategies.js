@@ -120,6 +120,10 @@ export let SEND_MESSAGE_STRATEGIES = {
             message.sourceHint = 'window.opener';
         }
 
+        if (window === getOpener(win).parent) {
+            message.sourceHint = 'window.opener.parent';
+        }
+
         return getBridge().then(bridge => {
 
             if (!bridge) {
