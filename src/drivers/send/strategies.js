@@ -116,11 +116,13 @@ export let SEND_MESSAGE_STRATEGIES = {
 
         // If we're messaging our child
 
-        if (window === getOpener(win)) {
+        let opener = getOpener(win);
+
+        if (opener && window === opener) {
             message.sourceHint = 'window.opener';
         }
 
-        if (window === getOpener(win).parent) {
+        if (opener && window === opener.parent) {
             message.sourceHint = 'window.opener.parent';
         }
 
