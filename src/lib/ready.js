@@ -29,8 +29,9 @@ export function initOnReady() {
     }
 }
 
-export function onWindowReady(win) {
-    return new promise.Promise(resolve => {
+export function onWindowReady(win, timeout = 5000) {
+    return new promise.Promise((resolve, reject) => {
+
         if (readyWindows.indexOf(win) !== -1) {
             return resolve(win);
         } else {
@@ -38,6 +39,8 @@ export function onWindowReady(win) {
                 win,
                 resolve
             });
+
+            setTimeout(() => reject(new Error(`Bridge did not load after ${timeout}ms`)), timeout);
         }
     });
 }
