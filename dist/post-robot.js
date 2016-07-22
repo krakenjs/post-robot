@@ -972,10 +972,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	var possiblyUnhandledPromiseTimeout;
 
 	function addPossiblyUnhandledPromise(promise) {
-	    if (!promise.resolved && !promise.hasErrorHandlers) {
-	        possiblyUnhandledPromises.push(promise);
-	        possiblyUnhandledPromiseTimeout = possiblyUnhandledPromiseTimeout || setTimeout(flushPossiblyUnhandledPromises, 1);
-	    }
+	    possiblyUnhandledPromises.push(promise);
+	    possiblyUnhandledPromiseTimeout = possiblyUnhandledPromiseTimeout || setTimeout(flushPossiblyUnhandledPromises, 1);
 	}
 
 	function flushPossiblyUnhandledPromises() {
@@ -984,9 +982,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    possiblyUnhandledPromises = [];
 	    for (var i = 0; i < promises.length; i++) {
 	        var promise = promises[i];
-	        if (!promise.hasErrorHandlers) {
+	        if (!promise.hasHandlers) {
 	            promise.handlers.push({
-	                onError: logError
+	                onError: function onError(err) {
+	                    if (!promise.hasHandlers) {
+	                        logError(err);
+	                    }
+	                }
 	            });
 	            promise.dispatch();
 	        }
@@ -994,21 +996,31 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	function logError(err) {
-	    err = err.stack || err.toString();
-	    if (window.console && window.console.error) {
-	        window.console.error(err);
-	    } else if (window.console && window.console.log) {
-	        window.console.log(err);
-	    }
+	    setTimeout(function () {
+	        throw err;
+	    });
 	}
 
-	var SyncPromise = exports.SyncPromise = function SyncPromise(handler) {
+	function isPromise(item) {
+	    try {
+	        if (item && item.then instanceof Function) {
+	            return true;
+	        }
+	    } catch (err) {
+	        return false;
+	    }
+
+	    return false;
+	}
+
+	var SyncPromise = exports.SyncPromise = function SyncPromise(handler, parent) {
+
+	    this.parent = parent;
 
 	    this.resolved = false;
 	    this.rejected = false;
 
-	    this.hasErrorHandlers = false;
-	    this.hasSuccessHandlers = false;
+	    this.hasHandlers = false;
 
 	    this.handlers = [];
 
@@ -1029,7 +1041,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	SyncPromise.resolve = function SyncPromiseResolve(value) {
 
-	    if (value && value.then) {
+	    if (isPromise(value)) {
 	        return value;
 	    }
 
@@ -1045,7 +1057,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return this;
 	    }
 
-	    if (result && result.then) {
+	    if (isPromise(result)) {
 	        throw new Error('Can not resolve promise with another promise');
 	    }
 
@@ -1061,7 +1073,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return this;
 	    }
 
-	    if (error && error.then) {
+	    if (isPromise(error)) {
 	        throw new Error('Can not reject promise with another promise');
 	    }
 
@@ -1107,7 +1119,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        if (error) {
 	            handler.promise.reject(error);
-	        } else if (result && result.then) {
+	        } else if (isPromise(result)) {
 	            result.then(function (res) {
 	                handler.promise.resolve(res);
 	            }, function (err) {
@@ -1129,21 +1141,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	SyncPromise.prototype.then = function (onSuccess, onError) {
 
-	    var promise = new SyncPromise();
-
-	    if (onSuccess) {
-	        this.hasSuccessHandlers = true;
-	    }
-
-	    if (onError) {
-	        this.hasErrorHandlers = true;
-	    }
+	    var promise = new SyncPromise(null, this);
 
 	    this.handlers.push({
 	        promise: promise,
 	        onSuccess: onSuccess,
 	        onError: onError
 	    });
+
+	    this.hasHandlers = true;
 
 	    this.dispatch();
 
@@ -2021,7 +2027,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	function onWindowReady(win) {
-	    return new _promise.promise.Promise(function (resolve) {
+	    var timeout = arguments.length <= 1 || arguments[1] === undefined ? 5000 : arguments[1];
+
+	    return new _promise.promise.Promise(function (resolve, reject) {
+
 	        if (readyWindows.indexOf(win) !== -1) {
 	            return resolve(win);
 	        } else {
@@ -2029,6 +2038,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	                win: win,
 	                resolve: resolve
 	            });
+
+	            setTimeout(function () {
+	                return reject(new Error('Bridge did not load after ' + timeout + 'ms'));
+	            }, timeout);
 	        }
 	    });
 	}
