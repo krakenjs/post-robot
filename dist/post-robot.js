@@ -1623,6 +1623,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.registerWindow = registerWindow;
 	exports.isWindowEqual = isWindowEqual;
 	exports.isSameTopWindow = isSameTopWindow;
+	exports.onOpenWindow = onOpenWindow;
 
 	var _util = __webpack_require__(12);
 
@@ -1834,6 +1835,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	}
 
+	var windowOpenListeners = [];
+
+	function onOpenWindow(method) {
+	    windowOpenListeners.push(method);
+	}
+
 	var openWindow = window.open;
 
 	window.open = function (url, name, x, y) {
@@ -1844,6 +1851,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    var win = _util.util.apply(openWindow, this, arguments);
+
+	    for (var _iterator3 = windowOpenListeners, _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
+	        var _ref3;
+
+	        if (_isArray3) {
+	            if (_i3 >= _iterator3.length) break;
+	            _ref3 = _iterator3[_i3++];
+	        } else {
+	            _i3 = _iterator3.next();
+	            if (_i3.done) break;
+	            _ref3 = _i3.value;
+	        }
+
+	        var listener = _ref3;
+
+	        listener(url, win);
+	    }
 
 	    registerWindow(name, win);
 
@@ -2028,6 +2052,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function onWindowReady(win) {
 	    var timeout = arguments.length <= 1 || arguments[1] === undefined ? 5000 : arguments[1];
+	    var name = arguments.length <= 2 || arguments[2] === undefined ? 'Window' : arguments[2];
 
 	    return new _promise.promise.Promise(function (resolve, reject) {
 
@@ -2040,7 +2065,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            });
 
 	            setTimeout(function () {
-	                return reject(new Error('Bridge did not load after ' + timeout + 'ms'));
+	                return reject(new Error(name + ' did not load after ' + timeout + 'ms'));
 	            }, timeout);
 	        }
 	    });
@@ -2101,27 +2126,35 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
+	exports.getBridgeByDomain = getBridgeByDomain;
+	exports.getBridgeByWindow = getBridgeByWindow;
 	exports.openBridge = openBridge;
-	exports.getBridgeFor = getBridgeFor;
-	exports.getBridge = getBridge;
+	exports.getRemoteBridge = getRemoteBridge;
 
 	var _conf = __webpack_require__(3);
 
 	var _lib = __webpack_require__(8);
 
 	var BRIDGE_NAME_PREFIX = '__postrobot_bridge__';
-	var id = BRIDGE_NAME_PREFIX + '_' + _lib.util.uniqueID();
 
-	var bridge = void 0;
+	function getDomain(url) {
 
-	function openBridge(url) {
+	    var domain = void 0;
 
-	    if (bridge) {
-	        throw new Error('Only one bridge supported!');
+	    if (url.indexOf('http://') === 0 || url.indexOf('https://') === 0) {
+	        domain = url;
+	    } else {
+	        domain = window.location.href;
 	    }
 
-	    var documentReady = new _lib.promise.Promise(function (resolve) {
-	        if (window.document.body) {
+	    domain = domain.split('/').slice(0, 3).join('/');
+
+	    return domain;
+	}
+
+	function documentReady() {
+	    return new _lib.promise.Promise(function (resolve) {
+	        if (window.document && window.document.body) {
 	            return resolve(window.document);
 	        }
 
@@ -2129,8 +2162,94 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return resolve(window.document);
 	        });
 	    });
+	}
 
-	    bridge = documentReady.then(function (document) {
+	var bridges = [];
+
+	function getBridgeByDomain(domain) {
+	    for (var _iterator = bridges, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+	        var _ref;
+
+	        if (_isArray) {
+	            if (_i >= _iterator.length) break;
+	            _ref = _iterator[_i++];
+	        } else {
+	            _i = _iterator.next();
+	            if (_i.done) break;
+	            _ref = _i.value;
+	        }
+
+	        var bridge = _ref;
+
+	        if (domain === bridge.domain) {
+	            return bridge.bridge;
+	        }
+	    }
+	}
+
+	function getBridgeByWindow(win) {
+	    for (var _iterator2 = bridges, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
+	        var _ref2;
+
+	        if (_isArray2) {
+	            if (_i2 >= _iterator2.length) break;
+	            _ref2 = _iterator2[_i2++];
+	        } else {
+	            _i2 = _iterator2.next();
+	            if (_i2.done) break;
+	            _ref2 = _i2.value;
+	        }
+
+	        var bridge = _ref2;
+
+	        if (bridge.windows.indexOf(win) !== -1) {
+	            return bridge.bridge;
+	        }
+	    }
+	}
+
+	var windowBuffer = {};
+
+	(0, _lib.onOpenWindow)(function (url, win) {
+	    var domain = getDomain(url);
+
+	    for (var _iterator3 = bridges, _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
+	        var _ref3;
+
+	        if (_isArray3) {
+	            if (_i3 >= _iterator3.length) break;
+	            _ref3 = _iterator3[_i3++];
+	        } else {
+	            _i3 = _iterator3.next();
+	            if (_i3.done) break;
+	            _ref3 = _i3.value;
+	        }
+
+	        var bridge = _ref3;
+
+	        if (domain === bridge.domain) {
+	            bridge.windows.push(win);
+	            return;
+	        }
+	    }
+
+	    windowBuffer[domain] = windowBuffer[domain] || [];
+	    windowBuffer[domain].push(win);
+	});
+
+	function openBridge(url) {
+
+	    var domain = getDomain(url);
+
+	    var existingBridge = getBridgeByDomain(domain);
+
+	    if (existingBridge) {
+	        return existingBridge;
+	    }
+
+	    var id = BRIDGE_NAME_PREFIX + '_' + _lib.util.uniqueID();
+
+	    var bridge = documentReady().then(function (document) {
 
 	        _lib.log.debug('Opening bridge:', url);
 
@@ -2159,24 +2278,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	            iframe.onerror = reject;
 	        }).then(function () {
 
-	            return (0, _lib.onWindowReady)(iframe.contentWindow);
+	            return (0, _lib.onWindowReady)(iframe.contentWindow, 5000, 'Bridge ' + url);
 	        });
 	    });
+
+	    bridges.push({
+	        id: id,
+	        domain: domain,
+	        bridge: bridge,
+	        windows: windowBuffer[domain] || []
+	    });
+
+	    delete windowBuffer[domain];
 
 	    return bridge;
 	}
 
-	function getBridgeFor(win) {
-
-	    try {
-	        var frame = win.frames[id];
-
-	        if (frame && frame !== window && (0, _lib.isSameDomain)(frame) && frame[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
-	            return frame;
-	        }
-	    } catch (err) {
-	        // pass
-	    }
+	function getRemoteBridge(win) {
 
 	    try {
 	        if (!win || !win.frames || !win.frames.length) {
@@ -2185,10 +2303,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        for (var i = 0; i < win.frames.length; i++) {
 	            try {
-	                var _frame = win.frames[i];
+	                var frame = win.frames[i];
 
-	                if (_frame && _frame !== window && (0, _lib.isSameDomain)(_frame) && _frame[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
-	                    return _frame;
+	                if (frame && frame !== window && (0, _lib.isSameDomain)(frame) && frame[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
+	                    return frame;
 	                }
 	            } catch (err) {
 	                continue;
@@ -2197,12 +2315,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    } catch (err) {
 	        return;
 	    }
-	}
-
-	function getBridge() {
-	    return _lib.promise.Promise.resolve().then(function () {
-	        return bridge || getBridgeFor(window);
-	    });
 	}
 
 /***/ },
@@ -2438,7 +2550,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        throw new Error('Can only use bridge to communicate between two different windows, not between frames');
 	    }
 
-	    var frame = (0, _compat.getBridgeFor)(win);
+	    var frame = (0, _compat.getRemoteBridge)(win);
 
 	    if (!frame) {
 	        throw new Error('No bridge available in window');
@@ -2506,7 +2618,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        message.sourceHint = 'window.opener.parent';
 	    }
 
-	    return (0, _compat.getBridge)().then(function (bridge) {
+	    return (0, _compat.getBridgeByWindow)(win).then(function (bridge) {
 
 	        if (!bridge) {
 	            throw new Error('Bridge not initialized');
