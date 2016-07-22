@@ -1,7 +1,7 @@
 
 import { CONSTANTS } from '../../conf';
 import { util, isSameDomain, getOpener, isSameTopWindow } from '../../lib';
-import { emulateIERestrictions, getBridge, getBridgeFor } from '../../compat';
+import { emulateIERestrictions, getBridgeByWindow, getRemoteBridge } from '../../compat';
 
 export let SEND_MESSAGE_STRATEGIES = {
 
@@ -56,7 +56,7 @@ export let SEND_MESSAGE_STRATEGIES = {
             throw new Error(`Can only use bridge to communicate between two different windows, not between frames`);
         }
 
-        let frame = getBridgeFor(win);
+        let frame = getRemoteBridge(win);
 
         if (!frame) {
             throw new Error(`No bridge available in window`);
@@ -126,7 +126,7 @@ export let SEND_MESSAGE_STRATEGIES = {
             message.sourceHint = 'window.opener.parent';
         }
 
-        return getBridge().then(bridge => {
+        return getBridgeByWindow(win).then(bridge => {
 
             if (!bridge) {
                 throw new Error(`Bridge not initialized`);

@@ -191,6 +191,13 @@ export function isSameTopWindow(win1, win2) {
 }
 
 
+let windowOpenListeners = [];
+
+export function onOpenWindow(method) {
+    windowOpenListeners.push(method);
+}
+
+
 let openWindow = window.open;
 
 window.open = function(url, name, x, y) {
@@ -201,6 +208,10 @@ window.open = function(url, name, x, y) {
     }
 
     let win = util.apply(openWindow, this, arguments);
+
+    for (let listener of windowOpenListeners) {
+        listener(url, win);
+    }
 
     registerWindow(name, win);
 

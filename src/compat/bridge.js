@@ -1,20 +1,27 @@
 
 import { CONSTANTS } from '../conf';
-import { util, promise, isSameDomain, log, onWindowReady } from '../lib';
+import { util, promise, isSameDomain, log, onWindowReady, onOpenWindow } from '../lib';
 
 const BRIDGE_NAME_PREFIX = '__postrobot_bridge__';
-let id = `${BRIDGE_NAME_PREFIX}_${util.uniqueID()}`;
 
-let bridge;
+function getDomain(url) {
 
-export function openBridge(url) {
+    let domain;
 
-    if (bridge) {
-        throw new Error('Only one bridge supported!');
+    if (url.indexOf('http://') === 0 || url.indexOf('https://') === 0) {
+        domain = url;
+    } else {
+        domain = window.location.href;
     }
 
-    let documentReady = new promise.Promise(resolve => {
-        if (window.document.body) {
+    domain = domain.split('/').slice(0, 3).join('/');
+
+    return domain;
+}
+
+function documentReady() {
+    return new promise.Promise(resolve => {
+        if (window.document && window.document.body) {
             return resolve(window.document);
         }
 
@@ -22,8 +29,55 @@ export function openBridge(url) {
             return resolve(window.document);
         });
     });
+}
 
-    bridge = documentReady.then(document => {
+let bridges = [];
+
+export function getBridgeByDomain(domain) {
+    for (let bridge of bridges) {
+        if (domain === bridge.domain) {
+            return bridge.bridge;
+        }
+    }
+}
+
+export function getBridgeByWindow(win) {
+    for (let bridge of bridges) {
+        if (bridge.windows.indexOf(win) !== -1) {
+            return bridge.bridge;
+        }
+    }
+}
+
+let windowBuffer = {};
+
+onOpenWindow((url, win) => {
+    let domain = getDomain(url);
+
+    for (let bridge of bridges) {
+        if (domain === bridge.domain) {
+            bridge.windows.push(win);
+            return;
+        }
+    }
+
+    windowBuffer[domain] = windowBuffer[domain] || [];
+    windowBuffer[domain].push(win);
+});
+
+export function openBridge(url) {
+
+    let domain = getDomain(url);
+
+    let existingBridge = getBridgeByDomain(domain);
+
+    if (existingBridge) {
+        return existingBridge;
+    }
+
+    let id = `${BRIDGE_NAME_PREFIX}_${util.uniqueID()}`;
+
+    let bridge = documentReady().then(document => {
 
         log.debug('Opening bridge:', url);
 
@@ -53,25 +107,23 @@ export function openBridge(url) {
 
         }).then(() => {
 
-            return onWindowReady(iframe.contentWindow);
+            return onWindowReady(iframe.contentWindow, 5000, `Bridge ${url}`);
         });
     });
+
+    bridges.push({
+        id,
+        domain,
+        bridge,
+        windows: windowBuffer[domain] || []
+    });
+
+    delete windowBuffer[domain];
 
     return bridge;
 }
 
-export function getBridgeFor(win) {
-
-    try {
-        let frame = win.frames[id];
-
-        if (frame && frame !== window && isSameDomain(frame) && frame[CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
-            return frame;
-        }
-
-    } catch (err) {
-        // pass
-    }
+export function getRemoteBridge(win) {
 
     try {
         if (!win || !win.frames || !win.frames.length) {
@@ -93,10 +145,4 @@ export function getBridgeFor(win) {
     } catch (err) {
         return;
     }
-}
-
-export function getBridge() {
-    return promise.Promise.resolve().then(() => {
-        return bridge || getBridgeFor(window);
-    });
 }
