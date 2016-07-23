@@ -13,3 +13,4 @@ export { resetListeners as reset } from '../drivers';
 export { openBridge } from '../compat/bridge';
 
 export { util } from '../lib/util';
+export { linkUrl } from '../lib/windows';

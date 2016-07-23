@@ -47,11 +47,17 @@ export function getBridgeByWindow(win) {
             return bridge.bridge;
         }
     }
+
+    return Promise.resolve();
 }
 
 let windowBuffer = {};
 
 onOpenWindow((url, win) => {
+    if (!url) {
+        return;
+    }
+
     let domain = getDomain(url);
 
     for (let bridge of bridges) {

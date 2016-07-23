@@ -217,3 +217,10 @@ window.open = function(url, name, x, y) {
 
     return win;
 };
+
+export function linkUrl(win, url) {
+
+    for (let listener of windowOpenListeners) {
+        listener(url, win);
+    }
+}
