@@ -109,7 +109,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.util = exports.openBridge = exports.reset = exports.parent = undefined;
+	exports.linkUrl = exports.util = exports.openBridge = exports.reset = exports.parent = undefined;
 
 	var _client = __webpack_require__(2);
 
@@ -188,6 +188,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _windows = __webpack_require__(14);
 
+	Object.defineProperty(exports, 'linkUrl', {
+	  enumerable: true,
+	  get: function get() {
+	    return _windows.linkUrl;
+	  }
+	});
 	var parent = exports.parent = (0, _windows.getParentWindow)();
 
 /***/ },
@@ -1624,6 +1630,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.isWindowEqual = isWindowEqual;
 	exports.isSameTopWindow = isSameTopWindow;
 	exports.onOpenWindow = onOpenWindow;
+	exports.linkUrl = linkUrl;
 
 	var _util = __webpack_require__(12);
 
@@ -1873,6 +1880,26 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    return win;
 	};
+
+	function linkUrl(win, url) {
+
+	    for (var _iterator4 = windowOpenListeners, _isArray4 = Array.isArray(_iterator4), _i4 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator]();;) {
+	        var _ref4;
+
+	        if (_isArray4) {
+	            if (_i4 >= _iterator4.length) break;
+	            _ref4 = _iterator4[_i4++];
+	        } else {
+	            _i4 = _iterator4.next();
+	            if (_i4.done) break;
+	            _ref4 = _i4.value;
+	        }
+
+	        var listener = _ref4;
+
+	        listener(url, win);
+	    }
+	}
 
 /***/ },
 /* 15 */
@@ -2213,6 +2240,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	var windowBuffer = {};
 
 	(0, _lib.onOpenWindow)(function (url, win) {
+	    if (!url) {
+	        return;
+	    }
+
 	    var domain = getDomain(url);
 
 	    for (var _iterator3 = bridges, _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
@@ -2230,7 +2261,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var bridge = _ref3;
 
 	        if (domain === bridge.domain) {
-	            console.warn(domain, bridge.domain);
 	            bridge.windows.push(win);
 	            return;
 	        }
