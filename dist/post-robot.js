@@ -2206,6 +2206,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return bridge.bridge;
 	        }
 	    }
+
+	    return Promise.resolve();
 	}
 
 	var windowBuffer = {};
@@ -2228,6 +2230,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var bridge = _ref3;
 
 	        if (domain === bridge.domain) {
+	            console.warn(domain, bridge.domain);
 	            bridge.windows.push(win);
 	            return;
 	        }
