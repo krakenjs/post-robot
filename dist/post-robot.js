@@ -2423,6 +2423,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return existingBridge;
 	        }
 
+	        if (_lib.util.getDomain() === domain) {
+	            return;
+	        }
+
 	        var id = BRIDGE_NAME_PREFIX + '_' + _lib.util.uniqueID();
 
 	        _lib.log.debug('Opening bridge:', url);
