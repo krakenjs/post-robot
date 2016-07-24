@@ -3187,12 +3187,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return _conf.CONSTANTS;
 	    }
 	});
+	exports.disable = disable;
+
+	var _drivers = __webpack_require__(6);
+
 	function enableMockMode() {
 	    _conf.CONFIG.MOCK_MODE = true;
 	}
 
 	function disableMockMode() {
 	    _conf.CONFIG.MOCK_MODE = false;
+	}
+
+	function disable() {
+	    delete window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT];
+	    window.removeEventListener('message', _drivers.messageListener);
 	}
 
 /***/ }
