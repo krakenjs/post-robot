@@ -1,23 +1,16 @@
 
 import { CONSTANTS } from '../conf';
-import { util, promise, isSameDomain, log, onWindowReady, onOpenWindow } from '../lib';
+import { util, promise, isSameDomain, log, onWindowReady, getOpener, getWindowDomain, registerWindow } from '../lib';
 
 const BRIDGE_NAME_PREFIX = '__postrobot_bridge__';
 
-function getDomain(url) {
+let pendingBridges = {};
+let bridges = [];
 
-    let domain;
-
-    if (url.indexOf('http://') === 0 || url.indexOf('https://') === 0) {
-        domain = url;
-    } else {
-        domain = window.location.href;
-    }
-
-    domain = domain.split('/').slice(0, 3).join('/');
-
-    return domain;
-}
+const ZONES = {
+    LOCAL: 'local',
+    REMOTE: 'remote'
+};
 
 function documentReady() {
     return new promise.Promise(resolve => {
@@ -31,59 +24,150 @@ function documentReady() {
     });
 }
 
-let bridges = [];
+function getBridgeForDomain(domain, zone = ZONES.LOCAL) {
+    return promise.run(() => {
 
-export function getBridgeByDomain(domain) {
-    for (let bridge of bridges) {
-        if (domain === bridge.domain) {
-            return bridge.bridge;
+        if (zone === ZONES.LOCAL && pendingBridges[domain]) {
+            return pendingBridges[domain];
         }
-    }
+
+        for (let item of bridges) {
+            if (item.domain === domain && item.zone === zone) {
+                return item.bridge;
+            }
+        }
+
+    }).then(bridge => {
+
+        if (bridge && zone === ZONES.LOCAL) {
+            return onWindowReady(bridge);
+        }
+
+        return bridge;
+    });
 }
 
-export function getBridgeByWindow(win) {
-    for (let bridge of bridges) {
-        if (bridge.windows.indexOf(win) !== -1) {
-            return bridge.bridge;
-        }
-    }
+function getBridgeForWindow(win, zone = ZONES.LOCAL) {
+    return promise.run(() => {
 
-    return Promise.resolve();
+        if (getOpener(win) === window) {
+            return onWindowReady(win);
+        }
+
+    }).then(() => {
+
+        for (let item of bridges) {
+            if (item.win === win && item.zone === zone) {
+                return item.bridge;
+            }
+        }
+
+        let domain = getWindowDomain(win);
+
+        if (domain) {
+            return getBridgeForDomain(domain, zone);
+        }
+
+    }).then(bridge => {
+
+        if (bridge && zone === ZONES.LOCAL) {
+            return onWindowReady(bridge);
+        }
+
+        return bridge;
+    });
 }
 
-let windowBuffer = {};
+export function getLocalBridgeForDomain(domain) {
+    return getBridgeForDomain(domain, ZONES.LOCAL);
+}
 
-onOpenWindow((url, win) => {
-    if (!url) {
-        return;
-    }
+export function getLocalBridgeForWindow(win) {
+    return getBridgeForWindow(win, ZONES.LOCAL);
+}
 
-    let domain = getDomain(url);
+export function getRemoteBridgeForDomain(domain) {
+    return getBridgeForDomain(domain, ZONES.REMOTE);
+}
 
-    for (let bridge of bridges) {
-        if (domain === bridge.domain) {
-            bridge.windows.push(win);
+export function getRemoteBridgeForWindow(win) {
+    return promise.run(() => {
+
+        return getBridgeForWindow(win, ZONES.REMOTE);
+
+    }).then(bridge => {
+
+        if (bridge) {
+            return bridge;
+        }
+
+        try {
+            if (!win || !win.frames || !win.frames.length) {
+                return;
+            }
+
+            for (let i = 0; i < win.frames.length; i++) {
+                try {
+                    let frame = win.frames[i];
+
+                    if (frame && frame !== window && isSameDomain(frame) && frame[CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
+                        return frame;
+                    }
+
+                } catch (err) {
+                    continue;
+                }
+            }
+        } catch (err) {
             return;
         }
+    });
+}
+
+export function registerBridge(bridge, win) {
+
+    let result;
+
+    for (let item of bridges) {
+        if (item.bridge === bridge) {
+            result = item;
+            break;
+        }
     }
 
-    windowBuffer[domain] = windowBuffer[domain] || [];
-    windowBuffer[domain].push(win);
-});
+    if (!result) {
+        let zone = util.isFrameOwnedBy(window, bridge) ? ZONES.LOCAL : ZONES.REMOTE;
 
-export function openBridge(url) {
+        result = {
+            bridge,
+            domain: getWindowDomain(bridge),
+            windows: [],
+            zone
+        };
 
-    let domain = getDomain(url);
-
-    let existingBridge = getBridgeByDomain(domain);
-
-    if (existingBridge) {
-        return existingBridge;
+        bridges.push(result);
     }
 
-    let id = `${BRIDGE_NAME_PREFIX}_${util.uniqueID()}`;
+    if (win && result.windows.indexOf(win) === -1) {
+        result.windows.push(win);
+    }
+}
 
-    let bridge = documentReady().then(document => {
+export function openBridge(url, domain) {
+
+    domain = domain || util.getDomainFromUrl(url);
+
+    let bridgePromise = promise.run(() => {
+
+        return getLocalBridgeForDomain(domain);
+
+    }).then(existingBridge => {
+
+        if (existingBridge) {
+            return existingBridge;
+        }
+
+        let id = `${BRIDGE_NAME_PREFIX}_${util.uniqueID()}`;
 
         log.debug('Opening bridge:', url);
 
@@ -104,51 +188,34 @@ export function openBridge(url) {
         iframe.setAttribute('role', 'presentation');
 
         iframe.src = url;
-        document.body.appendChild(iframe);
 
-        return new promise.Promise((resolve, reject) => {
+        return documentReady().then(document => {
+            document.body.appendChild(iframe);
 
-            iframe.onload = resolve;
-            iframe.onerror = reject;
+            let bridge = iframe.contentWindow;
 
-        }).then(() => {
+            registerWindow(id, bridge, domain);
+            registerBridge(bridge);
 
-            return onWindowReady(iframe.contentWindow, 5000, `Bridge ${url}`);
+            delete pendingBridges[domain];
+
+            return new promise.Promise((resolve, reject) => {
+
+                iframe.onload = resolve;
+                iframe.onerror = reject;
+
+            }).then(() => {
+
+                return onWindowReady(bridge, 5000, `Bridge ${url}`);
+
+            }).then(() => {
+
+                return bridge;
+            });
         });
     });
 
-    bridges.push({
-        id,
-        domain,
-        bridge,
-        windows: windowBuffer[domain] || []
-    });
+    pendingBridges[domain] = bridgePromise;
 
-    delete windowBuffer[domain];
-
-    return bridge;
-}
-
-export function getRemoteBridge(win) {
-
-    try {
-        if (!win || !win.frames || !win.frames.length) {
-            return;
-        }
-
-        for (let i = 0; i < win.frames.length; i++) {
-            try {
-                let frame = win.frames[i];
-
-                if (frame && frame !== window && isSameDomain(frame) && frame[CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
-                    return frame;
-                }
-
-            } catch (err) {
-                continue;
-            }
-        }
-    } catch (err) {
-        return;
-    }
+    return bridgePromise;
 }

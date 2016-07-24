@@ -1,9 +1,10 @@
 <script>
     window.__coverage__ = window.parent.__coverage__;
+    window.mockDomain = 'http://test-post-robot-child.com';
 </script>
 
 <script src="/base/test/child.js"></script>
 
 <script>
-    postRobot.openBridge('/base/test/bridge.htm');
+    postRobot.openBridge('/base/test/bridge.htm', 'http://test-post-robot.com');
 </script>

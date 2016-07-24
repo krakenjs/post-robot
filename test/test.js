@@ -33,7 +33,7 @@ let bridge;
 let childWindow, childFrame, otherChildFrame;
 
 before(function() {
-    return postRobot.openBridge('/base/test/bridge.htm').then(frame => {
+    return postRobot.openBridge('/base/test/bridge.htm', 'http://test-post-robot-child.com').then(frame => {
         bridge = frame;
     }).then(function() {
 

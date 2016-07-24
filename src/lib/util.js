@@ -248,6 +248,46 @@ export let util = {
     },
 
     getDomain(win) {
+        win = win || window;
         return win.mockDomain || `${win.location.protocol}//${win.location.host}`;
+    },
+
+    getDomainFromUrl(url) {
+
+        let domain;
+
+        if (url.indexOf('http://') === 0 || url.indexOf('https://') === 0) {
+            domain = url;
+        } else {
+            return this.getDomain();
+        }
+
+        domain = domain.split('/').slice(0, 3).join('/');
+
+        return domain;
+    },
+
+    isFrameOwnedBy(win, frame) {
+
+        try {
+            if (frame.parent === win) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (err) {
+
+            try {
+                for (let i = 0; i < win.frames.length; i++) {
+                    if (win.frames[i] === frame) {
+                        return true;
+                    }
+                }
+            } catch (err2) {
+                return false;
+            }
+        }
+
+        return false;
     }
 };

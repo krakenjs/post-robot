@@ -142,11 +142,31 @@ export function getWindowById(id) {
     }
 }
 
-export function registerWindow(id, win) {
+export function getWindowDomain(win) {
+
+    if (win === window) {
+        return util.getDomain(window);
+    }
+
+    for (let i = windows.length - 1; i >= 0; i--) {
+        let map = windows[i];
+
+        try {
+            if (map.win === win && map.domain) {
+                return map.domain;
+            }
+        } catch (err) {
+            continue;
+        }
+    }
+}
+
+export function registerWindow(id, win, domain) {
 
     for (let map of windows) {
         try {
             if (map.id === id && map.win === win) {
+                map.domain = domain;
                 return;
             }
         } catch (err) {
@@ -162,7 +182,8 @@ export function registerWindow(id, win) {
 
     windows.push({
         id,
-        win
+        win,
+        domain
     });
 }
 
@@ -191,10 +212,16 @@ export function isSameTopWindow(win1, win2) {
 }
 
 
-let windowOpenListeners = [];
+export function linkUrl(name, win, url) {
 
-export function onOpenWindow(method) {
-    windowOpenListeners.push(method);
+    let domain = util.getDomainFromUrl(url);
+
+    registerWindow(name, win, domain);
+
+    domainMatches.push({
+        win,
+        match: util.getDomain() === domain
+    });
 }
 
 
@@ -209,18 +236,11 @@ window.open = function(url, name, x, y) {
 
     let win = util.apply(openWindow, this, arguments);
 
-    for (let listener of windowOpenListeners) {
-        listener(url, win);
+    if (url) {
+        linkUrl(name, win, url);
+    } else {
+        registerWindow(name, win);
     }
-
-    registerWindow(name, win);
 
     return win;
 };
-
-export function linkUrl(win, url) {
-
-    for (let listener of windowOpenListeners) {
-        listener(url, win);
-    }
-}

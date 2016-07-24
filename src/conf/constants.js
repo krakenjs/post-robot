@@ -34,7 +34,7 @@ export let CONSTANTS = {
     SEND_STRATEGIES: {
         POST_MESSAGE: 'postrobot_post_message',
         GLOBAL_METHOD: 'postrobot_global_method',
-        FOREIGN_BRIDGE: 'postrobot_foreign_bridge',
+        REMOTE_BRIDGE: 'postrobot_remote_bridge',
         LOCAL_BRIDGE: 'postrobot_local_bridge'
     }
 };

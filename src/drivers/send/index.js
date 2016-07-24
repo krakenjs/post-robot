@@ -11,16 +11,19 @@ export function buildMessage(win, message, options = {}) {
     let source = getWindowId(window);
     let type   = util.getType();
     let target = getWindowId(win);
+    let sourceDomain = util.getDomain(window);
 
     return {
         ...message,
         ...options,
-        id:                 message.id || id,
+        id:                   message.id || id,
         source,
-        originalSource:     message.originalSource || source,
-        windowType:         type,
-        originalWindowType: message.originalWindowType || type,
-        target:             message.target || target
+        originalSource:       message.originalSource || source,
+        sourceDomain,
+        originalSourceDomain: message.sourceDomain || sourceDomain,
+        windowType:           type,
+        originalWindowType:   message.originalWindowType || type,
+        target:               message.target || target
     };
 }
 

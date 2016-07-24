@@ -36,12 +36,13 @@ export let RECEIVE_MESSAGE_TYPES = {
             }, '*');
         }
 
-        return respond({
-            type: CONSTANTS.POST_MESSAGE_TYPE.ACK
+        return promise.Promise.all([
 
-        }).then(() => {
+            respond({
+                type: CONSTANTS.POST_MESSAGE_TYPE.ACK
+            }),
 
-            return promise.run(() => {
+            promise.run(() => {
 
                 if (!options) {
                     throw new Error(`No postmessage request handler for ${message.name} in ${window.location.href}`);
@@ -73,9 +74,9 @@ export let RECEIVE_MESSAGE_TYPES = {
                     ack: CONSTANTS.POST_MESSAGE_ACK.ERROR,
                     error: err.stack ? `${err.message}\n${err.stack}` : err.toString()
                 });
-            });
+            })
 
-        }).catch(err => {
+        ]).catch(err => {
 
             if (options && options.handleError) {
                 return options.handleError(err);

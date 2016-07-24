@@ -56,6 +56,8 @@ export function on(name, options, handler, errorHandler) {
         options = {};
     }
 
+    options = options || {};
+
     options.name = name;
     options.handler = handler || options.handler;
     options.errorHandler = errorHandler || options.errorHandler;
@@ -71,13 +73,15 @@ export function once(name, options, handler, errorHandler) {
         options = {};
     }
 
+    options = options || {};
+
     options.name = name;
     options.handler = handler || options.handler;
     options.errorHandler = errorHandler || options.errorHandler;
     options.once = true;
 
     let prom = new promise.Promise((resolve, reject) => {
-        options.handler = options.handler || resolve;
+        options.handler = options.handler || ((source, data) => resolve(data));
         options.errorHandler = options.errorHandler || reject;
     });
 

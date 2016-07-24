@@ -1,7 +1,7 @@
 
 import { CONFIG, CONSTANTS, POST_MESSAGE_NAMES_LIST } from '../../conf';
 import { getWindowById, registerWindow, deserializeMethods, log, getOpener, getWindowId, isWindowClosed } from '../../lib';
-import { emulateIERestrictions } from '../../compat';
+import { emulateIERestrictions, registerBridge } from '../../compat';
 
 import { sendMessage } from '../send';
 import { listeners, getRequestListener } from '../listeners';
@@ -122,7 +122,7 @@ export function receiveMessage(event) {
         return;
     }
 
-    registerWindow(message.source, source);
+    registerWindow(message.source, source, origin);
 
     let proxyWindow;
 
@@ -154,36 +154,40 @@ export function receiveMessage(event) {
         return sendMessage(proxyWindow, message, message.domain || '*', true);
     }
 
+    let originalSource = source;
+
     if (message.originalSource !== message.source) {
 
         if (message.sourceHint) {
-            source = getWindow(message.sourceHint, message.originalSource);
+            originalSource = getWindow(message.sourceHint, message.originalSource);
             delete message.sourceHint;
         } else {
-            let originalSource = getWindowById(message.originalSource);
-            if (originalSource) {
-                source = originalSource;
-            } else {
+            originalSource = getWindowById(message.originalSource);
+            if (!originalSource) {
                 throw new Error(`Can not find original message source: ${message.originalSource}`);
             }
         }
 
-        registerWindow(message.originalSource, source);
+        registerWindow(message.originalSource, originalSource, message.originalSourceDomain);
     }
 
-    if (isWindowClosed(source)) {
+    if (originalSource !== source) {
+        registerBridge(source, originalSource);
+    }
+
+    if (isWindowClosed(originalSource)) {
         return log.debug(`Source window is closed: ${message.originalSource} - can not send ${message.type} ${message.name}`);
     }
 
     if (CONFIG.MOCK_MODE) {
-        return RECEIVE_MESSAGE_TYPES[message.type](source, message, origin);
+        return RECEIVE_MESSAGE_TYPES[message.type](originalSource, message, origin);
     }
 
     if (message.data) {
-        message.data = deserializeMethods(source, message.data);
+        message.data = deserializeMethods(originalSource, message.data);
     }
 
-    RECEIVE_MESSAGE_TYPES[message.type](source, message, origin);
+    RECEIVE_MESSAGE_TYPES[message.type](originalSource, message, origin);
 }
 
 export function messageListener(event) {

@@ -1,7 +1,7 @@
 
 import { CONSTANTS } from '../../conf';
 import { util, isSameDomain, getOpener, isSameTopWindow } from '../../lib';
-import { emulateIERestrictions, getBridgeByWindow, getRemoteBridge } from '../../compat';
+import { emulateIERestrictions, getLocalBridgeForWindow, getRemoteBridgeForWindow } from '../../compat';
 
 export let SEND_MESSAGE_STRATEGIES = {
 
@@ -50,51 +50,48 @@ export let SEND_MESSAGE_STRATEGIES = {
         });
     },
 
-    [ CONSTANTS.SEND_STRATEGIES.FOREIGN_BRIDGE ](win, message, domain) {
+    [ CONSTANTS.SEND_STRATEGIES.REMOTE_BRIDGE ](win, message, domain) {
 
         if (isSameTopWindow(window, win)) {
             throw new Error(`Can only use bridge to communicate between two different windows, not between frames`);
         }
 
-        let frame = getRemoteBridge(win);
+        return getRemoteBridgeForWindow(win).then(bridge => {
 
-        if (!frame) {
-            throw new Error(`No bridge available in window`);
-        }
+            if (!bridge) {
+                throw new Error(`No bridge available in window`);
+            }
 
-        if (!isSameDomain(frame)) {
-            throw new Error(`Bridge is not on the same domain`);
-        }
+            let sourceDomain = util.getDomain(window);
+            let targetDomain;
 
-        let sourceDomain = util.getDomain(window);
-        let targetDomain;
+            try {
+                targetDomain = util.getDomain(bridge);
+            } catch (err) {
+                throw new Error(`Can not read bridge window domain: ${err.message}`);
+            }
 
-        try {
-            targetDomain = util.getDomain(frame);
-        } catch (err) {
-            throw new Error(`Can not read bridge window domain: ${err.message}`);
-        }
+            if (sourceDomain !== targetDomain) {
+                throw new Error(`Can not accept global message through bridge - source ${sourceDomain} does not match bridge ${targetDomain}`);
+            }
 
-        if (sourceDomain !== targetDomain) {
-            throw new Error(`Can not accept global message through bridge - source ${sourceDomain} does not match bridge ${targetDomain}`);
-        }
+            if (!util.safeHasProp(bridge, CONSTANTS.WINDOW_PROPS.POSTROBOT)) {
+                throw new Error(`post-robot not available on bridge at ${targetDomain}`);
+            }
 
-        if (!util.safeHasProp(frame, CONSTANTS.WINDOW_PROPS.POSTROBOT)) {
-            throw new Error(`post-robot not available on bridge at ${targetDomain}`);
-        }
+            message.targetHint = 'window.parent';
 
-        message.targetHint = 'window.parent';
+            // If we're messaging our child
 
-        // If we're messaging our child
+            if (window === getOpener(win)) {
+                message.sourceHint = 'window.opener';
+            }
 
-        if (window === getOpener(win)) {
-            message.sourceHint = 'window.opener';
-        }
-
-        frame[CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessage({
-            origin: util.getDomain(window),
-            source: window,
-            data: JSON.stringify(message, 0, 2)
+            bridge[CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessage({
+                origin: util.getDomain(window),
+                source: window,
+                data: JSON.stringify(message, 0, 2)
+            });
         });
     },
 
@@ -104,14 +101,14 @@ export let SEND_MESSAGE_STRATEGIES = {
             throw new Error(`Can only use bridge to communicate between two different windows, not between frames`);
         }
 
-        if (!message.target) {
-            throw new Error(`Can not post message down through bridge without target`);
-        }
-
         // If we're messaging our parent
 
         if (win === getOpener(window)) {
             message.targetHint = 'window.parent.opener';
+        }
+
+        if (!message.target && !message.targetHint) {
+            throw new Error(`Can not post message down through bridge without target or targetHint`);
         }
 
         // If we're messaging our child
@@ -126,7 +123,7 @@ export let SEND_MESSAGE_STRATEGIES = {
             message.sourceHint = 'window.opener.parent';
         }
 
-        return getBridgeByWindow(win).then(bridge => {
+        return getLocalBridgeForWindow(win).then(bridge => {
 
             if (!bridge) {
                 throw new Error(`Bridge not initialized`);
