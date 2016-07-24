@@ -167,6 +167,10 @@ export function openBridge(url, domain) {
             return existingBridge;
         }
 
+        if (util.getDomain() === domain) {
+            return;
+        }
+
         let id = `${BRIDGE_NAME_PREFIX}_${util.uniqueID()}`;
 
         log.debug('Opening bridge:', url);
