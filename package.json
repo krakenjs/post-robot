@@ -4,7 +4,7 @@
   "description": "Simple postMessage based server.",
   "main": "dist/post-robot.min.js",
   "scripts": {
-    "test": "gulp lint"
+    "test": "gulp karma"
   },
   "repository": {
     "type": "git",

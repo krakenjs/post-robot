@@ -131,8 +131,8 @@ export function sendToParent(name, data, options, callback) {
 
     let win = getParentWindow();
 
-    if (!window) {
-        throw new Error('Window does not have a parent');
+    if (!win) {
+        return new promise.Promise((resolve, reject) => reject(new Error('Window does not have a parent')));
     }
 
     return send(win, name, data, options, callback);
