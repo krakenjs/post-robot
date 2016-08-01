@@ -338,8 +338,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var win = (0, _lib.getParentWindow)();
 
-	    if (!window) {
-	        throw new Error('Window does not have a parent');
+	    if (!win) {
+	        return new _lib.promise.Promise(function (resolve, reject) {
+	            return reject(new Error('Window does not have a parent'));
+	        });
 	    }
 
 	    return send(win, name, data, options, callback);
