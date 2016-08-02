@@ -1692,6 +1692,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	var domainMatches = [];
+	var domainMatchTimeout = void 0;
 
 	function isSameDomain(win) {
 
@@ -1741,6 +1742,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	        win: win,
 	        match: match
 	    });
+
+	    if (!domainMatchTimeout) {
+	        domainMatchTimeout = setTimeout(function () {
+	            domainMatches = [];
+	            domainMatchTimeout = null;
+	        }, 1);
+	    }
 
 	    return match;
 	}
