@@ -15,6 +15,7 @@ function safeGet(obj, prop) {
 }
 
 let domainMatches = [];
+let domainMatchTimeout;
 
 export function isSameDomain(win) {
 
@@ -51,6 +52,13 @@ export function isSameDomain(win) {
         win,
         match
     });
+
+    if (!domainMatchTimeout) {
+        domainMatchTimeout = setTimeout(function() {
+            domainMatches = [];
+            domainMatchTimeout = null;
+        }, 1);
+    }
 
     return match;
 }
