@@ -180,7 +180,7 @@ export function openBridge(url, domain) {
         iframe.setAttribute('name', id);
         iframe.setAttribute('id', id);
 
-        iframe.setAttribute('style', 'margin: 0; padding: 0; border: 0px none; overflow: hidden;');
+        iframe.setAttribute('style', 'display: none; margin: 0; padding: 0; border: 0px none; overflow: hidden;');
         iframe.setAttribute('frameborder', '0');
         iframe.setAttribute('border', '0');
         iframe.setAttribute('scrolling', 'no');
