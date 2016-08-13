@@ -2437,7 +2437,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return;
 	        }
 
-	        var id = BRIDGE_NAME_PREFIX + '_' + _lib.util.uniqueID();
+	        var sanitizedDomain = domain.replace(/[^a-zA-Z0-9]+/g, '_');
+
+	        var id = BRIDGE_NAME_PREFIX + '_' + sanitizedDomain;
+
+	        if (window.frames[id]) {
+	            return (0, _lib.onWindowReady)(window.frames[id], 5000, 'Bridge ' + url);
+	        }
 
 	        _lib.log.debug('Opening bridge:', url);
 
