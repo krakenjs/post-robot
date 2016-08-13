@@ -171,7 +171,13 @@ export function openBridge(url, domain) {
             return;
         }
 
-        let id = `${BRIDGE_NAME_PREFIX}_${util.uniqueID()}`;
+        let sanitizedDomain = domain.replace(/[^a-zA-Z0-9]+/g, '_');
+
+        let id = `${BRIDGE_NAME_PREFIX}_${sanitizedDomain}`;
+
+        if (window.frames[id]) {
+            return onWindowReady(window.frames[id], 5000, `Bridge ${url}`);
+        }
 
         log.debug('Opening bridge:', url);
 
