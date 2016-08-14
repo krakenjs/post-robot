@@ -20,7 +20,7 @@ export function buildMessage(win, message, options = {}) {
         source,
         originalSource:       message.originalSource || source,
         sourceDomain,
-        originalSourceDomain: message.sourceDomain || sourceDomain,
+        originalSourceDomain: message.originalSourceDomain || sourceDomain,
         windowType:           type,
         originalWindowType:   message.originalWindowType || type,
         target:               message.target || target

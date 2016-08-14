@@ -1,6 +1,6 @@
 
 import { CONFIG, CONSTANTS, POST_MESSAGE_NAMES_LIST } from '../../conf';
-import { getWindowById, registerWindow, deserializeMethods, log, getOpener, getWindowId, isWindowClosed } from '../../lib';
+import { getWindowById, registerWindow, deserializeMethods, log, getOpener, getWindowId, isWindowClosed, isSameDomain } from '../../lib';
 import { emulateIERestrictions, registerBridge } from '../../compat';
 
 import { sendMessage } from '../send';
@@ -52,7 +52,7 @@ function getWindow(hint, windowID) {
     return win;
 }
 
-function getProxy(source, message) {
+function getTargetWindow(source, message) {
 
     if (message.targetHint) {
         let win = getWindow(message.targetHint, message.target);
@@ -95,19 +95,34 @@ export function receiveMessage(event) {
         return;
     }
 
+    if (message.sourceDomain !== origin) {
+        throw new Error(`Message source domain ${message.sourceDomain} does not match message origin ${origin}`);
+    }
+
     registerWindow(message.source, source, origin);
 
-    let proxyWindow;
+
+    // Only allow self-certifying original domain when proxying through same domain
+
+    if (message.originalSourceDomain !== origin) {
+        if (!isSameDomain(source)) {
+            throw new Error(`Message original source domain ${message.originalSourceDomain} does not match message origin ${origin}`);
+        }
+    }
+
+
+
+    let targetWindow;
 
     try {
-        proxyWindow = getProxy(source, message);
+        targetWindow = getTargetWindow(source, message);
     } catch (err) {
         return log.debug(err.message);
     }
 
     let level;
 
-    if (POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 || message.type === CONSTANTS.POST_MESSAGE_TYPE.ACK || proxyWindow) {
+    if (POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 || message.type === CONSTANTS.POST_MESSAGE_TYPE.ACK || targetWindow) {
         level = 'debug';
     } else if (message.ack === 'error') {
         level = 'error';
@@ -115,16 +130,16 @@ export function receiveMessage(event) {
         level = 'info';
     }
 
-    log.logLevel(level, [ proxyWindow ? '#receiveproxy' : '#receive', message.type, message.name, message ]);
+    log.logLevel(level, [ targetWindow ? '#receiveproxy' : '#receive', message.type, message.name, message ]);
 
-    if (proxyWindow) {
+    if (targetWindow) {
 
-        if (isWindowClosed(proxyWindow)) {
+        if (isWindowClosed(targetWindow)) {
             return log.debug(`Target window is closed: ${message.target} - can not proxy ${message.type} ${message.name}`);
         }
 
         delete message.target;
-        return sendMessage(proxyWindow, message, message.domain || '*', true);
+        return sendMessage(targetWindow, message, message.domain || '*', true);
     }
 
     let originalSource = source;

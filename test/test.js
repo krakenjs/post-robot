@@ -1,16 +1,11 @@
 
+import './common';
 import postRobot from 'src/index';
 
 import { onWindowReady, promise } from 'src/lib';
 
 postRobot.CONFIG.LOG_TO_PAGE = true;
 window.mockDomain = 'http://test-post-robot.com';
-
-window.console.karma = function() {
-    var karma = window.karma || (window.top && window.top.karma) || (window.opener && window.opener.karma);
-    karma.log('debug', arguments);
-    console.log.apply(console, arguments);
-};
 
 function createIframe(name, callback) {
     var frame = document.createElement('iframe');

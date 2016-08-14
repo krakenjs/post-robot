@@ -1,13 +1,8 @@
 
+import './common';
 import postRobot from 'src/index';
 
 window.postRobot = postRobot;
-
-window.console.karma = function() {
-    var karma = window.karma || (window.top && window.top.karma) || (window.opener && window.opener.karma);
-    karma.log('debug', arguments);
-    console.log.apply(console, arguments);
-};
 
 postRobot.on('sendMessageToParent', function(source, data) {
     return postRobot.sendToParent(data.messageName, data.data);
