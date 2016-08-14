@@ -4,7 +4,6 @@ import { getWindowById, registerWindow, deserializeMethods, log, getOpener, getW
 import { emulateIERestrictions, registerBridge } from '../../compat';
 
 import { sendMessage } from '../send';
-import { listeners, getRequestListener } from '../listeners';
 
 import { RECEIVE_MESSAGE_TYPES } from './types';
 
@@ -54,32 +53,6 @@ function getWindow(hint, windowID) {
 }
 
 function getProxy(source, message) {
-
-    if (CONFIG.MOCK_MODE) {
-        return;
-    }
-
-    if (!message) {
-        return;
-    }
-
-    let listener = getRequestListener(message.name, source);
-
-    if (message.type === CONSTANTS.POST_MESSAGE_TYPE.REQUEST && message.name && listener && listener.proxy === false) {
-        return;
-    }
-
-    let isResponseOrAck = (message.type === CONSTANTS.POST_MESSAGE_TYPE.REQUEST || message.type === CONSTANTS.POST_MESSAGE_TYPE.ACK) && listeners.response[message.hash];
-
-    if (!isResponseOrAck) {
-        for (let i = 0; i < listeners.proxies.length; i++) {
-            let proxy = listeners.proxies[i];
-
-            if (source === proxy.from) {
-                return proxy.to;
-            }
-        }
-    }
 
     if (message.targetHint) {
         let win = getWindow(message.targetHint, message.target);

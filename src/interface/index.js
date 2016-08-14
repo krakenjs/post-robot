@@ -3,7 +3,6 @@ import { getParentWindow } from '../lib/windows';
 
 export * from './client';
 export * from './server';
-export * from './proxy';
 export * from './config';
 
 export let parent = getParentWindow();
