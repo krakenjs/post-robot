@@ -608,10 +608,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var data = event.data;
 
 
+	    if ((0, _lib.isSameDomain)(source, false)) {
+	        origin = _lib.util.getDomain(source);
+	    }
+
 	    var message = parseMessage(data);
 
 	    if (!message) {
 	        return;
+	    }
+
+	    if (message.sourceDomain.indexOf('mock://') === 0) {
+	        origin = message.sourceDomain;
 	    }
 
 	    if (receivedMessages.indexOf(message.id) === -1) {
@@ -1448,8 +1456,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return safeInterval;
 	    },
 	    getDomain: function getDomain(win) {
+	        var allowMockDomain = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
+
+
 	        win = win || window;
-	        return win.mockDomain || win.location.protocol + '//' + win.location.host;
+
+	        if (win.mockDomain && allowMockDomain && win.mockDomain.indexOf('mock://') === 0) {
+	            return win.mockDomain;
+	        }
+
+	        return win.location.protocol + '//' + win.location.host;
 	    },
 	    getDomainFromUrl: function getDomainFromUrl(url) {
 
@@ -1667,6 +1683,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	var domainMatchTimeout = void 0;
 
 	function isSameDomain(win) {
+	    var allowMockDomain = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
+
 
 	    for (var _iterator = domainMatches, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
 	        var _ref;
@@ -1683,28 +1701,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var _match = _ref;
 
 	        if (_match.win === win) {
-
-	            if (!_match.match) {
-	                return false;
-	            }
-
-	            _match.match = false;
-
-	            try {
-	                _match.match = _util.util.getDomain(window) === _util.util.getDomain(win);
-	            } catch (err) {
-	                return;
-	            }
-
-	            return _match.match;
+	            return allowMockDomain ? _match.match : _match.actualMatch;
 	        }
 	    }
 
 	    var match = false;
+	    var actualMatch = false;
 
 	    try {
 	        if (_util.util.getDomain(window) === _util.util.getDomain(win)) {
 	            match = true;
+	        }
+
+	        if (_util.util.getDomain(window, false) === _util.util.getDomain(win, false)) {
+	            actualMatch = true;
 	        }
 	    } catch (err) {
 	        // pass
@@ -1712,7 +1722,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    domainMatches.push({
 	        win: win,
-	        match: match
+	        match: match,
+	        actualMatch: actualMatch
 	    });
 
 	    if (!domainMatchTimeout) {
@@ -1722,7 +1733,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }, 1);
 	    }
 
-	    return match;
+	    return allowMockDomain ? match : actualMatch;
 	}
 
 	function isWindowClosed(win) {
