@@ -135,19 +135,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _proxy = __webpack_require__(26);
-
-	Object.keys(_proxy).forEach(function (key) {
-	  if (key === "default") return;
-	  Object.defineProperty(exports, key, {
-	    enumerable: true,
-	    get: function get() {
-	      return _proxy[key];
-	    }
-	  });
-	});
-
-	var _config = __webpack_require__(27);
+	var _config = __webpack_require__(26);
 
 	Object.keys(_config).forEach(function (key) {
 	  if (key === "default") return;
@@ -500,7 +488,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _listeners = __webpack_require__(23);
+	var _listeners = __webpack_require__(24);
 
 	Object.keys(_listeners).forEach(function (key) {
 	  if (key === "default") return;
@@ -532,9 +520,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _send = __webpack_require__(21);
 
-	var _listeners = __webpack_require__(23);
-
-	var _types = __webpack_require__(24);
+	var _types = __webpack_require__(23);
 
 	var receivedMessages = [];
 
@@ -589,33 +575,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return win;
 	}
 
-	function getProxy(source, message) {
-
-	    if (_conf.CONFIG.MOCK_MODE) {
-	        return;
-	    }
-
-	    if (!message) {
-	        return;
-	    }
-
-	    var listener = (0, _listeners.getRequestListener)(message.name, source);
-
-	    if (message.type === _conf.CONSTANTS.POST_MESSAGE_TYPE.REQUEST && message.name && listener && listener.proxy === false) {
-	        return;
-	    }
-
-	    var isResponseOrAck = (message.type === _conf.CONSTANTS.POST_MESSAGE_TYPE.REQUEST || message.type === _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK) && _listeners.listeners.response[message.hash];
-
-	    if (!isResponseOrAck) {
-	        for (var i = 0; i < _listeners.listeners.proxies.length; i++) {
-	            var proxy = _listeners.listeners.proxies[i];
-
-	            if (source === proxy.from) {
-	                return proxy.to;
-	            }
-	        }
-	    }
+	function getTargetWindow(source, message) {
 
 	    if (message.targetHint) {
 	        var win = getWindow(message.targetHint, message.target);
@@ -660,19 +620,31 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return;
 	    }
 
+	    if (message.sourceDomain !== origin) {
+	        throw new Error('Message source domain ' + message.sourceDomain + ' does not match message origin ' + origin);
+	    }
+
 	    (0, _lib.registerWindow)(message.source, source, origin);
 
-	    var proxyWindow = void 0;
+	    // Only allow self-certifying original domain when proxying through same domain
+
+	    if (message.originalSourceDomain !== origin) {
+	        if (!(0, _lib.isSameDomain)(source)) {
+	            throw new Error('Message original source domain ' + message.originalSourceDomain + ' does not match message origin ' + origin);
+	        }
+	    }
+
+	    var targetWindow = void 0;
 
 	    try {
-	        proxyWindow = getProxy(source, message);
+	        targetWindow = getTargetWindow(source, message);
 	    } catch (err) {
 	        return _lib.log.debug(err.message);
 	    }
 
 	    var level = void 0;
 
-	    if (_conf.POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 || message.type === _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK || proxyWindow) {
+	    if (_conf.POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 || message.type === _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK || targetWindow) {
 	        level = 'debug';
 	    } else if (message.ack === 'error') {
 	        level = 'error';
@@ -680,16 +652,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	        level = 'info';
 	    }
 
-	    _lib.log.logLevel(level, [proxyWindow ? '#receiveproxy' : '#receive', message.type, message.name, message]);
+	    _lib.log.logLevel(level, [targetWindow ? '#receiveproxy' : '#receive', message.type, message.name, message]);
 
-	    if (proxyWindow) {
+	    if (targetWindow) {
 
-	        if ((0, _lib.isWindowClosed)(proxyWindow)) {
+	        if ((0, _lib.isWindowClosed)(targetWindow)) {
 	            return _lib.log.debug('Target window is closed: ' + message.target + ' - can not proxy ' + message.type + ' ' + message.name);
 	        }
 
 	        delete message.target;
-	        return (0, _send.sendMessage)(proxyWindow, message, message.domain || '*', true);
+	        return (0, _send.sendMessage)(targetWindow, message, message.domain || '*', true);
 	    }
 
 	    var originalSource = source;
@@ -2542,6 +2514,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	function emulateIERestrictions(sourceWindow, targetWindow) {
 	    if (!_conf.CONFIG.ALLOW_POSTMESSAGE_POPUP) {
 
+	        if ((0, _lib.isSameDomain)(sourceWindow) && (0, _lib.isSameDomain)(targetWindow)) {
+	            return;
+	        }
+
 	        if (!(0, _lib.isSameTopWindow)(sourceWindow, targetWindow)) {
 	            throw new Error('Can not send and receive post messages between two different windows (disabled to emulate IE)');
 	        }
@@ -2584,7 +2560,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        source: source,
 	        originalSource: message.originalSource || source,
 	        sourceDomain: sourceDomain,
-	        originalSourceDomain: message.sourceDomain || sourceDomain,
+	        originalSourceDomain: message.originalSourceDomain || sourceDomain,
 	        windowType: type,
 	        originalWindowType: message.originalWindowType || type,
 	        target: message.target || target
@@ -2818,109 +2794,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	exports.listeners = undefined;
-	exports.resetListeners = resetListeners;
-	exports.getRequestListener = getRequestListener;
-	exports.removeRequestListener = removeRequestListener;
-	exports.addRequestListener = addRequestListener;
-
-	var _lib = __webpack_require__(8);
-
-	var listeners = exports.listeners = void 0;
-
-	function resetListeners() {
-	    exports.listeners = listeners = {
-	        request: [],
-	        response: {},
-	        proxies: []
-	    };
-	}
-
-	function getRequestListener(name, win) {
-	    for (var _iterator = listeners.request, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
-	        var _ref;
-
-	        if (_isArray) {
-	            if (_i >= _iterator.length) break;
-	            _ref = _iterator[_i++];
-	        } else {
-	            _i = _iterator.next();
-	            if (_i.done) break;
-	            _ref = _i.value;
-	        }
-
-	        var requestListener = _ref;
-
-
-	        if (requestListener.name !== name) {
-	            continue;
-	        }
-
-	        if (!requestListener.win) {
-	            return requestListener.options;
-	        }
-
-	        if (win && (0, _lib.isWindowEqual)(win, requestListener.win)) {
-	            return requestListener.options;
-	        }
-	    }
-	}
-
-	function removeRequestListener(options) {
-
-	    var listener = void 0;
-
-	    for (var _iterator2 = listeners.request, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
-	        var _ref2;
-
-	        if (_isArray2) {
-	            if (_i2 >= _iterator2.length) break;
-	            _ref2 = _iterator2[_i2++];
-	        } else {
-	            _i2 = _iterator2.next();
-	            if (_i2.done) break;
-	            _ref2 = _i2.value;
-	        }
-
-	        var requestListener = _ref2;
-
-	        if (requestListener.options === options) {
-	            listener = requestListener;
-	            break;
-	        }
-	    }
-
-	    if (listener) {
-	        listeners.request.splice(listeners.request.indexOf(listener), 1);
-	    }
-	}
-
-	function addRequestListener(name, win, options, override) {
-
-	    var listener = getRequestListener(name, win);
-
-	    if (listener) {
-	        if (override) {
-	            removeRequestListener(listener);
-	        } else {
-	            throw new Error('Request listener already exists for ' + name);
-	        }
-	    }
-
-	    listeners.request.push({ name: name, win: win, options: options });
-	}
-
-	resetListeners();
-
-/***/ },
-/* 24 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
 	exports.RECEIVE_MESSAGE_TYPES = undefined;
 
 	var _RECEIVE_MESSAGE_TYPE;
@@ -2933,7 +2806,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _send = __webpack_require__(21);
 
-	var _listeners = __webpack_require__(23);
+	var _listeners = __webpack_require__(24);
 
 	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -3018,6 +2891,108 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return options.respond(null, message.data || message.response);
 	    }
 	}), _RECEIVE_MESSAGE_TYPE);
+
+/***/ },
+/* 24 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.listeners = undefined;
+	exports.resetListeners = resetListeners;
+	exports.getRequestListener = getRequestListener;
+	exports.removeRequestListener = removeRequestListener;
+	exports.addRequestListener = addRequestListener;
+
+	var _lib = __webpack_require__(8);
+
+	var listeners = exports.listeners = void 0;
+
+	function resetListeners() {
+	    exports.listeners = listeners = {
+	        request: [],
+	        response: {}
+	    };
+	}
+
+	function getRequestListener(name, win) {
+	    for (var _iterator = listeners.request, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+	        var _ref;
+
+	        if (_isArray) {
+	            if (_i >= _iterator.length) break;
+	            _ref = _iterator[_i++];
+	        } else {
+	            _i = _iterator.next();
+	            if (_i.done) break;
+	            _ref = _i.value;
+	        }
+
+	        var requestListener = _ref;
+
+
+	        if (requestListener.name !== name) {
+	            continue;
+	        }
+
+	        if (!requestListener.win) {
+	            return requestListener.options;
+	        }
+
+	        if (win && (0, _lib.isWindowEqual)(win, requestListener.win)) {
+	            return requestListener.options;
+	        }
+	    }
+	}
+
+	function removeRequestListener(options) {
+
+	    var listener = void 0;
+
+	    for (var _iterator2 = listeners.request, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
+	        var _ref2;
+
+	        if (_isArray2) {
+	            if (_i2 >= _iterator2.length) break;
+	            _ref2 = _iterator2[_i2++];
+	        } else {
+	            _i2 = _iterator2.next();
+	            if (_i2.done) break;
+	            _ref2 = _i2.value;
+	        }
+
+	        var requestListener = _ref2;
+
+	        if (requestListener.options === options) {
+	            listener = requestListener;
+	            break;
+	        }
+	    }
+
+	    if (listener) {
+	        listeners.request.splice(listeners.request.indexOf(listener), 1);
+	    }
+	}
+
+	function addRequestListener(name, win, options, override) {
+
+	    var listener = getRequestListener(name, win);
+
+	    if (listener) {
+	        if (override) {
+	            removeRequestListener(listener);
+	        } else {
+	            throw new Error('Request listener already exists for ' + name);
+	        }
+	    }
+
+	    listeners.request.push({ name: name, win: win, options: options });
+	}
+
+	resetListeners();
 
 /***/ },
 /* 25 */
@@ -3135,49 +3110,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 26 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.proxy = proxy;
-	exports.unproxy = unproxy;
-
-	var _drivers = __webpack_require__(6);
-
-	function proxy(window1, window2) {
-
-	    _drivers.listeners.proxies.push({
-	        from: window1,
-	        to: window2
-	    });
-
-	    _drivers.listeners.proxies.push({
-	        from: window2,
-	        to: window1
-	    });
-	}
-
-	function unproxy(window1, window2) {
-
-	    var toRemove = [];
-
-	    for (var i = 0; i < _drivers.listeners.proxies.length; i++) {
-	        var prox = _drivers.listeners.proxies[i];
-	        if (prox.to === window1 && prox.from === window2 || prox.to === window2 && prox.from === window1) {
-	            toRemove.push(prox);
-	        }
-	    }
-
-	    for (var _i = 0; _i < toRemove.length; _i++) {
-	        _drivers.listeners.proxies.splice(_drivers.listeners.proxies.indexOf(toRemove[_i]), 1);
-	    }
-	}
-
-/***/ },
-/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
