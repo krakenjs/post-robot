@@ -247,9 +247,15 @@ export let util = {
         return safeInterval;
     },
 
-    getDomain(win) {
+    getDomain(win, allowMockDomain = true) {
+
         win = win || window;
-        return win.mockDomain || `${win.location.protocol}//${win.location.host}`;
+
+        if (win.mockDomain && allowMockDomain && win.mockDomain.indexOf('mock://') === 0) {
+            return win.mockDomain;
+        }
+
+        return `${win.location.protocol}//${win.location.host}`;
     },
 
     getDomainFromUrl(url) {

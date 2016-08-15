@@ -5,7 +5,7 @@ import postRobot from 'src/index';
 import { onWindowReady, promise } from 'src/lib';
 
 postRobot.CONFIG.LOG_TO_PAGE = true;
-window.mockDomain = 'http://test-post-robot.com';
+window.mockDomain = 'mock://test-post-robot.com';
 
 function createIframe(name, callback) {
     var frame = document.createElement('iframe');
@@ -28,7 +28,7 @@ let bridge;
 let childWindow, childFrame, otherChildFrame;
 
 before(function() {
-    return postRobot.openBridge('/base/test/bridge.htm', 'http://test-post-robot-child.com').then(frame => {
+    return postRobot.openBridge('/base/test/bridge.htm', 'mock://test-post-robot-child.com').then(frame => {
         bridge = frame;
     }).then(function() {
 
@@ -333,18 +333,6 @@ describe('[post-robot] error cases', function() {
             postRobot.CONFIG.ALLOW_POSTMESSAGE_POPUP = true;
             postRobot.CONFIG.ALLOWED_POST_MESSAGE_METHODS = allowedStrategies;
         });
-    });
-
-    it.skip('should error out trying to set up a second bridge', function() {
-
-        try {
-            postRobot.openBridge('/base/test/child.htm');
-        } catch (err) {
-            assert.ok(err);
-            return;
-        }
-
-        throw new Error('Expected opening second bridge to throw an error');
     });
 
     it('should fail to send a message when the expected domain does not match', function() {
