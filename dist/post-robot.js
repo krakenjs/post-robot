@@ -84,16 +84,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _drivers = __webpack_require__(6);
 
-	var _compat = __webpack_require__(17);
+	var _global = __webpack_require__(15);
 
 	function init() {
 
-	    (0, _compat.registerGlobals)();
+	    if (!_global.global.initialized) {
 
-	    // Listen for all incoming post-messages
-	    _lib.util.listen(window, 'message', _drivers.messageListener);
+	        _lib.util.listen(window, 'message', _drivers.messageListener);
 
-	    (0, _lib.initOnReady)();
+	        (0, _lib.initOnReady)();
+	        (0, _lib.listenForMethods)();
+	    }
+
+	    _global.global.initialized = true;
 	}
 
 	init();
@@ -123,7 +126,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _server = __webpack_require__(25);
+	var _server = __webpack_require__(26);
 
 	Object.keys(_server).forEach(function (key) {
 	  if (key === "default") return;
@@ -135,7 +138,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _config = __webpack_require__(26);
+	var _config = __webpack_require__(27);
 
 	Object.keys(_config).forEach(function (key) {
 	  if (key === "default") return;
@@ -156,7 +159,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	});
 
-	var _bridge = __webpack_require__(18);
+	var _bridge = __webpack_require__(19);
 
 	Object.defineProperty(exports, 'openBridge', {
 	  enumerable: true,
@@ -476,7 +479,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _send = __webpack_require__(21);
+	var _send = __webpack_require__(22);
 
 	Object.keys(_send).forEach(function (key) {
 	  if (key === "default") return;
@@ -488,7 +491,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _listeners = __webpack_require__(24);
+	var _listeners = __webpack_require__(25);
 
 	Object.keys(_listeners).forEach(function (key) {
 	  if (key === "default") return;
@@ -516,13 +519,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _lib = __webpack_require__(8);
 
-	var _compat = __webpack_require__(17);
+	var _compat = __webpack_require__(18);
 
-	var _send = __webpack_require__(21);
+	var _global = __webpack_require__(15);
 
-	var _types = __webpack_require__(23);
+	var _send = __webpack_require__(22);
 
-	var receivedMessages = [];
+	var _types = __webpack_require__(24);
+
+	_global.global.receivedMessages = _global.global.receivedMessages || [];
 
 	function parseMessage(message) {
 
@@ -622,8 +627,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        origin = message.sourceDomain;
 	    }
 
-	    if (receivedMessages.indexOf(message.id) === -1) {
-	        receivedMessages.push(message.id);
+	    if (_global.global.receivedMessages.indexOf(message.id) === -1) {
+	        _global.global.receivedMessages.push(message.id);
 	    } else {
 	        return;
 	    }
@@ -789,7 +794,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _methods = __webpack_require__(15);
+	var _methods = __webpack_require__(16);
 
 	Object.keys(_methods).forEach(function (key) {
 	  if (key === "default") return;
@@ -813,7 +818,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _ready = __webpack_require__(16);
+	var _ready = __webpack_require__(17);
 
 	Object.keys(_ready).forEach(function (key) {
 	  if (key === "default") return;
@@ -1666,6 +1671,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _util = __webpack_require__(12);
 
+	var _global = __webpack_require__(15);
+
 	function safeGet(obj, prop) {
 
 	    var result = void 0;
@@ -1679,14 +1686,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return result;
 	}
 
-	var domainMatches = [];
+	_global.global.domainMatches = _global.global.domainMatches || [];
 	var domainMatchTimeout = void 0;
 
 	function isSameDomain(win) {
 	    var allowMockDomain = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
 
 
-	    for (var _iterator = domainMatches, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+	    for (var _iterator = _global.global.domainMatches, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
 	        var _ref;
 
 	        if (_isArray) {
@@ -1720,7 +1727,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        // pass
 	    }
 
-	    domainMatches.push({
+	    _global.global.domainMatches.push({
 	        win: win,
 	        match: match,
 	        actualMatch: actualMatch
@@ -1728,7 +1735,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    if (!domainMatchTimeout) {
 	        domainMatchTimeout = setTimeout(function () {
-	            domainMatches = [];
+	            _global.global.domainMatches = [];
 	            domainMatchTimeout = null;
 	        }, 1);
 	    }
@@ -1771,7 +1778,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	}
 
-	var windows = [];
+	_global.global.windows = _global.global.windows || [];
 	var windowId = window.name || _util.util.getType() + '_' + _util.util.uniqueID();
 
 	function getWindowId(win) {
@@ -1780,8 +1787,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return windowId;
 	    }
 
-	    for (var i = windows.length - 1; i >= 0; i--) {
-	        var map = windows[i];
+	    for (var i = _global.global.windows.length - 1; i >= 0; i--) {
+	        var map = _global.global.windows[i];
 
 	        try {
 	            if (map.win === win) {
@@ -1803,8 +1810,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return window.frames[id];
 	    }
 
-	    for (var i = windows.length - 1; i >= 0; i--) {
-	        var map = windows[i];
+	    for (var i = _global.global.windows.length - 1; i >= 0; i--) {
+	        var map = _global.global.windows[i];
 
 	        try {
 	            if (map.id === id) {
@@ -1822,8 +1829,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return _util.util.getDomain(window);
 	    }
 
-	    for (var i = windows.length - 1; i >= 0; i--) {
-	        var map = windows[i];
+	    for (var i = _global.global.windows.length - 1; i >= 0; i--) {
+	        var map = _global.global.windows[i];
 
 	        try {
 	            if (map.win === win && map.domain) {
@@ -1837,7 +1844,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function registerWindow(id, win, domain) {
 
-	    for (var _iterator2 = windows, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
+	    for (var _iterator2 = _global.global.windows, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
 	        var _ref2;
 
 	        if (_isArray2) {
@@ -1867,7 +1874,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    }
 
-	    windows.push({
+	    _global.global.windows.push({
 	        id: id,
 	        win: win,
 	        domain: domain
@@ -1904,7 +1911,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    registerWindow(name, win, domain);
 
-	    domainMatches.push({
+	    _global.global.domainMatches.push({
 	        win: win,
 	        match: _util.util.getDomain() === domain
 	    });
@@ -1937,6 +1944,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.global = undefined;
+
+	var _conf = __webpack_require__(3);
+
+	var global = exports.global = window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT] = window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT] || {};
+
+/***/ },
+/* 16 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
 	exports.listenForMethods = undefined;
@@ -1955,20 +1977,22 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _promise = __webpack_require__(9);
 
-	var methods = {};
+	var _global = __webpack_require__(15);
+
+	_global.global.methods = _global.global.methods || {};
 
 	var listenForMethods = exports.listenForMethods = _util.util.once(function () {
 	    (0, _interface.on)(_conf.CONSTANTS.POST_MESSAGE_NAMES.METHOD, function (source, data) {
 
-	        if (!methods[data.id]) {
+	        if (!_global.global.methods[data.id]) {
 	            throw new Error('Could not find method with id: ' + data.id);
 	        }
 
-	        if (methods[data.id].win !== source) {
+	        if (_global.global.methods[data.id].win !== source) {
 	            throw new Error('Method window does not match');
 	        }
 
-	        var method = methods[data.id].method;
+	        var method = _global.global.methods[data.id].method;
 
 	        _log.log.debug('Call local method', data.name, data.args);
 
@@ -1993,7 +2017,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var id = _util.util.uniqueID();
 
-	    methods[id] = {
+	    _global.global.methods[id] = {
 	        win: destination,
 	        method: method
 	    };
@@ -2006,8 +2030,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	function serializeMethods(destination, obj) {
-
-	    listenForMethods();
 
 	    return _util.util.replaceObject({ obj: obj }, function (item, key) {
 	        if (item instanceof Function) {
@@ -2048,7 +2070,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 16 */
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2069,13 +2091,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _promise = __webpack_require__(10);
 
-	var readyPromises = [];
+	var _global = __webpack_require__(15);
+
+	_global.global.readyPromises = _global.global.readyPromises || [];
 
 	function initOnReady() {
 
 	    (0, _interface.on)(_conf.CONSTANTS.POST_MESSAGE_NAMES.READY, function (win, data) {
 
-	        for (var _iterator = readyPromises, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+	        for (var _iterator = _global.global.readyPromises, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
 	            var _ref;
 
 	            if (_isArray) {
@@ -2095,7 +2119,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	        }
 
-	        readyPromises.push({
+	        _global.global.readyPromises.push({
 	            win: win,
 	            promise: new _promise.SyncPromise().resolve(win)
 	        });
@@ -2115,7 +2139,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var name = arguments.length <= 2 || arguments[2] === undefined ? 'Window' : arguments[2];
 
 
-	    for (var _iterator2 = readyPromises, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
+	    for (var _iterator2 = _global.global.readyPromises, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
 	        var _ref2;
 
 	        if (_isArray2) {
@@ -2136,7 +2160,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var promise = new _promise.SyncPromise();
 
-	    readyPromises.push({
+	    _global.global.readyPromises.push({
 	        win: win,
 	        promise: promise
 	    });
@@ -2149,7 +2173,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 17 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2158,7 +2182,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  value: true
 	});
 
-	var _bridge = __webpack_require__(18);
+	var _bridge = __webpack_require__(19);
 
 	Object.keys(_bridge).forEach(function (key) {
 	  if (key === "default") return;
@@ -2170,19 +2194,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	});
 
-	var _global = __webpack_require__(19);
+	var _post = __webpack_require__(20);
 
-	Object.keys(_global).forEach(function (key) {
+	Object.keys(_post).forEach(function (key) {
 	  if (key === "default") return;
 	  Object.defineProperty(exports, key, {
 	    enumerable: true,
 	    get: function get() {
-	      return _global[key];
+	      return _post[key];
 	    }
 	  });
 	});
 
-	var _ie = __webpack_require__(20);
+	var _ie = __webpack_require__(21);
 
 	Object.keys(_ie).forEach(function (key) {
 	  if (key === "default") return;
@@ -2195,7 +2219,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 18 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2478,37 +2502,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 19 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.registerGlobals = registerGlobals;
-
-	var _conf = __webpack_require__(3);
+	var _global = __webpack_require__(15);
 
 	var _drivers = __webpack_require__(6);
 
-	function registerGlobals() {
-
-	    // Only allow ourselves to be loaded once
-
-	    if (window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
-	        throw new Error('Attempting to load postRobot twice on the same window');
-	    }
-
-	    window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT] = {
-	        postMessage: function postMessage(event) {
-	            (0, _drivers.receiveMessage)(event);
-	        }
-	    };
-	}
+	_global.global.postMessage = _global.global.postMessage || function postMessage(event) {
+	    (0, _drivers.receiveMessage)(event);
+	};
 
 /***/ },
-/* 20 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2536,7 +2544,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 21 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2554,7 +2562,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _lib = __webpack_require__(8);
 
-	var _strategies = __webpack_require__(22);
+	var _strategies = __webpack_require__(23);
 
 	function buildMessage(win, message) {
 	    var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
@@ -2650,7 +2658,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 22 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2666,7 +2674,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _lib = __webpack_require__(8);
 
-	var _compat = __webpack_require__(17);
+	var _compat = __webpack_require__(18);
 
 	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -2797,7 +2805,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}), _SEND_MESSAGE_STRATEG);
 
 /***/ },
-/* 23 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2815,9 +2823,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _lib = __webpack_require__(8);
 
-	var _send = __webpack_require__(21);
+	var _send = __webpack_require__(22);
 
-	var _listeners = __webpack_require__(24);
+	var _listeners = __webpack_require__(25);
 
 	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -2904,7 +2912,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}), _RECEIVE_MESSAGE_TYPE);
 
 /***/ },
-/* 24 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2920,17 +2928,22 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _lib = __webpack_require__(8);
 
-	var listeners = exports.listeners = void 0;
+	var _global = __webpack_require__(15);
+
+	_global.global.listeners = _global.global.listeners || {
+	    request: [],
+	    response: []
+	};
+
+	var listeners = exports.listeners = _global.global.listeners;
 
 	function resetListeners() {
-	    exports.listeners = listeners = {
-	        request: [],
-	        response: {}
-	    };
+	    _global.global.listeners.request = [];
+	    _global.global.listeners.response = [];
 	}
 
 	function getRequestListener(name, win) {
-	    for (var _iterator = listeners.request, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+	    for (var _iterator = _global.global.listeners.request, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
 	        var _ref;
 
 	        if (_isArray) {
@@ -2963,7 +2976,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var listener = void 0;
 
-	    for (var _iterator2 = listeners.request, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
+	    for (var _iterator2 = _global.global.listeners.request, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
 	        var _ref2;
 
 	        if (_isArray2) {
@@ -2984,7 +2997,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    if (listener) {
-	        listeners.request.splice(listeners.request.indexOf(listener), 1);
+	        _global.global.listeners.request.splice(_global.global.listeners.request.indexOf(listener), 1);
 	    }
 	}
 
@@ -3003,10 +3016,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    listeners.request.push({ name: name, win: win, options: options });
 	}
 
-	resetListeners();
-
 /***/ },
-/* 25 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -3120,7 +3131,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 26 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
