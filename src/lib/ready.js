@@ -4,21 +4,22 @@ import { getParentWindow } from './windows';
 import { on, send } from '../interface';
 import { log } from './log';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
+import { global } from '../global';
 
-let readyPromises = [];
+global.readyPromises = global.readyPromises || [];
 
 export function initOnReady() {
 
     on(CONSTANTS.POST_MESSAGE_NAMES.READY, (win, data) => {
 
-        for (let item of readyPromises) {
+        for (let item of global.readyPromises) {
             if (item.win === win) {
                 item.promise.resolve(win);
                 return;
             }
         }
 
-        readyPromises.push({
+        global.readyPromises.push({
             win,
             promise: new Promise().resolve(win)
         });
@@ -35,7 +36,7 @@ export function initOnReady() {
 
 export function onWindowReady(win, timeout = 5000, name = 'Window') {
 
-    for (let item of readyPromises) {
+    for (let item of global.readyPromises) {
         if (item.win === win) {
             return item.promise;
         }
@@ -43,7 +44,7 @@ export function onWindowReady(win, timeout = 5000, name = 'Window') {
 
     let promise = new Promise();
 
-    readyPromises.push({
+    global.readyPromises.push({
         win,
         promise
     });

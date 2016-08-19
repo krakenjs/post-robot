@@ -1,16 +1,19 @@
 
-import { util, initOnReady } from './lib';
+import { util, initOnReady, listenForMethods } from './lib';
 import { messageListener } from './drivers';
-import { registerGlobals } from './compat';
+import { global } from './global';
 
 function init() {
 
-    registerGlobals();
+    if (!global.initialized) {
 
-    // Listen for all incoming post-messages
-    util.listen(window, 'message', messageListener);
+        util.listen(window, 'message', messageListener);
 
-    initOnReady();
+        initOnReady();
+        listenForMethods();
+    }
+
+    global.initialized = true;
 }
 
 init();

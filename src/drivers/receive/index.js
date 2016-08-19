@@ -2,12 +2,13 @@
 import { CONFIG, CONSTANTS, POST_MESSAGE_NAMES_LIST } from '../../conf';
 import { getWindowById, registerWindow, deserializeMethods, log, getOpener, getWindowId, isWindowClosed, isSameDomain, util } from '../../lib';
 import { emulateIERestrictions, registerBridge } from '../../compat';
+import { global } from '../../global';
 
 import { sendMessage } from '../send';
 
 import { RECEIVE_MESSAGE_TYPES } from './types';
 
-let receivedMessages = [];
+global.receivedMessages = global.receivedMessages || [];
 
 function parseMessage(message) {
 
@@ -97,8 +98,8 @@ export function receiveMessage(event) {
         origin = message.sourceDomain;
     }
 
-    if (receivedMessages.indexOf(message.id) === -1) {
-        receivedMessages.push(message.id);
+    if (global.receivedMessages.indexOf(message.id) === -1) {
+        global.receivedMessages.push(message.id);
     } else {
         return;
     }

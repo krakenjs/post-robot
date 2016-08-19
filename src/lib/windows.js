@@ -1,5 +1,6 @@
 
 import { util } from './util';
+import { global } from '../global';
 
 function safeGet(obj, prop) {
 
@@ -14,12 +15,12 @@ function safeGet(obj, prop) {
     return result;
 }
 
-let domainMatches = [];
+global.domainMatches = global.domainMatches || [];
 let domainMatchTimeout;
 
 export function isSameDomain(win, allowMockDomain = true) {
 
-    for (let match of domainMatches) {
+    for (let match of global.domainMatches) {
         if (match.win === win) {
             return allowMockDomain ? match.match : match.actualMatch;
         }
@@ -40,7 +41,7 @@ export function isSameDomain(win, allowMockDomain = true) {
         // pass
     }
 
-    domainMatches.push({
+    global.domainMatches.push({
         win,
         match,
         actualMatch
@@ -48,7 +49,7 @@ export function isSameDomain(win, allowMockDomain = true) {
 
     if (!domainMatchTimeout) {
         domainMatchTimeout = setTimeout(function() {
-            domainMatches = [];
+            global.domainMatches = [];
             domainMatchTimeout = null;
         }, 1);
     }
@@ -97,9 +98,8 @@ export function getParentWindow(win) {
 
 
 
-let windows = [];
+global.windows = global.windows || [];
 let windowId = window.name || `${util.getType()}_${util.uniqueID()}`;
-
 
 export function getWindowId(win) {
 
@@ -107,8 +107,8 @@ export function getWindowId(win) {
         return windowId;
     }
 
-    for (let i = windows.length - 1; i >= 0; i--) {
-        let map = windows[i];
+    for (let i = global.windows.length - 1; i >= 0; i--) {
+        let map = global.windows[i];
 
         try {
             if (map.win === win) {
@@ -130,8 +130,8 @@ export function getWindowById(id) {
         return window.frames[id];
     }
 
-    for (let i = windows.length - 1; i >= 0; i--) {
-        let map = windows[i];
+    for (let i = global.windows.length - 1; i >= 0; i--) {
+        let map = global.windows[i];
 
         try {
             if (map.id === id) {
@@ -149,8 +149,8 @@ export function getWindowDomain(win) {
         return util.getDomain(window);
     }
 
-    for (let i = windows.length - 1; i >= 0; i--) {
-        let map = windows[i];
+    for (let i = global.windows.length - 1; i >= 0; i--) {
+        let map = global.windows[i];
 
         try {
             if (map.win === win && map.domain) {
@@ -164,7 +164,7 @@ export function getWindowDomain(win) {
 
 export function registerWindow(id, win, domain) {
 
-    for (let map of windows) {
+    for (let map of global.windows) {
         try {
             if (map.id === id && map.win === win) {
                 map.domain = domain;
@@ -181,7 +181,7 @@ export function registerWindow(id, win, domain) {
         }
     }
 
-    windows.push({
+    global.windows.push({
         id,
         win,
         domain
@@ -219,7 +219,7 @@ export function linkUrl(name, win, url) {
 
     registerWindow(name, win, domain);
 
-    domainMatches.push({
+    global.domainMatches.push({
         win,
         match: util.getDomain() === domain
     });

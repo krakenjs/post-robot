@@ -1,17 +1,21 @@
 
 import { isWindowEqual } from '../lib';
+import { global } from '../global';
 
-export let listeners;
+global.listeners = global.listeners || {
+    request: [],
+    response: []
+};
+
+export let listeners = global.listeners;
 
 export function resetListeners() {
-    listeners = {
-        request: [],
-        response: {}
-    };
+    global.listeners.request = [];
+    global.listeners.response = [];
 }
 
 export function getRequestListener(name, win) {
-    for (let requestListener of listeners.request) {
+    for (let requestListener of global.listeners.request) {
 
         if (requestListener.name !== name) {
             continue;
@@ -31,7 +35,7 @@ export function removeRequestListener(options) {
 
     let listener;
 
-    for (let requestListener of listeners.request) {
+    for (let requestListener of global.listeners.request) {
         if (requestListener.options === options) {
             listener = requestListener;
             break;
@@ -39,7 +43,7 @@ export function removeRequestListener(options) {
     }
 
     if (listener) {
-        listeners.request.splice(listeners.request.indexOf(listener), 1);
+        global.listeners.request.splice(global.listeners.request.indexOf(listener), 1);
     }
 }
 
@@ -57,5 +61,3 @@ export function addRequestListener(name, win, options, override) {
 
     listeners.request.push({ name, win, options });
 }
-
-resetListeners();

@@ -4,21 +4,22 @@ import { util } from './util';
 import { on, send } from '../interface';
 import { log } from './log';
 import { promise } from './promise';
+import { global } from '../global';
 
-let methods = {};
+global.methods = global.methods || {};
 
 export let listenForMethods = util.once(() => {
     on(CONSTANTS.POST_MESSAGE_NAMES.METHOD, (source, data) => {
 
-        if (!methods[data.id]) {
+        if (!global.methods[data.id]) {
             throw new Error(`Could not find method with id: ${data.id}`);
         }
 
-        if (methods[data.id].win !== source) {
+        if (global.methods[data.id].win !== source) {
             throw new Error('Method window does not match');
         }
 
-        let method = methods[data.id].method;
+        let method = global.methods[data.id].method;
 
         log.debug('Call local method', data.name, data.args);
 
@@ -44,7 +45,7 @@ export function serializeMethod(destination, method, name) {
 
     let id = util.uniqueID();
 
-    methods[id] = {
+    global.methods[id] = {
         win: destination,
         method
     };
@@ -57,8 +58,6 @@ export function serializeMethod(destination, method, name) {
 }
 
 export function serializeMethods(destination, obj) {
-
-    listenForMethods();
 
     return util.replaceObject({ obj }, (item, key) => {
         if (item instanceof Function) {
