@@ -1,5 +1,6 @@
 
 import { util } from './util';
+import { getWindowType } from './windows';
 import { CONFIG } from '../conf';
 
 const LOG_LEVELS = ['debug', 'info', 'warn', 'error'];
@@ -92,7 +93,7 @@ export let log = {
 
         args.unshift(window.location.pathname);
         args.unshift(window.location.host);
-        args.unshift(`<${util.getType().toLowerCase()}>`);
+        args.unshift(`<${getWindowType().toLowerCase()}>`);
         args.unshift('[post-robot]');
 
         if (CONFIG.LOG_TO_PAGE) {

@@ -1,6 +1,6 @@
 
 import { CONSTANTS } from '../conf';
-import { util, promise, isSameDomain, log, onWindowReady, getOpener, getWindowDomain, registerWindow } from '../lib';
+import { util, promise, isSameDomain, log, onWindowReady, getOpener, getWindowDomain, registerWindow, getFrames, isFrameOwnedBy } from '../lib';
 
 const BRIDGE_NAME_PREFIX = '__postrobot_bridge__';
 
@@ -102,13 +102,15 @@ export function getRemoteBridgeForWindow(win) {
         }
 
         try {
-            if (!win || !win.frames || !win.frames.length) {
+            let frames = getFrames(win);
+
+            if (!frames || !frames.length) {
                 return;
             }
 
-            for (let i = 0; i < win.frames.length; i++) {
+            for (let i = 0; i < frames.length; i++) {
                 try {
-                    let frame = win.frames[i];
+                    let frame = frames[i];
 
                     if (frame && frame !== window && isSameDomain(frame) && frame[CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
                         return frame;
@@ -136,7 +138,7 @@ export function registerBridge(bridge, win) {
     }
 
     if (!result) {
-        let zone = util.isFrameOwnedBy(window, bridge) ? ZONES.LOCAL : ZONES.REMOTE;
+        let zone = isFrameOwnedBy(window, bridge) ? ZONES.LOCAL : ZONES.REMOTE;
 
         result = {
             bridge,
@@ -175,8 +177,10 @@ export function openBridge(url, domain) {
 
         let id = `${BRIDGE_NAME_PREFIX}_${sanitizedDomain}`;
 
-        if (window.frames[id]) {
-            return onWindowReady(window.frames[id], 5000, `Bridge ${url}`);
+        let frames = getFrames(window);
+
+        if (frames && frames[id]) {
+            return onWindowReady(frames[id], 5000, `Bridge ${url}`);
         }
 
         log.debug('Opening bridge:', url);

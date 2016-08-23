@@ -1,7 +1,7 @@
 
 import { CONFIG, CONSTANTS } from '../conf';
 import { listeners, sendMessage } from '../drivers';
-import { util, promise, getParentWindow, onWindowReady, isWindowClosed } from '../lib';
+import { util, promise, getParentWindow, isParentWindow, onWindowReady, isWindowClosed } from '../lib';
 
 
 export function request(options) {
@@ -57,7 +57,7 @@ export function request(options) {
 
         return promise.run(() => {
 
-            if (getParentWindow(options.window) === window) {
+            if (isParentWindow(options.window, window)) {
                 return onWindowReady(options.window);
             }
 

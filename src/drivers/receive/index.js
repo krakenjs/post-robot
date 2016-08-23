@@ -1,6 +1,6 @@
 
 import { CONFIG, CONSTANTS, POST_MESSAGE_NAMES_LIST } from '../../conf';
-import { getWindowById, registerWindow, deserializeMethods, log, getOpener, getWindowId, isWindowClosed, isSameDomain, util } from '../../lib';
+import { getWindowById, registerWindow, deserializeMethods, log, getOpener, getParent, getWindowId, isWindowClosed, isSameDomain, util } from '../../lib';
 import { emulateIERestrictions, registerBridge } from '../../compat';
 import { global } from '../../global';
 
@@ -32,10 +32,10 @@ function parseMessage(message) {
 function getWindow(hint, windowID) {
 
     let windowTargets = {
-        'window.parent': id => window.parent,
+        'window.parent': id => getParent(window),
         'window.opener': id => getOpener(window),
-        'window.parent.opener': id => getOpener(window.parent),
-        'window.opener.parent': id => getOpener(window).parent
+        'window.parent.opener': id => getOpener(getParent(window)),
+        'window.opener.parent': id => getParent(getOpener(window))
     };
 
     let win;

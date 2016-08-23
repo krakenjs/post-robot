@@ -1,29 +1,5 @@
 
-import { CONSTANTS } from '../conf';
-
 export let util = {
-
-    isPopup() {
-        return Boolean(window.opener);
-    },
-
-    isIframe() {
-        return Boolean(window.parent && window !== window.parent);
-    },
-
-    isFullpage() {
-        return Boolean(!util.isIframe() && !util.isPopup());
-    },
-
-    getType() {
-        if (util.isPopup()) {
-            return CONSTANTS.WINDOW_TYPES.POPUP;
-        }
-        if (util.isIframe()) {
-            return CONSTANTS.WINDOW_TYPES.IFRAME;
-        }
-        return CONSTANTS.WINDOW_TYPES.FULLPAGE;
-    },
 
     once(method) {
         if (!method) {
@@ -271,29 +247,5 @@ export let util = {
         domain = domain.split('/').slice(0, 3).join('/');
 
         return domain;
-    },
-
-    isFrameOwnedBy(win, frame) {
-
-        try {
-            if (frame.parent === win) {
-                return true;
-            } else {
-                return false;
-            }
-        } catch (err) {
-
-            try {
-                for (let i = 0; i < win.frames.length; i++) {
-                    if (win.frames[i] === frame) {
-                        return true;
-                    }
-                }
-            } catch (err2) {
-                return false;
-            }
-        }
-
-        return false;
     }
 };

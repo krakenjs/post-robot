@@ -1,6 +1,6 @@
 
 import { CONSTANTS, CONFIG, POST_MESSAGE_NAMES_LIST } from '../../conf';
-import { util, promise, getWindowId, serializeMethods, log, isWindowClosed } from '../../lib';
+import { util, promise, getWindowId, serializeMethods, log, isWindowClosed, getWindowType } from '../../lib';
 
 import { SEND_MESSAGE_STRATEGIES } from './strategies';
 
@@ -9,7 +9,7 @@ export function buildMessage(win, message, options = {}) {
 
     let id     = util.uniqueID();
     let source = getWindowId(window);
-    let type   = util.getType();
+    let type   = getWindowType();
     let target = getWindowId(win);
     let sourceDomain = util.getDomain(window);
 

@@ -1,6 +1,7 @@
 
 import { util } from './util';
 import { global } from '../global';
+import { CONSTANTS } from '../conf';
 
 function safeGet(obj, prop) {
 
@@ -79,8 +80,83 @@ export function getOpener(win) {
     }
 }
 
+export function getParent(win) {
 
+    if (!win) {
+        return;
+    }
 
+    try {
+        return win.parent;
+    } catch (err) {
+        return;
+    }
+}
+
+export function getTop(win) {
+
+    if (!win) {
+        return;
+    }
+
+    try {
+        return win.top;
+    } catch (err) {
+        return;
+    }
+}
+
+export function getFrames(win) {
+
+    if (!win) {
+        return;
+    }
+
+    try {
+        if (win.frames && typeof win.frames === 'number') {
+            return win.frames;
+        }
+    } catch (err) {
+        // pass
+    }
+
+    if (win.length && typeof win.length === 'number') {
+        return win;
+    }
+}
+
+export function isFrameOwnedBy(win, frame) {
+
+    try {
+        let frameParent = getParent(frame);
+
+        if (frameParent) {
+            return frameParent === win;
+        }
+
+    } catch (err) {
+        // pass
+    }
+
+    try {
+        let frames = getFrames(win);
+
+        if (!frames || !frames.length) {
+            return false;
+        }
+
+        for (let i = 0; i < frames.length; i++) {
+            if (frames[i] === frame) {
+                return true;
+            }
+        }
+
+    } catch (err) {
+        // pass
+    }
+
+    return false;
+}
 
 export function getParentWindow(win) {
     win = win || window;
@@ -91,15 +167,76 @@ export function getParentWindow(win) {
         return opener;
     }
 
-    if (win.parent !== win) {
-        return win.parent;
+    let parent = getParent(win);
+
+    if (parent && parent !== win) {
+        return parent;
     }
+}
+
+
+export function isParentWindow(child, parent) {
+    parent = parent || window;
+
+    let parentWindow = getParentWindow(child);
+
+    if (parentWindow) {
+        return parentWindow === parent;
+    }
+
+    if (child === window) {
+        return getParentWindow(child) === parent;
+    }
+
+    if (child === parent) {
+        return false;
+    }
+
+    if (getTop(child) === child) {
+        return false;
+    }
+
+    let frames = getFrames(parent);
+
+    if (frames && frames.length) {
+        for (let i = 0; i < frames.length; i++) {
+            if (frames[i] === child) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+
+
+export function isPopup() {
+    return Boolean(getOpener(window));
+}
+
+export function isIframe() {
+    return Boolean(getParent(window));
+}
+
+export function isFullpage() {
+    return Boolean(!isIframe() && !isPopup());
+}
+
+export function getWindowType() {
+    if (isPopup()) {
+        return CONSTANTS.WINDOW_TYPES.POPUP;
+    }
+    if (isIframe()) {
+        return CONSTANTS.WINDOW_TYPES.IFRAME;
+    }
+    return CONSTANTS.WINDOW_TYPES.FULLPAGE;
 }
 
 
 
 global.windows = global.windows || [];
-let windowId = window.name || `${util.getType()}_${util.uniqueID()}`;
+let windowId = window.name || `${getWindowType()}_${util.uniqueID()}`;
 
 export function getWindowId(win) {
 
@@ -205,8 +342,11 @@ export function isWindowEqual(win1, win2) {
 }
 
 export function isSameTopWindow(win1, win2) {
+    let top1 = getTop(win1);
+    let top2 = getTop(win2);
+
     try {
-        return win1.top === win2.top;
+        return top1 && top2 && top1 === top2;
     } catch (err) {
         return false;
     }

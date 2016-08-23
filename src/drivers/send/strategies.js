@@ -1,6 +1,6 @@
 
 import { CONSTANTS } from '../../conf';
-import { util, isSameDomain, getOpener, isSameTopWindow } from '../../lib';
+import { util, isSameDomain, getOpener, isSameTopWindow, getParent } from '../../lib';
 import { emulateIERestrictions, getLocalBridgeForWindow, getRemoteBridgeForWindow } from '../../compat';
 
 export let SEND_MESSAGE_STRATEGIES = {
@@ -119,7 +119,9 @@ export let SEND_MESSAGE_STRATEGIES = {
             message.sourceHint = 'window.opener';
         }
 
-        if (opener && window === opener.parent) {
+        let openerParent = opener && getParent(opener);
+
+        if (openerParent && window === openerParent) {
             message.sourceHint = 'window.opener.parent';
         }
 
