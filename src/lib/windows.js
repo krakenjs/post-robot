@@ -216,7 +216,7 @@ export function isPopup() {
 }
 
 export function isIframe() {
-    return Boolean(getParent(window));
+    return Boolean(getParent(window) && window !== getParent(window));
 }
 
 export function isFullpage() {
