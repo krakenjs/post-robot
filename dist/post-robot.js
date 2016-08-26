@@ -1740,7 +1740,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    try {
-	        return win.parent;
+	        if (win.parent && win.parent !== win) {
+	            return win.parent;
+	        }
 	    } catch (err) {
 	        return;
 	    }
@@ -1820,7 +1822,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var parent = getParent(win);
 
-	    if (parent && parent !== win) {
+	    if (parent) {
 	        return parent;
 	    }
 	}
@@ -2894,12 +2896,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    if (opener && window === opener) {
 	        message.sourceHint = 'window.opener';
-	    }
+	    } else {
 
-	    var openerParent = opener && (0, _lib.getParent)(opener);
+	        var openerParent = opener && (0, _lib.getParent)(opener);
 
-	    if (openerParent && window === openerParent) {
-	        message.sourceHint = 'window.opener.parent';
+	        if (openerParent && window === openerParent) {
+	            message.sourceHint = 'window.opener.parent';
+	        }
 	    }
 
 	    return (0, _compat.getLocalBridgeForWindow)(win).then(function (bridge) {
