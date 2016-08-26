@@ -87,7 +87,9 @@ export function getParent(win) {
     }
 
     try {
-        return win.parent;
+        if (win.parent && win.parent !== win) {
+            return win.parent;
+        }
     } catch (err) {
         return;
     }
@@ -169,7 +171,7 @@ export function getParentWindow(win) {
 
     let parent = getParent(win);
 
-    if (parent && parent !== win) {
+    if (parent) {
         return parent;
     }
 }
@@ -216,7 +218,7 @@ export function isPopup() {
 }
 
 export function isIframe() {
-    return Boolean(getParent(window) && window !== getParent(window));
+    return Boolean(getParent(window));
 }
 
 export function isFullpage() {

@@ -117,13 +117,15 @@ export let SEND_MESSAGE_STRATEGIES = {
 
         if (opener && window === opener) {
             message.sourceHint = 'window.opener';
+        } else {
+
+            let openerParent = opener && getParent(opener);
+
+            if (openerParent && window === openerParent) {
+                message.sourceHint = 'window.opener.parent';
+            }
         }
 
-        let openerParent = opener && getParent(opener);
-
-        if (openerParent && window === openerParent) {
-            message.sourceHint = 'window.opener.parent';
-        }
 
         return getLocalBridgeForWindow(win).then(bridge => {
 
