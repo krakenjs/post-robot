@@ -7,7 +7,7 @@ export let CONFIG = {
 
     LOG_LEVEL: 'info',
 
-    ACK_TIMEOUT: 500,
+    ACK_TIMEOUT: 1000,
 
     LOG_TO_PAGE: false,
     

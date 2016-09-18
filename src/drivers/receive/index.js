@@ -77,7 +77,9 @@ function getTargetWindow(source, message) {
 export function receiveMessage(event) {
 
     try {
-        event.source // eslint-disable-line
+         if (!event.source) {
+            return;
+         }
     } catch (err) {
         return;
     }
