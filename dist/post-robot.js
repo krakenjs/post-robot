@@ -395,7 +395,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    LOG_LEVEL: 'info',
 
-	    ACK_TIMEOUT: 500,
+	    ACK_TIMEOUT: 1000,
 
 	    LOG_TO_PAGE: false,
 
@@ -603,7 +603,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	function receiveMessage(event) {
 
 	    try {
-	        event.source; // eslint-disable-line
+	        if (!event.source) {
+	            return;
+	        }
 	    } catch (err) {
 	        return;
 	    }
