@@ -77,9 +77,9 @@ function getTargetWindow(source, message) {
 export function receiveMessage(event) {
 
     try {
-         if (!event.source) {
+        if (!event.source) {
             return;
-         }
+        }
     } catch (err) {
         return;
     }
