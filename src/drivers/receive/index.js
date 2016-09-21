@@ -1,6 +1,6 @@
 
 import { CONFIG, CONSTANTS, POST_MESSAGE_NAMES_LIST } from '../../conf';
-import { getWindowById, registerWindow, deserializeMethods, log, getOpener, getParent, getWindowId, isWindowClosed, isSameDomain, util } from '../../lib';
+import { getWindowById, registerWindow, deserializeMethods, log, getOpener, getParent, getWindowId, isWindowClosed, isSameDomain } from '../../lib';
 import { emulateIERestrictions, registerBridge } from '../../compat';
 import { global } from '../../global';
 
@@ -85,10 +85,6 @@ export function receiveMessage(event) {
     }
 
     let { source, origin, data } = event;
-
-    if (isSameDomain(source)) {
-        origin = util.getDomain(source);
-    }
 
     let message = parseMessage(data);
 
