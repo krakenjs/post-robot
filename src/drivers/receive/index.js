@@ -86,7 +86,7 @@ export function receiveMessage(event) {
 
     let { source, origin, data } = event;
 
-    if (isSameDomain(source, false)) {
+    if (isSameDomain(source)) {
         origin = util.getDomain(source);
     }
 

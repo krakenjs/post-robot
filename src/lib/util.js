@@ -223,11 +223,11 @@ export let util = {
         return safeInterval;
     },
 
-    getDomain(win, allowMockDomain = true) {
+    getDomain(win) {
 
         win = win || window;
 
-        if (win.mockDomain && allowMockDomain && win.mockDomain.indexOf('mock://') === 0) {
+        if (win.mockDomain && win.mockDomain.indexOf('mock://') === 0) {
             return win.mockDomain;
         }
 

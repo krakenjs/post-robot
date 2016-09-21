@@ -19,24 +19,19 @@ function safeGet(obj, prop) {
 global.domainMatches = global.domainMatches || [];
 let domainMatchTimeout;
 
-export function isSameDomain(win, allowMockDomain = true) {
+export function isSameDomain(win) {
 
     for (let match of global.domainMatches) {
         if (match.win === win) {
-            return allowMockDomain ? match.match : match.actualMatch;
+            return match.match;
         }
     }
 
     let match = false;
-    let actualMatch = false;
 
     try {
         if (util.getDomain(window) === util.getDomain(win)) {
             match = true;
-        }
-
-        if (util.getDomain(window, false) === util.getDomain(win, false)) {
-            actualMatch = true;
         }
     } catch (err) {
         // pass
@@ -44,8 +39,7 @@ export function isSameDomain(win, allowMockDomain = true) {
 
     global.domainMatches.push({
         win,
-        match,
-        actualMatch
+        match
     });
 
     if (!domainMatchTimeout) {
@@ -55,7 +49,7 @@ export function isSameDomain(win, allowMockDomain = true) {
         }, 1);
     }
 
-    return allowMockDomain ? match : actualMatch;
+    return match;
 }
 
 export function isWindowClosed(win) {
