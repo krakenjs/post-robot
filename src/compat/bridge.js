@@ -1,6 +1,6 @@
 
 import { CONSTANTS } from '../conf';
-import { util, promise, isSameDomain, log, onWindowReady, getOpener, getWindowDomain, registerWindow, getFrames, isFrameOwnedBy } from '../lib';
+import { util, promise, isSameDomain, log, onWindowReady, getOpener, getWindowDomain, registerWindow, getFrames, isFrameOwnedBy, getFrameByName } from '../lib';
 
 const BRIDGE_NAME_PREFIX = '__postrobot_bridge__';
 
@@ -198,10 +198,10 @@ export function openBridge(url, domain) {
 
         let id = getBridgeName(domain);
 
-        let frames = getFrames(window);
+        let frame = getFrameByName(window, id);
 
-        if (frames && frames[id]) {
-            return onWindowReady(frames[id], 5000, `Bridge ${url}`);
+        if (frame) {
+            return onWindowReady(frame, 5000, `Bridge ${url}`);
         }
 
         log.debug('Opening bridge:', url);

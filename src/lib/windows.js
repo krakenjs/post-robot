@@ -102,6 +102,22 @@ export function getTop(win) {
     }
 }
 
+
+export function getFrameByName(win, name) {
+
+    try {
+        return win.frames[name];
+    } catch (err) {
+        // pass
+    }
+
+    try {
+        return win[name];
+    } catch (err) {
+        // pass
+    }
+}
+
 export function getFrames(win) {
 
     let result = [];
