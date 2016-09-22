@@ -102,22 +102,19 @@ export function receiveMessage(event) {
         return;
     }
 
+    // Do not allow self-certifying sourceDomain when it's different to origin
+
     if (message.sourceDomain !== origin) {
         throw new Error(`Message source domain ${message.sourceDomain} does not match message origin ${origin}`);
     }
 
-    registerWindow(message.source, source, origin);
+    // Do not allow self-certifying originalSourceDomain when it's different to origin -- unless the message is coming from a same domain window
 
-
-    // Only allow self-certifying original domain when proxying through same domain
-
-    if (message.originalSourceDomain !== origin) {
-        if (!isSameDomain(source)) {
-            throw new Error(`Message original source domain ${message.originalSourceDomain} does not match message origin ${origin}`);
-        }
+    if (message.originalSourceDomain !== origin && !isSameDomain(source)) {
+        throw new Error(`Message original source domain ${message.originalSourceDomain} does not match message origin ${origin}`);
     }
 
-
+    registerWindow(message.source, source, origin);
 
     let targetWindow;
 

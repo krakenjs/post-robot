@@ -104,21 +104,69 @@ export function getTop(win) {
 
 export function getFrames(win) {
 
-    if (!win) {
-        return;
-    }
+    let result = [];
+
+    let frames;
 
     try {
-        if (win.frames && typeof win.frames === 'number') {
-            return win.frames;
-        }
+        frames = win.frames;
+    } catch (err) {
+        frames = win;
+    }
+
+    let len;
+
+    try {
+        len = frames.length;
     } catch (err) {
         // pass
     }
 
-    if (win.length && typeof win.length === 'number') {
-        return win;
+    if (len === 0) {
+        return result;
     }
+
+    if (len) {
+        for (let i = 0; i < len; i++) {
+
+            let frame;
+
+            try {
+                frame = frames[i];
+            } catch (err) {
+                continue;
+            }
+
+            result.push(frame);
+        }
+    } else {
+
+        let i = 0;
+
+        while (true) {
+            let frame;
+
+            try {
+                frame = frames[i];
+            } catch (err) {
+                return result;
+            }
+
+            if (!frame) {
+                return result;
+            }
+
+            result.push(frame);
+
+            i += 1;
+
+            if (i > 20) {
+                return result;
+            }
+        }
+    }
+
+    return result;
 }
 
 export function isFrameOwnedBy(win, frame) {

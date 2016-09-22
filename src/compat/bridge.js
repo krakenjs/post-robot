@@ -12,6 +12,17 @@ const ZONES = {
     REMOTE: 'remote'
 };
 
+function getBridgeName(domain) {
+
+    domain = domain || util.getDomainFromUrl(domain || window.location.href);
+
+    let sanitizedDomain = domain.replace(/[^a-zA-Z0-9]+/g, '_');
+
+    let id = `${BRIDGE_NAME_PREFIX}_${sanitizedDomain}`;
+
+    return id;
+}
+
 function documentReady() {
     return new promise.Promise(resolve => {
         if (window.document && window.document.body) {
@@ -101,6 +112,18 @@ export function getRemoteBridgeForWindow(win) {
             return bridge;
         }
 
+        let id = getBridgeName(window.location.href);
+
+        try {
+
+            if (win[id]) {
+                return win[id];
+            }
+
+        } catch (err) {
+            // pass
+        }
+
         try {
             let frames = getFrames(win);
 
@@ -121,7 +144,7 @@ export function getRemoteBridgeForWindow(win) {
                 }
             }
         } catch (err) {
-            return;
+            // pass
         }
     });
 }
@@ -173,9 +196,7 @@ export function openBridge(url, domain) {
             return;
         }
 
-        let sanitizedDomain = domain.replace(/[^a-zA-Z0-9]+/g, '_');
-
-        let id = `${BRIDGE_NAME_PREFIX}_${sanitizedDomain}`;
+        let id = getBridgeName(domain);
 
         let frames = getFrames(window);
 
