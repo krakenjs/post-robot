@@ -44,6 +44,12 @@ before(function() {
     });
 });
 
+after(function() {
+    document.body.removeChild(childFrame.frameElement);
+    document.body.removeChild(otherChildFrame.frameElement);
+    childWindow.close();
+});
+
 
 
 describe('[post-robot] happy cases', function() {

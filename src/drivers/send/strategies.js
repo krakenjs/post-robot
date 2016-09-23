@@ -9,6 +9,10 @@ export let SEND_MESSAGE_STRATEGIES = {
 
         emulateIERestrictions(window, win);
 
+        if (domain && domain.indexOf(CONSTANTS.MOCK_PROTOCOL) === 0) {
+            domain = `${win.location.protocol}//${win.location.host}`;
+        }
+
         return win.postMessage(JSON.stringify(message, 0, 2), domain);
     },
 
@@ -91,7 +95,7 @@ export let SEND_MESSAGE_STRATEGIES = {
                 origin: util.getDomain(window),
                 source: window,
                 data: JSON.stringify(message, 0, 2)
-            });
+            }, domain);
         });
     },
 
@@ -126,7 +130,6 @@ export let SEND_MESSAGE_STRATEGIES = {
             }
         }
 
-
         return getLocalBridgeForWindow(win).then(bridge => {
 
             if (!bridge) {
@@ -135,6 +138,10 @@ export let SEND_MESSAGE_STRATEGIES = {
 
             if (win === bridge) {
                 throw new Error('Message target is bridge');
+            }
+
+            if (domain && domain.indexOf(CONSTANTS.MOCK_PROTOCOL) === 0) {
+                domain = `${bridge.location.protocol}//${bridge.location.host}`;
             }
 
             bridge.postMessage(JSON.stringify(message, 0, 2), domain);

@@ -1,4 +1,6 @@
 
+import { CONSTANTS } from '../conf';
+
 export let util = {
 
     once(method) {
@@ -227,7 +229,7 @@ export let util = {
 
         win = win || window;
 
-        if (win.mockDomain && win.mockDomain.indexOf('mock://') === 0) {
+        if (win.mockDomain && win.mockDomain.indexOf(CONSTANTS.MOCK_PROTOCOL) === 0) {
             return win.mockDomain;
         }
 

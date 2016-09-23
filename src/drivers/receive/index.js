@@ -92,7 +92,7 @@ export function receiveMessage(event) {
         return;
     }
 
-    if (message.sourceDomain.indexOf('mock://') === 0) {
+    if (message.sourceDomain.indexOf(CONSTANTS.MOCK_PROTOCOL) === 0) {
         origin = message.sourceDomain;
     }
 
@@ -172,14 +172,14 @@ export function receiveMessage(event) {
     }
 
     if (CONFIG.MOCK_MODE) {
-        return RECEIVE_MESSAGE_TYPES[message.type](originalSource, message, origin);
+        return RECEIVE_MESSAGE_TYPES[message.type](originalSource, message, message.originalSourceDomain);
     }
 
     if (message.data) {
         message.data = deserializeMethods(originalSource, message.data);
     }
 
-    RECEIVE_MESSAGE_TYPES[message.type](originalSource, message, origin);
+    RECEIVE_MESSAGE_TYPES[message.type](originalSource, message, message.originalSourceDomain);
 }
 
 export function messageListener(event) {

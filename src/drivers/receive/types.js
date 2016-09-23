@@ -33,7 +33,7 @@ export let RECEIVE_MESSAGE_TYPES = {
                 hash: message.hash,
                 name: message.name,
                 ...data
-            }, '*');
+            }, origin);
         }
 
         return promise.Promise.all([
