@@ -136,25 +136,6 @@ describe('[post-robot] happy cases', function() {
             });
         });
     });
-
-    it.skip('should be able to proxy messsages from one window to another', function(done) {
-
-        postRobot.proxy(childFrame, otherChildFrame);
-
-        return postRobot.send(childFrame, 'setupListener', {
-
-            messageName: 'proxythis',
-            handler: function() {
-                done();
-            }
-
-        }).then(function() {
-
-            return postRobot.send(otherChildFrame, 'sendMessageToParent', {
-                messageName: 'proxythis'
-            });
-        });
-    });
 });
 
 
