@@ -404,6 +404,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    ALLOWED_POST_MESSAGE_METHODS: (_ALLOWED_POST_MESSAGE = {}, _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE, true), _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.GLOBAL_METHOD, true), _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.REMOTE_BRIDGE, true), _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.LOCAL_BRIDGE, true), _ALLOWED_POST_MESSAGE)
 	};
 
+	if (window.location.href.indexOf(_constants.CONSTANTS.FILE_PROTOCOL) === 0) {
+	    CONFIG.ALLOW_POSTMESSAGE_POPUP = true;
+	}
+
 /***/ },
 /* 5 */
 /***/ function(module, exports) {
@@ -452,7 +456,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        LOCAL_BRIDGE: 'postrobot_local_bridge'
 	    },
 
-	    MOCK_PROTOCOL: 'mock://'
+	    MOCK_PROTOCOL: 'mock://',
+	    FILE_PROTOCOL: 'file://'
 	};
 
 	var POST_MESSAGE_NAMES_LIST = exports.POST_MESSAGE_NAMES_LIST = Object.keys(CONSTANTS.POST_MESSAGE_NAMES).map(function (key) {
@@ -627,6 +632,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        origin = message.sourceDomain;
 	    }
 
+	    if (message.sourceDomain.indexOf(_conf.CONSTANTS.FILE_PROTOCOL) === 0) {
+	        origin = message.sourceDomain;
+	    }
+
 	    if (_global.global.receivedMessages.indexOf(message.id) === -1) {
 	        _global.global.receivedMessages.push(message.id);
 	    } else {
@@ -707,7 +716,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    if (message.data) {
-	        message.data = (0, _lib.deserializeMethods)(originalSource, message.data);
+	        message.data = (0, _lib.deserializeMethods)(originalSource, message.originalSourceDomain, message.data);
 	    }
 
 	    _types.RECEIVE_MESSAGE_TYPES[message.type](originalSource, message, message.originalSourceDomain);
@@ -2185,22 +2194,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	_global.global.methods = _global.global.methods || {};
 
 	var listenForMethods = exports.listenForMethods = _util.util.once(function () {
-	    (0, _interface.on)(_conf.CONSTANTS.POST_MESSAGE_NAMES.METHOD, function (source, data) {
+	    (0, _interface.on)(_conf.CONSTANTS.POST_MESSAGE_NAMES.METHOD, function (_ref) {
+	        var source = _ref.source;
+	        var origin = _ref.origin;
+	        var data = _ref.data;
 
-	        if (!_global.global.methods[data.id]) {
+
+	        var meth = _global.global.methods[data.id];
+
+	        if (!meth) {
 	            throw new Error('Could not find method with id: ' + data.id);
 	        }
 
-	        if (_global.global.methods[data.id].win !== source) {
+	        if (meth.destination !== source) {
 	            throw new Error('Method window does not match');
 	        }
 
-	        var method = _global.global.methods[data.id].method;
+	        if (meth.domain && meth.domain !== '*' && origin !== meth.domain) {
+	            throw new Error('Method domain ' + meth.domain + ' does not match origin ' + origin);
+	        }
 
 	        _log.log.debug('Call local method', data.name, data.args);
 
 	        return _promise.promise.run(function () {
-	            return method.apply(null, data.args);
+	            return meth.method.apply(null, data.args);
 	        }).then(function (result) {
 
 	            return {
@@ -2216,12 +2233,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return item instanceof Object && item.__type__ === _conf.CONSTANTS.SERIALIZATION_TYPES.METHOD && item.__id__;
 	}
 
-	function serializeMethod(destination, method, name) {
+	function serializeMethod(destination, domain, method, name) {
 
 	    var id = _util.util.uniqueID();
 
 	    _global.global.methods[id] = {
-	        win: destination,
+	        destination: destination,
+	        domain: domain,
 	        method: method
 	    };
 
@@ -2232,16 +2250,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	}
 
-	function serializeMethods(destination, obj) {
+	function serializeMethods(destination, domain, obj) {
 
 	    return _util.util.replaceObject({ obj: obj }, function (item, key) {
 	        if (item instanceof Function) {
-	            return serializeMethod(destination, item, key);
+	            return serializeMethod(destination, domain, item, key);
 	        }
 	    }).obj;
 	}
 
-	function deserializeMethod(source, obj) {
+	function deserializeMethod(source, origin, obj) {
 
 	    function wrapper() {
 	        var args = Array.prototype.slice.call(arguments);
@@ -2251,7 +2269,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	            name: obj.__name__,
 	            args: args
 
-	        }).then(function (data) {
+	        }, { domain: origin }).then(function (_ref2) {
+	            var data = _ref2.data;
+
 
 	            _log.log.debug('Got foreign method result', obj.__name__, data.result);
 	            return data.result;
@@ -2263,11 +2283,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return wrapper;
 	}
 
-	function deserializeMethods(source, obj) {
+	function deserializeMethods(source, origin, obj) {
 
 	    return _util.util.replaceObject({ obj: obj }, function (item, key) {
 	        if (isSerializedMethod(item)) {
-	            return deserializeMethod(source, item);
+	            return deserializeMethod(source, origin, item);
 	        }
 	    }).obj;
 	}
@@ -2300,31 +2320,34 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function initOnReady() {
 
-	    (0, _interface.on)(_conf.CONSTANTS.POST_MESSAGE_NAMES.READY, function (win, data) {
+	    (0, _interface.on)(_conf.CONSTANTS.POST_MESSAGE_NAMES.READY, function (_ref) {
+	        var source = _ref.source;
+	        var data = _ref.data;
+
 
 	        for (var _iterator = _global.global.readyPromises, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
-	            var _ref;
+	            var _ref2;
 
 	            if (_isArray) {
 	                if (_i >= _iterator.length) break;
-	                _ref = _iterator[_i++];
+	                _ref2 = _iterator[_i++];
 	            } else {
 	                _i = _iterator.next();
 	                if (_i.done) break;
-	                _ref = _i.value;
+	                _ref2 = _i.value;
 	            }
 
-	            var item = _ref;
+	            var item = _ref2;
 
-	            if (item.win === win) {
-	                item.promise.resolve(win);
+	            if (item.win === source) {
+	                item.promise.resolve(source);
 	                return;
 	            }
 	        }
 
 	        _global.global.readyPromises.push({
-	            win: win,
-	            promise: new _promise.SyncPromise().resolve(win)
+	            win: source,
+	            promise: new _promise.SyncPromise().resolve(source)
 	        });
 	    });
 
@@ -2343,18 +2366,18 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 	    for (var _iterator2 = _global.global.readyPromises, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
-	        var _ref2;
+	        var _ref3;
 
 	        if (_isArray2) {
 	            if (_i2 >= _iterator2.length) break;
-	            _ref2 = _iterator2[_i2++];
+	            _ref3 = _iterator2[_i2++];
 	        } else {
 	            _i2 = _iterator2.next();
 	            if (_i2.done) break;
-	            _ref2 = _i2.value;
+	            _ref3 = _i2.value;
 	        }
 
-	        var item = _ref2;
+	        var item = _ref3;
 
 	        if (item.win === win) {
 	            return item.promise;
@@ -2817,7 +2840,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return _lib.promise.run(function () {
 
 	        message = buildMessage(win, message, {
-	            data: (0, _lib.serializeMethods)(win, message.data),
+	            data: (0, _lib.serializeMethods)(win, domain, message.data),
 	            domain: domain
 	        });
 
@@ -2911,6 +2934,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    if (domain && domain.indexOf(_conf.CONSTANTS.MOCK_PROTOCOL) === 0) {
 	        domain = win.location.protocol + '//' + win.location.host;
+	    }
+
+	    if (domain && domain.indexOf(_conf.CONSTANTS.FILE_PROTOCOL) === 0) {
+	        domain = '*';
 	    }
 
 	    return win.postMessage(JSON.stringify(message, 0, 2), domain);
@@ -3038,6 +3065,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	            domain = bridge.location.protocol + '//' + bridge.location.host;
 	        }
 
+	        if (domain && domain.indexOf(_conf.CONSTANTS.FILE_PROTOCOL) === 0) {
+	            domain = '*';
+	        }
+
 	        bridge.postMessage(JSON.stringify(message, 0, 2), domain);
 	    });
 	}), _SEND_MESSAGE_STRATEG);
@@ -3109,7 +3140,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	        }
 
-	        return _lib.promise.deNodeify(options.handler, source, message.data);
+	        var data = message.data;
+
+	        return _lib.promise.deNodeify(options.handler, { source: source, origin: origin, data: data });
 	    }).then(function (data) {
 
 	        return respond({
@@ -3145,7 +3178,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (message.ack === _conf.CONSTANTS.POST_MESSAGE_ACK.ERROR) {
 	        return options.respond(new Error(message.error));
 	    } else if (message.ack === _conf.CONSTANTS.POST_MESSAGE_ACK.SUCCESS) {
-	        return options.respond(null, message.data || message.response);
+	        var data = message.data || message.response;
+
+	        return options.respond(null, { source: source, origin: origin, data: data });
 	    }
 	}), _RECEIVE_MESSAGE_TYPE);
 
@@ -3355,8 +3390,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    options.once = true;
 
 	    var prom = new _lib.promise.Promise(function (resolve, reject) {
-	        options.handler = options.handler || function (source, data) {
-	            return resolve(data);
+	        options.handler = options.handler || function (event) {
+	            return resolve(event);
 	        };
 	        options.errorHandler = options.errorHandler || reject;
 	    });
