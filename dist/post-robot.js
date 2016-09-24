@@ -404,10 +404,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    ALLOWED_POST_MESSAGE_METHODS: (_ALLOWED_POST_MESSAGE = {}, _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE, true), _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.GLOBAL_METHOD, true), _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.REMOTE_BRIDGE, true), _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.LOCAL_BRIDGE, true), _ALLOWED_POST_MESSAGE)
 	};
 
-	if (window.location.href.indexOf(_constants.CONSTANTS.FILE_PROTOCOL) === 0) {
-	    CONFIG.ALLOW_POSTMESSAGE_POPUP = true;
-	}
-
 /***/ },
 /* 5 */
 /***/ function(module, exports) {
@@ -456,8 +452,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        LOCAL_BRIDGE: 'postrobot_local_bridge'
 	    },
 
-	    MOCK_PROTOCOL: 'mock://',
-	    FILE_PROTOCOL: 'file://'
+	    MOCK_PROTOCOL: 'mock://'
 	};
 
 	var POST_MESSAGE_NAMES_LIST = exports.POST_MESSAGE_NAMES_LIST = Object.keys(CONSTANTS.POST_MESSAGE_NAMES).map(function (key) {
@@ -629,10 +624,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    if (message.sourceDomain.indexOf(_conf.CONSTANTS.MOCK_PROTOCOL) === 0) {
-	        origin = message.sourceDomain;
-	    }
-
-	    if (message.sourceDomain.indexOf(_conf.CONSTANTS.FILE_PROTOCOL) === 0) {
 	        origin = message.sourceDomain;
 	    }
 
@@ -2922,10 +2913,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        domain = win.location.protocol + '//' + win.location.host;
 	    }
 
-	    if (domain && domain.indexOf(_conf.CONSTANTS.FILE_PROTOCOL) === 0) {
-	        domain = '*';
-	    }
-
 	    return win.postMessage(JSON.stringify(message, 0, 2), domain);
 	}), _defineProperty(_SEND_MESSAGE_STRATEG, _conf.CONSTANTS.SEND_STRATEGIES.GLOBAL_METHOD, function (win, message, domain) {
 
@@ -3049,10 +3036,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        if (domain && domain.indexOf(_conf.CONSTANTS.MOCK_PROTOCOL) === 0) {
 	            domain = bridge.location.protocol + '//' + bridge.location.host;
-	        }
-
-	        if (domain && domain.indexOf(_conf.CONSTANTS.FILE_PROTOCOL) === 0) {
-	            domain = '*';
 	        }
 
 	        bridge.postMessage(JSON.stringify(message, 0, 2), domain);
