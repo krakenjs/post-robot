@@ -26,7 +26,7 @@ This also allows cross-domain post messages between two different windows (not j
 ## Simple listener / sender
 
 ```javascript
-postRobot.on('getCart', function(data, callback) {
+postRobot.on('getCart', function(event, callback) {
     return callback({
         foo: 'bar'
     });
@@ -34,15 +34,15 @@ postRobot.on('getCart', function(data, callback) {
 ```
 
 ```javascript
-postRobot.send(window, 'getCart', function(err, data) {
-    console.log(data);
+postRobot.send(window, 'getCart', function(err, event) {
+    console.log(event.data);
 });
 ```
 
 ## One-off listener
 
 ```javascript
-postRobot.once('init', function(source, data, callback) {
+postRobot.once('init', function(event, callback) {
     ...
 });
 ```
@@ -50,7 +50,7 @@ postRobot.once('init', function(source, data, callback) {
 ## Listen to a specific window
 
 ```javascript
-postRobot.on('init', { window: window.parent }, function(source, data, callback) {
+postRobot.on('init', { window: window.parent }, function(event, callback) {
     ...
 });
 ```
@@ -58,16 +58,16 @@ postRobot.on('init', { window: window.parent }, function(source, data, callback)
 ## Set a timeout for a response
 
 ```javascript
-postRobot.send(window, 'getCart', { timeout: 5000 }, function(err, data) {
-    console.log(data);
+postRobot.send(window, 'getCart', { timeout: 5000 }, function(err, event) {
+    console.log(event.data);
 });
 ```
 
 ## Send a message to the direct parent
 
 ```javascript
-postRobot.sendToParent('getCart', function(err, data) {
-    console.log(data);
+postRobot.sendToParent('getCart', function(err, event) {
+    console.log(event.data);
 });
 ```
 
@@ -76,8 +76,8 @@ postRobot.sendToParent('getCart', function(err, data) {
 All of the above can be done with promises rather than callbacks
 
 ```javascript
-postRobot.on('getCart', function(source, data) {
-    return getFoo(data).then(function(bar) {
+postRobot.on('getCart', function(event) {
+    return getFoo(event.data).then(function(bar) {
         return {
             bar: bar
         };
@@ -86,7 +86,7 @@ postRobot.on('getCart', function(source, data) {
 ```
 
 ```javascript
-postRobot.once('getCart').then(function(data) {
+postRobot.once('getCart').then(function(event) {
     ...
 }).catch(function(err) {
     ...
@@ -94,7 +94,7 @@ postRobot.once('getCart').then(function(data) {
 ```
 
 ```javascript
-postRobot.send(window, 'getCart').then(function(data) {
+postRobot.send(window, 'getCart').then(function(event) {
     ...
 }).catch(function(err) {
     ...
@@ -104,7 +104,7 @@ postRobot.send(window, 'getCart').then(function(data) {
 ## Async / Await
 
 ```javascript
-postRobot.on('getCart', async function(source, data) {
+postRobot.on('getCart', async function(event) {
     return {
         bar: await bar
     };
@@ -114,7 +114,7 @@ postRobot.on('getCart', async function(source, data) {
 ```javascript
 
 try {
-    let data = await postRobot.once('getCart');
+    let event = await postRobot.once('getCart');
 } catch (err) {
     ...
 }
@@ -122,7 +122,7 @@ try {
 
 ```javascript
 try {
-    let data = await postRobot.send(window, 'getCart');
+    let event = await postRobot.send(window, 'getCart');
 } catch (err) {
     ...
 }
@@ -137,7 +137,7 @@ For example:
 ```javascript
 // Window 1:
 
-postRobot.on('getFoo', function(source, data) {
+postRobot.on('getFoo', function(event) {
     return {
         bar: function() {
             console.log('foobar!');
@@ -147,8 +147,8 @@ postRobot.on('getFoo', function(source, data) {
 
 // Window 2:
 
-postRobot.send(myWindow, 'getFoo').then(function(source, data) {
-    data.bar();
+postRobot.send(myWindow, 'getFoo').then(function(event) {
+    event.data.bar();
 });
 ```
 

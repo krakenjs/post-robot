@@ -96,6 +96,10 @@ export function receiveMessage(event) {
         origin = message.sourceDomain;
     }
 
+    if (message.sourceDomain.indexOf(CONSTANTS.FILE_PROTOCOL) === 0) {
+        origin = message.sourceDomain;
+    }
+
     if (global.receivedMessages.indexOf(message.id) === -1) {
         global.receivedMessages.push(message.id);
     } else {
@@ -176,7 +180,7 @@ export function receiveMessage(event) {
     }
 
     if (message.data) {
-        message.data = deserializeMethods(originalSource, message.data);
+        message.data = deserializeMethods(originalSource, message.originalSourceDomain, message.data);
     }
 
     RECEIVE_MESSAGE_TYPES[message.type](originalSource, message, message.originalSourceDomain);

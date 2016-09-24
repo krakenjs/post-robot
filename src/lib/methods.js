@@ -9,22 +9,26 @@ import { global } from '../global';
 global.methods = global.methods || {};
 
 export let listenForMethods = util.once(() => {
-    on(CONSTANTS.POST_MESSAGE_NAMES.METHOD, (source, data) => {
+    on(CONSTANTS.POST_MESSAGE_NAMES.METHOD, ({ source, origin, data }) => {
 
-        if (!global.methods[data.id]) {
+        let meth = global.methods[data.id];
+
+        if (!meth) {
             throw new Error(`Could not find method with id: ${data.id}`);
         }
 
-        if (global.methods[data.id].win !== source) {
-            throw new Error('Method window does not match');
+        if (meth.destination !== source) {
+            throw new Error(`Method window does not match`);
         }
 
-        let method = global.methods[data.id].method;
+        if (meth.domain && meth.domain !== '*' && origin !== meth.domain) {
+            throw new Error(`Method domain ${meth.domain} does not match origin ${origin}`);
+        }
 
         log.debug('Call local method', data.name, data.args);
 
         return promise.run(() => {
-            return method.apply(null, data.args);
+            return meth.method.apply(null, data.args);
 
         }).then(result => {
 
@@ -41,12 +45,13 @@ function isSerializedMethod(item) {
     return item instanceof Object && item.__type__ === CONSTANTS.SERIALIZATION_TYPES.METHOD && item.__id__;
 }
 
-export function serializeMethod(destination, method, name) {
+export function serializeMethod(destination, domain, method, name) {
 
     let id = util.uniqueID();
 
     global.methods[id] = {
-        win: destination,
+        destination,
+        domain,
         method
     };
 
@@ -57,16 +62,16 @@ export function serializeMethod(destination, method, name) {
     };
 }
 
-export function serializeMethods(destination, obj) {
+export function serializeMethods(destination, domain, obj) {
 
     return util.replaceObject({ obj }, (item, key) => {
         if (item instanceof Function) {
-            return serializeMethod(destination, item, key);
+            return serializeMethod(destination, domain, item, key);
         }
     }).obj;
 }
 
-export function deserializeMethod(source, obj) {
+export function deserializeMethod(source, origin, obj) {
 
     function wrapper() {
         let args = Array.prototype.slice.call(arguments);
@@ -76,7 +81,7 @@ export function deserializeMethod(source, obj) {
             name: obj.__name__,
             args
 
-        }).then(data => {
+        }, { domain: origin }).then(({ data }) => {
 
             log.debug('Got foreign method result', obj.__name__, data.result);
             return data.result;
@@ -88,11 +93,11 @@ export function deserializeMethod(source, obj) {
     return wrapper;
 }
 
-export function deserializeMethods(source, obj) {
+export function deserializeMethods(source, origin, obj) {
 
     return util.replaceObject({ obj }, (item, key) => {
         if (isSerializedMethod(item)) {
-            return deserializeMethod(source, item);
+            return deserializeMethod(source, origin, item);
         }
     }).obj;
 }

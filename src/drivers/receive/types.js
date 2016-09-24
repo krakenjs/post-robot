@@ -57,7 +57,9 @@ export let RECEIVE_MESSAGE_TYPES = {
                     }
                 }
 
-                return promise.deNodeify(options.handler, source, message.data);
+                let data = message.data;
+
+                return promise.deNodeify(options.handler, { source, origin, data });
 
             }).then(data => {
 
@@ -99,7 +101,9 @@ export let RECEIVE_MESSAGE_TYPES = {
         if (message.ack === CONSTANTS.POST_MESSAGE_ACK.ERROR) {
             return options.respond(new Error(message.error));
         } else if (message.ack === CONSTANTS.POST_MESSAGE_ACK.SUCCESS) {
-            return options.respond(null, message.data || message.response);
+            let data = message.data || message.response;
+
+            return options.respond(null, { source, origin, data });
         }
     }
 };

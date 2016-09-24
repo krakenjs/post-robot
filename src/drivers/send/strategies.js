@@ -13,6 +13,10 @@ export let SEND_MESSAGE_STRATEGIES = {
             domain = `${win.location.protocol}//${win.location.host}`;
         }
 
+        if (domain && domain.indexOf(CONSTANTS.FILE_PROTOCOL) === 0) {
+            domain = `*`;
+        }
+
         return win.postMessage(JSON.stringify(message, 0, 2), domain);
     },
 
@@ -142,6 +146,10 @@ export let SEND_MESSAGE_STRATEGIES = {
 
             if (domain && domain.indexOf(CONSTANTS.MOCK_PROTOCOL) === 0) {
                 domain = `${bridge.location.protocol}//${bridge.location.host}`;
+            }
+
+            if (domain && domain.indexOf(CONSTANTS.FILE_PROTOCOL) === 0) {
+                domain = `*`;
             }
 
             bridge.postMessage(JSON.stringify(message, 0, 2), domain);

@@ -81,7 +81,7 @@ export function once(name, options, handler, errorHandler) {
     options.once = true;
 
     let prom = new promise.Promise((resolve, reject) => {
-        options.handler = options.handler || ((source, data) => resolve(data));
+        options.handler = options.handler || (event => resolve(event));
         options.errorHandler = options.errorHandler || reject;
     });
 

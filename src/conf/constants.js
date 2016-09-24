@@ -38,7 +38,8 @@ export let CONSTANTS = {
         LOCAL_BRIDGE: 'postrobot_local_bridge'
     },
 
-    MOCK_PROTOCOL: 'mock://'
+    MOCK_PROTOCOL: 'mock://',
+    FILE_PROTOCOL: 'file://'
 };
 
 export let POST_MESSAGE_NAMES_LIST = Object.keys(CONSTANTS.POST_MESSAGE_NAMES).map(key => CONSTANTS.POST_MESSAGE_NAMES[key]);

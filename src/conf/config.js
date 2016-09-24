@@ -20,3 +20,7 @@ export let CONFIG = {
         [ CONSTANTS.SEND_STRATEGIES.LOCAL_BRIDGE ]: true
     }
 };
+
+if (window.location.href.indexOf(CONSTANTS.FILE_PROTOCOL) === 0) {
+    CONFIG.ALLOW_POSTMESSAGE_POPUP = true;
+}

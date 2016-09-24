@@ -95,7 +95,7 @@ describe('[post-robot] happy cases', function() {
 
         }).then(function() {
 
-            return postRobot.send(childFrame, 'foo').then(function(data) {
+            return postRobot.send(childFrame, 'foo').then(function({ data }) {
                 assert.equal(data.foo, 'bar');
             });
         });
@@ -112,8 +112,8 @@ describe('[post-robot] happy cases', function() {
 
         }).then(function() {
 
-            return postRobot.send(childFrame, 'foo', function(err, data) {
-                assert.equal(data.foo, 'bar2');
+            return postRobot.send(childFrame, 'foo', function(err, event) {
+                assert.equal(event.data.foo, 'bar2');
                 done();
             });
 
@@ -131,7 +131,7 @@ describe('[post-robot] happy cases', function() {
 
         }).then(function() {
 
-            return postRobot.send(childFrame, 'foo').then(function(data) {
+            return postRobot.send(childFrame, 'foo').then(function({ data }) {
                 data.done();
             });
         });
@@ -152,7 +152,7 @@ describe('[post-robot] options', function() {
 
         }).then(function() {
 
-            return postRobot.send('childframe', 'foo').then(function(data) {
+            return postRobot.send('childframe', 'foo').then(function({ data }) {
                 assert.equal(data.foo, 'bar');
             });
         });
@@ -183,7 +183,7 @@ describe('[post-robot] options', function() {
 
         var count = 0;
 
-        postRobot.once('foobu', { override: true }, function(source, data) {
+        postRobot.once('foobu', { override: true }, function({ source, data }) {
             count += data.add;
         });
 
@@ -194,7 +194,7 @@ describe('[post-robot] options', function() {
             }
         }).then(function() {
 
-            postRobot.once('foobu', { override: true }, function(source, data) {
+            postRobot.once('foobu', { override: true }, function({ source, data }) {
                 count += data.add;
             });
 
@@ -249,7 +249,7 @@ describe('[post-robot] error cases', function() {
 
     it('should get an error when messaging with an unknown name', function() {
 
-        return postRobot.send(childFrame, 'doesntexist').then(function(data) {
+        return postRobot.send(childFrame, 'doesntexist').then(function({ data }) {
             throw new Error('Expected success handler to not be called');
         }, function(err) {
             assert.ok(err);
@@ -258,10 +258,10 @@ describe('[post-robot] error cases', function() {
 
     it('should get a callback error when messaging with an unknown name', function(done) {
 
-        postRobot.send(childFrame, 'doesntexist', function(err, data) {
+        postRobot.send(childFrame, 'doesntexist', function(err, event) {
             assert.ok(err);
-            if (data) {
-                throw new Error('Expected data to be blank');
+            if (event) {
+                throw new Error('Expected event to be blank');
             }
             done();
         });
@@ -384,7 +384,7 @@ describe('[post-robot] popup tests', function() {
 
         }).then(function() {
 
-            return postRobot.send(childWindow, 'foo').then(function(data) {
+            return postRobot.send(childWindow, 'foo').then(function({ data }) {
                 assert.equal(data.foo, 'bar');
             });
         });
@@ -418,7 +418,7 @@ describe('[post-robot] popup tests', function() {
 
         }).then(function() {
 
-            return postRobot.send(bridge, 'foo').then(function(data) {
+            return postRobot.send(bridge, 'foo').then(function({ data }) {
                 assert.equal(data.foo, 'bar');
             });
         });

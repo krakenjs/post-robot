@@ -32,7 +32,7 @@ export function sendMessage(win, message, domain, isProxy) {
     return promise.run(() => {
 
         message = buildMessage(win, message, {
-            data: serializeMethods(win, message.data),
+            data: serializeMethods(win, domain, message.data),
             domain
         });
 
