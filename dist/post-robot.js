@@ -64,7 +64,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _interface = __webpack_require__(1);
 
 	Object.keys(_interface).forEach(function (key) {
-	    if (key === "default") return;
+	    if (key === "default" || key === "__esModule") return;
 	    Object.defineProperty(exports, key, {
 	        enumerable: true,
 	        get: function get() {
@@ -117,7 +117,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _client = __webpack_require__(2);
 
 	Object.keys(_client).forEach(function (key) {
-	  if (key === "default") return;
+	  if (key === "default" || key === "__esModule") return;
 	  Object.defineProperty(exports, key, {
 	    enumerable: true,
 	    get: function get() {
@@ -129,7 +129,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _server = __webpack_require__(26);
 
 	Object.keys(_server).forEach(function (key) {
-	  if (key === "default") return;
+	  if (key === "default" || key === "__esModule") return;
 	  Object.defineProperty(exports, key, {
 	    enumerable: true,
 	    get: function get() {
@@ -141,7 +141,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _config = __webpack_require__(27);
 
 	Object.keys(_config).forEach(function (key) {
-	  if (key === "default") return;
+	  if (key === "default" || key === "__esModule") return;
 	  Object.defineProperty(exports, key, {
 	    enumerable: true,
 	    get: function get() {
@@ -351,7 +351,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _config = __webpack_require__(4);
 
 	Object.keys(_config).forEach(function (key) {
-	  if (key === "default") return;
+	  if (key === "default" || key === "__esModule") return;
 	  Object.defineProperty(exports, key, {
 	    enumerable: true,
 	    get: function get() {
@@ -363,7 +363,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _constants = __webpack_require__(5);
 
 	Object.keys(_constants).forEach(function (key) {
-	  if (key === "default") return;
+	  if (key === "default" || key === "__esModule") return;
 	  Object.defineProperty(exports, key, {
 	    enumerable: true,
 	    get: function get() {
@@ -403,6 +403,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    ALLOWED_POST_MESSAGE_METHODS: (_ALLOWED_POST_MESSAGE = {}, _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE, true), _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.GLOBAL_METHOD, true), _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.REMOTE_BRIDGE, true), _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.LOCAL_BRIDGE, true), _ALLOWED_POST_MESSAGE)
 	};
+
+	if (window.location.href.indexOf(_constants.CONSTANTS.FILE_PROTOCOL) === 0) {
+	    CONFIG.ALLOW_POSTMESSAGE_POPUP = true;
+	}
 
 /***/ },
 /* 5 */
@@ -450,7 +454,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        GLOBAL_METHOD: 'postrobot_global_method',
 	        REMOTE_BRIDGE: 'postrobot_remote_bridge',
 	        LOCAL_BRIDGE: 'postrobot_local_bridge'
-	    }
+	    },
+
+	    MOCK_PROTOCOL: 'mock://',
+	    FILE_PROTOCOL: 'file://'
 	};
 
 	var POST_MESSAGE_NAMES_LIST = exports.POST_MESSAGE_NAMES_LIST = Object.keys(CONSTANTS.POST_MESSAGE_NAMES).map(function (key) {
@@ -470,7 +477,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _receive = __webpack_require__(7);
 
 	Object.keys(_receive).forEach(function (key) {
-	  if (key === "default") return;
+	  if (key === "default" || key === "__esModule") return;
 	  Object.defineProperty(exports, key, {
 	    enumerable: true,
 	    get: function get() {
@@ -482,7 +489,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _send = __webpack_require__(22);
 
 	Object.keys(_send).forEach(function (key) {
-	  if (key === "default") return;
+	  if (key === "default" || key === "__esModule") return;
 	  Object.defineProperty(exports, key, {
 	    enumerable: true,
 	    get: function get() {
@@ -494,7 +501,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _listeners = __webpack_require__(25);
 
 	Object.keys(_listeners).forEach(function (key) {
-	  if (key === "default") return;
+	  if (key === "default" || key === "__esModule") return;
 	  Object.defineProperty(exports, key, {
 	    enumerable: true,
 	    get: function get() {
@@ -615,17 +622,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var data = event.data;
 
 
-	    if ((0, _lib.isSameDomain)(source, false)) {
-	        origin = _lib.util.getDomain(source);
-	    }
-
 	    var message = parseMessage(data);
 
 	    if (!message) {
 	        return;
 	    }
 
-	    if (message.sourceDomain.indexOf('mock://') === 0) {
+	    if (message.sourceDomain.indexOf(_conf.CONSTANTS.MOCK_PROTOCOL) === 0) {
+	        origin = message.sourceDomain;
+	    }
+
+	    if (message.sourceDomain.indexOf(_conf.CONSTANTS.FILE_PROTOCOL) === 0) {
 	        origin = message.sourceDomain;
 	    }
 
@@ -635,19 +642,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return;
 	    }
 
+	    // Do not allow self-certifying sourceDomain when it's different to origin
+
 	    if (message.sourceDomain !== origin) {
 	        throw new Error('Message source domain ' + message.sourceDomain + ' does not match message origin ' + origin);
 	    }
 
-	    (0, _lib.registerWindow)(message.source, source, origin);
+	    // Do not allow self-certifying originalSourceDomain when it's different to origin -- unless the message is coming from a same domain window
 
-	    // Only allow self-certifying original domain when proxying through same domain
-
-	    if (message.originalSourceDomain !== origin) {
-	        if (!(0, _lib.isSameDomain)(source)) {
-	            throw new Error('Message original source domain ' + message.originalSourceDomain + ' does not match message origin ' + origin);
-	        }
+	    if (message.originalSourceDomain !== origin && !(0, _lib.isSameDomain)(source)) {
+	        throw new Error('Message original source domain ' + message.originalSourceDomain + ' does not match message origin ' + origin);
 	    }
+
+	    (0, _lib.registerWindow)(message.source, source, origin);
 
 	    var targetWindow = void 0;
 
@@ -705,14 +712,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    if (_conf.CONFIG.MOCK_MODE) {
-	        return _types.RECEIVE_MESSAGE_TYPES[message.type](originalSource, message, origin);
+	        return _types.RECEIVE_MESSAGE_TYPES[message.type](originalSource, message, message.originalSourceDomain);
 	    }
 
 	    if (message.data) {
 	        message.data = (0, _lib.deserializeMethods)(originalSource, message.data);
 	    }
 
-	    _types.RECEIVE_MESSAGE_TYPES[message.type](originalSource, message, origin);
+	    _types.RECEIVE_MESSAGE_TYPES[message.type](originalSource, message, message.originalSourceDomain);
 	}
 
 	function messageListener(event) {
@@ -751,7 +758,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _promise = __webpack_require__(9);
 
 	Object.keys(_promise).forEach(function (key) {
-	  if (key === "default") return;
+	  if (key === "default" || key === "__esModule") return;
 	  Object.defineProperty(exports, key, {
 	    enumerable: true,
 	    get: function get() {
@@ -763,7 +770,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _util = __webpack_require__(12);
 
 	Object.keys(_util).forEach(function (key) {
-	  if (key === "default") return;
+	  if (key === "default" || key === "__esModule") return;
 	  Object.defineProperty(exports, key, {
 	    enumerable: true,
 	    get: function get() {
@@ -775,7 +782,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _log = __webpack_require__(13);
 
 	Object.keys(_log).forEach(function (key) {
-	  if (key === "default") return;
+	  if (key === "default" || key === "__esModule") return;
 	  Object.defineProperty(exports, key, {
 	    enumerable: true,
 	    get: function get() {
@@ -787,7 +794,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _windows = __webpack_require__(14);
 
 	Object.keys(_windows).forEach(function (key) {
-	  if (key === "default") return;
+	  if (key === "default" || key === "__esModule") return;
 	  Object.defineProperty(exports, key, {
 	    enumerable: true,
 	    get: function get() {
@@ -799,7 +806,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _methods = __webpack_require__(16);
 
 	Object.keys(_methods).forEach(function (key) {
-	  if (key === "default") return;
+	  if (key === "default" || key === "__esModule") return;
 	  Object.defineProperty(exports, key, {
 	    enumerable: true,
 	    get: function get() {
@@ -811,7 +818,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _tick = __webpack_require__(11);
 
 	Object.keys(_tick).forEach(function (key) {
-	  if (key === "default") return;
+	  if (key === "default" || key === "__esModule") return;
 	  Object.defineProperty(exports, key, {
 	    enumerable: true,
 	    get: function get() {
@@ -823,7 +830,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _ready = __webpack_require__(17);
 
 	Object.keys(_ready).forEach(function (key) {
-	  if (key === "default") return;
+	  if (key === "default" || key === "__esModule") return;
 	  Object.defineProperty(exports, key, {
 	    enumerable: true,
 	    get: function get() {
@@ -967,6 +974,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    flush();
 	}
 
+	var possiblyUnhandledPromiseHandlers = [];
 	var possiblyUnhandledPromises = [];
 	var possiblyUnhandledPromiseTimeout;
 
@@ -981,14 +989,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	    possiblyUnhandledPromises = [];
 	    for (var i = 0; i < promises.length; i++) {
 	        var promise = promises[i];
+
 	        if (!promise.hasHandlers) {
 	            promise.handlers.push({
 	                onError: function onError(err) {
 	                    if (!promise.hasHandlers) {
 	                        logError(err);
+
+	                        for (var j = 0; j < possiblyUnhandledPromiseHandlers.length; j++) {
+	                            possiblyUnhandledPromiseHandlers[j](promise.value);
+	                        }
 	                    }
 	                }
 	            });
+
 	            promise.dispatch();
 	        }
 	    }
@@ -997,11 +1011,33 @@ return /******/ (function(modules) { // webpackBootstrap
 	function logError(err) {
 	    setTimeout(function () {
 	        throw err;
-	    });
+	    }, 1);
 	}
+
+	var toString = {}.toString;
 
 	function isPromise(item) {
 	    try {
+	        if (!item) {
+	            return false;
+	        }
+
+	        if (window.Window && item instanceof window.Window) {
+	            return false;
+	        }
+
+	        if (window.constructor && item instanceof window.constructor) {
+	            return false;
+	        }
+
+	        if (toString) {
+	            var name = toString.call(item);
+
+	            if (name === '[object Window]' || name === '[object global]' || name === '[object DOMWindow]') {
+	                return false;
+	            }
+	        }
+
 	        if (item && item.then instanceof Function) {
 	            return true;
 	        }
@@ -1012,9 +1048,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return false;
 	}
 
-	var SyncPromise = exports.SyncPromise = function SyncPromise(handler, parent) {
-
-	    this.parent = parent;
+	var SyncPromise = exports.SyncPromise = function SyncPromise(handler) {
 
 	    this.resolved = false;
 	    this.rejected = false;
@@ -1175,8 +1209,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var count = promises.length;
 	    var results = [];
 
-	    for (var i = 0; i < promises.length; i++) {
-	        promises[i].then(function (result) {
+	    var _loop2 = function _loop2(i) {
+
+	        var prom = isPromise(promises[i]) ? promises[i] : SyncPromise.resolve(promises[i]);
+
+	        prom.then(function (result) {
 	            results[i] = result;
 	            count -= 1;
 	            if (count === 0) {
@@ -1185,9 +1222,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }, function (err) {
 	            promise.reject(err);
 	        });
+	    };
+
+	    for (var i = 0; i < promises.length; i++) {
+	        _loop2(i);
 	    }
 
 	    return promise;
+	};
+
+	SyncPromise.onPossiblyUnhandledException = function (handler) {
+	    possiblyUnhandledPromiseHandlers.push(handler);
 	};
 
 	function patchPromise() {
@@ -1225,15 +1270,18 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 12 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
+	exports.util = undefined;
 
 	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+	var _conf = __webpack_require__(3);
 
 	var util = exports.util = {
 	    once: function once(method) {
@@ -1442,12 +1490,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return safeInterval;
 	    },
 	    getDomain: function getDomain(win) {
-	        var allowMockDomain = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
-
 
 	        win = win || window;
 
-	        if (win.mockDomain && allowMockDomain && win.mockDomain.indexOf('mock://') === 0) {
+	        if (win.mockDomain && win.mockDomain.indexOf(_conf.CONSTANTS.MOCK_PROTOCOL) === 0) {
 	            return win.mockDomain;
 	        }
 
@@ -1622,6 +1668,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.getOpener = getOpener;
 	exports.getParent = getParent;
 	exports.getTop = getTop;
+	exports.getFrameByName = getFrameByName;
 	exports.getFrames = getFrames;
 	exports.isFrameOwnedBy = isFrameOwnedBy;
 	exports.getParentWindow = getParentWindow;
@@ -1661,8 +1708,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	var domainMatchTimeout = void 0;
 
 	function isSameDomain(win) {
-	    var allowMockDomain = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
-
 
 	    for (var _iterator = _global.global.domainMatches, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
 	        var _ref;
@@ -1679,20 +1724,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var _match = _ref;
 
 	        if (_match.win === win) {
-	            return allowMockDomain ? _match.match : _match.actualMatch;
+	            return _match.match;
 	        }
 	    }
 
 	    var match = false;
-	    var actualMatch = false;
 
 	    try {
 	        if (_util.util.getDomain(window) === _util.util.getDomain(win)) {
 	            match = true;
-	        }
-
-	        if (_util.util.getDomain(window, false) === _util.util.getDomain(win, false)) {
-	            actualMatch = true;
 	        }
 	    } catch (err) {
 	        // pass
@@ -1700,8 +1740,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    _global.global.domainMatches.push({
 	        win: win,
-	        match: match,
-	        actualMatch: actualMatch
+	        match: match
 	    });
 
 	    if (!domainMatchTimeout) {
@@ -1711,7 +1750,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }, 1);
 	    }
 
-	    return allowMockDomain ? match : actualMatch;
+	    return match;
 	}
 
 	function isWindowClosed(win) {
@@ -1763,23 +1802,86 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	}
 
-	function getFrames(win) {
-
-	    if (!win) {
-	        return;
-	    }
+	function getFrameByName(win, name) {
 
 	    try {
-	        if (win.frames && typeof win.frames === 'number') {
-	            return win.frames;
-	        }
+	        return win.frames[name];
 	    } catch (err) {
 	        // pass
 	    }
 
-	    if (win.length && typeof win.length === 'number') {
-	        return win;
+	    try {
+	        return win[name];
+	    } catch (err) {
+	        // pass
 	    }
+	}
+
+	function getFrames(win) {
+
+	    var result = [];
+
+	    var frames = void 0;
+
+	    try {
+	        frames = win.frames;
+	    } catch (err) {
+	        frames = win;
+	    }
+
+	    var len = void 0;
+
+	    try {
+	        len = frames.length;
+	    } catch (err) {
+	        // pass
+	    }
+
+	    if (len === 0) {
+	        return result;
+	    }
+
+	    if (len) {
+	        for (var i = 0; i < len; i++) {
+
+	            var frame = void 0;
+
+	            try {
+	                frame = frames[i];
+	            } catch (err) {
+	                continue;
+	            }
+
+	            result.push(frame);
+	        }
+	    } else {
+
+	        var _i2 = 0;
+
+	        while (true) {
+	            var _frame = void 0;
+
+	            try {
+	                _frame = frames[_i2];
+	            } catch (err) {
+	                return result;
+	            }
+
+	            if (!_frame) {
+	                return result;
+	            }
+
+	            result.push(_frame);
+
+	            _i2 += 1;
+
+	            if (_i2 > 20) {
+	                return result;
+	            }
+	        }
+	    }
+
+	    return result;
 	}
 
 	function isFrameOwnedBy(win, frame) {
@@ -1951,16 +2053,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function registerWindow(id, win, domain) {
 
-	    for (var _iterator2 = _global.global.windows, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
+	    for (var _iterator2 = _global.global.windows, _isArray2 = Array.isArray(_iterator2), _i3 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
 	        var _ref2;
 
 	        if (_isArray2) {
-	            if (_i2 >= _iterator2.length) break;
-	            _ref2 = _iterator2[_i2++];
+	            if (_i3 >= _iterator2.length) break;
+	            _ref2 = _iterator2[_i3++];
 	        } else {
-	            _i2 = _iterator2.next();
-	            if (_i2.done) break;
-	            _ref2 = _i2.value;
+	            _i3 = _iterator2.next();
+	            if (_i3.done) break;
+	            _ref2 = _i3.value;
 	        }
 
 	        var map = _ref2;
@@ -2295,7 +2397,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _bridge = __webpack_require__(19);
 
 	Object.keys(_bridge).forEach(function (key) {
-	  if (key === "default") return;
+	  if (key === "default" || key === "__esModule") return;
 	  Object.defineProperty(exports, key, {
 	    enumerable: true,
 	    get: function get() {
@@ -2307,7 +2409,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _post = __webpack_require__(20);
 
 	Object.keys(_post).forEach(function (key) {
-	  if (key === "default") return;
+	  if (key === "default" || key === "__esModule") return;
 	  Object.defineProperty(exports, key, {
 	    enumerable: true,
 	    get: function get() {
@@ -2319,7 +2421,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _ie = __webpack_require__(21);
 
 	Object.keys(_ie).forEach(function (key) {
-	  if (key === "default") return;
+	  if (key === "default" || key === "__esModule") return;
 	  Object.defineProperty(exports, key, {
 	    enumerable: true,
 	    get: function get() {
@@ -2357,6 +2459,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    LOCAL: 'local',
 	    REMOTE: 'remote'
 	};
+
+	function getBridgeName(domain) {
+
+	    domain = domain || _lib.util.getDomainFromUrl(domain || window.location.href);
+
+	    var sanitizedDomain = domain.replace(/[^a-zA-Z0-9]+/g, '_');
+
+	    var id = BRIDGE_NAME_PREFIX + '_' + sanitizedDomain;
+
+	    return id;
+	}
 
 	function documentReady() {
 	    return new _lib.promise.Promise(function (resolve) {
@@ -2473,6 +2586,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return bridge;
 	        }
 
+	        var id = getBridgeName(window.location.href);
+
+	        try {
+
+	            if (win[id]) {
+	                return win[id];
+	            }
+	        } catch (err) {
+	            // pass
+	        }
+
 	        try {
 	            var frames = (0, _lib.getFrames)(win);
 
@@ -2492,7 +2616,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 	            }
 	        } catch (err) {
-	            return;
+	            // pass
 	        }
 	    });
 	}
@@ -2556,14 +2680,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return;
 	        }
 
-	        var sanitizedDomain = domain.replace(/[^a-zA-Z0-9]+/g, '_');
+	        var id = getBridgeName(domain);
 
-	        var id = BRIDGE_NAME_PREFIX + '_' + sanitizedDomain;
+	        var frame = (0, _lib.getFrameByName)(window, id);
 
-	        var frames = (0, _lib.getFrames)(window);
-
-	        if (frames && frames[id]) {
-	            return (0, _lib.onWindowReady)(frames[id], 5000, 'Bridge ' + url);
+	        if (frame) {
+	            return (0, _lib.onWindowReady)(frame, 5000, 'Bridge ' + url);
 	        }
 
 	        _lib.log.debug('Opening bridge:', url);
@@ -2796,6 +2918,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    (0, _compat.emulateIERestrictions)(window, win);
 
+	    if (domain && domain.indexOf(_conf.CONSTANTS.MOCK_PROTOCOL) === 0) {
+	        domain = win.location.protocol + '//' + win.location.host;
+	    }
+
+	    if (domain && domain.indexOf(_conf.CONSTANTS.FILE_PROTOCOL) === 0) {
+	        domain = '*';
+	    }
+
 	    return win.postMessage(JSON.stringify(message, 0, 2), domain);
 	}), _defineProperty(_SEND_MESSAGE_STRATEG, _conf.CONSTANTS.SEND_STRATEGIES.GLOBAL_METHOD, function (win, message, domain) {
 
@@ -2874,7 +3004,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            origin: _lib.util.getDomain(window),
 	            source: window,
 	            data: JSON.stringify(message, 0, 2)
-	        });
+	        }, domain);
 	    });
 	}), _defineProperty(_SEND_MESSAGE_STRATEG, _conf.CONSTANTS.SEND_STRATEGIES.LOCAL_BRIDGE, function (win, message, domain) {
 
@@ -2915,6 +3045,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        if (win === bridge) {
 	            throw new Error('Message target is bridge');
+	        }
+
+	        if (domain && domain.indexOf(_conf.CONSTANTS.MOCK_PROTOCOL) === 0) {
+	            domain = bridge.location.protocol + '//' + bridge.location.host;
+	        }
+
+	        if (domain && domain.indexOf(_conf.CONSTANTS.FILE_PROTOCOL) === 0) {
+	            domain = '*';
 	        }
 
 	        bridge.postMessage(JSON.stringify(message, 0, 2), domain);
@@ -2969,7 +3107,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            target: message.originalSource,
 	            hash: message.hash,
 	            name: message.name
-	        }, data), '*');
+	        }, data), origin);
 	    }
 
 	    return _lib.promise.Promise.all([respond({
