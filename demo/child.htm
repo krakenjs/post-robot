@@ -7,9 +7,9 @@
 
 <script>
 	function sendMessage() {
-		postRobot.send(window.opener, 'foo', { message: Math.random().toString() }).then(function(data) {
+		postRobot.send(window.opener, 'foo', { message: Math.random().toString() }).then(function(event) {
 			var el = document.getElementById('messages');
-			el.innerHTML += '\n' + data.message;
+			el.innerHTML += '\n' + event.data.message;
 		}).done()
 	}
 

@@ -9,11 +9,11 @@
 		window.open('./child.htm');
 	}
 
-	postRobot.on('foo', function(source, data) {
+	postRobot.on('foo', function(event) {
 		var el = document.getElementById('messages');
-		el.innerHTML += '\n' + data.message;
+		el.innerHTML += '\n' + event.data.message;
 		return {
-			message: data.message
+			message: event.data.message
 		}
 	});
 
