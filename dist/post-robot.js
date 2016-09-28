@@ -396,12 +396,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    ALLOW_POSTMESSAGE_POPUP: false,
 
-	    LOG_LEVEL: 'debug',
+	    LOG_LEVEL: 'info',
 
 	    BRIDGE_TIMEOUT: 5000,
 	    ACK_TIMEOUT: 1000,
 
-	    LOG_TO_PAGE: true,
+	    LOG_TO_PAGE: false,
 
 	    MOCK_MODE: false,
 
