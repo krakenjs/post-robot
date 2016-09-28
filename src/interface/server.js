@@ -25,6 +25,10 @@ export function listen(options) {
 
     let override = options.override || CONFIG.MOCK_MODE;
 
+    if (options.source) {
+        options.window = options.source;
+    }
+
     addRequestListener(options.name, options.window, options, override);
 
     options.handleError = err => {
@@ -50,7 +54,7 @@ export function listen(options) {
 
 export function on(name, options, handler, errorHandler) {
 
-    if (options instanceof Function) {
+    if (typeof options === 'function') {
         errorHandler = handler;
         handler = options;
         options = {};
@@ -67,7 +71,7 @@ export function on(name, options, handler, errorHandler) {
 
 export function once(name, options, handler, errorHandler) {
 
-    if (options instanceof Function) {
+    if (typeof options === 'function') {
         errorHandler = handler;
         handler = options;
         options = {};

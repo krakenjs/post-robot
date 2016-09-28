@@ -2,6 +2,7 @@
 import { util, initOnReady, listenForMethods } from './lib';
 import { messageListener } from './drivers';
 import { global } from './global';
+import { openTunnelToOpener } from './bridge';
 
 function init() {
 
@@ -9,6 +10,7 @@ function init() {
 
         util.listen(window, 'message', messageListener);
 
+        openTunnelToOpener();
         initOnReady();
         listenForMethods();
     }

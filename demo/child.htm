@@ -1,3 +1,11 @@
+<!DOCTYPE html>
+
+<script>
+
+    window.mockDomain = 'mock://foo.com';
+
+</script>
+
 <script src="../dist/post-robot.js"></script>
 
 
@@ -10,7 +18,7 @@
 		postRobot.send(window.opener, 'foo', { message: Math.random().toString() }).then(function(event) {
 			var el = document.getElementById('messages');
 			el.innerHTML += '\n' + event.data.message;
-		}).done()
+		});
 	}
 
 </script>

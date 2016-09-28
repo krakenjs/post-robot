@@ -1,6 +1,6 @@
 
 import { CONSTANTS } from '../conf';
-import { getParentWindow } from './windows';
+import { getAncestor } from './windows';
 import { on, send } from '../interface';
 import { log } from './log';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
@@ -25,7 +25,7 @@ export function initOnReady() {
         });
     });
 
-    let parent = getParentWindow();
+    let parent = getAncestor();
 
     if (parent) {
         send(parent, CONSTANTS.POST_MESSAGE_NAMES.READY, {}).catch(err => {

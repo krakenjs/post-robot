@@ -18,7 +18,7 @@ function createIframe(name, callback) {
 }
 
 function createPopup(name) {
-    var popup = window.open('/base/test/' + name, Math.random().toString() + '_' + name.replace(/[^a-zA-Z0-9]+/g, '_'));
+    var popup = window.open('mock://test-post-robot-child.com|/base/test/' + name, Math.random().toString() + '_' + name.replace(/[^a-zA-Z0-9]+/g, '_'));
     window.focus();
     return popup;
 }
@@ -423,27 +423,5 @@ describe('[post-robot] popup tests', function() {
             });
         });
 
-    });
-
-    it('should work when the only method is post down through bridge', function() {
-
-        var allowedStrategies = postRobot.CONFIG.ALLOWED_POST_MESSAGE_METHODS;
-
-        postRobot.CONFIG.ALLOWED_POST_MESSAGE_METHODS = {
-            [ postRobot.CONSTANTS.SEND_STRATEGIES.LOCAL_BRIDGE ]: true
-        };
-
-        return postRobot.send(childWindow, 'setupListener', {
-
-            messageName: 'foo',
-            data: {
-                foo: 'bar'
-            }
-
-        }).then(function() {
-            return postRobot.send(childWindow, 'foo');
-        }).then(function() {
-            postRobot.CONFIG.ALLOWED_POST_MESSAGE_METHODS = allowedStrategies;
-        });
     });
 });

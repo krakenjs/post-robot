@@ -1,5 +1,4 @@
 
-import { isWindowEqual } from '../lib';
 import { global } from '../global';
 
 global.listeners = global.listeners || {
@@ -25,7 +24,7 @@ export function getRequestListener(name, win) {
             return requestListener.options;
         }
 
-        if (win && isWindowEqual(win, requestListener.win)) {
+        if (win && win === requestListener.win) {
             return requestListener.options;
         }
     }

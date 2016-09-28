@@ -1,34 +1,27 @@
 
 import { CONSTANTS, CONFIG, POST_MESSAGE_NAMES_LIST } from '../../conf';
-import { util, promise, getWindowId, serializeMethods, log, isWindowClosed, getWindowType } from '../../lib';
+import { util, promise, serializeMethods, log, isWindowClosed, getWindowType } from '../../lib';
 
 import { SEND_MESSAGE_STRATEGIES } from './strategies';
 
 
 export function buildMessage(win, message, options = {}) {
 
-    let id     = util.uniqueID();
-    let source = getWindowId(window);
-    let type   = getWindowType();
-    let target = getWindowId(win);
+    let id   = util.uniqueID();
+    let type = getWindowType();
     let sourceDomain = util.getDomain(window);
 
     return {
         ...message,
         ...options,
-        id:                   message.id || id,
-        source,
-        originalSource:       message.originalSource || source,
         sourceDomain,
-        originalSourceDomain: message.originalSourceDomain || sourceDomain,
-        windowType:           type,
-        originalWindowType:   message.originalWindowType || type,
-        target:               message.target || target
+        id:         message.id || id,
+        windowType: type
     };
 }
 
 
-export function sendMessage(win, message, domain, isProxy) {
+export function sendMessage(win, message, domain) {
     return promise.run(() => {
 
         message = buildMessage(win, message, {
@@ -38,7 +31,7 @@ export function sendMessage(win, message, domain, isProxy) {
 
         let level;
 
-        if (POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 || message.type === CONSTANTS.POST_MESSAGE_TYPE.ACK || isProxy) {
+        if (POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 || message.type === CONSTANTS.POST_MESSAGE_TYPE.ACK) {
             level = 'debug';
         } else if (message.ack === 'error') {
             level = 'error';
@@ -46,7 +39,7 @@ export function sendMessage(win, message, domain, isProxy) {
             level = 'info';
         }
 
-        log.logLevel(level, [ isProxy ? '#sendproxy' : '#send', message.type, message.name, message ]);
+        log.logLevel(level, [ '\n\n\t', '#send', message.type.replace(/^postrobot_message_/, ''), '::', message.name, '\n\n', message ]);
 
         if (CONFIG.MOCK_MODE) {
             delete message.target;
@@ -69,7 +62,7 @@ export function sendMessage(win, message, domain, isProxy) {
 
         let messages = [];
 
-        return promise.map(util.keys(SEND_MESSAGE_STRATEGIES), strategyName => {
+        return promise.map(Object.keys(SEND_MESSAGE_STRATEGIES), strategyName => {
 
             return promise.run(() => {
 

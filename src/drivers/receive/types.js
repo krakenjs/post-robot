@@ -7,7 +7,7 @@ import { listeners, getRequestListener } from '../listeners';
 
 export let RECEIVE_MESSAGE_TYPES = {
 
-    [ CONSTANTS.POST_MESSAGE_TYPE.ACK ]: (source, message, origin) => {
+    [ CONSTANTS.POST_MESSAGE_TYPE.ACK ]: (source, origin, message) => {
 
         let options = listeners.response[message.hash];
 
@@ -18,7 +18,7 @@ export let RECEIVE_MESSAGE_TYPES = {
         options.ack = true;
     },
 
-    [ CONSTANTS.POST_MESSAGE_TYPE.REQUEST ]: (source, message, origin) => {
+    [ CONSTANTS.POST_MESSAGE_TYPE.REQUEST ]: (source, origin, message) => {
 
         let options = getRequestListener(message.name, source);
 
@@ -50,7 +50,8 @@ export let RECEIVE_MESSAGE_TYPES = {
 
                 if (options.domain) {
                     let match = (typeof options.domain === 'string' && origin === options.domain) ||
-                                (options.domain instanceof RegExp && origin.match(options.domain));
+                                (Object.prototype.toString.call(options.domain) === '[object RegExp]' && origin.match(options.domain) ||
+                                (Array.isArray(options.domain) && options.domain.indexOf(origin) !== -1));
 
                     if (!match) {
                         throw new Error(`Message origin ${origin} does not match domain ${options.domain}`);
@@ -88,7 +89,7 @@ export let RECEIVE_MESSAGE_TYPES = {
         });
     },
 
-    [ CONSTANTS.POST_MESSAGE_TYPE.RESPONSE ]: (source, message, origin) => {
+    [ CONSTANTS.POST_MESSAGE_TYPE.RESPONSE ]: (source, origin, message) => {
 
         let options = listeners.response[message.hash];
 

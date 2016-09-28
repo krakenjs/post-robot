@@ -14,7 +14,8 @@ export let CONSTANTS = {
 
     POST_MESSAGE_NAMES: {
         METHOD: 'postrobot_method',
-        READY: 'postrobot_ready'
+        READY: 'postrobot_ready',
+        OPEN_TUNNEL: 'postrobot_open_tunnel'
     },
 
     WINDOW_TYPES: {
@@ -33,13 +34,14 @@ export let CONSTANTS = {
 
     SEND_STRATEGIES: {
         POST_MESSAGE: 'postrobot_post_message',
-        GLOBAL_METHOD: 'postrobot_global_method',
-        REMOTE_BRIDGE: 'postrobot_remote_bridge',
-        LOCAL_BRIDGE: 'postrobot_local_bridge'
+        BRIDGE: 'postrobot_bridge'
     },
 
     MOCK_PROTOCOL: 'mock://',
-    FILE_PROTOCOL: 'file://'
+    FILE_PROTOCOL: 'file://',
+
+    BRIDGE_NAME_PREFIX: '__postrobot_bridge__',
+    POSTROBOT_PROXY: '__postrobot_proxy__'
 };
 
 export let POST_MESSAGE_NAMES_LIST = Object.keys(CONSTANTS.POST_MESSAGE_NAMES).map(key => CONSTANTS.POST_MESSAGE_NAMES[key]);

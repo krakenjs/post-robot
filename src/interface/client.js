@@ -1,7 +1,7 @@
 
 import { CONFIG, CONSTANTS } from '../conf';
 import { listeners, sendMessage } from '../drivers';
-import { util, promise, getParentWindow, isParentWindow, onWindowReady, isWindowClosed } from '../lib';
+import { util, promise, getAncestor, isAncestor, onWindowReady, isWindowClosed } from '../lib';
 
 
 export function request(options) {
@@ -57,7 +57,7 @@ export function request(options) {
 
         return promise.run(() => {
 
-            if (isParentWindow(options.window, window)) {
+            if (isAncestor(window, options.window)) {
                 return onWindowReady(options.window);
             }
 
@@ -108,11 +108,11 @@ export function request(options) {
 export function send(window, name, data, options, callback) {
 
     if (!callback) {
-        if (!options && data instanceof Function) {
+        if (!options && typeof data === 'function') {
             callback = data;
             options = {};
             data = {};
-        } else if (options instanceof Function) {
+        } else if (typeof options === 'function') {
             callback = options;
             options = {};
         }
@@ -129,7 +129,7 @@ export function send(window, name, data, options, callback) {
 
 export function sendToParent(name, data, options, callback) {
 
-    let win = getParentWindow();
+    let win = getAncestor();
 
     if (!win) {
         return new promise.Promise((resolve, reject) => reject(new Error('Window does not have a parent')));

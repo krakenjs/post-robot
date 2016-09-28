@@ -28,7 +28,7 @@ export let listenForMethods = util.once(() => {
         log.debug('Call local method', data.name, data.args);
 
         return promise.run(() => {
-            return meth.method.apply(null, data.args);
+            return meth.method.apply({ source, origin, data }, data.args);
 
         }).then(result => {
 
@@ -42,7 +42,7 @@ export let listenForMethods = util.once(() => {
 });
 
 function isSerializedMethod(item) {
-    return item instanceof Object && item.__type__ === CONSTANTS.SERIALIZATION_TYPES.METHOD && item.__id__;
+    return typeof item === 'object' && item !== null && item.__type__ === CONSTANTS.SERIALIZATION_TYPES.METHOD && item.__id__;
 }
 
 export function serializeMethod(destination, domain, method, name) {
@@ -65,7 +65,7 @@ export function serializeMethod(destination, domain, method, name) {
 export function serializeMethods(destination, domain, obj) {
 
     return util.replaceObject({ obj }, (item, key) => {
-        if (item instanceof Function) {
+        if (typeof item === 'function') {
             return serializeMethod(destination, domain, item, key);
         }
     }).obj;

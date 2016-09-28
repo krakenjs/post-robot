@@ -2,11 +2,7 @@
     var parentWindow = (window.opener || window.parent);
     window.__coverage__ = parentWindow.__coverage__;
     window.console = parentWindow.console;
-    window.mockDomain = 'http://test-post-robot-child.com';
+    window.mockDomain = 'mock://test-post-robot-child.com';
 </script>
 
 <script src="/base/test/child.js"></script>
-
-<script>
-    postRobot.openBridge('/base/test/bridge.htm', 'mock://test-post-robot.com');
-</script>

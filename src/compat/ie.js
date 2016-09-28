@@ -9,7 +9,7 @@ export function emulateIERestrictions(sourceWindow, targetWindow) {
             return;
         }
 
-        if (!isSameTopWindow(sourceWindow, targetWindow)) {
+        if (isSameTopWindow(sourceWindow, targetWindow) === false) {
             throw new Error(`Can not send and receive post messages between two different windows (disabled to emulate IE)`);
         }
     }

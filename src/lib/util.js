@@ -57,7 +57,7 @@ export let util = {
     },
 
     apply(method, context, args) {
-        if (method.apply instanceof Function) {
+        if (typeof method.apply === 'function') {
             return method.apply(context, args);
         }
         return method(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9]);
@@ -158,11 +158,11 @@ export let util = {
     },
 
     each(obj, callback) {
-        if (obj instanceof Array) {
+        if (Array.isArray(obj)) {
             for (let i = 0; i < obj.length; i++) {
                 callback(obj[i], i);
             }
-        } else if (obj instanceof Object && !(obj instanceof Function)) {
+        } else if (typeof obj === 'object' && obj !== null) {
             for (let key in obj) {
                 if (obj.hasOwnProperty(key)) {
                     callback(obj[key], key);
@@ -171,9 +171,13 @@ export let util = {
         }
     },
 
-    replaceObject(obj, callback) {
+    replaceObject(obj, callback, depth = 1) {
 
-        let newobj = obj instanceof Array ? [] : {};
+        if (depth >= 100) {
+            throw new Error(`Self-referential object passed, or object contained too many layers`);
+        }
+
+        let newobj = Array.isArray(obj) ? [] : {};
 
         util.each(obj, (item, key) => {
 
@@ -182,7 +186,7 @@ export let util = {
             if (result !== undefined) {
                 newobj[key] = result;
             } else if (typeof item === 'object' && item !== null) {
-                newobj[key] = util.replaceObject(item, callback);
+                newobj[key] = util.replaceObject(item, callback, depth + 1);
             } else {
                 newobj[key] = item;
             }
@@ -240,7 +244,7 @@ export let util = {
 
         let domain;
 
-        if (url.indexOf('http://') === 0 || url.indexOf('https://') === 0) {
+        if (url.match(/^(https?|mock|file):\/\//)) {
             domain = url;
         } else {
             return this.getDomain();
@@ -249,5 +253,18 @@ export let util = {
         domain = domain.split('/').slice(0, 3).join('/');
 
         return domain;
+    },
+
+    safeGet(obj, prop) {
+
+        let result;
+
+        try {
+            result = obj[prop];
+        } catch (err) {
+            // pass
+        }
+
+        return result;
     }
 };

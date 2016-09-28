@@ -48,7 +48,7 @@ export let log = {
                     return item;
                 }
                 if (!item) {
-                    return toString.call(item);
+                    return Object.prototype.toString.call(item);
                 }
                 let json;
                 try {
@@ -85,34 +85,39 @@ export let log = {
 
     logLevel(level, args) {
 
-        if (LOG_LEVELS.indexOf(level) < LOG_LEVELS.indexOf(CONFIG.LOG_LEVEL)) {
-            return;
+        try {
+            if (LOG_LEVELS.indexOf(level) < LOG_LEVELS.indexOf(CONFIG.LOG_LEVEL)) {
+                return;
+            }
+
+            args = Array.prototype.slice.call(args);
+
+            args.unshift(`${window.location.host}${window.location.pathname}`);
+            args.unshift(`::`);
+            args.unshift(`${getWindowType().toLowerCase()}`);
+            args.unshift('[post-robot]');
+
+            if (CONFIG.LOG_TO_PAGE) {
+                log.writeToPage(level, args);
+            }
+
+            if (!window.console) {
+                return;
+            }
+
+            if (!window.console[level]) {
+                level = 'log';
+            }
+
+            if (!window.console[level]) {
+                return;
+            }
+
+            window.console[level].apply(window.console, args);
+
+        } catch (err) {
+            // pass
         }
-
-        args = Array.prototype.slice.call(args);
-
-        args.unshift(window.location.pathname);
-        args.unshift(window.location.host);
-        args.unshift(`<${getWindowType().toLowerCase()}>`);
-        args.unshift('[post-robot]');
-
-        if (CONFIG.LOG_TO_PAGE) {
-            log.writeToPage(level, args);
-        }
-
-        if (!window.console) {
-            return;
-        }
-
-        if (!window.console[level]) {
-            level = 'log';
-        }
-
-        if (!window.console[level]) {
-            return;
-        }
-
-        window.console[level].apply(window.console, args);
     },
 
     debug() {
