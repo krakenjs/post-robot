@@ -39,7 +39,7 @@ export function sendMessage(win, message, domain) {
             level = 'info';
         }
 
-        log.logLevel(level, [ '\n\n\t', '#send', message.type.replace(/^postrobot_message_/, ''), '::', message.name, '\n\n', message ]);
+        log.logLevel(level, [ '\n\n\t', '#send', message.type.replace(/^postrobot_message_/, ''), '::', message.name, '::', domain || '*', '\n\n', message ]);
 
         if (CONFIG.MOCK_MODE) {
             delete message.target;
