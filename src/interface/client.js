@@ -38,6 +38,8 @@ export function request(options) {
             }
         }
 
+        options.domain = options.domain || '*';
+
         let hash = `${options.name}_${util.uniqueID()}`;
         listeners.response[hash] = options;
 
@@ -69,7 +71,7 @@ export function request(options) {
                 name: options.name,
                 data: options.data,
                 fireAndForget: options.fireAndForget
-            }, options.domain || '*').catch(reject);
+            }, options.domain).catch(reject);
 
             if (options.fireAndForget) {
                 return resolve();

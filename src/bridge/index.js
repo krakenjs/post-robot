@@ -280,7 +280,7 @@ export function openTunnelToOpener() {
 
             receiveMessage({
                 data:   message,
-                origin: this.domain,
+                origin: this.origin,
                 source: this.source
             });
         }

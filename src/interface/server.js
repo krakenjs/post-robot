@@ -29,6 +29,8 @@ export function listen(options) {
         options.window = options.source;
     }
 
+    options.domain = options.domain || '*';
+
     addRequestListener(options.name, options.window, options, override);
 
     options.handleError = err => {
