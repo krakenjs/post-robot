@@ -40,6 +40,47 @@ export function isSameDomain(win) {
     return match;
 }
 
+export function isWindow(item) {
+
+    if (!item) {
+        return false;
+    }
+
+    try {
+
+        for (let key of [ 'setTimeout', 'setInterval', 'postMessage', 'alert' ]) {
+            if (typeof item[key] !== 'function') {
+                return false;
+            }
+        }
+
+        if (!item.document || !item.location) {
+            return false;
+        }
+
+        return true;
+
+    } catch (err) {
+        // pass
+    }
+
+    try {
+
+        for (let i = 0; i < 5; i++) {
+            if (item) {
+                item = item[Math.random().toString()];
+            }
+        }
+
+        return false;
+
+    } catch (err) {
+
+        return true;
+    }
+}
+
+
 export function isWindowClosed(win) {
 
     try {
@@ -280,7 +321,7 @@ export function getFrameByName(win, name) {
 
     for (let childFrame of getFrames(win)) {
         try {
-            if (childFrame.name === name) {
+            if (childFrame.name === name && isWindow(childFrame)) {
                 return childFrame;
             }
         } catch (err) {
@@ -289,13 +330,17 @@ export function getFrameByName(win, name) {
     }
 
     try {
-        return win.frames[name];
+        if (isWindow(win.frames[name])) {
+            return win.frames[name];
+        }
     } catch (err) {
         // pass
     }
 
     try {
-        return win[name];
+        if (isWindow(win[name])) {
+            return win[name];
+        }
     } catch (err) {
         // pass
     }
