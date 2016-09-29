@@ -31,6 +31,6 @@ export let SEND_MESSAGE_STRATEGIES = {
             throw new Error(`Can only use bridge to communicate between two different windows, not between frames`);
         }
 
-        return sendBridgeMessage(win, message, domain);
+        return sendBridgeMessage(win, JSON.stringify(message, 0, 2), domain);
     }
 };

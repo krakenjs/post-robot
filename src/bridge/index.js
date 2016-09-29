@@ -219,12 +219,12 @@ function listenForRegister(source, domain) {
             sendMessage(message) {
 
                 if (!window || window.closed) {
-                    throw new Error(`Function orphaned in closed window`);
+                    return;
                 }
 
                 receiveMessage({
-                    data:   JSON.stringify(message),
-                    domain: winDetails.domain,
+                    data:   message,
+                    origin: winDetails.domain,
                     source: winDetails.win
                 });
             }
@@ -275,12 +275,12 @@ export function openTunnelToOpener() {
         sendMessage(message) {
 
             if (!window || window.closed) {
-                throw new Error(`Function orphaned in closed window`);
+                return;
             }
 
             receiveMessage({
-                data:   JSON.stringify(message),
-                domain: this.domain,
+                data:   message,
+                origin: this.domain,
                 source: this.source
             });
         }
@@ -330,7 +330,16 @@ function openBridgeFrame(name, url) {
 }
 
 
+export function bridgeRequired(url, domain) {
 
+    domain = domain || util.getDomainFromUrl(url);
+
+    if (util.getDomain() === domain) {
+        return false;
+    }
+
+    return true;
+}
 
 
 global.bridges = global.bridges || {};
