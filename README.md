@@ -34,7 +34,7 @@ postRobot.on('getCart', function(event, callback) {
 ```
 
 ```javascript
-postRobot.send(window, 'getCart', function(err, event) {
+postRobot.send(someWindow, 'getCart', function(err, event) {
     console.log(event.data);
 });
 ```
@@ -55,10 +55,26 @@ postRobot.on('init', { window: window.parent }, function(event, callback) {
 });
 ```
 
+## Listen to a specific domain
+
+```javascript
+postRobot.on('init', { domain: 'http://zombo.com' }, function(event, callback) {
+    ...
+});
+```
+
 ## Set a timeout for a response
 
 ```javascript
-postRobot.send(window, 'getCart', { timeout: 5000 }, function(err, event) {
+postRobot.send(someWindow, 'getCart', { timeout: 5000 }, function(err, event) {
+    console.log(event.data);
+});
+```
+
+## Send a message to a specific domain
+
+```javascript
+postRobot.send(someWindow, 'getCart', { domain: 'http://zombo.com' }, function(err, event) {
     console.log(event.data);
 });
 ```
@@ -94,7 +110,7 @@ postRobot.once('getCart').then(function(event) {
 ```
 
 ```javascript
-postRobot.send(window, 'getCart').then(function(event) {
+postRobot.send(someWindow, 'getCart').then(function(event) {
     ...
 }).catch(function(err) {
     ...
@@ -122,7 +138,7 @@ try {
 
 ```javascript
 try {
-    let event = await postRobot.send(window, 'getCart');
+    let event = await postRobot.send(someWindow, 'getCart');
 } catch (err) {
     ...
 }
