@@ -278,6 +278,16 @@ export function getTop(win) {
 
 export function getFrameByName(win, name) {
 
+    for (let childFrame of getFrames(win)) {
+        try {
+            if (childFrame.name === name) {
+                return childFrame;
+            }
+        } catch (err) {
+            // pass
+        }
+    }
+
     try {
         return win.frames[name];
     } catch (err) {
