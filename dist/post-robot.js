@@ -253,6 +253,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	        }
 
+	        options.domain = options.domain || '*';
+
 	        var hash = options.name + '_' + _lib.util.uniqueID();
 	        _drivers.listeners.response[hash] = options;
 
@@ -283,7 +285,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                name: options.name,
 	                data: options.data,
 	                fireAndForget: options.fireAndForget
-	            }, options.domain || '*')['catch'](reject);
+	            }, options.domain)['catch'](reject);
 
 	            if (options.fireAndForget) {
 	                return resolve();
@@ -616,7 +618,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        level = 'info';
 	    }
 
-	    _lib.log.logLevel(level, ['\n\n\t', '#receive', message.type.replace(/^postrobot_message_/, ''), '::', message.name, '\n\n', message]);
+	    _lib.log.logLevel(level, ['\n\n\t', '#receive', message.type.replace(/^postrobot_message_/, ''), '::', message.name, '::', origin, '\n\n', message]);
 
 	    if ((0, _lib.isWindowClosed)(source)) {
 	        return _lib.log.debug('Source window is closed - can not send ' + message.type + ' ' + message.name);
@@ -2563,12 +2565,33 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
+	function matchDomain(domain, origin) {
+
+	    if (typeof domain === 'string') {
+	        return domain === '*' || origin === domain;
+	    }
+
+	    if (Object.prototype.toString.call(domain) === '[object RegExp]') {
+	        return origin.match(domain);
+	    }
+
+	    if (Array.isArray(domain)) {
+	        return domain.indexOf(origin) !== -1;
+	    }
+
+	    return false;
+	}
+
 	var RECEIVE_MESSAGE_TYPES = exports.RECEIVE_MESSAGE_TYPES = (_RECEIVE_MESSAGE_TYPE = {}, _defineProperty(_RECEIVE_MESSAGE_TYPE, _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK, function (source, origin, message) {
 
 	    var options = _listeners.listeners.response[message.hash];
 
 	    if (!options) {
 	        throw new Error('No handler found for post message ack for message: ' + message.name + ' in ' + window.location.href);
+	    }
+
+	    if (!matchDomain(options.domain, origin)) {
+	        throw new Error('Ack origin ' + origin + ' does not match domain ' + options.domain);
 	    }
 
 	    options.ack = true;
@@ -2597,12 +2620,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            throw new Error('No postmessage request handler for ' + message.name + ' in ' + window.location.href);
 	        }
 
-	        if (options.domain) {
-	            var match = typeof options.domain === 'string' && origin === options.domain || Object.prototype.toString.call(options.domain) === '[object RegExp]' && origin.match(options.domain) || Array.isArray(options.domain) && options.domain.indexOf(origin) !== -1;
-
-	            if (!match) {
-	                throw new Error('Message origin ' + origin + ' does not match domain ' + options.domain);
-	            }
+	        if (!matchDomain(options.domain, origin)) {
+	            throw new Error('Request origin ' + origin + ' does not match domain ' + options.domain);
 	        }
 
 	        var data = message.data;
@@ -2636,6 +2655,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    if (!options) {
 	        throw new Error('No response handler found for post message response ' + message.name + ' in ' + window.location.href);
+	    }
+
+	    if (!matchDomain(options.domain, origin)) {
+	        throw new Error('Response origin ' + origin + ' does not match domain ' + options.domain);
 	    }
 
 	    delete _listeners.listeners.response[message.hash];
@@ -2703,7 +2726,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            level = 'info';
 	        }
 
-	        _lib.log.logLevel(level, ['\n\n\t', '#send', message.type.replace(/^postrobot_message_/, ''), '::', message.name, '\n\n', message]);
+	        _lib.log.logLevel(level, ['\n\n\t', '#send', message.type.replace(/^postrobot_message_/, ''), '::', message.name, '::', domain || '*', '\n\n', message]);
 
 	        if (_conf.CONFIG.MOCK_MODE) {
 	            delete message.target;
@@ -3152,7 +3175,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            (0, _drivers.receiveMessage)({
 	                data: message,
-	                origin: this.domain,
+	                origin: this.origin,
 	                source: this.source
 	            });
 	        }
@@ -3408,6 +3431,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (options.source) {
 	        options.window = options.source;
 	    }
+
+	    options.domain = options.domain || '*';
 
 	    (0, _drivers.addRequestListener)(options.name, options.window, options, override);
 
