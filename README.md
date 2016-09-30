@@ -92,7 +92,7 @@ postRobot.on('init', { domain: 'http://zombo.com' }, function(event, callback) {
 ## Set a timeout for a response
 
 ```javascript
-postRobot.send(someWindow, 'getUser', { timeout: 5000 }.then(function(event) {
+postRobot.send(someWindow, 'getUser', { timeout: 5000 }).then(function(event) {
     console.log(event.source, event.origin, 'Got user:', event.data.name);
 
 }).catch(function(err) {
@@ -104,7 +104,7 @@ postRobot.send(someWindow, 'getUser', { timeout: 5000 }.then(function(event) {
 ## Send a message to a specific domain
 
 ```javascript
-postRobot.send(someWindow, 'getUser', { domain: 'http://zombo.com' }.then(function(event) {
+postRobot.send(someWindow, 'getUser', { domain: 'http://zombo.com' }).then(function(event) {
     console.log(event.source, event.origin, 'Got user:', event.data.name);
 });
 ```
