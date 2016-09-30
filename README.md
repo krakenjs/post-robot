@@ -1,27 +1,15 @@
 # post-robot [:]-\\-<
 
-Post-messaging on the client side using a simple server/client pattern.
+Post-messaging on the client side, using a simple listener/client pattern.
 
-Use this if you want to communicate between two different windows (or popups, or iframes) using `window.postMessage`,
-but you don't like the fire-and-forget nature of `window.postMessage` (which doesn't tell you if your message got through, if there was an error, and isn't fully supported in even the latest versions of IE for window to window communication).
+Send a message to another window, and:
 
-With this module, you can set up a listener in one window, have it wait for a post message, and then have it reply with data,
-all while gracefully handling any errors that crop up.
-
-This also allows cross-domain post messages between two different windows (not just popups) in IE9+.
-
-## Features
-
-- Request/response pattern (avoids sending fire-and-forget messages back and forth)
-- Support for promises and async/await
-- Don't worry about serialization, just send javascript objects
-- Send functions across domains and have them called on the original window
-- Handles all of the corner cases for IE9+, which is normally not able to send cross-domain post messages between two different windows, only iframes
-- Handle error cases gracefully
-  - The user closed the window you're trying to message
-  - The other window doesn't have any listener set up for your message
-  - The other window didn't acknowledge your message
-  - You didn't get a response from the other window in enough time
+- Get a response from the window you messaged
+- Pass functions to another window, across different domains
+- Handle any errors prevented your message from getting through
+- Don't worry about serializing your messages; just send javascript objects
+- Use promises, callbacks or async/await to wait for responses from windows you message
+- Send messages between a parent and a popup window in IE
 
 ## Simple listener / sender with error handling
 
