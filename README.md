@@ -4,14 +4,15 @@ Post-messaging on the client side, using a simple listener/client pattern.
 
 Send a message to another window, and:
 
-- Get a response from the window you messaged
-- Pass functions to another window, across different domains
-- Handle any errors prevented your message from getting through
-- Don't worry about serializing your messages; just send javascript objects
-- Use promises, callbacks or async/await to wait for responses from windows you message
-- Send messages between a parent and a popup window in IE
+- [Get a response](#simple-listener-and-sender-with-error-handling) from the window you messaged
+- [Pass functions](#functions) to another window, across different domains
+- [Handle any errors](#simple-listener-and-sender-with-error-handling) that prevented your message from getting through
+- Don't worry about serializing your messages; [just send javascript objects](#simple-listener-and-sender-with-error-handling)
+- Use [promises](#listener-with-promise-response), [callbacks](#listener-with-callback-response) or [async/await](#async--await) to wait for responses from windows you message
+- Set up a [secure message channel](#secure-message-channel) between two windows on a certain domain
+- Send messages between a [parent and a popup window](#parent-to-popup-messaging) in IE
 
-## Simple listener / sender with error handling
+## Simple listener and sender with error handling
 
 ```javascript
 postRobot.on('getUser', function(event) {
@@ -30,7 +31,7 @@ postRobot.send(someWindow, 'getUser').then(function(event) {
 });
 ```
 
-## Listener with an async promise response
+## Listener with an promise response
 
 ```javascript
 postRobot.on('getUser', function(event, callback) {
@@ -43,7 +44,7 @@ postRobot.on('getUser', function(event, callback) {
 });
 ```
 
-## Listener with an async callback response
+## Listener with an callback response
 
 ```javascript
 postRobot.on('getUser', function(event, callback) {
