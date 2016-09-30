@@ -91,9 +91,18 @@ export function once(name, options, handler, errorHandler) {
         options.errorHandler = options.errorHandler || reject;
     });
 
-    let listener = listen(options);
+    let myListener = listen(options);
 
-    util.extend(prom, listener);
+    util.extend(prom, myListener);
 
     return prom;
+}
+
+export function listener(options = {}) {
+
+    return {
+        on(name, handler, errorHandler) {
+            return on(name, options, handler, errorHandler);
+        }
+    };
 }

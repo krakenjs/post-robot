@@ -140,5 +140,16 @@ export function sendToParent(name, data, options, callback) {
     return send(win, name, data, options, callback);
 }
 
+export function client(options = {}) {
 
+    if (!options.window) {
+        throw new Error(`Expected options.window`);
+    }
+
+    return {
+        send(name, data, callback) {
+            return send(options.window, name, data, options, callback);
+        }
+    };
+}
 
