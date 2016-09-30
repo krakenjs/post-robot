@@ -99,9 +99,8 @@ postRobot.send(someWindow, 'getUser', { id: 1337 }, { timeout: 5000 }).then(func
     console.log(event.source, event.origin, 'Got user:', event.data.name);
 
 }).catch(function(err) {
-
     console.error(err);
-});;
+});
 ```
 
 ## Send a message to a specific domain
