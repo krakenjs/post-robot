@@ -17,6 +17,7 @@ Send a message to another window, and:
 ```javascript
 postRobot.on('getUser', function(event) {
     return {
+        id:   event.data.id,
         name: 'Zippy the Pinhead'
     };
 });
@@ -51,6 +52,7 @@ postRobot.on('getUser', { id: 1337 }, function(event, callback) {
 
     setTimeout(function() {
         callback(null, {
+            id:   event.data.id,
             name: 'Captain Pugwash'
         });
     }, 500);
@@ -126,6 +128,7 @@ postRobot.on('getUser', async ({ source, origin, data }) => {
     let user = await getUser(data.id);
 
     return {
+        id:   data.id,
         name: user.name
     };
 });
@@ -149,6 +152,7 @@ to and send messages to. This creates a secure message channel that only works b
 ```javascript
 postRobot.on('getUser', { window: childWindow, domain: 'http://zombo.com' }, function(event) {
     return {
+        id:   event.data.id,
         name: 'Frodo'
     };
 });
@@ -170,19 +174,18 @@ Post robot lets you send across functions in your data payload, fairly seamlessl
 For example:
 
 ```javascript
-// Window 1:
-
 postRobot.on('getUser', function(event) {
     return {
-        name: 'Nogbad the Bad',
+        id:     event.data.id,
+        name:   'Nogbad the Bad',
+        
         logout: function() {
             currentUser.logout();
         }
     };
 });
 
-// Window 2:
-
+```javascript
 postRobot.send(myWindow, { id: 1337 }, 'getUser').then(function(event) {
     var user = event.data;
 
