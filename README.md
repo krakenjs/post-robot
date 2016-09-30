@@ -31,7 +31,7 @@ postRobot.send(someWindow, 'getUser').then(function(event) {
 });
 ```
 
-## Listener with an promise response
+## Listener with promise response
 
 ```javascript
 postRobot.on('getUser', function(event, callback) {
@@ -44,7 +44,7 @@ postRobot.on('getUser', function(event, callback) {
 });
 ```
 
-## Listener with an callback response
+## Listener with callback response
 
 ```javascript
 postRobot.on('getUser', function(event, callback) {
