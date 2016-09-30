@@ -211,9 +211,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
+	exports.send = undefined;
 	exports.request = request;
-	exports.send = send;
 	exports.sendToParent = sendToParent;
+	exports.client = client;
 
 	var _conf = __webpack_require__(3);
 
@@ -320,7 +321,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }), options.callback);
 	}
 
-	function send(window, name, data, options, callback) {
+	function _send(window, name, data, options, callback) {
 
 	    if (!callback) {
 	        if (!options && typeof data === 'function') {
@@ -342,6 +343,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return request(options);
 	}
 
+	exports.send = _send;
 	function sendToParent(name, data, options, callback) {
 
 	    var win = (0, _lib.getAncestor)();
@@ -352,7 +354,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	        });
 	    }
 
-	    return send(win, name, data, options, callback);
+	    return _send(win, name, data, options, callback);
+	}
+
+	function client() {
+	    var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+
+	    if (!options.window) {
+	        throw new Error('Expected options.window');
+	    }
+
+	    return {
+	        send: function send(name, data, callback) {
+	            return _send(options.window, name, data, options, callback);
+	        }
+	    };
 	}
 
 /***/ },
@@ -408,7 +425,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var CONFIG = exports.CONFIG = {
 
-	    ALLOW_POSTMESSAGE_POPUP: false,
+	    ALLOW_POSTMESSAGE_POPUP: true,
 
 	    LOG_LEVEL: 'info',
 
@@ -2286,7 +2303,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	_global.global.methods = _global.global.methods || {};
 
 	var listenForMethods = exports.listenForMethods = _util.util.once(function () {
-	    (0, _interface.on)(_conf.CONSTANTS.POST_MESSAGE_NAMES.METHOD, function (_ref) {
+	    (0, _interface.on)(_conf.CONSTANTS.POST_MESSAGE_NAMES.METHOD, { window: '*', origin: '*' }, function (_ref) {
 	        var source = _ref.source;
 	        var origin = _ref.origin;
 	        var data = _ref.data;
@@ -2412,7 +2429,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function initOnReady() {
 
-	    (0, _interface.on)(_conf.CONSTANTS.POST_MESSAGE_NAMES.READY, function (_ref) {
+	    (0, _interface.on)(_conf.CONSTANTS.POST_MESSAGE_NAMES.READY, { window: '*', domain: '*' }, function (_ref) {
 	        var source = _ref.source;
 	        var data = _ref.data;
 
@@ -2446,7 +2463,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var parent = (0, _windows.getAncestor)();
 
 	    if (parent) {
-	        (0, _interface.send)(parent, _conf.CONSTANTS.POST_MESSAGE_NAMES.READY, {})['catch'](function (err) {
+	        (0, _interface.send)(parent, _conf.CONSTANTS.POST_MESSAGE_NAMES.READY, {}, { domain: '*' })['catch'](function (err) {
 	            _log.log.debug(err.stack || err.toString());
 	        });
 	    }
@@ -3140,7 +3157,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        sendMessage: function sendMessage() {
 	            return _sendMessage.apply(this, arguments);
 	        }
-	    });
+	    }, { domain: '*' });
 	};
 
 	function openTunnelToOpener() {
@@ -3331,7 +3348,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            continue;
 	        }
 
-	        if (!requestListener.win) {
+	        if (!requestListener.win || requestListener.win === '*') {
 	            return requestListener.options;
 	        }
 
@@ -3394,9 +3411,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
+	exports.on = undefined;
 	exports.listen = listen;
-	exports.on = on;
 	exports.once = once;
+	exports.listener = listener;
 
 	var _conf = __webpack_require__(3);
 
@@ -3459,7 +3477,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	}
 
-	function on(name, options, handler, errorHandler) {
+	function _on(name, options, handler, errorHandler) {
 
 	    if (typeof options === 'function') {
 	        errorHandler = handler;
@@ -3476,6 +3494,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return listen(options);
 	}
 
+	exports.on = _on;
 	function once(name, options, handler, errorHandler) {
 
 	    if (typeof options === 'function') {
@@ -3498,11 +3517,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	        options.errorHandler = options.errorHandler || reject;
 	    });
 
-	    var listener = listen(options);
+	    var myListener = listen(options);
 
-	    _lib.util.extend(prom, listener);
+	    _lib.util.extend(prom, myListener);
 
 	    return prom;
+	}
+
+	function listener() {
+	    var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+
+	    return {
+	        on: function on(name, handler, errorHandler) {
+	            return _on(name, options, handler, errorHandler);
+	        }
+	    };
 	}
 
 /***/ },
