@@ -78,7 +78,7 @@ postRobot.on('init', { window: window.parent }, function(event, callback) {
 });
 ```
 
-## Listen to a specific domain only
+## Listen for messages from a specific domain
 
 ```javascript
 postRobot.on('init', { domain: 'http://zombo.com' }, function(event, callback) {
