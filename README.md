@@ -204,8 +204,9 @@ Because this uses post-messaging behind the scenes and is therefore always async
 
 ## Parent to popup messaging
 
-In order to use post-robot in IE9+ between two different windows on different domains (like a parent window and a popup)
-you will need to set up an invisible bridge in an iframe on your parent page:
+Unfortunately, IE blocks direct post messaging between a parent window and a popup, on different domains.
+
+In order to use post-robot in IE9+ with popup windows, you will need to set up an invisible 'bridge' iframe on your parent page:
 
 ```
    [ Parent page ]
