@@ -200,11 +200,6 @@ Because this uses post-messaging behind the scenes and is therefore always async
 
 ## Parent to popup messaging
 
-> Note: this restriction is extended to all browsers, to ensure cross-browser code works in the same way. If you do
-> not need to support IE, you can set
->
-> `postRobot.CONFIG.ALLOW_POSTMESSAGE_POPUP = true`
-
 In order to use post-robot in IE9+ between two different windows on different domains (like a parent window and a popup)
 you will need to set up an invisible bridge in an iframe on your parent page:
 
