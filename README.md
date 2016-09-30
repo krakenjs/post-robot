@@ -226,18 +226,22 @@ you will need to set up an invisible bridge in an iframe on your parent page:
 
 Supporting IE9+ in your app is pretty simple:
 
-a. Create a bridge path, for example `http://yy.com/bridge.html`, and include post-robot:
+a. Create a bridge path on the domain of your popup, for example `http://yy.com/bridge.html`, and include post-robot:
 
 ```html
-<script src="http://xx.com/js/post-robot.js"></script>
+<!-- http://yy.com/bridge.html -->
+
+<script src="http://yy.com/js/post-robot.js"></script>
 ```
 
-b. In the parent page, `xx.com`, include the following javascript:
+b. In the parent page, `xx.com`, which opens the popup, include the following javascript:
 
 ```html
+<!-- http://xx.com -->
+
 <script>
     postRobot.openBridge('http://yy.com/bridge.html');
 </script>
 ```
 
-Now `Parent xx.com` and `Popup yy.com` can communicate freely using post-robot. in IE.
+c. Now `Parent xx.com` and `Popup yy.com` can communicate freely using post-robot, in IE.
