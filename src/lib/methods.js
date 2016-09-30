@@ -9,7 +9,7 @@ import { global } from '../global';
 global.methods = global.methods || {};
 
 export let listenForMethods = util.once(() => {
-    on(CONSTANTS.POST_MESSAGE_NAMES.METHOD, ({ source, origin, data }) => {
+    on(CONSTANTS.POST_MESSAGE_NAMES.METHOD, { window: '*', origin: '*' }, ({ source, origin, data }) => {
 
         let meth = global.methods[data.id];
 

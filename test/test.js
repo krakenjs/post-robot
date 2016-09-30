@@ -2,6 +2,8 @@
 import './common';
 import postRobot from 'src/index';
 
+postRobot.CONFIG.ALLOW_POSTMESSAGE_POPUP = false;
+
 import { onWindowReady, promise } from 'src/lib';
 
 postRobot.CONFIG.LOG_TO_PAGE = true;

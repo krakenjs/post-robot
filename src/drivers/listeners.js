@@ -20,7 +20,7 @@ export function getRequestListener(name, win) {
             continue;
         }
 
-        if (!requestListener.win) {
+        if (!requestListener.win || requestListener.win === '*') {
             return requestListener.options;
         }
 

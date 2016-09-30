@@ -244,7 +244,7 @@ global.openTunnel = function openTunnel(remoteWindow, { name, sendMessage }) {
         sendMessage() {
             return sendMessage.apply(this, arguments);
         }
-    });
+    }, { domain: '*' });
 };
 
 

@@ -10,7 +10,7 @@ global.readyPromises = global.readyPromises || [];
 
 export function initOnReady() {
 
-    on(CONSTANTS.POST_MESSAGE_NAMES.READY, ({ source, data }) => {
+    on(CONSTANTS.POST_MESSAGE_NAMES.READY, { window: '*', domain: '*' }, ({ source, data }) => {
 
         for (let item of global.readyPromises) {
             if (item.win === source) {
@@ -28,7 +28,7 @@ export function initOnReady() {
     let parent = getAncestor();
 
     if (parent) {
-        send(parent, CONSTANTS.POST_MESSAGE_NAMES.READY, {}).catch(err => {
+        send(parent, CONSTANTS.POST_MESSAGE_NAMES.READY, {}, { domain: '*' }).catch(err => {
             log.debug(err.stack || err.toString());
         });
     }
