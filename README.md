@@ -209,9 +209,9 @@ you will need to set up an invisible bridge in an iframe on your parent page:
 
 ```
 +---------------------+
-| xx.com              |
+|        xx.com       |
 |                     |      +--------------+
-|  +---------------+  |      | yy.com       |
+|  +---------------+  |      |    yy.com    |
 |  | yy.com/bridge |  |      |              |
 |  |               |  |      |              |
 |  |               |  |      |              |
@@ -223,8 +223,6 @@ you will need to set up an invisible bridge in an iframe on your parent page:
 |                     |
 +---------------------+
 ```
-
-Supporting IE9+ in your app is pretty simple:
 
 a. Create a bridge path on the domain of your popup, for example `http://yy.com/bridge.html`, and include post-robot:
 
