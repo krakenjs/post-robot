@@ -120,26 +120,21 @@ postRobot.sendToParent('getUser').then(function(event) {
 ## Async / Await
 
 ```javascript
-postRobot.on('getUser', async function(event) {
+postRobot.on('getUser', async ({ source, origin, data }) => {
+
+    let user = await getUser(event.data);
+
     return {
-        bar: await bar
+        name: user.name
     };
 });
 ```
 
 ```javascript
-
 try {
-    let event = await postRobot.once('getUser');
-} catch (err) {
-    console.error(err);
-}
-```
+    let { source, origin, data } = await postRobot.send(someWindow, `getUser`);
+    console.log(source, origin, 'Got user:', data.name);
 
-```javascript
-try {
-    let event = await postRobot.send(someWindow, 'getUser');
-    console.log(event.source, event.origin, 'Got user:', event.data.name);
 } catch (err) {
     console.error(err);
 }
@@ -147,7 +142,7 @@ try {
 
 ## Secure Message Channel
 
-For security reasons, the recommendation is that you always explicitly specify the window and domain you want to listen
+For security reasons, it is recommended that you always explicitly specify the window and domain you want to listen
 to and send messages to. This creates a secure message channel that only works between two windows on the specified domain:
 
 ```javascript
