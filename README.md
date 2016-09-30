@@ -155,7 +155,7 @@ postRobot.on('getUser', { window: childWindow, domain: 'http://zombo.com' }, fun
 ```
 
 ```javascript
-postRobot.send(someWindow, { domain: 'http://zombo.com' }, 'getUser').then(function(event) {
+postRobot.send(someWindow, 'getUser', { domain: 'http://zombo.com' }).then(function(event) {
     console.log(event.source, event.origin, 'Got user:', event.data.name);
 
 }).catch(function(err) {
