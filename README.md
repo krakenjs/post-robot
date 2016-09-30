@@ -23,104 +23,116 @@ This also allows cross-domain post messages between two different windows (not j
   - The other window didn't acknowledge your message
   - You didn't get a response from the other window in enough time
 
-## Simple listener / sender
+## Simple listener / sender with error handling
 
 ```javascript
-postRobot.on('getCart', function(event, callback) {
-    return callback({
-        foo: 'bar'
-    });
+postRobot.on('getUser', function(event) {
+    return {
+        name: 'Zippy the Pinhead'
+    };
 });
 ```
 
 ```javascript
-postRobot.send(someWindow, 'getCart', function(err, event) {
-    console.log(event.data);
+postRobot.send(someWindow, 'getUser'.then(function(event) {
+    console.log(event.source, event.origin, 'Got user:', event.data.name);
+
+}).catch(function(err) {
+    console.error(err);
+});
+```
+
+## Listener with an async promise response
+
+```javascript
+postRobot.on('getUser', function(event, callback) {
+
+    return getUser(event.data).then(function(user) {
+        return {
+            name: user.name
+        };
+    });
+});
+```
+
+## Listener with an async callback response
+
+```javascript
+postRobot.on('getUser', function(event, callback) {
+
+    setTimeout(function() {
+        callback(null, {
+            name: 'Captain Pugwash'
+        });
+    }, 500);
 });
 ```
 
 ## One-off listener
 
 ```javascript
-postRobot.once('init', function(event, callback) {
-    ...
+postRobot.once('init', function(event) {
+
+    return {
+        name: 'Noggin the Nog'
+    };
 });
 ```
 
-## Listen to a specific window
+## Listen for messages from a specific window
 
 ```javascript
 postRobot.on('init', { window: window.parent }, function(event, callback) {
-    ...
+
+    return {
+        name: 'Guybrush Threepwood'
+    };
 });
 ```
 
-## Listen to a specific domain
+## Listen to a specific domain only
 
 ```javascript
 postRobot.on('init', { domain: 'http://zombo.com' }, function(event, callback) {
-    ...
+
+    return {
+        name: 'Manny Calavera'
+    };
 });
 ```
 
 ## Set a timeout for a response
 
 ```javascript
-postRobot.send(someWindow, 'getCart', { timeout: 5000 }, function(err, event) {
-    console.log(event.data);
-});
+postRobot.send(someWindow, 'getUser', { timeout: 5000 }.then(function(event) {
+    console.log(event.source, event.origin, 'Got user:', event.data.name);
+
+}).catch(function(err) {
+
+    console.error(err);
+});;
 ```
 
 ## Send a message to a specific domain
 
 ```javascript
-postRobot.send(someWindow, 'getCart', { domain: 'http://zombo.com' }, function(err, event) {
-    console.log(event.data);
+postRobot.send(someWindow, 'getUser', { domain: 'http://zombo.com' }.then(function(event) {
+    console.log(event.source, event.origin, 'Got user:', event.data.name);
 });
 ```
 
 ## Send a message to the direct parent
 
 ```javascript
-postRobot.sendToParent('getCart', function(err, event) {
+postRobot.sendToParent('getUser'.then(function(event) {
     console.log(event.data);
-});
-```
-
-## Promises
-
-All of the above can be done with promises rather than callbacks
-
-```javascript
-postRobot.on('getCart', function(event) {
-    return getFoo(event.data).then(function(bar) {
-        return {
-            bar: bar
-        };
-    });
-});
-```
-
-```javascript
-postRobot.once('getCart').then(function(event) {
-    ...
-}).catch(function(err) {
-    ...
-});
-```
-
-```javascript
-postRobot.send(someWindow, 'getCart').then(function(event) {
-    ...
-}).catch(function(err) {
-    ...
 });
 ```
 
 ## Async / Await
 
 ```javascript
-postRobot.on('getCart', async function(event) {
+postRobot.on('getUser', async function(event) {
     return {
         bar: await bar
     };
@@ -130,18 +142,41 @@ postRobot.on('getCart', async function(event) {
 ```javascript
 
 try {
-    let event = await postRobot.once('getCart');
+    let event = await postRobot.once('getUser');
 } catch (err) {
-    ...
+    console.error(err);
 }
 ```
 
 ```javascript
 try {
-    let event = await postRobot.send(someWindow, 'getCart');
+    let event = await postRobot.send(someWindow, 'getUser');
+    console.log(event.source, event.origin, 'Got user:', event.data.name);
 } catch (err) {
-    ...
+    console.error(err);
 }
+```
+
+## Secure Message Channel
+
+For security reasons, the recommendation is that you always explicitly specify the window and domain you want to listen
+to and send messages to. This creates a secure message channel that only works between two windows on the specified domain:
+
+```javascript
+postRobot.on('getUser', { window: childWindow, domain: 'http://zombo.com' }, function(event) {
+    return {
+        name: 'Frodo'
+    };
+});
+```
+
+```javascript
+postRobot.send(someWindow, { domain: 'http://zombo.com' }, 'getUser').then(function(event) {
+    console.log(event.source, event.origin, 'Got user:', event.data.name);
+
+}).catch(function(err) {
+    console.error(err);
+});
 ```
 
 ## Functions
@@ -153,26 +188,38 @@ For example:
 ```javascript
 // Window 1:
 
-postRobot.on('getFoo', function(event) {
+postRobot.on('getUser', function(event) {
     return {
-        bar: function() {
-            console.log('foobar!');
+        name: 'Nogbad the Bad',
+        logout: function() {
+            currentUser.logout();
         }
     };
 });
 
 // Window 2:
 
-postRobot.send(myWindow, 'getFoo').then(function(event) {
-    event.data.bar();
+postRobot.send(myWindow, 'getUser').then(function(event) {
+    var user = event.data;
+
+    user.logout().then(function() {
+        console.log('User was logged out');
+    });
 });
 ```
 
-The function `data.bar()` will be called on the original window.
-Because this uses post-messaging behind the scenes and is therefore always async, `data.bar()` will **always** return a promise, and must be `.then`'d or `await`ed.
+The function `user.logout()` will be called on the **original** window. Post Robot transparently messages back to the
+original window, calls the function that was passed, then messages back with the result of the function.
+
+Because this uses post-messaging behind the scenes and is therefore always async, `user.logout()` will **always** return a promise, and must be `.then`'d or `await`ed.
 
 
-## IE9+
+## Parent to popup messaging
+
+> Note: this restriction is extended to all browsers, to ensure cross-browser code works in the same way. If you do
+> not need to support IE, you can set
+>
+> `postRobot.CONFIG.ALLOW_POSTMESSAGE_POPUP = true`
 
 In order to use post-robot in IE9+ between two different windows on different domains (like a parent window and a popup)
 you will need to set up an invisible bridge in an iframe on your parent page:
@@ -210,6 +257,4 @@ b. In the parent page, `xx.com`, include the following javascript:
 </script>
 ```
 
-Now `Parent xx.com` and `Popup yy.com` can communicate freely using post-robot in IE.
-
-This can even be done in reverse -- for example, `Popup yy.com` can include `Bridge xx.com` if that suits your use cases better.
+Now `Parent xx.com` and `Popup yy.com` can communicate freely using post-robot. in IE.
