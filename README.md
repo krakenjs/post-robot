@@ -22,7 +22,7 @@ postRobot.on('getUser', function(event) {
 ```
 
 ```javascript
-postRobot.send(someWindow, 'getUser'.then(function(event) {
+postRobot.send(someWindow, 'getUser').then(function(event) {
     console.log(event.source, event.origin, 'Got user:', event.data.name);
 
 }).catch(function(err) {
@@ -112,7 +112,7 @@ postRobot.send(someWindow, 'getUser', { domain: 'http://zombo.com' }).then(funct
 ## Send a message to the direct parent
 
 ```javascript
-postRobot.sendToParent('getUser'.then(function(event) {
+postRobot.sendToParent('getUser').then(function(event) {
     console.log(event.data);
 });
 ```
