@@ -209,10 +209,10 @@ you will need to set up an invisible bridge in an iframe on your parent page:
 
 ```
 +---------------------+
-| Parent xx.com       |
+| xx.com              |
 |                     |      +--------------+
-|  +---------------+  |      | Popup yy.com |
-|  | Bridge yy.com |  |      |              |
+|  +---------------+  |      | yy.com       |
+|  | yy.com/bridge |  |      |              |
 |  |               |  |      |              |
 |  |               |  |      |              |
 |  |               |  |      |              |
