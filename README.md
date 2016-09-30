@@ -208,13 +208,15 @@ In order to use post-robot in IE9+ between two different windows on different do
 you will need to set up an invisible bridge in an iframe on your parent page:
 
 ```
-+---------------------+
+   [ Parent page ]
+
++---------------------+          [ Popup ]
 |        xx.com       |
 |                     |      +--------------+
 |  +---------------+  |      |    yy.com    |
+|  |    [iframe]   |  |      |              |
+|  |               |  |      |              |
 |  | yy.com/bridge |  |      |              |
-|  |               |  |      |              |
-|  |               |  |      |              |
 |  |               |  |      |              |
 |  |               |  |      |              |
 |  |               |  |      |              |
@@ -242,4 +244,4 @@ b. In the parent page, `xx.com`, which opens the popup, include the following ja
 </script>
 ```
 
-c. Now `Parent xx.com` and `Popup yy.com` can communicate freely using post-robot, in IE.
+c. Now `xx.com` and `yy.com` can communicate freely using post-robot, in IE.
