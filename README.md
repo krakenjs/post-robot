@@ -36,7 +36,7 @@ postRobot.send(someWindow, 'getUser').then(function(event) {
 ```javascript
 postRobot.on('getUser', function(event, callback) {
 
-    return getUser(event.data).then(function(user) {
+    return getUser(event.data.id).then(function(user) {
         return {
             name: user.name
         };
@@ -47,7 +47,7 @@ postRobot.on('getUser', function(event, callback) {
 ## Listener with callback response
 
 ```javascript
-postRobot.on('getUser', function(event, callback) {
+postRobot.on('getUser', { id: 1337 }, function(event, callback) {
 
     setTimeout(function() {
         callback(null, {
@@ -123,7 +123,7 @@ postRobot.sendToParent('getUser').then(function(event) {
 ```javascript
 postRobot.on('getUser', async ({ source, origin, data }) => {
 
-    let user = await getUser(event.data);
+    let user = await getUser(data.id);
 
     return {
         name: user.name
@@ -133,7 +133,7 @@ postRobot.on('getUser', async ({ source, origin, data }) => {
 
 ```javascript
 try {
-    let { source, origin, data } = await postRobot.send(someWindow, `getUser`);
+    let { source, origin, data } = await postRobot.send(someWindow, `getUser`, { id: 1337 });
     console.log(source, origin, 'Got user:', data.name);
 
 } catch (err) {
