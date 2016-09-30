@@ -178,12 +178,13 @@ postRobot.on('getUser', function(event) {
     return {
         id:     event.data.id,
         name:   'Nogbad the Bad',
-        
+
         logout: function() {
             currentUser.logout();
         }
     };
 });
+```
 
 ```javascript
 postRobot.send(myWindow, { id: 1337 }, 'getUser').then(function(event) {
