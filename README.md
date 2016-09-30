@@ -23,7 +23,7 @@ postRobot.on('getUser', function(event) {
 ```
 
 ```javascript
-postRobot.send(someWindow, 'getUser').then(function(event) {
+postRobot.send(someWindow, 'getUser', { id: 1337 }).then(function(event) {
     console.log(event.source, event.origin, 'Got user:', event.data.name);
 
 }).catch(function(err) {
@@ -93,7 +93,7 @@ postRobot.on('init', { domain: 'http://zombo.com' }, function(event, callback) {
 ## Set a timeout for a response
 
 ```javascript
-postRobot.send(someWindow, 'getUser', { timeout: 5000 }).then(function(event) {
+postRobot.send(someWindow, 'getUser', { id: 1337 }, { timeout: 5000 }).then(function(event) {
     console.log(event.source, event.origin, 'Got user:', event.data.name);
 
 }).catch(function(err) {
@@ -105,7 +105,7 @@ postRobot.send(someWindow, 'getUser', { timeout: 5000 }).then(function(event) {
 ## Send a message to a specific domain
 
 ```javascript
-postRobot.send(someWindow, 'getUser', { domain: 'http://zombo.com' }).then(function(event) {
+postRobot.send(someWindow, 'getUser', { id: 1337 }, { domain: 'http://zombo.com' }).then(function(event) {
     console.log(event.source, event.origin, 'Got user:', event.data.name);
 });
 ```
@@ -155,7 +155,7 @@ postRobot.on('getUser', { window: childWindow, domain: 'http://zombo.com' }, fun
 ```
 
 ```javascript
-postRobot.send(someWindow, 'getUser', { domain: 'http://zombo.com' }).then(function(event) {
+postRobot.send(someWindow, 'getUser', { id: 1337 }, { domain: 'http://zombo.com' }).then(function(event) {
     console.log(event.source, event.origin, 'Got user:', event.data.name);
 
 }).catch(function(err) {
@@ -183,7 +183,7 @@ postRobot.on('getUser', function(event) {
 
 // Window 2:
 
-postRobot.send(myWindow, 'getUser').then(function(event) {
+postRobot.send(myWindow, { id: 1337 }, 'getUser').then(function(event) {
     var user = event.data;
 
     user.logout().then(function() {
