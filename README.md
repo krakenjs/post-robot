@@ -1,6 +1,6 @@
 # post-robot [:]-\\-<
 
-Post-messaging on the client side, using a simple listener/client pattern.
+Cross domain post-messaging on the client side, using a simple listener/client pattern.
 
 Send a message to another window, and:
 
