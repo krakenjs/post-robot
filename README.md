@@ -35,7 +35,7 @@ postRobot.send(someWindow, 'getUser', { id: 1337 }).then(function(event) {
 ## Listener with promise response
 
 ```javascript
-postRobot.on('getUser', function(event, callback) {
+postRobot.on('getUser', function(event) {
 
     return getUser(event.data.id).then(function(user) {
         return {
@@ -73,7 +73,7 @@ postRobot.once('init', function(event) {
 ## Listen for messages from a specific window
 
 ```javascript
-postRobot.on('init', { window: window.parent }, function(event, callback) {
+postRobot.on('init', { window: window.parent }, function(event) {
 
     return {
         name: 'Guybrush Threepwood'
@@ -84,7 +84,7 @@ postRobot.on('init', { window: window.parent }, function(event, callback) {
 ## Listen for messages from a specific domain
 
 ```javascript
-postRobot.on('init', { domain: 'http://zombo.com' }, function(event, callback) {
+postRobot.on('init', { domain: 'http://zombo.com' }, function(event) {
 
     return {
         name: 'Manny Calavera'
