@@ -166,6 +166,30 @@ postRobot.send(someWindow, 'getUser', { id: 1337 }, { domain: 'http://zombo.com'
 });
 ```
 
+You can even set up a listener and sender instance in advance:
+
+```javascript
+var listener = postRobot.listener({ window: childWindow, domain: 'http://zombo.com' });
+
+listener.on('getUser', function(event) {
+    return {
+        id:   event.data.id,
+        name: 'Frodo'
+    };
+});
+```
+
+```javascript
+var client = postRobot.client({ window: someWindow, domain: 'http://zombo.com' });
+
+client.send('getUser', { id: 1337 }).then(function(event) {
+    console.log(event.source, event.origin, 'Got user:', event.data.name);
+
+}).catch(function(err) {
+    console.error(err);
+});
+```
+
 ## Functions
 
 Post robot lets you send across functions in your data payload, fairly seamlessly.
