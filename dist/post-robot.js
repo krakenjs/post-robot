@@ -64,7 +64,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _interface = __webpack_require__(1);
 
 	Object.keys(_interface).forEach(function (key) {
-	    if (key === "default") return;
+	    if (key === "default" || key === "__esModule") return;
 	    Object.defineProperty(exports, key, {
 	        enumerable: true,
 	        get: function get() {
@@ -120,7 +120,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _client = __webpack_require__(2);
 
 	Object.keys(_client).forEach(function (key) {
-	  if (key === "default") return;
+	  if (key === "default" || key === "__esModule") return;
 	  Object.defineProperty(exports, key, {
 	    enumerable: true,
 	    get: function get() {
@@ -132,7 +132,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _server = __webpack_require__(25);
 
 	Object.keys(_server).forEach(function (key) {
-	  if (key === "default") return;
+	  if (key === "default" || key === "__esModule") return;
 	  Object.defineProperty(exports, key, {
 	    enumerable: true,
 	    get: function get() {
@@ -144,7 +144,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _config = __webpack_require__(26);
 
 	Object.keys(_config).forEach(function (key) {
-	  if (key === "default") return;
+	  if (key === "default" || key === "__esModule") return;
 	  Object.defineProperty(exports, key, {
 	    enumerable: true,
 	    get: function get() {
@@ -385,7 +385,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _config = __webpack_require__(4);
 
 	Object.keys(_config).forEach(function (key) {
-	  if (key === "default") return;
+	  if (key === "default" || key === "__esModule") return;
 	  Object.defineProperty(exports, key, {
 	    enumerable: true,
 	    get: function get() {
@@ -397,7 +397,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _constants = __webpack_require__(5);
 
 	Object.keys(_constants).forEach(function (key) {
-	  if (key === "default") return;
+	  if (key === "default" || key === "__esModule") return;
 	  Object.defineProperty(exports, key, {
 	    enumerable: true,
 	    get: function get() {
@@ -514,7 +514,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _receive = __webpack_require__(7);
 
 	Object.keys(_receive).forEach(function (key) {
-	  if (key === "default") return;
+	  if (key === "default" || key === "__esModule") return;
 	  Object.defineProperty(exports, key, {
 	    enumerable: true,
 	    get: function get() {
@@ -526,7 +526,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _send = __webpack_require__(21);
 
 	Object.keys(_send).forEach(function (key) {
-	  if (key === "default") return;
+	  if (key === "default" || key === "__esModule") return;
 	  Object.defineProperty(exports, key, {
 	    enumerable: true,
 	    get: function get() {
@@ -538,7 +538,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _listeners = __webpack_require__(24);
 
 	Object.keys(_listeners).forEach(function (key) {
-	  if (key === "default") return;
+	  if (key === "default" || key === "__esModule") return;
 	  Object.defineProperty(exports, key, {
 	    enumerable: true,
 	    get: function get() {
@@ -576,6 +576,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	    try {
 	        message = JSON.parse(message);
 	    } catch (err) {
+	        return;
+	    }
+
+	    if (!message) {
+	        return;
+	    }
+
+	    message = message[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT];
+
+	    if (!message) {
 	        return;
 	    }
 
@@ -684,7 +694,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _promise = __webpack_require__(9);
 
 	Object.keys(_promise).forEach(function (key) {
-	  if (key === "default") return;
+	  if (key === "default" || key === "__esModule") return;
 	  Object.defineProperty(exports, key, {
 	    enumerable: true,
 	    get: function get() {
@@ -696,7 +706,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _util = __webpack_require__(12);
 
 	Object.keys(_util).forEach(function (key) {
-	  if (key === "default") return;
+	  if (key === "default" || key === "__esModule") return;
 	  Object.defineProperty(exports, key, {
 	    enumerable: true,
 	    get: function get() {
@@ -708,7 +718,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _log = __webpack_require__(13);
 
 	Object.keys(_log).forEach(function (key) {
-	  if (key === "default") return;
+	  if (key === "default" || key === "__esModule") return;
 	  Object.defineProperty(exports, key, {
 	    enumerable: true,
 	    get: function get() {
@@ -720,7 +730,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _windows = __webpack_require__(14);
 
 	Object.keys(_windows).forEach(function (key) {
-	  if (key === "default") return;
+	  if (key === "default" || key === "__esModule") return;
 	  Object.defineProperty(exports, key, {
 	    enumerable: true,
 	    get: function get() {
@@ -732,7 +742,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _methods = __webpack_require__(16);
 
 	Object.keys(_methods).forEach(function (key) {
-	  if (key === "default") return;
+	  if (key === "default" || key === "__esModule") return;
 	  Object.defineProperty(exports, key, {
 	    enumerable: true,
 	    get: function get() {
@@ -744,7 +754,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _tick = __webpack_require__(11);
 
 	Object.keys(_tick).forEach(function (key) {
-	  if (key === "default") return;
+	  if (key === "default" || key === "__esModule") return;
 	  Object.defineProperty(exports, key, {
 	    enumerable: true,
 	    get: function get() {
@@ -756,7 +766,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _ready = __webpack_require__(17);
 
 	Object.keys(_ready).forEach(function (key) {
-	  if (key === "default") return;
+	  if (key === "default" || key === "__esModule") return;
 	  Object.defineProperty(exports, key, {
 	    enumerable: true,
 	    get: function get() {
@@ -974,9 +984,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return false;
 	}
 
-	var SyncPromise = exports.SyncPromise = function SyncPromise(handler, parent) {
-
-	    this.parent = parent;
+	var SyncPromise = exports.SyncPromise = function SyncPromise(handler) {
 
 	    this.resolved = false;
 	    this.rejected = false;
@@ -1137,7 +1145,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var count = promises.length;
 	    var results = [];
 
-	    for (var i = 0; i < promises.length; i++) {
+	    var _loop2 = function _loop2(i) {
 
 	        var prom = isPromise(promises[i]) ? promises[i] : SyncPromise.resolve(promises[i]);
 
@@ -1150,6 +1158,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }, function (err) {
 	            promise.reject(err);
 	        });
+	    };
+
+	    for (var i = 0; i < promises.length; i++) {
+	        _loop2(i);
 	    }
 
 	    return promise;
@@ -2520,7 +2532,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _ie = __webpack_require__(19);
 
 	Object.keys(_ie).forEach(function (key) {
-	  if (key === "default") return;
+	  if (key === "default" || key === "__esModule") return;
 	  Object.defineProperty(exports, key, {
 	    enumerable: true,
 	    get: function get() {
@@ -2710,6 +2722,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _strategies = __webpack_require__(22);
 
+	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 	function buildMessage(win, message) {
 	    var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
@@ -2766,6 +2780,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        var messages = [];
 
+	        var serializedMessage = JSON.stringify(_defineProperty({}, _conf.CONSTANTS.WINDOW_PROPS.POSTROBOT, message), 0, 2);
+
 	        return _lib.promise.map(Object.keys(_strategies.SEND_MESSAGE_STRATEGIES), function (strategyName) {
 
 	            return _lib.promise.run(function () {
@@ -2774,7 +2790,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    throw new Error('Strategy disallowed: ' + strategyName);
 	                }
 
-	                return _strategies.SEND_MESSAGE_STRATEGIES[strategyName](win, message, domain);
+	                return _strategies.SEND_MESSAGE_STRATEGIES[strategyName](win, serializedMessage, domain);
 	            }).then(function () {
 	                messages.push(strategyName + ': success');
 	                return true;
@@ -2831,7 +2847,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        domain = '*';
 	    }
 
-	    return win.postMessage(JSON.stringify(message, 0, 2), domain);
+	    return win.postMessage(message, domain);
 	}), _defineProperty(_SEND_MESSAGE_STRATEG, _conf.CONSTANTS.SEND_STRATEGIES.BRIDGE, function (win, message, domain) {
 
 	    if ((0, _lib.isSameDomain)(win)) {
@@ -2842,7 +2858,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        throw new Error('Can only use bridge to communicate between two different windows, not between frames');
 	    }
 
-	    return (0, _bridge.sendBridgeMessage)(win, JSON.stringify(message, 0, 2), domain);
+	    return (0, _bridge.sendBridgeMessage)(win, message, domain);
 	}), _SEND_MESSAGE_STRATEG);
 
 /***/ },
