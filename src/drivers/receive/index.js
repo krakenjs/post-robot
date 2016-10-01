@@ -16,6 +16,16 @@ function parseMessage(message) {
         return;
     }
 
+    if (!message) {
+        return;
+    }
+
+    message = message[CONSTANTS.WINDOW_PROPS.POSTROBOT];
+
+    if (!message) {
+        return;
+    }
+
     if (!message.type) {
         return;
     }

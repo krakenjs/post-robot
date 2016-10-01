@@ -62,6 +62,10 @@ export function sendMessage(win, message, domain) {
 
         let messages = [];
 
+        let serializedMessage = JSON.stringify({
+            [ CONSTANTS.WINDOW_PROPS.POSTROBOT ]: message
+        }, 0, 2);
+
         return promise.map(Object.keys(SEND_MESSAGE_STRATEGIES), strategyName => {
 
             return promise.run(() => {
@@ -70,7 +74,7 @@ export function sendMessage(win, message, domain) {
                     throw new Error(`Strategy disallowed: ${strategyName}`);
                 }
 
-                return SEND_MESSAGE_STRATEGIES[strategyName](win, message, domain);
+                return SEND_MESSAGE_STRATEGIES[strategyName](win, serializedMessage, domain);
 
             }).then(() => {
                 messages.push(`${strategyName}: success`);

@@ -18,7 +18,7 @@ export let SEND_MESSAGE_STRATEGIES = {
             domain = `*`;
         }
 
-        return win.postMessage(JSON.stringify(message, 0, 2), domain);
+        return win.postMessage(message, domain);
     },
 
     [ CONSTANTS.SEND_STRATEGIES.BRIDGE ](win, message, domain) {
@@ -31,6 +31,6 @@ export let SEND_MESSAGE_STRATEGIES = {
             throw new Error(`Can only use bridge to communicate between two different windows, not between frames`);
         }
 
-        return sendBridgeMessage(win, JSON.stringify(message, 0, 2), domain);
+        return sendBridgeMessage(win, message, domain);
     }
 };
