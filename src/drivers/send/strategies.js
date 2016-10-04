@@ -6,7 +6,7 @@ import { sendBridgeMessage } from '../../bridge';
 
 export let SEND_MESSAGE_STRATEGIES = {
 
-    [ CONSTANTS.SEND_STRATEGIES.POST_MESSAGE ](win, message, domain) {
+    [ CONSTANTS.SEND_STRATEGIES.POST_MESSAGE ](win, serializedMessage, domain) {
 
         emulateIERestrictions(window, win);
 
@@ -18,10 +18,10 @@ export let SEND_MESSAGE_STRATEGIES = {
             domain = `*`;
         }
 
-        return win.postMessage(message, domain);
+        return win.postMessage(serializedMessage, domain);
     },
 
-    [ CONSTANTS.SEND_STRATEGIES.BRIDGE ](win, message, domain) {
+    [ CONSTANTS.SEND_STRATEGIES.BRIDGE ](win, serializedMessage, domain) {
 
         if (isSameDomain(win)) {
             throw new Error(`Post message through bridge disabled between same domain windows`);
@@ -31,6 +31,6 @@ export let SEND_MESSAGE_STRATEGIES = {
             throw new Error(`Can only use bridge to communicate between two different windows, not between frames`);
         }
 
-        return sendBridgeMessage(win, message, domain);
+        return sendBridgeMessage(win, serializedMessage, domain);
     }
 };

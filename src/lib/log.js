@@ -1,6 +1,6 @@
 
 import { util } from './util';
-import { getWindowType } from './windows';
+import { getWindowType, jsonStringify } from './windows';
 import { CONFIG } from '../conf';
 
 const LOG_LEVELS = ['debug', 'info', 'warn', 'error'];
@@ -52,7 +52,7 @@ export let log = {
                 }
                 let json;
                 try {
-                    json = JSON.stringify(item, 0, 2);
+                    json = jsonStringify(item, 0, 2);
                 } catch (e) {
                     json = '[object]';
                 }

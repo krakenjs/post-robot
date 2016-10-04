@@ -1,6 +1,6 @@
 
 import { CONSTANTS, POST_MESSAGE_NAMES_LIST } from '../../conf';
-import { deserializeMethods, log, isWindowClosed } from '../../lib';
+import { deserializeMethods, log, isWindowClosed, jsonParse } from '../../lib';
 import { emulateIERestrictions } from '../../compat';
 import { global } from '../../global';
 
@@ -11,7 +11,7 @@ global.receivedMessages = global.receivedMessages || [];
 function parseMessage(message) {
 
     try {
-        message = JSON.parse(message);
+        message = jsonParse(message);
     } catch (err) {
         return;
     }

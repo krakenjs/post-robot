@@ -483,3 +483,54 @@ export function isSameTopWindow(win1, win2) {
         return false;
     }
 }
+
+export function jsonStringify() {
+
+    let objectToJSON;
+    let arrayToJSON;
+
+    try {
+        if (JSON.stringify({}) !== '{}') {
+            objectToJSON = Object.prototype.toJSON;
+            delete Object.prototype.toJSON;
+        }
+
+        if (JSON.stringify({}) !== '{}') {
+            throw new Error(`Can not correctly serialize JSON objects`);
+        }
+
+        if (JSON.stringify([]) !== '[]') {
+            arrayToJSON  = Array.prototype.toJSON;
+            delete Array.prototype.toJSON;
+        }
+
+        if (JSON.stringify([]) !== '[]') {
+            throw new Error(`Can not correctly serialize JSON objects`);
+        }
+
+    } catch (err) {
+        throw new Error(`Can not repair JSON.stringify: ${err.message}`);
+    }
+
+    let result = JSON.stringify.apply(this, arguments);
+
+    try {
+        if (objectToJSON) {
+            Object.prototype.toJSON = objectToJSON; // eslint-disable-line
+        }
+
+        if (arrayToJSON) {
+            Array.prototype.toJSON = arrayToJSON; // eslint-disable-line
+        }
+
+    } catch (err) {
+        throw new Error(`Can not repair JSON.stringify: ${err.message}`);
+    }
+
+
+    return result;
+}
+
+export function jsonParse() {
+    return JSON.parse.apply(this, arguments);
+}

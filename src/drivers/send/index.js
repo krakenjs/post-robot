@@ -1,6 +1,6 @@
 
 import { CONSTANTS, CONFIG, POST_MESSAGE_NAMES_LIST } from '../../conf';
-import { util, promise, serializeMethods, log, isWindowClosed, getWindowType } from '../../lib';
+import { util, promise, serializeMethods, log, isWindowClosed, getWindowType, jsonStringify } from '../../lib';
 
 import { SEND_MESSAGE_STRATEGIES } from './strategies';
 
@@ -46,7 +46,7 @@ export function sendMessage(win, message, domain) {
             return window[CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessage({
                 origin: util.getDomain(window),
                 source: window,
-                data: JSON.stringify(message)
+                data: jsonStringify(message, 0, 2)
             });
         }
 
