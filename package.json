@@ -1,6 +1,6 @@
 {
   "name": "post-robot",
-  "version": "4.0.7",
+  "version": "4.0.8",
   "description": "Simple postMessage based server.",
   "main": "dist/post-robot.min.js",
   "scripts": {
