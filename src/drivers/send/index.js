@@ -62,7 +62,7 @@ export function sendMessage(win, message, domain) {
 
         let messages = [];
 
-        let serializedMessage = JSON.stringify({
+        let serializedMessage = jsonStringify({
             [ CONSTANTS.WINDOW_PROPS.POSTROBOT ]: message
         }, 0, 2);
 
