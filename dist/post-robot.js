@@ -2828,7 +2828,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        var messages = [];
 
-	        var serializedMessage = JSON.stringify(_defineProperty({}, _conf.CONSTANTS.WINDOW_PROPS.POSTROBOT, message), 0, 2);
+	        var serializedMessage = (0, _lib.jsonStringify)(_defineProperty({}, _conf.CONSTANTS.WINDOW_PROPS.POSTROBOT, message), 0, 2);
 
 	        return _lib.promise.map(Object.keys(_strategies.SEND_MESSAGE_STRATEGIES), function (strategyName) {
 
