@@ -2843,7 +2843,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                messages.push(strategyName + ': success');
 	                return true;
 	            }, function (err) {
-	                messages.push(strategyName + ': ' + err.message);
+	                messages.push(strategyName + ': ' + (err.stack || err.toString()) + '\n');
 	                return false;
 	            });
 	        }).then(function (results) {
@@ -3207,13 +3207,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	}
 
-	_global.global.openTunnel = function openTunnel(remoteWindow, _ref6) {
+	_global.global.openTunnelToParent = function openTunnelToParent(_ref6) {
 	    var name = _ref6.name;
 	    var _sendMessage = _ref6.sendMessage;
 
 
+	    var remoteWindow = (0, _lib.getParent)(window);
+
 	    if (!remoteWindow) {
-	        throw new Error('No window found to open tunnel to');
+	        throw new Error('No parent window found to open tunnel to');
 	    }
 
 	    return (0, _interface.send)(remoteWindow, _conf.CONSTANTS.POST_MESSAGE_NAMES.OPEN_TUNNEL, {
@@ -3244,7 +3246,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return rejectRemoteSendMessage(opener, new Error('Can not register with opener: window does not have a name'));
 	    }
 
-	    bridge[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].openTunnel(opener, {
+	    bridge[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].openTunnelToParent({
 
 	        name: window.name,
 
