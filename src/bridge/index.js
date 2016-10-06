@@ -1,6 +1,6 @@
 
 import { CONFIG, CONSTANTS } from '../conf';
-import { util, promise, isSameDomain, log, onWindowReady, getOpener, getFrames, getFrameByName, isOpener } from '../lib';
+import { util, promise, isSameDomain, log, onWindowReady, getOpener, getFrames, getFrameByName, isOpener, getParent } from '../lib';
 import { global } from '../global';
 import { on, send } from '../interface';
 import { receiveMessage } from '../drivers';
@@ -233,10 +233,12 @@ function listenForRegister(source, domain) {
 }
 
 
-global.openTunnel = function openTunnel(remoteWindow, { name, sendMessage }) {
+global.openTunnelToParent = function openTunnelToParent({ name, sendMessage }) {
+
+    let remoteWindow = getParent(window);
 
     if (!remoteWindow) {
-        throw new Error(`No window found to open tunnel to`);
+        throw new Error(`No parent window found to open tunnel to`);
     }
 
     return send(remoteWindow, CONSTANTS.POST_MESSAGE_NAMES.OPEN_TUNNEL, {
@@ -268,7 +270,7 @@ export function openTunnelToOpener() {
         return rejectRemoteSendMessage(opener, new Error(`Can not register with opener: window does not have a name`));
     }
 
-    bridge[CONSTANTS.WINDOW_PROPS.POSTROBOT].openTunnel(opener, {
+    bridge[CONSTANTS.WINDOW_PROPS.POSTROBOT].openTunnelToParent({
 
         name: window.name,
 

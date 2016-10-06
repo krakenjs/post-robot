@@ -80,7 +80,7 @@ export function sendMessage(win, message, domain) {
                 messages.push(`${strategyName}: success`);
                 return true;
             }, err => {
-                messages.push(`${strategyName}: ${err.message}`);
+                messages.push(`${strategyName}: ${err.stack || err.toString()}\n`);
                 return false;
             });
 
