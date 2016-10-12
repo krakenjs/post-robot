@@ -46,22 +46,24 @@ export function isWindow(item) {
         return false;
     }
 
-    try {
+    if (isSameDomain(item)) {
+        try {
 
-        for (let key of [ 'setTimeout', 'setInterval', 'postMessage', 'alert' ]) {
-            if (typeof item[key] !== 'function') {
+            for (let key of [ 'setTimeout', 'setInterval', 'postMessage', 'alert' ]) {
+                if (typeof item[key] !== 'function') {
+                    return false;
+                }
+            }
+
+            if (!item.document || !item.location) {
                 return false;
             }
+
+            return true;
+
+        } catch (err) {
+            // pass
         }
-
-        if (!item.document || !item.location) {
-            return false;
-        }
-
-        return true;
-
-    } catch (err) {
-        // pass
     }
 
     try {
@@ -85,7 +87,11 @@ export function isWindowClosed(win) {
 
     try {
 
-        if (!win || win.closed || (isSameDomain(win) && util.safeGet(win, 'mockclosed'))) {
+        if (!win || win.closed) {
+            return true;
+        }
+
+        if (isSameDomain(win) && util.safeGet(win, 'mockclosed')) {
             return true;
         }
 
@@ -201,31 +207,24 @@ export function getFrames(win) {
 
             result.push(frame);
         }
-    } else {
 
-        let i = 0;
+        return result;
+    }
 
-        while (true) {
-            let frame;
+    for (let i = 0; i < 100; i++) {
+        let frame;
 
-            try {
-                frame = frames[i];
-            } catch (err) {
-                return result;
-            }
-
-            if (!frame) {
-                return result;
-            }
-
-            result.push(frame);
-
-            i += 1;
-
-            if (i > 20) {
-                return result;
-            }
+        try {
+            frame = frames[i];
+        } catch (err) {
+            return result;
         }
+
+        if (!frame) {
+            return result;
+        }
+
+        result.push(frame);
     }
 
     return result;
