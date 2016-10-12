@@ -15,14 +15,14 @@ export function isSameDomain(win) {
         }
     }
 
-    let match = false;
+    let match;
 
     try {
         if (util.getDomain(window) === util.getDomain(win)) {
             match = true;
         }
     } catch (err) {
-        // pass
+        match = false;
     }
 
     global.domainMatches.push({
@@ -46,7 +46,7 @@ export function isWindow(item) {
         return false;
     }
 
-    if (isSameDomain(item)) {
+    if (isSameDomain(item) !== false) {
         try {
 
             for (let key of [ 'setTimeout', 'setInterval', 'postMessage', 'alert' ]) {
@@ -320,7 +320,7 @@ export function getFrameByName(win, name) {
 
     for (let childFrame of getFrames(win)) {
         try {
-            if (childFrame.name === name && isWindow(childFrame)) {
+            if (isSameDomain(childFrame) && childFrame.name === name && isWindow(childFrame)) {
                 return childFrame;
             }
         } catch (err) {
