@@ -1674,14 +1674,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    }
 
-	    var match = false;
+	    var match = void 0;
 
 	    try {
 	        if (_util.util.getDomain(window) === _util.util.getDomain(win)) {
 	            match = true;
 	        }
 	    } catch (err) {
-	        // pass
+	        match = false;
 	    }
 
 	    _global.global.domainMatches.push({
@@ -1705,24 +1705,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return false;
 	    }
 
-	    try {
-	        var _arr = ['setTimeout', 'setInterval', 'postMessage', 'alert'];
+	    if (isSameDomain(item) !== false) {
+	        try {
+	            var _arr = ['setTimeout', 'setInterval', 'postMessage', 'alert'];
 
 
-	        for (var _i2 = 0; _i2 < _arr.length; _i2++) {
-	            var key = _arr[_i2];
-	            if (typeof item[key] !== 'function') {
+	            for (var _i2 = 0; _i2 < _arr.length; _i2++) {
+	                var key = _arr[_i2];
+	                if (typeof item[key] !== 'function') {
+	                    return false;
+	                }
+	            }
+
+	            if (!item.document || !item.location) {
 	                return false;
 	            }
-	        }
 
-	        if (!item.document || !item.location) {
-	            return false;
+	            return true;
+	        } catch (err) {
+	            // pass
 	        }
-
-	        return true;
-	    } catch (err) {
-	        // pass
 	    }
 
 	    try {
@@ -1744,7 +1746,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    try {
 
-	        if (!win || win.closed || isSameDomain(win) && _util.util.safeGet(win, 'mockclosed')) {
+	        if (!win || win.closed) {
+	            return true;
+	        }
+
+	        if (isSameDomain(win) && _util.util.safeGet(win, 'mockclosed')) {
 	            return true;
 	        }
 
@@ -1857,31 +1863,24 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            result.push(frame);
 	        }
-	    } else {
 
-	        var _i3 = 0;
+	        return result;
+	    }
 
-	        while (true) {
-	            var _frame = void 0;
+	    for (var _i3 = 0; _i3 < 100; _i3++) {
+	        var _frame = void 0;
 
-	            try {
-	                _frame = frames[_i3];
-	            } catch (err) {
-	                return result;
-	            }
-
-	            if (!_frame) {
-	                return result;
-	            }
-
-	            result.push(_frame);
-
-	            _i3 += 1;
-
-	            if (_i3 > 20) {
-	                return result;
-	            }
+	        try {
+	            _frame = frames[_i3];
+	        } catch (err) {
+	            return result;
 	        }
+
+	        if (!_frame) {
+	            return result;
+	        }
+
+	        result.push(_frame);
 	    }
 
 	    return result;
@@ -2054,7 +2053,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var childFrame = _ref7;
 
 	        try {
-	            if (childFrame.name === name && isWindow(childFrame)) {
+	            if (isSameDomain(childFrame) && childFrame.name === name && isWindow(childFrame)) {
 	                return childFrame;
 	            }
 	        } catch (err) {
@@ -3209,6 +3208,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	_global.global.openTunnelToParent = function openTunnelToParent(_ref6) {
 	    var name = _ref6.name;
+	    var source = _ref6.source;
+	    var canary = _ref6.canary;
 	    var _sendMessage = _ref6.sendMessage;
 
 
@@ -3221,7 +3222,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return (0, _interface.send)(remoteWindow, _conf.CONSTANTS.POST_MESSAGE_NAMES.OPEN_TUNNEL, {
 	        name: name,
 	        sendMessage: function sendMessage() {
-	            return _sendMessage.apply(this, arguments);
+
+	            if ((0, _lib.isWindowClosed)(source)) {
+	                return;
+	            }
+
+	            try {
+	                canary();
+	            } catch (err) {
+	                return;
+	            }
+
+	            _sendMessage.apply(this, arguments);
 	        }
 	    }, { domain: '*' });
 	};
@@ -3246,10 +3258,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return rejectRemoteSendMessage(opener, new Error('Can not register with opener: window does not have a name'));
 	    }
 
-	    bridge[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].openTunnelToParent({
+	    return bridge[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].openTunnelToParent({
 
 	        name: window.name,
 
+	        source: window,
+
+	        canary: function canary() {
+	            // pass
+	        },
 	        sendMessage: function sendMessage(message) {
 
 	            if (!window || window.closed) {
