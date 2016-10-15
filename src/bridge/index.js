@@ -18,17 +18,22 @@ function getBridgeName(domain) {
     return id;
 }
 
-function documentReady() {
-    return new promise.Promise(resolve => {
-        if (window.document && window.document.body) {
-            return resolve(window.document);
-        }
 
-        window.document.addEventListener('DOMContentLoaded', event => {
-            return resolve(window.document);
-        });
-    });
-}
+let documentBodyReady = new promise.Promise(resolve => {
+
+    if (window.document && window.document.body) {
+        return resolve(window.document.body);
+    }
+
+    let interval = setInterval(() => {
+        if (window.document && window.document.body) {
+            clearInterval(interval);
+            return resolve(window.document.body);
+        }
+    }, 10);
+});
+
+
 
 function getRemoteBridgeForWindow(win) {
     try {
@@ -390,25 +395,33 @@ export function openBridge(url, domain) {
 
         let iframe = openBridgeFrame(name, url);
 
-        return documentReady().then(document => {
-            document.body.appendChild(iframe);
-
-            let bridge = iframe.contentWindow;
-
-            listenForRegister(bridge, domain);
+        return documentBodyReady.then(body => {
 
             return new promise.Promise((resolve, reject) => {
 
-                iframe.onload = resolve;
-                iframe.onerror = reject;
+                setTimeout(resolve, 1);
 
             }).then(() => {
 
-                return onWindowReady(bridge, CONFIG.BRIDGE_TIMEOUT, `Bridge ${url}`);
+                body.appendChild(iframe);
 
-            }).then(() => {
+                let bridge = iframe.contentWindow;
 
-                return bridge;
+                listenForRegister(bridge, domain);
+
+                return new promise.Promise((resolve, reject) => {
+
+                    iframe.onload = resolve;
+                    iframe.onerror = reject;
+
+                }).then(() => {
+
+                    return onWindowReady(bridge, CONFIG.BRIDGE_TIMEOUT, `Bridge ${url}`);
+
+                }).then(() => {
+
+                    return bridge;
+                });
             });
         });
     });
