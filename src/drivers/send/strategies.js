@@ -32,5 +32,28 @@ export let SEND_MESSAGE_STRATEGIES = {
         }
 
         return sendBridgeMessage(win, serializedMessage, domain);
+    },
+
+    [ CONSTANTS.SEND_STRATEGIES.GLOBAL ](win, serializedMessage, domain) {
+
+        if (!isSameDomain(win)) {
+            throw new Error(`Post message through global disabled between different domain windows`);
+        }
+
+        if (isSameTopWindow(window, win) !== false) {
+            throw new Error(`Can only use global to communicate between two different windows, not between frames`);
+        }
+
+        let foreignGlobal = win[CONSTANTS.WINDOW_PROPS.POSTROBOT];
+        
+        if (!foreignGlobal) {
+            throw new Error(`Can not find postRobot global on foreign window`);
+        }
+
+        return foreignGlobal.receiveMessage({
+            source: window,
+            origin: domain,
+            data: serializedMessage
+        });
     }
 };

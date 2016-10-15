@@ -323,9 +323,9 @@ export function openTunnelToOpener() {
     });
 }
 
-
-
-
+global.receiveMessage = function(event) {
+    return receiveMessage(event);
+};
 
 function openBridgeFrame(name, url) {
 

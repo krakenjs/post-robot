@@ -34,7 +34,8 @@ export let CONSTANTS = {
 
     SEND_STRATEGIES: {
         POST_MESSAGE: 'postrobot_post_message',
-        BRIDGE: 'postrobot_bridge'
+        BRIDGE: 'postrobot_bridge',
+        GLOBAL: 'postrobot_global'
     },
 
     MOCK_PROTOCOL: 'mock://',
