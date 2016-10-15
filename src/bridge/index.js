@@ -269,6 +269,10 @@ export function openTunnelToOpener() {
         return;
     }
 
+    if (isSameDomain(opener)) {
+        return;
+    }
+
     registerRemoteWindow(opener);
 
     let bridge = getRemoteBridgeForWindow(opener);
