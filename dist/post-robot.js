@@ -436,7 +436,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    MOCK_MODE: false,
 
-	    ALLOWED_POST_MESSAGE_METHODS: (_ALLOWED_POST_MESSAGE = {}, _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE, true), _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.BRIDGE, true), _ALLOWED_POST_MESSAGE)
+	    ALLOWED_POST_MESSAGE_METHODS: (_ALLOWED_POST_MESSAGE = {}, _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE, true), _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.BRIDGE, true), _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.GLOBAL, true), _ALLOWED_POST_MESSAGE)
 	};
 
 	if (window.location.href.indexOf(_constants.CONSTANTS.FILE_PROTOCOL) === 0) {
@@ -487,7 +487,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    SEND_STRATEGIES: {
 	        POST_MESSAGE: 'postrobot_post_message',
-	        BRIDGE: 'postrobot_bridge'
+	        BRIDGE: 'postrobot_bridge',
+	        GLOBAL: 'postrobot_global'
 	    },
 
 	    MOCK_PROTOCOL: 'mock://',
@@ -2608,10 +2609,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	function emulateIERestrictions(sourceWindow, targetWindow) {
 	    if (!_conf.CONFIG.ALLOW_POSTMESSAGE_POPUP) {
 
-	        if ((0, _lib.isSameDomain)(sourceWindow) && (0, _lib.isSameDomain)(targetWindow)) {
-	            return;
-	        }
-
 	        if ((0, _lib.isSameTopWindow)(sourceWindow, targetWindow) === false) {
 	            throw new Error('Can not send and receive post messages between two different windows (disabled to emulate IE)');
 	        }
@@ -2908,6 +2905,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    return (0, _bridge.sendBridgeMessage)(win, serializedMessage, domain);
+	}), _defineProperty(_SEND_MESSAGE_STRATEG, _conf.CONSTANTS.SEND_STRATEGIES.GLOBAL, function (win, serializedMessage, domain) {
+
+	    if (!(0, _lib.isSameDomain)(win)) {
+	        throw new Error('Post message through global disabled between different domain windows');
+	    }
+
+	    if ((0, _lib.isSameTopWindow)(window, win) !== false) {
+	        throw new Error('Can only use global to communicate between two different windows, not between frames');
+	    }
+
+	    var foreignGlobal = win[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT];
+
+	    if (!foreignGlobal) {
+	        throw new Error('Can not find postRobot global on foreign window');
+	    }
+
+	    return foreignGlobal.receiveMessage({
+	        source: window,
+	        origin: domain,
+	        data: serializedMessage
+	    });
 	}), _SEND_MESSAGE_STRATEG);
 
 /***/ },
@@ -3302,6 +3320,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        throw err;
 	    });
 	}
+
+	_global.global.receiveMessage = function (event) {
+	    return (0, _drivers.receiveMessage)(event);
+	};
 
 	function openBridgeFrame(name, url) {
 
