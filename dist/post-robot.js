@@ -1438,6 +1438,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return win.mockDomain;
 	        }
 
+	        if (!win.location.protocol) {
+	            throw new Error('Can not read window protocol');
+	        }
+
+	        if (!win.location.host) {
+	            throw new Error('Can not read window host');
+	        }
+
 	        return win.location.protocol + '//' + win.location.host;
 	    },
 	    getDomainFromUrl: function getDomainFromUrl(url) {
@@ -1621,7 +1629,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: true
 	});
 	exports.isSameDomain = isSameDomain;
-	exports.isWindow = isWindow;
 	exports.isWindowClosed = isWindowClosed;
 	exports.getOpener = getOpener;
 	exports.getParent = getParent;
@@ -1655,6 +1662,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	var domainMatchTimeout = void 0;
 
 	function isSameDomain(win) {
+	    var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
 
 	    for (var _iterator = _global.global.domainMatches, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
 	        var _ref;
@@ -1680,6 +1689,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    try {
 	        if (_util.util.getDomain(window) === _util.util.getDomain(win)) {
 	            match = true;
+	        } else {
+	            match = false;
 	        }
 	    } catch (err) {
 	        match = false;
@@ -1698,49 +1709,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    return match;
-	}
-
-	function isWindow(item) {
-
-	    if (!item) {
-	        return false;
-	    }
-
-	    if (isSameDomain(item) !== false) {
-	        try {
-	            var _arr = ['setTimeout', 'setInterval', 'postMessage', 'alert'];
-
-
-	            for (var _i2 = 0; _i2 < _arr.length; _i2++) {
-	                var key = _arr[_i2];
-	                if (typeof item[key] !== 'function') {
-	                    return false;
-	                }
-	            }
-
-	            if (!item.document || !item.location) {
-	                return false;
-	            }
-
-	            return true;
-	        } catch (err) {
-	            // pass
-	        }
-	    }
-
-	    try {
-
-	        for (var i = 0; i < 5; i++) {
-	            if (item) {
-	                item = item[Math.random().toString()];
-	            }
-	        }
-
-	        return false;
-	    } catch (err) {
-
-	        return true;
-	    }
 	}
 
 	function isWindowClosed(win) {
@@ -1868,11 +1836,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return result;
 	    }
 
-	    for (var _i3 = 0; _i3 < 100; _i3++) {
+	    for (var _i2 = 0; _i2 < 100; _i2++) {
 	        var _frame = void 0;
 
 	        try {
-	            _frame = frames[_i3];
+	            _frame = frames[_i2];
 	        } catch (err) {
 	            return result;
 	        }
@@ -1891,32 +1859,32 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var result = [];
 
-	    for (var _iterator2 = getFrames(win), _isArray2 = Array.isArray(_iterator2), _i4 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
+	    for (var _iterator2 = getFrames(win), _isArray2 = Array.isArray(_iterator2), _i3 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
 	        var _ref2;
 
 	        if (_isArray2) {
-	            if (_i4 >= _iterator2.length) break;
-	            _ref2 = _iterator2[_i4++];
+	            if (_i3 >= _iterator2.length) break;
+	            _ref2 = _iterator2[_i3++];
 	        } else {
-	            _i4 = _iterator2.next();
-	            if (_i4.done) break;
-	            _ref2 = _i4.value;
+	            _i3 = _iterator2.next();
+	            if (_i3.done) break;
+	            _ref2 = _i3.value;
 	        }
 
 	        var frame = _ref2;
 
 	        result.push(frame);
 
-	        for (var _iterator3 = getAllChildFrames(frame), _isArray3 = Array.isArray(_iterator3), _i5 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
+	        for (var _iterator3 = getAllChildFrames(frame), _isArray3 = Array.isArray(_iterator3), _i4 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
 	            var _ref3;
 
 	            if (_isArray3) {
-	                if (_i5 >= _iterator3.length) break;
-	                _ref3 = _iterator3[_i5++];
+	                if (_i4 >= _iterator3.length) break;
+	                _ref3 = _iterator3[_i4++];
 	            } else {
-	                _i5 = _iterator3.next();
-	                if (_i5.done) break;
-	                _ref3 = _i5.value;
+	                _i4 = _iterator3.next();
+	                if (_i4.done) break;
+	                _ref3 = _i4.value;
 	            }
 
 	            var childFrame = _ref3;
@@ -1934,16 +1902,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    result.push(win);
 
-	    for (var _iterator4 = getParents(win), _isArray4 = Array.isArray(_iterator4), _i6 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator]();;) {
+	    for (var _iterator4 = getParents(win), _isArray4 = Array.isArray(_iterator4), _i5 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator]();;) {
 	        var _ref4;
 
 	        if (_isArray4) {
-	            if (_i6 >= _iterator4.length) break;
-	            _ref4 = _iterator4[_i6++];
+	            if (_i5 >= _iterator4.length) break;
+	            _ref4 = _iterator4[_i5++];
 	        } else {
-	            _i6 = _iterator4.next();
-	            if (_i6.done) break;
-	            _ref4 = _i6.value;
+	            _i5 = _iterator4.next();
+	            if (_i5.done) break;
+	            _ref4 = _i5.value;
 	        }
 
 	        var parent = _ref4;
@@ -1951,16 +1919,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        result.push(parent);
 
-	        for (var _iterator5 = getFrames(parent), _isArray5 = Array.isArray(_iterator5), _i7 = 0, _iterator5 = _isArray5 ? _iterator5 : _iterator5[Symbol.iterator]();;) {
+	        for (var _iterator5 = getFrames(parent), _isArray5 = Array.isArray(_iterator5), _i6 = 0, _iterator5 = _isArray5 ? _iterator5 : _iterator5[Symbol.iterator]();;) {
 	            var _ref5;
 
 	            if (_isArray5) {
-	                if (_i7 >= _iterator5.length) break;
-	                _ref5 = _iterator5[_i7++];
+	                if (_i6 >= _iterator5.length) break;
+	                _ref5 = _iterator5[_i6++];
 	            } else {
-	                _i7 = _iterator5.next();
-	                if (_i7.done) break;
-	                _ref5 = _i7.value;
+	                _i6 = _iterator5.next();
+	                if (_i6.done) break;
+	                _ref5 = _i6.value;
 	            }
 
 	            var frame = _ref5;
@@ -2009,16 +1977,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	        // pass
 	    }
 
-	    for (var _iterator6 = getAllChildFrames(win), _isArray6 = Array.isArray(_iterator6), _i8 = 0, _iterator6 = _isArray6 ? _iterator6 : _iterator6[Symbol.iterator]();;) {
+	    for (var _iterator6 = getAllChildFrames(win), _isArray6 = Array.isArray(_iterator6), _i7 = 0, _iterator6 = _isArray6 ? _iterator6 : _iterator6[Symbol.iterator]();;) {
 	        var _ref6;
 
 	        if (_isArray6) {
-	            if (_i8 >= _iterator6.length) break;
-	            _ref6 = _iterator6[_i8++];
+	            if (_i7 >= _iterator6.length) break;
+	            _ref6 = _iterator6[_i7++];
 	        } else {
-	            _i8 = _iterator6.next();
-	            if (_i8.done) break;
-	            _ref6 = _i8.value;
+	            _i7 = _iterator6.next();
+	            if (_i7.done) break;
+	            _ref6 = _i7.value;
 	        }
 
 	        var frame = _ref6;
@@ -2039,22 +2007,24 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function getFrameByName(win, name) {
 
-	    for (var _iterator7 = getFrames(win), _isArray7 = Array.isArray(_iterator7), _i9 = 0, _iterator7 = _isArray7 ? _iterator7 : _iterator7[Symbol.iterator]();;) {
+	    var winFrames = getFrames(win);
+
+	    for (var _iterator7 = winFrames, _isArray7 = Array.isArray(_iterator7), _i8 = 0, _iterator7 = _isArray7 ? _iterator7 : _iterator7[Symbol.iterator]();;) {
 	        var _ref7;
 
 	        if (_isArray7) {
-	            if (_i9 >= _iterator7.length) break;
-	            _ref7 = _iterator7[_i9++];
+	            if (_i8 >= _iterator7.length) break;
+	            _ref7 = _iterator7[_i8++];
 	        } else {
-	            _i9 = _iterator7.next();
-	            if (_i9.done) break;
-	            _ref7 = _i9.value;
+	            _i8 = _iterator7.next();
+	            if (_i8.done) break;
+	            _ref7 = _i8.value;
 	        }
 
 	        var childFrame = _ref7;
 
 	        try {
-	            if (isSameDomain(childFrame) && childFrame.name === name && isWindow(childFrame)) {
+	            if (isSameDomain(childFrame) && childFrame.name === name) {
 	                return childFrame;
 	            }
 	        } catch (err) {
@@ -2063,7 +2033,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    try {
-	        if (isWindow(win.frames[name])) {
+	        if (winFrames.indexOf(win.frames[name]) !== 0) {
 	            return win.frames[name];
 	        }
 	    } catch (err) {
@@ -2071,7 +2041,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    try {
-	        if (isWindow(win[name])) {
+	        if (winFrames.indexOf(win[name]) !== 0) {
 	            return win[name];
 	        }
 	    } catch (err) {
@@ -2087,16 +2057,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return frameParent === win;
 	    }
 
-	    for (var _iterator8 = getFrames(win), _isArray8 = Array.isArray(_iterator8), _i10 = 0, _iterator8 = _isArray8 ? _iterator8 : _iterator8[Symbol.iterator]();;) {
+	    for (var _iterator8 = getFrames(win), _isArray8 = Array.isArray(_iterator8), _i9 = 0, _iterator8 = _isArray8 ? _iterator8 : _iterator8[Symbol.iterator]();;) {
 	        var _ref8;
 
 	        if (_isArray8) {
-	            if (_i10 >= _iterator8.length) break;
-	            _ref8 = _iterator8[_i10++];
+	            if (_i9 >= _iterator8.length) break;
+	            _ref8 = _iterator8[_i9++];
 	        } else {
-	            _i10 = _iterator8.next();
-	            if (_i10.done) break;
-	            _ref8 = _i10.value;
+	            _i9 = _iterator8.next();
+	            if (_i9.done) break;
+	            _ref8 = _i9.value;
 	        }
 
 	        var childFrame = _ref8;
@@ -2150,16 +2120,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return false;
 	    }
 
-	    for (var _iterator9 = getFrames(parent), _isArray9 = Array.isArray(_iterator9), _i11 = 0, _iterator9 = _isArray9 ? _iterator9 : _iterator9[Symbol.iterator]();;) {
+	    for (var _iterator9 = getFrames(parent), _isArray9 = Array.isArray(_iterator9), _i10 = 0, _iterator9 = _isArray9 ? _iterator9 : _iterator9[Symbol.iterator]();;) {
 	        var _ref9;
 
 	        if (_isArray9) {
-	            if (_i11 >= _iterator9.length) break;
-	            _ref9 = _iterator9[_i11++];
+	            if (_i10 >= _iterator9.length) break;
+	            _ref9 = _iterator9[_i10++];
 	        } else {
-	            _i11 = _iterator9.next();
-	            if (_i11.done) break;
-	            _ref9 = _i11.value;
+	            _i10 = _iterator9.next();
+	            if (_i10.done) break;
+	            _ref9 = _i10.value;
 	        }
 
 	        var frame = _ref9;
@@ -2196,30 +2166,30 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function anyMatch(collection1, collection2) {
 
-	    for (var _iterator10 = collection1, _isArray10 = Array.isArray(_iterator10), _i12 = 0, _iterator10 = _isArray10 ? _iterator10 : _iterator10[Symbol.iterator]();;) {
+	    for (var _iterator10 = collection1, _isArray10 = Array.isArray(_iterator10), _i11 = 0, _iterator10 = _isArray10 ? _iterator10 : _iterator10[Symbol.iterator]();;) {
 	        var _ref10;
 
 	        if (_isArray10) {
-	            if (_i12 >= _iterator10.length) break;
-	            _ref10 = _iterator10[_i12++];
+	            if (_i11 >= _iterator10.length) break;
+	            _ref10 = _iterator10[_i11++];
 	        } else {
-	            _i12 = _iterator10.next();
-	            if (_i12.done) break;
-	            _ref10 = _i12.value;
+	            _i11 = _iterator10.next();
+	            if (_i11.done) break;
+	            _ref10 = _i11.value;
 	        }
 
 	        var item1 = _ref10;
 
-	        for (var _iterator11 = collection2, _isArray11 = Array.isArray(_iterator11), _i13 = 0, _iterator11 = _isArray11 ? _iterator11 : _iterator11[Symbol.iterator]();;) {
+	        for (var _iterator11 = collection2, _isArray11 = Array.isArray(_iterator11), _i12 = 0, _iterator11 = _isArray11 ? _iterator11 : _iterator11[Symbol.iterator]();;) {
 	            var _ref11;
 
 	            if (_isArray11) {
-	                if (_i13 >= _iterator11.length) break;
-	                _ref11 = _iterator11[_i13++];
+	                if (_i12 >= _iterator11.length) break;
+	                _ref11 = _iterator11[_i12++];
 	            } else {
-	                _i13 = _iterator11.next();
-	                if (_i13.done) break;
-	                _ref11 = _i13.value;
+	                _i12 = _iterator11.next();
+	                if (_i12.done) break;
+	                _ref11 = _i12.value;
 	            }
 
 	            var item2 = _ref11;
