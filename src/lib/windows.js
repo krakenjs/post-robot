@@ -20,6 +20,8 @@ export function isSameDomain(win) {
     try {
         if (util.getDomain(window) === util.getDomain(win)) {
             match = true;
+        } else {
+            match = false;
         }
     } catch (err) {
         match = false;
@@ -39,49 +41,6 @@ export function isSameDomain(win) {
 
     return match;
 }
-
-export function isWindow(item) {
-
-    if (!item) {
-        return false;
-    }
-
-    if (isSameDomain(item) !== false) {
-        try {
-
-            for (let key of [ 'setTimeout', 'setInterval', 'postMessage', 'alert' ]) {
-                if (typeof item[key] !== 'function') {
-                    return false;
-                }
-            }
-
-            if (!item.document || !item.location) {
-                return false;
-            }
-
-            return true;
-
-        } catch (err) {
-            // pass
-        }
-    }
-
-    try {
-
-        for (let i = 0; i < 5; i++) {
-            if (item) {
-                item = item[Math.random().toString()];
-            }
-        }
-
-        return false;
-
-    } catch (err) {
-
-        return true;
-    }
-}
-
 
 export function isWindowClosed(win) {
 
@@ -318,9 +277,11 @@ export function getTop(win) {
 
 export function getFrameByName(win, name) {
 
-    for (let childFrame of getFrames(win)) {
+    let winFrames = getFrames(win);
+
+    for (let childFrame of winFrames) {
         try {
-            if (isSameDomain(childFrame) && childFrame.name === name && isWindow(childFrame)) {
+            if (isSameDomain(childFrame) && childFrame.name === name) {
                 return childFrame;
             }
         } catch (err) {
@@ -329,7 +290,7 @@ export function getFrameByName(win, name) {
     }
 
     try {
-        if (isWindow(win.frames[name])) {
+        if (winFrames.indexOf(win.frames[name]) !== 0) {
             return win.frames[name];
         }
     } catch (err) {
@@ -337,7 +298,7 @@ export function getFrameByName(win, name) {
     }
 
     try {
-        if (isWindow(win[name])) {
+        if (winFrames.indexOf(win[name]) !== 0) {
             return win[name];
         }
     } catch (err) {

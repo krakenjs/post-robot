@@ -237,6 +237,14 @@ export let util = {
             return win.mockDomain;
         }
 
+        if (!win.location.protocol) {
+            throw new Error(`Can not read window protocol`);
+        }
+
+        if (!win.location.host) {
+            throw new Error(`Can not read window host`);
+        }
+
         return `${win.location.protocol}//${win.location.host}`;
     },
 
