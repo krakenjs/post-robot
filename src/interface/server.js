@@ -31,7 +31,7 @@ export function listen(options) {
 
     options.domain = options.domain || '*';
 
-    addRequestListener(options.name, options.window, options, override);
+    addRequestListener(options.name, options.window, options.domain, options, override);
 
     options.handleError = err => {
         // removeRequestListener(options);

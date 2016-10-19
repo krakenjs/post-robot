@@ -41,7 +41,7 @@ export let RECEIVE_MESSAGE_TYPES = {
 
     [ CONSTANTS.POST_MESSAGE_TYPE.REQUEST ]: (source, origin, message) => {
 
-        let options = getRequestListener(message.name, source);
+        let options = getRequestListener(message.name, source, origin);
 
         function respond(data) {
 
