@@ -1639,9 +1639,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.getAllFramesInWindow = getAllFramesInWindow;
 	exports.getTop = getTop;
 	exports.getFrameByName = getFrameByName;
+	exports.findFrameByName = findFrameByName;
 	exports.isParent = isParent;
 	exports.isOpener = isOpener;
 	exports.getAncestor = getAncestor;
+	exports.getAncestors = getAncestors;
 	exports.isAncestor = isAncestor;
 	exports.isPopup = isPopup;
 	exports.isIframe = isIframe;
@@ -2047,15 +2049,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	}
 
-	function isParent(win, frame) {
+	function findFrameByName(win, name) {
 
-	    var frameParent = getParent(frame);
+	    var frame = void 0;
 
-	    if (frameParent) {
-	        return frameParent === win;
+	    frame = getFrameByName(win, name);
+
+	    if (frame) {
+	        return frame;
 	    }
 
-	    for (var _iterator8 = getFrames(win), _isArray8 = Array.isArray(_iterator8), _i9 = 0, _iterator8 = _isArray8 ? _iterator8 : _iterator8[Symbol.iterator]();;) {
+	    for (var _iterator8 = getAncestors(win), _isArray8 = Array.isArray(_iterator8), _i9 = 0, _iterator8 = _isArray8 ? _iterator8 : _iterator8[Symbol.iterator]();;) {
 	        var _ref8;
 
 	        if (_isArray8) {
@@ -2067,7 +2071,58 @@ return /******/ (function(modules) { // webpackBootstrap
 	            _ref8 = _i9.value;
 	        }
 
-	        var childFrame = _ref8;
+	        var ancestor = _ref8;
+
+	        frame = getFrameByName(ancestor, name);
+
+	        if (frame) {
+	            return frame;
+	        }
+	    }
+
+	    for (var _iterator9 = getFrames(win), _isArray9 = Array.isArray(_iterator9), _i10 = 0, _iterator9 = _isArray9 ? _iterator9 : _iterator9[Symbol.iterator]();;) {
+	        var _ref9;
+
+	        if (_isArray9) {
+	            if (_i10 >= _iterator9.length) break;
+	            _ref9 = _iterator9[_i10++];
+	        } else {
+	            _i10 = _iterator9.next();
+	            if (_i10.done) break;
+	            _ref9 = _i10.value;
+	        }
+
+	        var childFrame = _ref9;
+
+	        frame = getFrameByName(childFrame, name);
+
+	        if (frame) {
+	            return frame;
+	        }
+	    }
+	}
+
+	function isParent(win, frame) {
+
+	    var frameParent = getParent(frame);
+
+	    if (frameParent) {
+	        return frameParent === win;
+	    }
+
+	    for (var _iterator10 = getFrames(win), _isArray10 = Array.isArray(_iterator10), _i11 = 0, _iterator10 = _isArray10 ? _iterator10 : _iterator10[Symbol.iterator]();;) {
+	        var _ref10;
+
+	        if (_isArray10) {
+	            if (_i11 >= _iterator10.length) break;
+	            _ref10 = _iterator10[_i11++];
+	        } else {
+	            _i11 = _iterator10.next();
+	            if (_i11.done) break;
+	            _ref10 = _i11.value;
+	        }
+
+	        var childFrame = _ref10;
 
 	        if (childFrame === frame) {
 	            return true;
@@ -2098,6 +2153,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	}
 
+	function getAncestors(win) {
+
+	    var results = [];
+
+	    var ancestor = win;
+
+	    while (ancestor) {
+	        ancestor = getAncestor(ancestor);
+	        if (ancestor) {
+	            results.push(ancestor);
+	        }
+	    }
+
+	    return results;
+	}
+
 	function isAncestor(parent, child) {
 
 	    var actualParent = getAncestor(child);
@@ -2118,19 +2189,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return false;
 	    }
 
-	    for (var _iterator9 = getFrames(parent), _isArray9 = Array.isArray(_iterator9), _i10 = 0, _iterator9 = _isArray9 ? _iterator9 : _iterator9[Symbol.iterator]();;) {
-	        var _ref9;
+	    for (var _iterator11 = getFrames(parent), _isArray11 = Array.isArray(_iterator11), _i12 = 0, _iterator11 = _isArray11 ? _iterator11 : _iterator11[Symbol.iterator]();;) {
+	        var _ref11;
 
-	        if (_isArray9) {
-	            if (_i10 >= _iterator9.length) break;
-	            _ref9 = _iterator9[_i10++];
+	        if (_isArray11) {
+	            if (_i12 >= _iterator11.length) break;
+	            _ref11 = _iterator11[_i12++];
 	        } else {
-	            _i10 = _iterator9.next();
-	            if (_i10.done) break;
-	            _ref9 = _i10.value;
+	            _i12 = _iterator11.next();
+	            if (_i12.done) break;
+	            _ref11 = _i12.value;
 	        }
 
-	        var frame = _ref9;
+	        var frame = _ref11;
 
 	        if (frame === child) {
 	            return true;
@@ -2164,33 +2235,33 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function anyMatch(collection1, collection2) {
 
-	    for (var _iterator10 = collection1, _isArray10 = Array.isArray(_iterator10), _i11 = 0, _iterator10 = _isArray10 ? _iterator10 : _iterator10[Symbol.iterator]();;) {
-	        var _ref10;
+	    for (var _iterator12 = collection1, _isArray12 = Array.isArray(_iterator12), _i13 = 0, _iterator12 = _isArray12 ? _iterator12 : _iterator12[Symbol.iterator]();;) {
+	        var _ref12;
 
-	        if (_isArray10) {
-	            if (_i11 >= _iterator10.length) break;
-	            _ref10 = _iterator10[_i11++];
+	        if (_isArray12) {
+	            if (_i13 >= _iterator12.length) break;
+	            _ref12 = _iterator12[_i13++];
 	        } else {
-	            _i11 = _iterator10.next();
-	            if (_i11.done) break;
-	            _ref10 = _i11.value;
+	            _i13 = _iterator12.next();
+	            if (_i13.done) break;
+	            _ref12 = _i13.value;
 	        }
 
-	        var item1 = _ref10;
+	        var item1 = _ref12;
 
-	        for (var _iterator11 = collection2, _isArray11 = Array.isArray(_iterator11), _i12 = 0, _iterator11 = _isArray11 ? _iterator11 : _iterator11[Symbol.iterator]();;) {
-	            var _ref11;
+	        for (var _iterator13 = collection2, _isArray13 = Array.isArray(_iterator13), _i14 = 0, _iterator13 = _isArray13 ? _iterator13 : _iterator13[Symbol.iterator]();;) {
+	            var _ref13;
 
-	            if (_isArray11) {
-	                if (_i12 >= _iterator11.length) break;
-	                _ref11 = _iterator11[_i12++];
+	            if (_isArray13) {
+	                if (_i14 >= _iterator13.length) break;
+	                _ref13 = _iterator13[_i14++];
 	            } else {
-	                _i12 = _iterator11.next();
-	                if (_i12.done) break;
-	                _ref11 = _i12.value;
+	                _i14 = _iterator13.next();
+	                if (_i14.done) break;
+	                _ref13 = _i14.value;
 	            }
 
-	            var item2 = _ref11;
+	            var item2 = _ref13;
 
 	            if (item1 === item2) {
 	                return true;
@@ -3414,6 +3485,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _global.global.listeners.response = [];
 	}
 
+	function matchDomain(domain, origin) {
+
+	    if (typeof domain === 'string') {
+	        return domain === '*' || origin === domain;
+	    }
+
+	    if (Object.prototype.toString.call(domain) === '[object RegExp]') {
+	        return origin.match(domain);
+	    }
+
+	    if (Array.isArray(domain)) {
+	        return domain.indexOf(origin) !== -1;
+	    }
+
+	    return false;
+	}
+
 	function getRequestListener(name, win, domain) {
 
 	    var result = {};
@@ -3441,7 +3529,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var specifiedDomain = requestListener.domain && requestListener.domain !== '*';
 
 	        var matchedWin = specifiedWin && requestListener.win === win;
-	        var matchedDomain = specifiedDomain && requestListener.domain === domain;
+	        var matchedDomain = specifiedDomain && matchDomain(requestListener.domain, domain);
 
 	        if (specifiedWin && specifiedDomain) {
 	            if (matchedWin && matchedDomain) {
