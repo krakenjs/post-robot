@@ -13,6 +13,23 @@ export function resetListeners() {
     global.listeners.response = [];
 }
 
+function matchDomain(domain, origin) {
+
+    if (typeof domain === 'string') {
+        return domain === '*' || origin === domain;
+    }
+
+    if (Object.prototype.toString.call(domain) === '[object RegExp]') {
+        return origin.match(domain);
+    }
+
+    if (Array.isArray(domain)) {
+        return domain.indexOf(origin) !== -1;
+    }
+
+    return false;
+}
+
 export function getRequestListener(name, win, domain) {
 
     let result = {};
@@ -27,7 +44,7 @@ export function getRequestListener(name, win, domain) {
         let specifiedDomain = (requestListener.domain && requestListener.domain !== '*');
 
         let matchedWin = (specifiedWin && requestListener.win === win);
-        let matchedDomain = (specifiedDomain && requestListener.domain === domain);
+        let matchedDomain = (specifiedDomain && matchDomain(requestListener.domain, domain));
 
         if (specifiedWin && specifiedDomain) {
             if (matchedWin && matchedDomain) {

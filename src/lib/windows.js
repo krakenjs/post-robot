@@ -306,6 +306,33 @@ export function getFrameByName(win, name) {
     }
 }
 
+export function findFrameByName(win, name) {
+
+    let frame;
+
+    frame = getFrameByName(win, name);
+
+    if (frame) {
+        return frame;
+    }
+
+    for (let ancestor of getAncestors(win)) {
+        frame = getFrameByName(ancestor, name);
+
+        if (frame) {
+            return frame;
+        }
+    }
+
+    for (let childFrame of getFrames(win)) {
+        frame = getFrameByName(childFrame, name);
+
+        if (frame) {
+            return frame;
+        }
+    }
+}
+
 export function isParent(win, frame) {
 
     let frameParent = getParent(frame);
@@ -342,6 +369,22 @@ export function getAncestor(win) {
     if (parent) {
         return parent;
     }
+}
+
+export function getAncestors(win) {
+
+    let results = [];
+
+    let ancestor = win;
+
+    while (ancestor) {
+        ancestor = getAncestor(ancestor);
+        if (ancestor) {
+            results.push(ancestor);
+        }
+    }
+
+    return results;
 }
 
 
