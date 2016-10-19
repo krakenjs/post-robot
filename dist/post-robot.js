@@ -2638,7 +2638,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    options.ack = true;
 	}), _defineProperty(_RECEIVE_MESSAGE_TYPE, _conf.CONSTANTS.POST_MESSAGE_TYPE.REQUEST, function (source, origin, message) {
 
-	    var options = (0, _listeners.getRequestListener)(message.name, source);
+	    var options = (0, _listeners.getRequestListener)(message.name, source, origin);
 
 	    function respond(data) {
 
@@ -3414,7 +3414,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _global.global.listeners.response = [];
 	}
 
-	function getRequestListener(name, win) {
+	function getRequestListener(name, win, domain) {
+
+	    var result = {};
+
 	    for (var _iterator = _global.global.listeners.request, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
 	        var _ref;
 
@@ -3434,19 +3437,33 @@ return /******/ (function(modules) { // webpackBootstrap
 	            continue;
 	        }
 
-	        if (!requestListener.win || requestListener.win === '*') {
-	            return requestListener.options;
-	        }
+	        var specifiedWin = requestListener.win && requestListener.win !== '*';
+	        var specifiedDomain = requestListener.domain && requestListener.domain !== '*';
 
-	        if (win && win === requestListener.win) {
-	            return requestListener.options;
+	        var matchedWin = specifiedWin && requestListener.win === win;
+	        var matchedDomain = specifiedDomain && requestListener.domain === domain;
+
+	        if (specifiedWin && specifiedDomain) {
+	            if (matchedWin && matchedDomain) {
+	                result.all = requestListener.options;
+	            }
+	        } else if (specifiedDomain) {
+	            if (matchedDomain) {
+	                result.domain = requestListener.options;
+	            }
+	        } else if (specifiedWin) {
+	            if (matchedWin) {
+	                result.win = requestListener.options;
+	            }
+	        } else {
+	            result.name = requestListener.options;
 	        }
 	    }
+
+	    return result.all || result.domain || result.win || result.name;
 	}
 
 	function removeRequestListener(options) {
-
-	    var listener = void 0;
 
 	    for (var _iterator2 = _global.global.listeners.request, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
 	        var _ref2;
@@ -3460,32 +3477,32 @@ return /******/ (function(modules) { // webpackBootstrap
 	            _ref2 = _i2.value;
 	        }
 
-	        var requestListener = _ref2;
+	        var listener = _ref2;
 
-	        if (requestListener.options === options) {
-	            listener = requestListener;
-	            break;
+	        if (listener.options === options) {
+	            _global.global.listeners.request.splice(_global.global.listeners.request.indexOf(listener), 1);
 	        }
-	    }
-
-	    if (listener) {
-	        _global.global.listeners.request.splice(_global.global.listeners.request.indexOf(listener), 1);
 	    }
 	}
 
-	function addRequestListener(name, win, options, override) {
+	function addRequestListener(name, win, domain, options, override) {
 
-	    var listener = getRequestListener(name, win);
+	    var listener = getRequestListener(name, win, domain);
 
 	    if (listener) {
 	        if (override) {
 	            removeRequestListener(listener);
 	        } else {
-	            throw new Error('Request listener already exists for ' + name);
+
+	            if (win) {
+	                throw new Error('Request listener already exists for ' + name + ' on domain ' + domain + ' for specified window: ' + (listener.win === win));
+	            }
+
+	            throw new Error('Request listener already exists for ' + name + ' on domain ' + domain);
 	        }
 	    }
 
-	    listeners.request.push({ name: name, win: win, options: options });
+	    listeners.request.push({ name: name, win: win, domain: domain, options: options });
 	}
 
 /***/ },
@@ -3538,7 +3555,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    options.domain = options.domain || '*';
 
-	    (0, _drivers.addRequestListener)(options.name, options.window, options, override);
+	    (0, _drivers.addRequestListener)(options.name, options.window, options.domain, options, override);
 
 	    options.handleError = function (err) {
 	        // removeRequestListener(options);
