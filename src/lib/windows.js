@@ -281,7 +281,7 @@ export function getFrameByName(win, name) {
 
     for (let childFrame of winFrames) {
         try {
-            if (isSameDomain(childFrame) && childFrame.name === name) {
+            if (isSameDomain(childFrame) && childFrame.name === name && winFrames.indexOf(childFrame) !== -1) {
                 return childFrame;
             }
         } catch (err) {
@@ -290,7 +290,7 @@ export function getFrameByName(win, name) {
     }
 
     try {
-        if (winFrames.indexOf(win.frames[name]) !== 0) {
+        if (winFrames.indexOf(win.frames[name]) !== -1) {
             return win.frames[name];
         }
     } catch (err) {
@@ -298,7 +298,7 @@ export function getFrameByName(win, name) {
     }
 
     try {
-        if (winFrames.indexOf(win[name]) !== 0) {
+        if (winFrames.indexOf(win[name]) !== -1) {
             return win[name];
         }
     } catch (err) {
