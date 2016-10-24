@@ -425,7 +425,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var CONFIG = exports.CONFIG = {
 
-	    ALLOW_POSTMESSAGE_POPUP: false,
+	    ALLOW_POSTMESSAGE_POPUP: true,
 
 	    LOG_LEVEL: 'info',
 
