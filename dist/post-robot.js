@@ -425,7 +425,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var CONFIG = exports.CONFIG = {
 
-	    ALLOW_POSTMESSAGE_POPUP: true,
+	    ALLOW_POSTMESSAGE_POPUP: false,
 
 	    LOG_LEVEL: 'info',
 
@@ -2699,7 +2699,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var options = _listeners.listeners.response[message.hash];
 
 	    if (!options) {
-	        throw new Error('No handler found for post message ack for message: ' + message.name + ' in ' + window.location.href);
+	        throw new Error('No handler found for post message ack for message: ' + message.name + ' from ' + origin + ' in ' + window.location.protocol + '//' + window.location.host + window.location.pathname);
 	    }
 
 	    if (!matchDomain(options.domain, origin)) {
@@ -2729,7 +2729,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }), _lib.promise.run(function () {
 
 	        if (!options) {
-	            throw new Error('No postmessage request handler for ' + message.name + ' in ' + window.location.href);
+	            throw new Error('No handler found for post message: ' + message.name + ' from ' + origin + ' in ' + window.location.protocol + '//' + window.location.host + window.location.pathname);
 	        }
 
 	        if (!matchDomain(options.domain, origin)) {
@@ -2766,7 +2766,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var options = _listeners.listeners.response[message.hash];
 
 	    if (!options) {
-	        throw new Error('No response handler found for post message response ' + message.name + ' in ' + window.location.href);
+	        throw new Error('No handler found for post message response for message: ' + message.name + ' from ' + origin + ' in ' + window.location.protocol + '//' + window.location.host + window.location.pathname);
 	    }
 
 	    if (!matchDomain(options.domain, origin)) {
