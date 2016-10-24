@@ -29,7 +29,7 @@ export let RECEIVE_MESSAGE_TYPES = {
         let options = listeners.response[message.hash];
 
         if (!options) {
-            throw new Error(`No handler found for post message ack for message: ${message.name} in ${window.location.href}`);
+            throw new Error(`No handler found for post message ack for message: ${message.name} from ${origin} in ${window.location.protocol}//${window.location.host}${window.location.pathname}`);
         }
 
         if (!matchDomain(options.domain, origin)) {
@@ -66,7 +66,7 @@ export let RECEIVE_MESSAGE_TYPES = {
             promise.run(() => {
 
                 if (!options) {
-                    throw new Error(`No postmessage request handler for ${message.name} in ${window.location.href}`);
+                    throw new Error(`No handler found for post message: ${message.name} from ${origin} in ${window.location.protocol}//${window.location.host}${window.location.pathname}`);
                 }
 
                 if (!matchDomain(options.domain, origin)) {
@@ -109,7 +109,7 @@ export let RECEIVE_MESSAGE_TYPES = {
         let options = listeners.response[message.hash];
 
         if (!options) {
-            throw new Error(`No response handler found for post message response ${message.name} in ${window.location.href}`);
+            throw new Error(`No handler found for post message response for message: ${message.name} from ${origin} in ${window.location.protocol}//${window.location.host}${window.location.pathname}`);
         }
 
         if (!matchDomain(options.domain, origin)) {
