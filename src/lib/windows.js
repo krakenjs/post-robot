@@ -42,27 +42,6 @@ export function isSameDomain(win) {
     return match;
 }
 
-export function isWindowClosed(win) {
-
-    try {
-
-        if (!win || win.closed) {
-            return true;
-        }
-
-        if (isSameDomain(win) && util.safeGet(win, 'mockclosed')) {
-            return true;
-        }
-
-        return false;
-
-    } catch (err) {
-        // pass
-    }
-
-    return true;
-}
-
 
 export function getOpener(win) {
 
@@ -90,6 +69,57 @@ export function getParent(win) {
     } catch (err) {
         return;
     }
+}
+
+
+export function isWindowClosed(win) {
+
+    if (win === window) {
+        return false;
+    }
+
+    try {
+        if (!win) {
+            return true;
+        }
+
+    } catch (err) {
+        return true;
+    }
+
+    try {
+        if (win.closed) {
+            return true;
+        }
+
+    } catch (err) {
+
+        // I love you so much IE
+
+        if (err && err.message === 'Call was rejected by callee.\r\n') {
+            return false;
+        }
+
+        return true;
+    }
+
+
+    if (isSameDomain(win) && util.safeGet(win, 'mockclosed')) {
+        return true;
+    }
+
+    // IE9... don't even ask. If an iframe is removed from the parent page, .closed does not get set to true
+
+    try {
+        if (win.parent === win && !getOpener(win) && win !== window) {
+            return true;
+        }
+    } catch (err) {
+        // pass
+    }
+
+
+    return false;
 }
 
 export function getParents(win) {
