@@ -115,7 +115,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.winutil = exports.util = exports.linkUrl = exports.bridgeRequired = exports.openBridge = exports.reset = exports.parent = undefined;
+	exports.winutil = exports.util = exports.isBridge = exports.linkUrl = exports.bridgeRequired = exports.openBridge = exports.reset = exports.parent = undefined;
 
 	var _client = __webpack_require__(2);
 
@@ -180,6 +180,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  enumerable: true,
 	  get: function get() {
 	    return _bridge.linkUrl;
+	  }
+	});
+	Object.defineProperty(exports, 'isBridge', {
+	  enumerable: true,
+	  get: function get() {
+	    return _bridge.isBridge;
 	  }
 	});
 
@@ -2982,6 +2988,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.openTunnelToOpener = openTunnelToOpener;
 	exports.bridgeRequired = bridgeRequired;
 	exports.openBridge = openBridge;
+	exports.isBridge = isBridge;
 
 	var _conf = __webpack_require__(3);
 
@@ -3454,6 +3461,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 
 	    return _global.global.bridges[domain];
+	}
+
+	function isBridge() {
+	    return window.name && window.name === getBridgeName(_lib.util.getDomain());
 	}
 
 /***/ },
