@@ -1635,9 +1635,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: true
 	});
 	exports.isSameDomain = isSameDomain;
-	exports.isWindowClosed = isWindowClosed;
 	exports.getOpener = getOpener;
 	exports.getParent = getParent;
+	exports.isWindowClosed = isWindowClosed;
 	exports.getParents = getParents;
 	exports.isAncestorParent = isAncestorParent;
 	exports.getFrames = getFrames;
@@ -1717,26 +1717,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return match;
 	}
 
-	function isWindowClosed(win) {
-
-	    try {
-
-	        if (!win || win.closed) {
-	            return true;
-	        }
-
-	        if (isSameDomain(win) && _util.util.safeGet(win, 'mockclosed')) {
-	            return true;
-	        }
-
-	        return false;
-	    } catch (err) {
-	        // pass
-	    }
-
-	    return true;
-	}
-
 	function getOpener(win) {
 
 	    if (!win) {
@@ -1763,6 +1743,52 @@ return /******/ (function(modules) { // webpackBootstrap
 	    } catch (err) {
 	        return;
 	    }
+	}
+
+	function isWindowClosed(win) {
+
+	    if (win === window) {
+	        return false;
+	    }
+
+	    try {
+	        if (!win) {
+	            return true;
+	        }
+	    } catch (err) {
+	        return true;
+	    }
+
+	    try {
+	        if (win.closed) {
+	            return true;
+	        }
+	    } catch (err) {
+
+	        // I love you so much IE
+
+	        if (err && err.message === 'Call was rejected by callee.\r\n') {
+	            return false;
+	        }
+
+	        return true;
+	    }
+
+	    if (isSameDomain(win) && _util.util.safeGet(win, 'mockclosed')) {
+	        return true;
+	    }
+
+	    // IE9... don't even ask. If an iframe is removed from the parent page, .closed does not get set to true
+
+	    try {
+	        if (win.parent === win && !getOpener(win) && win !== window) {
+	            return true;
+	        }
+	    } catch (err) {
+	        // pass
+	    }
+
+	    return false;
 	}
 
 	function getParents(win) {
