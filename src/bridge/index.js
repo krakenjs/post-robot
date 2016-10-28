@@ -428,3 +428,7 @@ export function openBridge(url, domain) {
 
     return global.bridges[domain];
 }
+
+export function isBridge() {
+    return window.name && window.name === getBridgeName(util.getDomain());
+}
