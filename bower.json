@@ -1,7 +1,7 @@
 {
   "name": "post-robot",
   "main": "index.js",
-  "version": "4.0.20",
+  "version": "4.0.21",
   "authors": [
     "Daniel Brain <dbrain@paypal.com>"
   ],
