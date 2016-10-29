@@ -72,55 +72,6 @@ export function getParent(win) {
 }
 
 
-export function isWindowClosed(win) {
-
-    if (win === window) {
-        return false;
-    }
-
-    try {
-        if (!win) {
-            return true;
-        }
-
-    } catch (err) {
-        return true;
-    }
-
-    try {
-        if (win.closed) {
-            return true;
-        }
-
-    } catch (err) {
-
-        // I love you so much IE
-
-        if (err && err.message === 'Call was rejected by callee.\r\n') {
-            return false;
-        }
-
-        return true;
-    }
-
-
-    if (isSameDomain(win) && util.safeGet(win, 'mockclosed')) {
-        return true;
-    }
-
-    // IE9... don't even ask. If an iframe is removed from the parent page, .closed does not get set to true
-
-    try {
-        if (win.parent === win && !getOpener(win) && win !== window) {
-            return true;
-        }
-    } catch (err) {
-        // pass
-    }
-
-
-    return false;
-}
 
 export function getParents(win) {
 
@@ -304,6 +255,58 @@ export function getTop(win) {
         }
     }
 }
+
+
+export function isWindowClosed(win, allowMock = true) {
+
+    if (win === window) {
+        return false;
+    }
+
+    try {
+        if (!win) {
+            return true;
+        }
+
+    } catch (err) {
+        return true;
+    }
+
+    try {
+        if (win.closed) {
+            return true;
+        }
+
+    } catch (err) {
+
+        // I love you so much IE
+
+        if (err && err.message === 'Call was rejected by callee.\r\n') {
+            return false;
+        }
+
+        return true;
+    }
+
+
+    if (allowMock && isSameDomain(win) && util.safeGet(win, 'mockclosed')) {
+        return true;
+    }
+
+    // IE9... don't even ask. If an iframe is removed from the parent page, .closed does not get set to true
+
+    try {
+        if (win.parent === win && !getOpener(win) && win !== getTop(window)) {
+            // return true;
+        }
+    } catch (err) {
+        // pass
+    }
+
+
+    return false;
+}
+
 
 export function getFrameByName(win, name) {
 
