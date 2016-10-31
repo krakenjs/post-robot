@@ -348,10 +348,10 @@ export function findChildFrameByName(win, name) {
     }
 
     for (let childFrame of getFrames(win)) {
-        let frame = findChildFrameByName(childFrame, name);
+        let namedFrame = findChildFrameByName(childFrame, name);
 
-        if (frame) {
-            return frame;
+        if (namedFrame) {
+            return namedFrame;
         }
     }
 }
