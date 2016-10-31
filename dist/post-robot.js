@@ -1645,6 +1645,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.getTop = getTop;
 	exports.isWindowClosed = isWindowClosed;
 	exports.getFrameByName = getFrameByName;
+	exports.findChildFrameByName = findChildFrameByName;
 	exports.findFrameByName = findFrameByName;
 	exports.isParent = isParent;
 	exports.isOpener = isOpener;
@@ -2083,17 +2084,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	}
 
-	function findFrameByName(win, name) {
+	function findChildFrameByName(win, name) {
 
-	    var frame = void 0;
-
-	    frame = getFrameByName(win, name);
+	    var frame = getFrameByName(win, name);
 
 	    if (frame) {
 	        return frame;
 	    }
 
-	    for (var _iterator8 = getAncestors(win), _isArray8 = Array.isArray(_iterator8), _i9 = 0, _iterator8 = _isArray8 ? _iterator8 : _iterator8[Symbol.iterator]();;) {
+	    for (var _iterator8 = getFrames(win), _isArray8 = Array.isArray(_iterator8), _i9 = 0, _iterator8 = _isArray8 ? _iterator8 : _iterator8[Symbol.iterator]();;) {
 	        var _ref8;
 
 	        if (_isArray8) {
@@ -2105,13 +2104,35 @@ return /******/ (function(modules) { // webpackBootstrap
 	            _ref8 = _i9.value;
 	        }
 
-	        var ancestor = _ref8;
+	        var childFrame = _ref8;
 
-	        frame = getFrameByName(ancestor, name);
+	        var namedFrame = findChildFrameByName(childFrame, name);
 
-	        if (frame) {
-	            return frame;
+	        if (namedFrame) {
+	            return namedFrame;
 	        }
+	    }
+	}
+
+	function findFrameByName(win, name) {
+
+	    var frame = void 0;
+
+	    frame = getFrameByName(win, name);
+
+	    if (frame) {
+	        return frame;
+	    }
+
+	    return findChildFrameByName(getTop(win), name);
+	}
+
+	function isParent(win, frame) {
+
+	    var frameParent = getParent(frame);
+
+	    if (frameParent) {
+	        return frameParent === win;
 	    }
 
 	    for (var _iterator9 = getFrames(win), _isArray9 = Array.isArray(_iterator9), _i10 = 0, _iterator9 = _isArray9 ? _iterator9 : _iterator9[Symbol.iterator]();;) {
@@ -2127,36 +2148,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 
 	        var childFrame = _ref9;
-
-	        frame = getFrameByName(childFrame, name);
-
-	        if (frame) {
-	            return frame;
-	        }
-	    }
-	}
-
-	function isParent(win, frame) {
-
-	    var frameParent = getParent(frame);
-
-	    if (frameParent) {
-	        return frameParent === win;
-	    }
-
-	    for (var _iterator10 = getFrames(win), _isArray10 = Array.isArray(_iterator10), _i11 = 0, _iterator10 = _isArray10 ? _iterator10 : _iterator10[Symbol.iterator]();;) {
-	        var _ref10;
-
-	        if (_isArray10) {
-	            if (_i11 >= _iterator10.length) break;
-	            _ref10 = _iterator10[_i11++];
-	        } else {
-	            _i11 = _iterator10.next();
-	            if (_i11.done) break;
-	            _ref10 = _i11.value;
-	        }
-
-	        var childFrame = _ref10;
 
 	        if (childFrame === frame) {
 	            return true;
@@ -2223,19 +2214,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return false;
 	    }
 
-	    for (var _iterator11 = getFrames(parent), _isArray11 = Array.isArray(_iterator11), _i12 = 0, _iterator11 = _isArray11 ? _iterator11 : _iterator11[Symbol.iterator]();;) {
-	        var _ref11;
+	    for (var _iterator10 = getFrames(parent), _isArray10 = Array.isArray(_iterator10), _i11 = 0, _iterator10 = _isArray10 ? _iterator10 : _iterator10[Symbol.iterator]();;) {
+	        var _ref10;
 
-	        if (_isArray11) {
-	            if (_i12 >= _iterator11.length) break;
-	            _ref11 = _iterator11[_i12++];
+	        if (_isArray10) {
+	            if (_i11 >= _iterator10.length) break;
+	            _ref10 = _iterator10[_i11++];
 	        } else {
-	            _i12 = _iterator11.next();
-	            if (_i12.done) break;
-	            _ref11 = _i12.value;
+	            _i11 = _iterator10.next();
+	            if (_i11.done) break;
+	            _ref10 = _i11.value;
 	        }
 
-	        var frame = _ref11;
+	        var frame = _ref10;
 
 	        if (frame === child) {
 	            return true;
@@ -2269,33 +2260,33 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function anyMatch(collection1, collection2) {
 
-	    for (var _iterator12 = collection1, _isArray12 = Array.isArray(_iterator12), _i13 = 0, _iterator12 = _isArray12 ? _iterator12 : _iterator12[Symbol.iterator]();;) {
-	        var _ref12;
+	    for (var _iterator11 = collection1, _isArray11 = Array.isArray(_iterator11), _i12 = 0, _iterator11 = _isArray11 ? _iterator11 : _iterator11[Symbol.iterator]();;) {
+	        var _ref11;
 
-	        if (_isArray12) {
-	            if (_i13 >= _iterator12.length) break;
-	            _ref12 = _iterator12[_i13++];
+	        if (_isArray11) {
+	            if (_i12 >= _iterator11.length) break;
+	            _ref11 = _iterator11[_i12++];
 	        } else {
-	            _i13 = _iterator12.next();
-	            if (_i13.done) break;
-	            _ref12 = _i13.value;
+	            _i12 = _iterator11.next();
+	            if (_i12.done) break;
+	            _ref11 = _i12.value;
 	        }
 
-	        var item1 = _ref12;
+	        var item1 = _ref11;
 
-	        for (var _iterator13 = collection2, _isArray13 = Array.isArray(_iterator13), _i14 = 0, _iterator13 = _isArray13 ? _iterator13 : _iterator13[Symbol.iterator]();;) {
-	            var _ref13;
+	        for (var _iterator12 = collection2, _isArray12 = Array.isArray(_iterator12), _i13 = 0, _iterator12 = _isArray12 ? _iterator12 : _iterator12[Symbol.iterator]();;) {
+	            var _ref12;
 
-	            if (_isArray13) {
-	                if (_i14 >= _iterator13.length) break;
-	                _ref13 = _iterator13[_i14++];
+	            if (_isArray12) {
+	                if (_i13 >= _iterator12.length) break;
+	                _ref12 = _iterator12[_i13++];
 	            } else {
-	                _i14 = _iterator13.next();
-	                if (_i14.done) break;
-	                _ref13 = _i14.value;
+	                _i13 = _iterator12.next();
+	                if (_i13.done) break;
+	                _ref12 = _i13.value;
 	            }
 
-	            var item2 = _ref13;
+	            var item2 = _ref12;
 
 	            if (item1 === item2) {
 	                return true;
