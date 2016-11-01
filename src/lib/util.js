@@ -241,6 +241,10 @@ export let util = {
             throw new Error(`Can not read window protocol`);
         }
 
+        if (win.location.protocol === CONSTANTS.FILE_PROTOCOL) {
+            return `${win.location.protocol}//${win.location.host}`;
+        }
+
         if (!win.location.host) {
             throw new Error(`Can not read window host`);
         }

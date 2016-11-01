@@ -38,8 +38,8 @@ export let CONSTANTS = {
         GLOBAL: 'postrobot_global'
     },
 
-    MOCK_PROTOCOL: 'mock://',
-    FILE_PROTOCOL: 'file://',
+    MOCK_PROTOCOL: 'mock:',
+    FILE_PROTOCOL: 'file:',
 
     BRIDGE_NAME_PREFIX: '__postrobot_bridge__',
     POSTROBOT_PROXY: '__postrobot_proxy__'
