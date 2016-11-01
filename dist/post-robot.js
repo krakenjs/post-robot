@@ -497,8 +497,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        GLOBAL: 'postrobot_global'
 	    },
 
-	    MOCK_PROTOCOL: 'mock://',
-	    FILE_PROTOCOL: 'file://',
+	    MOCK_PROTOCOL: 'mock:',
+	    FILE_PROTOCOL: 'file:',
 
 	    BRIDGE_NAME_PREFIX: '__postrobot_bridge__',
 	    POSTROBOT_PROXY: '__postrobot_proxy__'
@@ -1446,6 +1446,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        if (!win.location.protocol) {
 	            throw new Error('Can not read window protocol');
+	        }
+
+	        if (win.location.protocol === _conf.CONSTANTS.FILE_PROTOCOL) {
+	            return win.location.protocol + '//' + win.location.host;
 	        }
 
 	        if (!win.location.host) {
