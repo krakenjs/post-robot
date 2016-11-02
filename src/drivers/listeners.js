@@ -13,17 +13,48 @@ export function resetListeners() {
     global.listeners.response = [];
 }
 
+function isRegex(item) {
+    return Object.prototype.toString.call(item) === '[object RegExp]';
+}
+
 function matchDomain(domain, origin) {
 
     if (typeof domain === 'string') {
+
+        if (isRegex(origin)) {
+            return false;
+        }
+
+        if (Array.isArray(origin)) {
+            return false;
+        }
+
         return domain === '*' || origin === domain;
     }
 
-    if (Object.prototype.toString.call(domain) === '[object RegExp]') {
+    if (isRegex(domain)) {
+
+        if (isRegex(origin)) {
+            return domain.toString() === origin.toString();
+        }
+
+        if (Array.isArray(origin)) {
+            return false;
+        }
+
         return origin.match(domain);
     }
 
     if (Array.isArray(domain)) {
+
+        if (isRegex(origin)) {
+            return false;
+        }
+
+        if (Array.isArray(origin)) {
+            return JSON.stringify(domain) === JSON.stringify(origin);
+        }
+
         return domain.indexOf(origin) !== -1;
     }
 
@@ -48,18 +79,18 @@ export function getRequestListener(name, win, domain) {
 
         if (specifiedWin && specifiedDomain) {
             if (matchedWin && matchedDomain) {
-                result.all = requestListener.options;
+                result.all = result.all || requestListener.options;
             }
         } else if (specifiedDomain) {
             if (matchedDomain) {
-                result.domain = requestListener.options;
+                result.domain = result.domain || requestListener.options;
             }
         } else if (specifiedWin) {
             if (matchedWin) {
-                result.win = requestListener.options;
+                result.win = result.win || requestListener.options;
             }
         } else {
-            result.name = requestListener.options;
+            result.name = result.name || requestListener.options;
         }
     }
 
