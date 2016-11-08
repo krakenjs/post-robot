@@ -1,10 +1,33 @@
 
+import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { CONFIG, CONSTANTS } from '../conf';
-import { util, promise, isSameDomain, log, onWindowReady, getOpener, getFrames, getFrameByName, isOpener, getParent, isWindowClosed, isSameTopWindow } from '../lib';
+import { util, promise, isSameDomain, log, onWindowReady, getOpener, getFrames, getFrameByName, isOpener, getParent,
+           isWindowClosed, isSameTopWindow, getUserAgent } from '../lib';
 import { global } from '../global';
 import { on, send } from '../interface';
 import { receiveMessage } from '../drivers';
 
+
+export function needsBridge({ win, domain }) {
+
+    if (!getUserAgent(window).match(/MSIE|trident|edge/i)) {
+        return false;
+    }
+
+    if (win && isSameTopWindow(window, win)) {
+        return false;
+    }
+
+    if (win && isSameDomain(win)) {
+        return false;
+    }
+
+    if (domain && util.getDomain() === domain) {
+        return false;
+    }
+
+    return true;
+}
 
 
 function getBridgeName(domain) {
@@ -267,64 +290,66 @@ global.openTunnelToParent = function openTunnelToParent({ name, source, canary, 
 
 
 export function openTunnelToOpener() {
+    return Promise.try(() => {
 
-    let opener = getOpener(window);
+        let opener = getOpener(window);
 
-    if (!opener) {
-        return;
-    }
+        if (!opener) {
+            return;
+        }
 
-    if (isSameDomain(opener)) {
-        return;
-    }
+        if (!needsBridge({ win: opener })) {
+            return;
+        }
 
-    registerRemoteWindow(opener);
+        registerRemoteWindow(opener);
 
-    let bridge = getRemoteBridgeForWindow(opener);
+        let bridge = getRemoteBridgeForWindow(opener);
 
-    if (!bridge) {
-        return rejectRemoteSendMessage(opener, new Error(`Can not register with opener: no bridge found in opener`));
-    }
+        if (!bridge) {
+            return rejectRemoteSendMessage(opener, new Error(`Can not register with opener: no bridge found in opener`));
+        }
 
-    if (!window.name) {
-        return rejectRemoteSendMessage(opener, new Error(`Can not register with opener: window does not have a name`));
-    }
+        if (!window.name) {
+            return rejectRemoteSendMessage(opener, new Error(`Can not register with opener: window does not have a name`));
+        }
 
-    return bridge[CONSTANTS.WINDOW_PROPS.POSTROBOT].openTunnelToParent({
+        return bridge[CONSTANTS.WINDOW_PROPS.POSTROBOT].openTunnelToParent({
 
-        name: window.name,
+            name: window.name,
 
-        source: window,
+            source: window,
 
-        canary() {
-            // pass
-        },
+            canary() {
+                // pass
+            },
 
-        sendMessage(message) {
+            sendMessage(message) {
 
-            if (!window || window.closed) {
-                return;
+                if (!window || window.closed) {
+                    return;
+                }
+
+                receiveMessage({
+                    data:   message,
+                    origin: this.origin,
+                    source: this.source
+                });
             }
 
-            receiveMessage({
-                data:   message,
-                origin: this.origin,
-                source: this.source
-            });
-        }
+        }).then(({ source, origin, data }) => {
 
-    }).then(({ source, origin, data }) => {
+            if (source !== opener) {
+                throw new Error(`Source does not match opener`);
+            }
 
-        if (source !== opener) {
-            throw new Error(`Source does not match opener`);
-        }
+            registerRemoteSendMessage(source, origin, data.sendMessage);
 
-        registerRemoteSendMessage(source, origin, data.sendMessage);
+        }).catch(err => {
 
-    }).catch(err => {
-
-        rejectRemoteSendMessage(opener, err);
-        throw err;
+            rejectRemoteSendMessage(opener, err);
+            throw err;
+        });
     });
 }
 
@@ -427,23 +452,6 @@ export function openBridge(url, domain) {
     });
 
     return global.bridges[domain];
-}
-
-export function needsBridge({ win, domain }) {
-
-    if (!window.navigator.userAgent.match(/MSIE|trident|edge/i)) {
-        return false;
-    }
-
-    if (win && isSameTopWindow(window, win)) {
-        return false;
-    }
-
-    if (domain && util.getDomain() === domain) {
-        return false;
-    }
-
-    return true;
 }
 
 export function isBridge() {

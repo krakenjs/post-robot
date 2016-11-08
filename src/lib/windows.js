@@ -311,6 +311,11 @@ export function isWindowClosed(win, allowMock = true) {
     return false;
 }
 
+export function getUserAgent(win) {
+    win = win || window;
+    return win.navigator.mockUserAgent || win.navigator.userAgent;
+}
+
 
 export function getFrameByName(win, name) {
 

@@ -1,8 +1,6 @@
 
-import './common';
+import { enableIE8Mode } from './common';
 import postRobot from 'src/index';
-
-postRobot.CONFIG.ALLOW_POSTMESSAGE_POPUP = false;
 
 import { onWindowReady, promise } from 'src/lib';
 
@@ -394,18 +392,26 @@ describe('[post-robot] popup tests', function() {
 
     it('should succeed messaging popup when emulating IE with all strategies enabled', function() {
 
-        postRobot.CONFIG.ALLOW_POSTMESSAGE_POPUP = false;
+        return postRobot.send(childWindow, 'enableIE8Mode').then((event) => {
 
-        return postRobot.send(childWindow, 'setupListener', {
+            let ie8mode = enableIE8Mode();
+            let remoteIE8mode = event.data;
 
-            messageName: 'foo',
-            data: {
-                foo: 'bar'
-            }
+            return postRobot.send(childWindow, 'setupListener', {
 
-        }).then(function() {
+                messageName: 'foo',
+                data: {
+                    foo: 'bar'
+                }
 
-            return postRobot.send(childWindow, 'foo');
+            }).then(function() {
+
+                return postRobot.send(childWindow, 'foo').then(() => {
+                    ie8mode.cancel();
+                    return remoteIE8mode.cancel();
+                });
+            });
+
         });
     });
 
