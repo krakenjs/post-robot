@@ -115,7 +115,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.winutil = exports.util = exports.needsBridge = exports.isBridge = exports.linkUrl = exports.bridgeRequired = exports.openBridge = exports.reset = exports.parent = undefined;
+	exports.winutil = exports.util = exports.openTunnelToOpener = exports.needsBridge = exports.isBridge = exports.linkUrl = exports.bridgeRequired = exports.openBridge = exports.reset = exports.parent = undefined;
 
 	var _client = __webpack_require__(2);
 
@@ -192,6 +192,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  enumerable: true,
 	  get: function get() {
 	    return _bridge.needsBridge;
+	  }
+	});
+	Object.defineProperty(exports, 'openTunnelToOpener', {
+	  enumerable: true,
+	  get: function get() {
+	    return _bridge.openTunnelToOpener;
 	  }
 	});
 
@@ -957,7 +963,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	}
 
+	var loggedErrors = [];
+
 	function logError(err) {
+
+	    if (loggedErrors.indexOf(err) !== -1) {
+	        return;
+	    }
+
+	    loggedErrors.push(err);
+
 	    setTimeout(function () {
 	        throw err;
 	    }, 1);
@@ -997,9 +1012,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return false;
 	}
 
-	var SyncPromise = exports.SyncPromise = function SyncPromise(handler, parent) {
-
-	    this.parent = parent;
+	var SyncPromise = exports.SyncPromise = function SyncPromise(handler) {
 
 	    this.resolved = false;
 	    this.rejected = false;
@@ -1125,6 +1138,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	SyncPromise.prototype.then = function (onSuccess, onError) {
 
+	    if (onSuccess && typeof onSuccess !== 'function') {
+	        throw new Error('Promise.then expected a function for success handler');
+	    }
+
+	    if (onError && typeof onError !== 'function') {
+	        throw new Error('Promise.then expected a function for error handler');
+	    }
+
 	    var promise = new SyncPromise(null, this);
 
 	    this.handlers.push({
@@ -1146,11 +1167,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	SyncPromise.prototype['finally'] = function (handler) {
 	    return this.then(function (result) {
-	        handler();
-	        return result;
-	    }, function (error) {
-	        handler();
-	        throw error;
+	        return SyncPromise['try'](handler).then(function () {
+	            return result;
+	        });
+	    }, function (err) {
+	        return SyncPromise['try'](handler).then(function () {
+	            throw err;
+	        });
 	    });
 	};
 
@@ -1160,7 +1183,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var count = promises.length;
 	    var results = [];
 
-	    for (var i = 0; i < promises.length; i++) {
+	    var _loop2 = function _loop2(i) {
 
 	        var prom = isPromise(promises[i]) ? promises[i] : SyncPromise.resolve(promises[i]);
 
@@ -1173,13 +1196,49 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }, function (err) {
 	            promise.reject(err);
 	        });
+	    };
+
+	    for (var i = 0; i < promises.length; i++) {
+	        _loop2(i);
+	    }
+
+	    if (!count) {
+	        promise.resolve(results);
 	    }
 
 	    return promise;
 	};
 
-	SyncPromise.onPossiblyUnhandledException = function (handler) {
+	SyncPromise.onPossiblyUnhandledException = function syncPromiseOnPossiblyUnhandledException(handler) {
 	    possiblyUnhandledPromiseHandlers.push(handler);
+	};
+
+	SyncPromise['try'] = function syncPromiseTry(method) {
+	    return SyncPromise.resolve().then(method);
+	};
+
+	SyncPromise.delay = function syncPromiseDelay(delay) {
+	    return new SyncPromise(function (resolve) {
+	        setTimeout(resolve, delay);
+	    });
+	};
+
+	SyncPromise.hash = function (obj) {
+
+	    var results = {};
+	    var promises = [];
+
+	    for (var key in obj) {
+	        if (obj.hasOwnProperty(key)) {
+	            promises.push(SyncPromise.resolve(obj[key]).then(function (result) {
+	                results[key] = result;
+	            }));
+	        }
+	    }
+
+	    return SyncPromise.all(promises).then(function () {
+	        return results;
+	    });
 	};
 
 	function patchPromise() {
@@ -1654,6 +1713,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.getAllFramesInWindow = getAllFramesInWindow;
 	exports.getTop = getTop;
 	exports.isWindowClosed = isWindowClosed;
+	exports.getUserAgent = getUserAgent;
 	exports.getFrameByName = getFrameByName;
 	exports.findChildFrameByName = findChildFrameByName;
 	exports.findFrameByName = findFrameByName;
@@ -2049,6 +2109,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	     */
 
 	    return false;
+	}
+
+	function getUserAgent(win) {
+	    win = win || window;
+	    return win.navigator.mockUserAgent || win.navigator.userAgent;
 	}
 
 	function getFrameByName(win, name) {
@@ -3013,13 +3078,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
+	exports.needsBridge = needsBridge;
 	exports.sendBridgeMessage = sendBridgeMessage;
 	exports.linkUrl = linkUrl;
 	exports.openTunnelToOpener = openTunnelToOpener;
 	exports.bridgeRequired = bridgeRequired;
 	exports.openBridge = openBridge;
-	exports.needsBridge = needsBridge;
 	exports.isBridge = isBridge;
+
+	var _promise = __webpack_require__(10);
 
 	var _conf = __webpack_require__(3);
 
@@ -3030,6 +3097,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _interface = __webpack_require__(1);
 
 	var _drivers = __webpack_require__(6);
+
+	function needsBridge(_ref) {
+	    var win = _ref.win;
+	    var domain = _ref.domain;
+
+
+	    if (!(0, _lib.getUserAgent)(window).match(/MSIE|trident|edge/i)) {
+	        return false;
+	    }
+
+	    if (win && (0, _lib.isSameTopWindow)(window, win)) {
+	        return false;
+	    }
+
+	    if (win && (0, _lib.isSameDomain)(win)) {
+	        return false;
+	    }
+
+	    if (domain && _lib.util.getDomain() === domain) {
+	        return false;
+	    }
+
+	    return true;
+	}
 
 	function getBridgeName(domain) {
 
@@ -3092,18 +3183,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	function registerRemoteSendMessage(win, domain, sendMessage) {
 
 	    for (var _iterator = _global.global.remoteWindows, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
-	        var _ref;
+	        var _ref2;
 
 	        if (_isArray) {
 	            if (_i >= _iterator.length) break;
-	            _ref = _iterator[_i++];
+	            _ref2 = _iterator[_i++];
 	        } else {
 	            _i = _iterator.next();
 	            if (_i.done) break;
-	            _ref = _i.value;
+	            _ref2 = _i.value;
 	        }
 
-	        var remoteWindow = _ref;
+	        var remoteWindow = _ref2;
 
 	        if (remoteWindow.win === win) {
 
@@ -3133,18 +3224,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	function rejectRemoteSendMessage(win, err) {
 
 	    for (var _iterator2 = _global.global.remoteWindows, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
-	        var _ref2;
+	        var _ref3;
 
 	        if (_isArray2) {
 	            if (_i2 >= _iterator2.length) break;
-	            _ref2 = _iterator2[_i2++];
+	            _ref3 = _iterator2[_i2++];
 	        } else {
 	            _i2 = _iterator2.next();
 	            if (_i2.done) break;
-	            _ref2 = _i2.value;
+	            _ref3 = _i2.value;
 	        }
 
-	        var remoteWindow = _ref2;
+	        var remoteWindow = _ref3;
 
 	        if (remoteWindow.win === win) {
 	            return remoteWindow.sendMessagePromise.reject(err);
@@ -3164,18 +3255,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    for (var _iterator3 = _global.global.remoteWindows, _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
-	        var _ref3;
+	        var _ref4;
 
 	        if (_isArray3) {
 	            if (_i3 >= _iterator3.length) break;
-	            _ref3 = _iterator3[_i3++];
+	            _ref4 = _iterator3[_i3++];
 	        } else {
 	            _i3 = _iterator3.next();
 	            if (_i3.done) break;
-	            _ref3 = _i3.value;
+	            _ref4 = _i3.value;
 	        }
 
-	        var remoteWindow = _ref3;
+	        var remoteWindow = _ref4;
 
 	        if (remoteWindow.win === win) {
 
@@ -3227,18 +3318,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	function linkUrl(win, url) {
 
 	    for (var _iterator4 = Object.keys(_global.global.popupWindows), _isArray4 = Array.isArray(_iterator4), _i4 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator]();;) {
-	        var _ref4;
+	        var _ref5;
 
 	        if (_isArray4) {
 	            if (_i4 >= _iterator4.length) break;
-	            _ref4 = _iterator4[_i4++];
+	            _ref5 = _iterator4[_i4++];
 	        } else {
 	            _i4 = _iterator4.next();
 	            if (_i4.done) break;
-	            _ref4 = _i4.value;
+	            _ref5 = _i4.value;
 	        }
 
-	        var name = _ref4;
+	        var name = _ref5;
 
 	        var winOptions = _global.global.popupWindows[name];
 
@@ -3253,9 +3344,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	function listenForRegister(source, domain) {
-	    (0, _interface.on)(_conf.CONSTANTS.POST_MESSAGE_NAMES.OPEN_TUNNEL, { source: source, domain: domain }, function (_ref5) {
-	        var origin = _ref5.origin;
-	        var data = _ref5.data;
+	    (0, _interface.on)(_conf.CONSTANTS.POST_MESSAGE_NAMES.OPEN_TUNNEL, { source: source, domain: domain }, function (_ref6) {
+	        var origin = _ref6.origin;
+	        var data = _ref6.data;
 
 
 	        if (origin !== domain) {
@@ -3303,11 +3394,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	}
 
-	_global.global.openTunnelToParent = function openTunnelToParent(_ref6) {
-	    var name = _ref6.name;
-	    var source = _ref6.source;
-	    var canary = _ref6.canary;
-	    var _sendMessage = _ref6.sendMessage;
+	_global.global.openTunnelToParent = function openTunnelToParent(_ref7) {
+	    var name = _ref7.name;
+	    var source = _ref7.source;
+	    var canary = _ref7.canary;
+	    var _sendMessage = _ref7.sendMessage;
 
 
 	    var remoteWindow = (0, _lib.getParent)(window);
@@ -3336,65 +3427,67 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 	function openTunnelToOpener() {
+	    return _promise.SyncPromise['try'](function () {
 
-	    var opener = (0, _lib.getOpener)(window);
+	        var opener = (0, _lib.getOpener)(window);
 
-	    if (!opener) {
-	        return;
-	    }
+	        if (!opener) {
+	            return;
+	        }
 
-	    if ((0, _lib.isSameDomain)(opener)) {
-	        return;
-	    }
+	        if (!needsBridge({ win: opener })) {
+	            return;
+	        }
 
-	    registerRemoteWindow(opener);
+	        registerRemoteWindow(opener);
 
-	    var bridge = getRemoteBridgeForWindow(opener);
+	        var bridge = getRemoteBridgeForWindow(opener);
 
-	    if (!bridge) {
-	        return rejectRemoteSendMessage(opener, new Error('Can not register with opener: no bridge found in opener'));
-	    }
+	        if (!bridge) {
+	            return rejectRemoteSendMessage(opener, new Error('Can not register with opener: no bridge found in opener'));
+	        }
 
-	    if (!window.name) {
-	        return rejectRemoteSendMessage(opener, new Error('Can not register with opener: window does not have a name'));
-	    }
+	        if (!window.name) {
+	            return rejectRemoteSendMessage(opener, new Error('Can not register with opener: window does not have a name'));
+	        }
 
-	    return bridge[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].openTunnelToParent({
+	        return bridge[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].openTunnelToParent({
 
-	        name: window.name,
+	            name: window.name,
 
-	        source: window,
+	            source: window,
 
-	        canary: function canary() {
-	            // pass
-	        },
-	        sendMessage: function sendMessage(message) {
+	            canary: function canary() {
+	                // pass
+	            },
+	            sendMessage: function sendMessage(message) {
 
-	            if (!window || window.closed) {
-	                return;
+	                if (!window || window.closed) {
+	                    return;
+	                }
+
+	                (0, _drivers.receiveMessage)({
+	                    data: message,
+	                    origin: this.origin,
+	                    source: this.source
+	                });
+	            }
+	        }).then(function (_ref8) {
+	            var source = _ref8.source;
+	            var origin = _ref8.origin;
+	            var data = _ref8.data;
+
+
+	            if (source !== opener) {
+	                throw new Error('Source does not match opener');
 	            }
 
-	            (0, _drivers.receiveMessage)({
-	                data: message,
-	                origin: this.origin,
-	                source: this.source
-	            });
-	        }
-	    }).then(function (_ref7) {
-	        var source = _ref7.source;
-	        var origin = _ref7.origin;
-	        var data = _ref7.data;
+	            registerRemoteSendMessage(source, origin, data.sendMessage);
+	        })['catch'](function (err) {
 
-
-	        if (source !== opener) {
-	            throw new Error('Source does not match opener');
-	        }
-
-	        registerRemoteSendMessage(source, origin, data.sendMessage);
-	    })['catch'](function (err) {
-
-	        rejectRemoteSendMessage(opener, err);
-	        throw err;
+	            rejectRemoteSendMessage(opener, err);
+	            throw err;
+	        });
 	    });
 	}
 
@@ -3492,26 +3585,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 
 	    return _global.global.bridges[domain];
-	}
-
-	function needsBridge(_ref8) {
-	    var win = _ref8.win;
-	    var domain = _ref8.domain;
-
-
-	    if (!window.navigator.userAgent.match(/MSIE|trident|edge/i)) {
-	        return false;
-	    }
-
-	    if (win && (0, _lib.isSameTopWindow)(window, win)) {
-	        return false;
-	    }
-
-	    if (domain && _lib.util.getDomain() === domain) {
-	        return false;
-	    }
-
-	    return true;
 	}
 
 	function isBridge() {
