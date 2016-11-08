@@ -293,6 +293,8 @@ export function isWindowClosed(win, allowMock = true) {
         return true;
     }
 
+    /*
+
     // IE9... don't even ask. If an iframe is removed from the parent page, .closed does not get set to true
 
     try {
@@ -302,6 +304,8 @@ export function isWindowClosed(win, allowMock = true) {
     } catch (err) {
         // pass
     }
+
+    */
 
 
     return false;

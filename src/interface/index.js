@@ -11,7 +11,7 @@ export let parent = getAncestor();
 
 export { resetListeners as reset } from '../drivers';
 
-export { openBridge, bridgeRequired, linkUrl, isBridge } from '../bridge';
+export { openBridge, bridgeRequired, linkUrl, isBridge, needsBridge } from '../bridge';
 
 export { util } from '../lib/util';
 

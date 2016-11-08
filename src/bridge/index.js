@@ -1,6 +1,6 @@
 
 import { CONFIG, CONSTANTS } from '../conf';
-import { util, promise, isSameDomain, log, onWindowReady, getOpener, getFrames, getFrameByName, isOpener, getParent, isWindowClosed } from '../lib';
+import { util, promise, isSameDomain, log, onWindowReady, getOpener, getFrames, getFrameByName, isOpener, getParent, isWindowClosed, isSameTopWindow } from '../lib';
 import { global } from '../global';
 import { on, send } from '../interface';
 import { receiveMessage } from '../drivers';
@@ -427,6 +427,23 @@ export function openBridge(url, domain) {
     });
 
     return global.bridges[domain];
+}
+
+export function needsBridge({ win, domain }) {
+
+    if (!window.navigator.userAgent.match(/MSIE|trident|edge/i)) {
+        return false;
+    }
+
+    if (win && isSameTopWindow(window, win)) {
+        return false;
+    }
+
+    if (domain && util.getDomain() === domain) {
+        return false;
+    }
+
+    return true;
 }
 
 export function isBridge() {
