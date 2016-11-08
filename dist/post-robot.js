@@ -115,7 +115,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.winutil = exports.util = exports.isBridge = exports.linkUrl = exports.bridgeRequired = exports.openBridge = exports.reset = exports.parent = undefined;
+	exports.winutil = exports.util = exports.needsBridge = exports.isBridge = exports.linkUrl = exports.bridgeRequired = exports.openBridge = exports.reset = exports.parent = undefined;
 
 	var _client = __webpack_require__(2);
 
@@ -186,6 +186,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  enumerable: true,
 	  get: function get() {
 	    return _bridge.isBridge;
+	  }
+	});
+	Object.defineProperty(exports, 'needsBridge', {
+	  enumerable: true,
+	  get: function get() {
+	    return _bridge.needsBridge;
 	  }
 	});
 
@@ -2031,15 +2037,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return true;
 	    }
 
-	    // IE9... don't even ask. If an iframe is removed from the parent page, .closed does not get set to true
-
-	    try {
+	    /*
+	     // IE9... don't even ask. If an iframe is removed from the parent page, .closed does not get set to true
+	     try {
 	        if (win.parent === win && !getOpener(win) && win !== getTop(window)) {
 	            // return true;
 	        }
 	    } catch (err) {
 	        // pass
 	    }
+	     */
 
 	    return false;
 	}
@@ -3011,6 +3018,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.openTunnelToOpener = openTunnelToOpener;
 	exports.bridgeRequired = bridgeRequired;
 	exports.openBridge = openBridge;
+	exports.needsBridge = needsBridge;
 	exports.isBridge = isBridge;
 
 	var _conf = __webpack_require__(3);
@@ -3486,6 +3494,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return _global.global.bridges[domain];
 	}
 
+	function needsBridge(_ref8) {
+	    var win = _ref8.win;
+	    var domain = _ref8.domain;
+
+
+	    if (!window.navigator.userAgent.match(/MSIE|trident|edge/i)) {
+	        return false;
+	    }
+
+	    if (win && (0, _lib.isSameTopWindow)(window, win)) {
+	        return false;
+	    }
+
+	    if (domain && _lib.util.getDomain() === domain) {
+	        return false;
+	    }
+
+	    return true;
+	}
+
 	function isBridge() {
 	    return window.name && window.name === getBridgeName(_lib.util.getDomain());
 	}
@@ -3519,17 +3547,48 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _global.global.listeners.response = [];
 	}
 
+	function isRegex(item) {
+	    return Object.prototype.toString.call(item) === '[object RegExp]';
+	}
+
 	function matchDomain(domain, origin) {
 
 	    if (typeof domain === 'string') {
+
+	        if (isRegex(origin)) {
+	            return false;
+	        }
+
+	        if (Array.isArray(origin)) {
+	            return false;
+	        }
+
 	        return domain === '*' || origin === domain;
 	    }
 
-	    if (Object.prototype.toString.call(domain) === '[object RegExp]') {
+	    if (isRegex(domain)) {
+
+	        if (isRegex(origin)) {
+	            return domain.toString() === origin.toString();
+	        }
+
+	        if (Array.isArray(origin)) {
+	            return false;
+	        }
+
 	        return origin.match(domain);
 	    }
 
 	    if (Array.isArray(domain)) {
+
+	        if (isRegex(origin)) {
+	            return false;
+	        }
+
+	        if (Array.isArray(origin)) {
+	            return JSON.stringify(domain) === JSON.stringify(origin);
+	        }
+
 	        return domain.indexOf(origin) !== -1;
 	    }
 
@@ -3567,18 +3626,18 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        if (specifiedWin && specifiedDomain) {
 	            if (matchedWin && matchedDomain) {
-	                result.all = requestListener.options;
+	                result.all = result.all || requestListener.options;
 	            }
 	        } else if (specifiedDomain) {
 	            if (matchedDomain) {
-	                result.domain = requestListener.options;
+	                result.domain = result.domain || requestListener.options;
 	            }
 	        } else if (specifiedWin) {
 	            if (matchedWin) {
-	                result.win = requestListener.options;
+	                result.win = result.win || requestListener.options;
 	            }
 	        } else {
-	            result.name = requestListener.options;
+	            result.name = result.name || requestListener.options;
 	        }
 	    }
 
