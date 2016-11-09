@@ -126,7 +126,7 @@ function rejectRemoteSendMessage(win, err) {
 
     for (let remoteWindow of global.remoteWindows) {
         if (remoteWindow.win === win) {
-            return remoteWindow.sendMessagePromise.reject(err);
+            return remoteWindow.sendMessagePromise.asyncReject(err);
         }
     }
 
