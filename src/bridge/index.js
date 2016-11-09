@@ -8,11 +8,16 @@ import { on, send } from '../interface';
 import { receiveMessage } from '../drivers';
 
 
-export function needsBridge({ win, domain }) {
+export function needsBridgeForBrowser() {
 
-    if (!getUserAgent(window).match(/MSIE|trident|edge/i)) {
-        return false;
+    if (getUserAgent(window).match(/MSIE|trident|edge/i)) {
+        return true;
     }
+
+    return false;
+}
+
+export function needsBridgeForWin(win) {
 
     if (win && isSameTopWindow(window, win)) {
         return false;
@@ -22,11 +27,20 @@ export function needsBridge({ win, domain }) {
         return false;
     }
 
-    if (domain && util.getDomain() === domain) {
+    return true;
+}
+
+export function needsBridgeForDomain(domain) {
+
+    if (domain && util.getDomain() === util.getDomainFromUrl(domain)) {
         return false;
     }
 
     return true;
+}
+
+export function needsBridge({ win, domain }) {
+    return needsBridgeForBrowser() && needsBridgeForWin(win) && needsBridgeForDomain(domain);
 }
 
 
@@ -381,19 +395,6 @@ function openBridgeFrame(name, url) {
 
     return iframe;
 }
-
-
-export function bridgeRequired(url, domain) {
-
-    domain = domain || util.getDomainFromUrl(url);
-
-    if (util.getDomain() === domain) {
-        return false;
-    }
-
-    return true;
-}
-
 
 global.bridges = global.bridges || {};
 
