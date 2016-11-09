@@ -115,7 +115,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.winutil = exports.util = exports.openTunnelToOpener = exports.needsBridge = exports.isBridge = exports.linkUrl = exports.bridgeRequired = exports.openBridge = exports.reset = exports.parent = undefined;
+	exports.winutil = exports.util = exports.openTunnelToOpener = exports.needsBridgeForDomain = exports.needsBridgeForWin = exports.needsBridgeForBrowser = exports.needsBridge = exports.isBridge = exports.linkUrl = exports.openBridge = exports.reset = exports.parent = undefined;
 
 	var _client = __webpack_require__(2);
 
@@ -170,12 +170,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return _bridge.openBridge;
 	  }
 	});
-	Object.defineProperty(exports, 'bridgeRequired', {
-	  enumerable: true,
-	  get: function get() {
-	    return _bridge.bridgeRequired;
-	  }
-	});
 	Object.defineProperty(exports, 'linkUrl', {
 	  enumerable: true,
 	  get: function get() {
@@ -192,6 +186,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	  enumerable: true,
 	  get: function get() {
 	    return _bridge.needsBridge;
+	  }
+	});
+	Object.defineProperty(exports, 'needsBridgeForBrowser', {
+	  enumerable: true,
+	  get: function get() {
+	    return _bridge.needsBridgeForBrowser;
+	  }
+	});
+	Object.defineProperty(exports, 'needsBridgeForWin', {
+	  enumerable: true,
+	  get: function get() {
+	    return _bridge.needsBridgeForWin;
+	  }
+	});
+	Object.defineProperty(exports, 'needsBridgeForDomain', {
+	  enumerable: true,
+	  get: function get() {
+	    return _bridge.needsBridgeForDomain;
 	  }
 	});
 	Object.defineProperty(exports, 'openTunnelToOpener', {
@@ -3083,11 +3095,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
+	exports.needsBridgeForBrowser = needsBridgeForBrowser;
+	exports.needsBridgeForWin = needsBridgeForWin;
+	exports.needsBridgeForDomain = needsBridgeForDomain;
 	exports.needsBridge = needsBridge;
 	exports.sendBridgeMessage = sendBridgeMessage;
 	exports.linkUrl = linkUrl;
 	exports.openTunnelToOpener = openTunnelToOpener;
-	exports.bridgeRequired = bridgeRequired;
 	exports.openBridge = openBridge;
 	exports.isBridge = isBridge;
 
@@ -3103,14 +3117,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _drivers = __webpack_require__(6);
 
-	function needsBridge(_ref) {
-	    var win = _ref.win;
-	    var domain = _ref.domain;
+	function needsBridgeForBrowser() {
 
-
-	    if (!(0, _lib.getUserAgent)(window).match(/MSIE|trident|edge/i)) {
-	        return false;
+	    if ((0, _lib.getUserAgent)(window).match(/MSIE|trident|edge/i)) {
+	        return true;
 	    }
+
+	    return false;
+	}
+
+	function needsBridgeForWin(win) {
 
 	    if (win && (0, _lib.isSameTopWindow)(window, win)) {
 	        return false;
@@ -3120,11 +3136,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return false;
 	    }
 
-	    if (domain && _lib.util.getDomain() === domain) {
+	    return true;
+	}
+
+	function needsBridgeForDomain(domain) {
+
+	    if (domain && _lib.util.getDomain() === _lib.util.getDomainFromUrl(domain)) {
 	        return false;
 	    }
 
 	    return true;
+	}
+
+	function needsBridge(_ref) {
+	    var win = _ref.win;
+	    var domain = _ref.domain;
+
+	    return needsBridgeForBrowser() && needsBridgeForWin(win) && needsBridgeForDomain(domain);
 	}
 
 	function getBridgeName(domain) {
@@ -3523,17 +3551,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    iframe.src = url;
 
 	    return iframe;
-	}
-
-	function bridgeRequired(url, domain) {
-
-	    domain = domain || _lib.util.getDomainFromUrl(url);
-
-	    if (_lib.util.getDomain() === domain) {
-	        return false;
-	    }
-
-	    return true;
 	}
 
 	_global.global.bridges = _global.global.bridges || {};
