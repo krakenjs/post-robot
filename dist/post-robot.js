@@ -2646,34 +2646,31 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function initOnReady() {
 
-	    (0, _interface.on)(_conf.CONSTANTS.POST_MESSAGE_NAMES.READY, { window: '*', domain: '*' }, function (_ref) {
-	        var source = _ref.source;
-	        var data = _ref.data;
-
+	    (0, _interface.on)(_conf.CONSTANTS.POST_MESSAGE_NAMES.READY, { window: '*', domain: '*' }, function (event) {
 
 	        for (var _iterator = _global.global.readyPromises, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
-	            var _ref2;
+	            var _ref;
 
 	            if (_isArray) {
 	                if (_i >= _iterator.length) break;
-	                _ref2 = _iterator[_i++];
+	                _ref = _iterator[_i++];
 	            } else {
 	                _i = _iterator.next();
 	                if (_i.done) break;
-	                _ref2 = _i.value;
+	                _ref = _i.value;
 	            }
 
-	            var item = _ref2;
+	            var item = _ref;
 
-	            if (item.win === source) {
-	                item.promise.resolve(source);
+	            if (item.win === event.source) {
+	                item.promise.resolve(event);
 	                return;
 	            }
 	        }
 
 	        _global.global.readyPromises.push({
-	            win: source,
-	            promise: new _promise.SyncPromise().resolve(source)
+	            win: event.source,
+	            promise: new _promise.SyncPromise().resolve(event)
 	        });
 	    });
 
@@ -2692,18 +2689,18 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 	    for (var _iterator2 = _global.global.readyPromises, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
-	        var _ref3;
+	        var _ref2;
 
 	        if (_isArray2) {
 	            if (_i2 >= _iterator2.length) break;
-	            _ref3 = _iterator2[_i2++];
+	            _ref2 = _iterator2[_i2++];
 	        } else {
 	            _i2 = _iterator2.next();
 	            if (_i2.done) break;
-	            _ref3 = _i2.value;
+	            _ref2 = _i2.value;
 	        }
 
-	        var item = _ref3;
+	        var item = _ref2;
 
 	        if (item.win === win) {
 	            return item.promise;
@@ -3123,6 +3120,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return true;
 	    }
 
+	    if (!_conf.CONFIG.ALLOW_POSTMESSAGE_POPUP) {
+	        return true;
+	    }
+
 	    return false;
 	}
 
@@ -3213,69 +3214,48 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _global.global.remoteWindows.push({ win: win, sendMessagePromise: sendMessagePromise });
 	}
 
-	function registerRemoteSendMessage(win, domain, sendMessage) {
-
-	    for (var _iterator = _global.global.remoteWindows, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
-	        var _ref2;
-
-	        if (_isArray) {
-	            if (_i >= _iterator.length) break;
-	            _ref2 = _iterator[_i++];
-	        } else {
-	            _i = _iterator.next();
-	            if (_i.done) break;
-	            _ref2 = _i.value;
-	        }
-
-	        var remoteWindow = _ref2;
-
-	        if (remoteWindow.win === win) {
-
-	            var sendMessageWrapper = function sendMessageWrapper(remoteWin, message, remoteDomain) {
-
-	                if (remoteWin !== win) {
-	                    throw new Error('Remote window does not match window');
-	                }
-
-	                if (remoteDomain !== '*' && remoteDomain !== domain) {
-	                    throw new Error('Remote domain ' + remoteDomain + ' does not match domain ' + domain);
-	                }
-
-	                sendMessage(message);
-	            };
-
-	            remoteWindow.sendMessagePromise.resolve(sendMessageWrapper);
-	            remoteWindow.sendMessagePromise = _lib.promise.Promise.resolve(sendMessageWrapper);
-
-	            return;
+	function findRemoteWindow(win) {
+	    for (var i = 0; i < _global.global.remoteWindows.length; i++) {
+	        if (_global.global.remoteWindows[i].win === win) {
+	            return _global.global.remoteWindows[i];
 	        }
 	    }
+	}
 
-	    throw new Error('Window not found to register sendMessage to');
+	function registerRemoteSendMessage(win, domain, sendMessage) {
+
+	    var remoteWindow = findRemoteWindow(win);
+
+	    if (!remoteWindow) {
+	        throw new Error('Window not found to register sendMessage to');
+	    }
+
+	    var sendMessageWrapper = function sendMessageWrapper(remoteWin, message, remoteDomain) {
+
+	        if (remoteWin !== win) {
+	            throw new Error('Remote window does not match window');
+	        }
+
+	        if (remoteDomain !== '*' && remoteDomain !== domain) {
+	            throw new Error('Remote domain ' + remoteDomain + ' does not match domain ' + domain);
+	        }
+
+	        sendMessage(message);
+	    };
+
+	    remoteWindow.sendMessagePromise.resolve(sendMessageWrapper);
+	    remoteWindow.sendMessagePromise = _lib.promise.Promise.resolve(sendMessageWrapper);
 	}
 
 	function rejectRemoteSendMessage(win, err) {
 
-	    for (var _iterator2 = _global.global.remoteWindows, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
-	        var _ref3;
+	    var remoteWindow = findRemoteWindow(win);
 
-	        if (_isArray2) {
-	            if (_i2 >= _iterator2.length) break;
-	            _ref3 = _iterator2[_i2++];
-	        } else {
-	            _i2 = _iterator2.next();
-	            if (_i2.done) break;
-	            _ref3 = _i2.value;
-	        }
-
-	        var remoteWindow = _ref3;
-
-	        if (remoteWindow.win === win) {
-	            return remoteWindow.sendMessagePromise.asyncReject(err);
-	        }
+	    if (!remoteWindow) {
+	        throw new Error('Window not found on which to reject sendMessage');
 	    }
 
-	    throw new Error('Window not found on which to reject sendMessage');
+	    return remoteWindow.sendMessagePromise.asyncReject(err);
 	}
 
 	function sendBridgeMessage(win, message, domain) {
@@ -3287,29 +3267,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	        throw new Error('Can only send messages to and from parent and popup windows');
 	    }
 
-	    for (var _iterator3 = _global.global.remoteWindows, _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
-	        var _ref4;
+	    var remoteWindow = findRemoteWindow(win);
 
-	        if (_isArray3) {
-	            if (_i3 >= _iterator3.length) break;
-	            _ref4 = _iterator3[_i3++];
-	        } else {
-	            _i3 = _iterator3.next();
-	            if (_i3.done) break;
-	            _ref4 = _i3.value;
-	        }
-
-	        var remoteWindow = _ref4;
-
-	        if (remoteWindow.win === win) {
-
-	            return remoteWindow.sendMessagePromise.then(function (sendMessage) {
-	                return sendMessage(win, message, domain);
-	            });
-	        }
+	    if (!remoteWindow) {
+	        throw new Error('Window not found to send message to');
 	    }
 
-	    throw new Error('Window not found to send message to');
+	    return remoteWindow.sendMessagePromise.then(function (sendMessage) {
+	        return sendMessage(win, message, domain);
+	    });
 	}
 
 	// Keep track of all open windows by name
@@ -3350,19 +3316,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function linkUrl(win, url) {
 
-	    for (var _iterator4 = Object.keys(_global.global.popupWindows), _isArray4 = Array.isArray(_iterator4), _i4 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator]();;) {
-	        var _ref5;
+	    for (var _iterator = Object.keys(_global.global.popupWindows), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+	        var _ref2;
 
-	        if (_isArray4) {
-	            if (_i4 >= _iterator4.length) break;
-	            _ref5 = _iterator4[_i4++];
+	        if (_isArray) {
+	            if (_i >= _iterator.length) break;
+	            _ref2 = _iterator[_i++];
 	        } else {
-	            _i4 = _iterator4.next();
-	            if (_i4.done) break;
-	            _ref5 = _i4.value;
+	            _i = _iterator.next();
+	            if (_i.done) break;
+	            _ref2 = _i.value;
 	        }
 
-	        var name = _ref5;
+	        var name = _ref2;
 
 	        var winOptions = _global.global.popupWindows[name];
 
@@ -3377,9 +3343,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	function listenForRegister(source, domain) {
-	    (0, _interface.on)(_conf.CONSTANTS.POST_MESSAGE_NAMES.OPEN_TUNNEL, { source: source, domain: domain }, function (_ref6) {
-	        var origin = _ref6.origin;
-	        var data = _ref6.data;
+	    (0, _interface.on)(_conf.CONSTANTS.POST_MESSAGE_NAMES.OPEN_TUNNEL, { source: source, domain: domain }, function (_ref3) {
+	        var origin = _ref3.origin;
+	        var data = _ref3.data;
 
 
 	        if (origin !== domain) {
@@ -3427,11 +3393,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	}
 
-	_global.global.openTunnelToParent = function openTunnelToParent(_ref7) {
-	    var name = _ref7.name;
-	    var source = _ref7.source;
-	    var canary = _ref7.canary;
-	    var _sendMessage = _ref7.sendMessage;
+	_global.global.openTunnelToParent = function openTunnelToParent(_ref4) {
+	    var name = _ref4.name;
+	    var source = _ref4.source;
+	    var canary = _ref4.canary;
+	    var _sendMessage = _ref4.sendMessage;
 
 
 	    var remoteWindow = (0, _lib.getParent)(window);
@@ -3505,10 +3471,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    source: this.source
 	                });
 	            }
-	        }).then(function (_ref8) {
-	            var source = _ref8.source;
-	            var origin = _ref8.origin;
-	            var data = _ref8.data;
+	        }).then(function (_ref5) {
+	            var source = _ref5.source;
+	            var origin = _ref5.origin;
+	            var data = _ref5.data;
 
 
 	            if (source !== opener) {
