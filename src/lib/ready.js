@@ -10,18 +10,18 @@ global.readyPromises = global.readyPromises || [];
 
 export function initOnReady() {
 
-    on(CONSTANTS.POST_MESSAGE_NAMES.READY, { window: '*', domain: '*' }, ({ source, data }) => {
+    on(CONSTANTS.POST_MESSAGE_NAMES.READY, { window: '*', domain: '*' }, event => {
 
         for (let item of global.readyPromises) {
-            if (item.win === source) {
-                item.promise.resolve(source);
+            if (item.win === event.source) {
+                item.promise.resolve(event);
                 return;
             }
         }
 
         global.readyPromises.push({
-            win: source,
-            promise: new Promise().resolve(source)
+            win: event.source,
+            promise: new Promise().resolve(event)
         });
     });
 

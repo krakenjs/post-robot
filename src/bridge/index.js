@@ -14,6 +14,10 @@ export function needsBridgeForBrowser() {
         return true;
     }
 
+    if (!CONFIG.ALLOW_POSTMESSAGE_POPUP) {
+        return true;
+    }
+
     return false;
 }
 
@@ -108,43 +112,48 @@ function registerRemoteWindow(win, timeout = CONFIG.BRIDGE_TIMEOUT) {
     global.remoteWindows.push({ win, sendMessagePromise });
 }
 
-function registerRemoteSendMessage(win, domain, sendMessage) {
-
-    for (let remoteWindow of global.remoteWindows) {
-        if (remoteWindow.win === win) {
-
-            let sendMessageWrapper = (remoteWin, message, remoteDomain) => {
-
-                if (remoteWin !== win) {
-                    throw new Error(`Remote window does not match window`);
-                }
-
-                if (remoteDomain !== `*` && remoteDomain !== domain) {
-                    throw new Error(`Remote domain ${remoteDomain} does not match domain ${domain}`);
-                }
-
-                sendMessage(message);
-            };
-
-            remoteWindow.sendMessagePromise.resolve(sendMessageWrapper);
-            remoteWindow.sendMessagePromise = promise.Promise.resolve(sendMessageWrapper);
-
-            return;
+function findRemoteWindow(win) {
+    for (let i = 0; i < global.remoteWindows.length; i++) {
+        if (global.remoteWindows[i].win === win) {
+            return global.remoteWindows[i];
         }
     }
+}
 
-    throw new Error(`Window not found to register sendMessage to`);
+function registerRemoteSendMessage(win, domain, sendMessage) {
+
+    let remoteWindow = findRemoteWindow(win);
+
+    if (!remoteWindow) {
+        throw new Error(`Window not found to register sendMessage to`);
+    }
+
+    let sendMessageWrapper = (remoteWin, message, remoteDomain) => {
+
+        if (remoteWin !== win) {
+            throw new Error(`Remote window does not match window`);
+        }
+
+        if (remoteDomain !== `*` && remoteDomain !== domain) {
+            throw new Error(`Remote domain ${remoteDomain} does not match domain ${domain}`);
+        }
+
+        sendMessage(message);
+    };
+
+    remoteWindow.sendMessagePromise.resolve(sendMessageWrapper);
+    remoteWindow.sendMessagePromise = promise.Promise.resolve(sendMessageWrapper);
 }
 
 function rejectRemoteSendMessage(win, err) {
 
-    for (let remoteWindow of global.remoteWindows) {
-        if (remoteWindow.win === win) {
-            return remoteWindow.sendMessagePromise.asyncReject(err);
-        }
+    let remoteWindow = findRemoteWindow(win);
+
+    if (!remoteWindow) {
+        throw new Error(`Window not found on which to reject sendMessage`);
     }
 
-    throw new Error(`Window not found on which to reject sendMessage`);
+    return remoteWindow.sendMessagePromise.asyncReject(err);
 }
 
 export function sendBridgeMessage(win, message, domain) {
@@ -156,16 +165,15 @@ export function sendBridgeMessage(win, message, domain) {
         throw new Error(`Can only send messages to and from parent and popup windows`);
     }
 
-    for (let remoteWindow of global.remoteWindows) {
-        if (remoteWindow.win === win) {
+    let remoteWindow = findRemoteWindow(win);
 
-            return remoteWindow.sendMessagePromise.then(sendMessage => {
-                return sendMessage(win, message, domain);
-            });
-        }
+    if (!remoteWindow) {
+        throw new Error(`Window not found to send message to`);
     }
 
-    throw new Error(`Window not found to send message to`);
+    return remoteWindow.sendMessagePromise.then(sendMessage => {
+        return sendMessage(win, message, domain);
+    });
 }
 
 
