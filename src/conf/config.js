@@ -3,7 +3,7 @@ import { CONSTANTS } from './constants';
 
 export let CONFIG = {
     
-    ALLOW_POSTMESSAGE_POPUP: true,
+    ALLOW_POSTMESSAGE_POPUP: false,
 
     LOG_LEVEL: 'info',
 

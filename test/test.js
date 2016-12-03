@@ -351,7 +351,7 @@ describe('[post-robot] error cases', function() {
             return postRobot.send(childFrame, 'foo', {}, { domain: 'http://www.zombo.com' }).then(function() {
                 throw new Error('Expected success handler to not be called');
             }, function(err) {
-                assert.ok(err);
+                assert.ok(err instanceof Error);
             });
         });
     });

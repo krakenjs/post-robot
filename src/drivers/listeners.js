@@ -123,5 +123,5 @@ export function addRequestListener(name, win, domain, options, override) {
         }
     }
 
-    listeners.request.push({ name, win, domain, options });
+    global.clean.push(global.listeners.request, { name, win, domain, options });
 }

@@ -4,7 +4,7 @@ import { listenForMessages } from './drivers';
 import { global } from './global';
 import { openTunnelToOpener } from './bridge';
 
-function init() {
+export function init() {
 
     if (!global.initialized) {
         listenForMessages();
@@ -17,6 +17,13 @@ function init() {
 }
 
 init();
+
+export function reset() {
+    return global.clean.all().then(() => {
+        global.initialized = false;
+        return init();
+    });
+}
 
 export * from './interface';
 export { Promise } from './lib';

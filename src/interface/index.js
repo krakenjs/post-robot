@@ -9,9 +9,7 @@ import * as windowUtil from '../lib/windows';
 
 export let parent = getAncestor();
 
-export { resetListeners as reset } from '../drivers';
-
-export { openBridge, linkUrl, isBridge, needsBridge, needsBridgeForBrowser, needsBridgeForWin, needsBridgeForDomain, openTunnelToOpener } from '../bridge';
+export { openBridge, linkUrl, isBridge, needsBridge, needsBridgeForBrowser, needsBridgeForWin, needsBridgeForDomain, openTunnelToOpener, destroyBridges } from '../bridge';
 
 export { util } from '../lib/util';
 

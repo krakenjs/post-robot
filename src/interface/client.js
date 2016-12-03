@@ -1,6 +1,7 @@
 
 import { CONFIG, CONSTANTS } from '../conf';
-import { listeners, sendMessage } from '../drivers';
+import { sendMessage } from '../drivers';
+import { global } from '../global';
 import { util, promise, getAncestor, isAncestor, onWindowReady, isWindowClosed } from '../lib';
 
 
@@ -41,7 +42,7 @@ export function request(options) {
         options.domain = options.domain || '*';
 
         let hash = `${options.name}_${util.uniqueID()}`;
-        listeners.response[hash] = options;
+        global.clean.setItem(global.listeners.response, hash, options);
 
         if (isWindowClosed(options.window)) {
             throw new Error('Target window is closed');

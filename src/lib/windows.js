@@ -27,10 +27,7 @@ export function isSameDomain(win) {
         match = false;
     }
 
-    global.domainMatches.push({
-        win,
-        match
-    });
+    global.clean.push(global.domainMatches, { win, match });
 
     if (!domainMatchTimeout) {
         domainMatchTimeout = setTimeout(() => {

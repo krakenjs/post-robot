@@ -65,7 +65,7 @@ export function receiveMessage(event) {
     }
 
     if (global.receivedMessages.indexOf(message.id) === -1) {
-        global.receivedMessages.push(message.id);
+        global.clean.push(global.receivedMessages, message.id);
     } else {
         return;
     }
@@ -117,5 +117,9 @@ export function messageListener(event) {
 }
 
 export function listenForMessages() {
-    util.listen(window, 'message', messageListener);
+    let listener = util.listen(window, 'message', messageListener);
+
+    global.clean.register('listener', () => {
+        listener.cancel();
+    });
 }

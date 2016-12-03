@@ -49,11 +49,7 @@ export function serializeMethod(destination, domain, method, name) {
 
     let id = util.uniqueID();
 
-    global.methods[id] = {
-        destination,
-        domain,
-        method
-    };
+    global.clean.setItem(global.methods, id, { destination, domain, method });
 
     return {
         __type__: CONSTANTS.SERIALIZATION_TYPES.METHOD,
@@ -89,6 +85,8 @@ export function deserializeMethod(source, origin, obj) {
     }
 
     wrapper.__name__ = obj.__name__;
+    wrapper.source = source;
+    wrapper.origin = origin;
 
     return wrapper;
 }

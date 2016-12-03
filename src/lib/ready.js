@@ -19,7 +19,7 @@ export function initOnReady() {
             }
         }
 
-        global.readyPromises.push({
+        global.clean.push(global.readyPromises, {
             win: event.source,
             promise: new Promise().resolve(event)
         });
@@ -44,10 +44,7 @@ export function onWindowReady(win, timeout = 5000, name = 'Window') {
 
     let promise = new Promise();
 
-    global.readyPromises.push({
-        win,
-        promise
-    });
+    global.clean.push(global.readyPromises, { win, promise });
 
     setTimeout(() => promise.reject(new Error(`${name} did not load after ${timeout}ms`)), timeout);
 

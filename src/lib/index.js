@@ -6,3 +6,4 @@ export * from './windows';
 export * from './methods';
 export * from './tick';
 export * from './ready';
+export * from './cleanup';
