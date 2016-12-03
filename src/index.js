@@ -1,15 +1,13 @@
 
-import { util, initOnReady, listenForMethods } from './lib';
-import { messageListener } from './drivers';
+import { initOnReady, listenForMethods } from './lib';
+import { listenForMessages } from './drivers';
 import { global } from './global';
 import { openTunnelToOpener } from './bridge';
 
 function init() {
 
     if (!global.initialized) {
-
-        util.listen(window, 'message', messageListener);
-
+        listenForMessages();
         openTunnelToOpener();
         initOnReady();
         listenForMethods();
