@@ -1,5 +1,6 @@
 var argv = require('yargs').argv;
 var path = require('path');
+var webpack = require('webpack');
 
 module.exports = function(config) {
     config.set({
@@ -71,7 +72,13 @@ module.exports = function(config) {
                     }
                 ]
             },
-            bail: false
+            bail: false,
+
+            plugins: [
+                new webpack.DefinePlugin({
+                    __TEST__: true
+                })
+            ]
         },
 
 

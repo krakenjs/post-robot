@@ -21,7 +21,8 @@
   "globals": {
     "window": true,
     "document": true,
-    "Promise": false
+    "Promise": false,
+    "__TEST__": true
   },
 
   "fix": true,
