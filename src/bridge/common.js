@@ -120,7 +120,7 @@ export function rejectRemoteSendMessage(win, err) {
         throw new Error(`Window not found on which to reject sendMessage`);
     }
 
-    return remoteWindow.sendMessagePromise.asyncReject(err);
+    remoteWindow.sendMessagePromise.asyncReject(err);
 }
 
 export function sendBridgeMessage(win, message, domain) {
