@@ -518,7 +518,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    },
 
 	    SERIALIZATION_TYPES: {
-	        METHOD: 'postrobot_method'
+	        METHOD: 'postrobot_method',
+	        ERROR: 'postrobot_error'
 	    },
 
 	    SEND_STRATEGIES: {
@@ -2671,6 +2672,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.serializeMethod = serializeMethod;
 	exports.serializeMethods = serializeMethods;
 	exports.deserializeMethod = deserializeMethod;
+	exports.deserializeError = deserializeError;
 	exports.deserializeMethods = deserializeMethods;
 
 	var _conf = __webpack_require__(3);
@@ -2723,8 +2725,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	});
 
-	function isSerializedMethod(item) {
-	    return (typeof item === 'undefined' ? 'undefined' : _typeof(item)) === 'object' && item !== null && item.__type__ === _conf.CONSTANTS.SERIALIZATION_TYPES.METHOD && item.__id__;
+	function isSerialized(item, type) {
+	    return (typeof item === 'undefined' ? 'undefined' : _typeof(item)) === 'object' && item !== null && item.__type__ === type;
 	}
 
 	function serializeMethod(destination, domain, method, name) {
@@ -2740,11 +2742,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	}
 
+	function serializeError(err) {
+	    return {
+	        __type__: _conf.CONSTANTS.SERIALIZATION_TYPES.ERROR,
+	        __message__: err.stack || err.message || err.toString()
+	    };
+	}
+
 	function serializeMethods(destination, domain, obj) {
 
 	    return _util.util.replaceObject({ obj: obj }, function (item, key) {
 	        if (typeof item === 'function') {
 	            return serializeMethod(destination, domain, item, key);
+	        }
+
+	        if (item instanceof Error) {
+	            return serializeError(item);
 	        }
 	    }).obj;
 	}
@@ -2775,11 +2788,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return wrapper;
 	}
 
+	function deserializeError(source, origin, obj) {
+	    return new Error(obj.__message__);
+	}
+
 	function deserializeMethods(source, origin, obj) {
 
 	    return _util.util.replaceObject({ obj: obj }, function (item, key) {
-	        if (isSerializedMethod(item)) {
+
+	        if (isSerialized(item, _conf.CONSTANTS.SERIALIZATION_TYPES.METHOD)) {
 	            return deserializeMethod(source, origin, item);
+	        }
+
+	        if (isSerialized(item, _conf.CONSTANTS.SERIALIZATION_TYPES.ERROR)) {
+	            return deserializeError(source, origin, item);
 	        }
 	    }).obj;
 	}
