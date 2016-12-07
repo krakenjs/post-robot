@@ -41,8 +41,8 @@ export let listenForMethods = util.once(() => {
     });
 });
 
-function isSerializedMethod(item) {
-    return typeof item === 'object' && item !== null && item.__type__ === CONSTANTS.SERIALIZATION_TYPES.METHOD && item.__id__;
+function isSerialized(item, type) {
+    return typeof item === 'object' && item !== null && item.__type__ === type;
 }
 
 export function serializeMethod(destination, domain, method, name) {
@@ -58,11 +58,22 @@ export function serializeMethod(destination, domain, method, name) {
     };
 }
 
+function serializeError(err) {
+    return {
+        __type__: CONSTANTS.SERIALIZATION_TYPES.ERROR,
+        __message__: err.stack || err.message || err.toString()
+    };
+}
+
 export function serializeMethods(destination, domain, obj) {
 
     return util.replaceObject({ obj }, (item, key) => {
         if (typeof item === 'function') {
             return serializeMethod(destination, domain, item, key);
+        }
+
+        if (item instanceof Error) {
+            return serializeError(item);
         }
     }).obj;
 }
@@ -91,11 +102,21 @@ export function deserializeMethod(source, origin, obj) {
     return wrapper;
 }
 
+export function deserializeError(source, origin, obj) {
+    return new Error(obj.__message__);
+}
+
 export function deserializeMethods(source, origin, obj) {
 
     return util.replaceObject({ obj }, (item, key) => {
-        if (isSerializedMethod(item)) {
+
+        if (isSerialized(item, CONSTANTS.SERIALIZATION_TYPES.METHOD)) {
             return deserializeMethod(source, origin, item);
         }
+
+        if (isSerialized(item, CONSTANTS.SERIALIZATION_TYPES.ERROR)) {
+            return deserializeError(source, origin, item);
+        }
+
     }).obj;
 }
