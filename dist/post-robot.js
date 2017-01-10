@@ -2504,7 +2504,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
-	  value: true
+	    value: true
 	});
 	exports.global = undefined;
 
@@ -2515,6 +2515,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	var global = exports.global = window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT] = window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT] || {};
 
 	global.clean = global.clean || (0, _cleanup.cleanup)(global);
+
+	// Backwards compatibility
+
+	global.registerSelf = function () {
+	    // pass
+	};
 
 /***/ },
 /* 16 */
