@@ -256,9 +256,14 @@ export function getTop(win) {
 
 export function isWindowClosed(win, allowMock = true) {
 
-    if (win === window) {
-        return false;
+    try {
+        if (win === window) {
+            return false;
+        }
+    } catch (err) {
+        return true;
     }
+
 
     try {
         if (!win) {
