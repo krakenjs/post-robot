@@ -2108,8 +2108,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var allowMock = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
 
 
-	    if (win === window) {
-	        return false;
+	    try {
+	        if (win === window) {
+	            return false;
+	        }
+	    } catch (err) {
+	        return true;
 	    }
 
 	    try {
