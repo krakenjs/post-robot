@@ -84,40 +84,41 @@ export let log = {
     },
 
     logLevel(level, args) {
+        setTimeout(() => {
+            try {
+                if (LOG_LEVELS.indexOf(level) < LOG_LEVELS.indexOf(CONFIG.LOG_LEVEL)) {
+                    return;
+                }
 
-        try {
-            if (LOG_LEVELS.indexOf(level) < LOG_LEVELS.indexOf(CONFIG.LOG_LEVEL)) {
-                return;
+                args = Array.prototype.slice.call(args);
+
+                args.unshift(`${window.location.host}${window.location.pathname}`);
+                args.unshift(`::`);
+                args.unshift(`${getWindowType().toLowerCase()}`);
+                args.unshift('[post-robot]');
+
+                if (CONFIG.LOG_TO_PAGE) {
+                    log.writeToPage(level, args);
+                }
+
+                if (!window.console) {
+                    return;
+                }
+
+                if (!window.console[level]) {
+                    level = 'log';
+                }
+
+                if (!window.console[level]) {
+                    return;
+                }
+
+                window.console[level].apply(window.console, args);
+
+            } catch (err) {
+                // pass
             }
-
-            args = Array.prototype.slice.call(args);
-
-            args.unshift(`${window.location.host}${window.location.pathname}`);
-            args.unshift(`::`);
-            args.unshift(`${getWindowType().toLowerCase()}`);
-            args.unshift('[post-robot]');
-
-            if (CONFIG.LOG_TO_PAGE) {
-                log.writeToPage(level, args);
-            }
-
-            if (!window.console) {
-                return;
-            }
-
-            if (!window.console[level]) {
-                level = 'log';
-            }
-
-            if (!window.console[level]) {
-                return;
-            }
-
-            window.console[level].apply(window.console, args);
-
-        } catch (err) {
-            // pass
-        }
+        }, 1);
     },
 
     debug() {
