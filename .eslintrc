@@ -22,7 +22,8 @@
     "window": true,
     "document": true,
     "Promise": false,
-    "__TEST__": true
+    "__TEST__": true,
+    "HTMLElement": true
   },
 
   "fix": true,

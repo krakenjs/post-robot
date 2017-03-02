@@ -25,7 +25,7 @@ function createPopup(name) {
 
 let bridge;
 
-let childWindow, childFrame, otherChildFrame;
+let childWindow, childFrame, otherChildFrame, frameElement;
 
 before(function() {
     return postRobot.openBridge('/base/test/bridge.htm', 'mock://test-post-robot-child.com').then(frame => {
@@ -35,6 +35,7 @@ before(function() {
         childWindow = createPopup('child.htm');
         childFrame = createIframe('child.htm');
         otherChildFrame = createIframe('child.htm');
+        frameElement = document.getElementById('childframe');
 
         return promise.Promise.all([
             onWindowReady(childWindow),
@@ -53,6 +54,23 @@ after(function() {
 
 
 describe('[post-robot] happy cases', function() {
+
+    it('should allow an iframe dom element in send function', function() {
+
+        return postRobot.send(frameElement, 'setupListener', {
+
+            messageName: 'foo',
+            data: {
+                foo: 'bar'
+            }
+
+        }).then(function() {
+
+            return postRobot.send(frameElement, 'foo').then(function({ data }) {
+                assert.equal(data.foo, 'bar');
+            });
+        });
+    });
 
     it('should set up a simple server and listen for a request', function(done) {
 

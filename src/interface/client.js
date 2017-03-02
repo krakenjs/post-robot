@@ -13,11 +13,7 @@ export function request(options) {
             throw new Error('Expected options.name');
         }
 
-        if (!options.window) {
-            throw new Error('Expected options.window');
-        }
-
-
+        
         if (CONFIG.MOCK_MODE) {
             options.window = window;
 
@@ -32,11 +28,28 @@ export function request(options) {
                 throw new Error(`Expected options.window ${options.window} to be an iframe`);
             }
 
+            if (!el.contentWindow) {
+                throw new Error('Iframe must have contentWindow.  Make sure it has a src attribute and is in the DOM.');
+            }
+
             options.window = el.contentWindow;
 
-            if (!options.window) {
-                throw new Error('Expected options.window');
+            
+        } else if (options.window instanceof HTMLElement) {
+            
+            if (options.window.tagName.toLowerCase() !== 'iframe') {
+                throw new Error(`Expected options.window ${options.window} to be an iframe`);
             }
+
+            if (!options.window.contentWindow) {
+                throw new Error('Iframe must have contentWindow.  Make sure it has a src attribute and is in the DOM.');
+            }
+            
+            options.window = options.window.contentWindow;
+        }
+
+        if (typeof options.window !== 'object' || options.window === null) { 
+            throw new Error('Expected options.window to be a window object, iframe, or iframe element id.');
         }
 
         options.domain = options.domain || '*';
