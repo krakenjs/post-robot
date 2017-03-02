@@ -210,7 +210,7 @@ postRobot.on('getUser', function(event) {
 ```
 
 ```javascript
-postRobot.send(myWindow, { id: 1337 }, 'getUser').then(function(event) {
+postRobot.send(myWindow, 'getUser', { id: 1337 }).then(function(event) {
     var user = event.data;
 
     user.logout().then(function() {
