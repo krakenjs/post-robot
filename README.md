@@ -70,6 +70,19 @@ postRobot.once('init', function(event) {
 });
 ```
 
+## Cancelling a listener
+
+```javascript
+var listener = postRobot.on('getUser', function(event) {
+    return {
+        id:   event.data.id,
+        name: 'Zippy the Pinhead'
+    };
+});
+
+listener.cancel();
+```
+
 ## Listen for messages from a specific window
 
 ```javascript
