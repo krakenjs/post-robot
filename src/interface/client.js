@@ -48,7 +48,7 @@ export function request(options) {
             options.window = options.window.contentWindow;
         }
 
-        if (options.window === null) {
+        if (!options.window) {
             throw new Error('Expected options.window to be a window object, iframe, or iframe element id.');
         }
 
