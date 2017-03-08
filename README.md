@@ -18,14 +18,21 @@ Send a message to another window, and:
 postRobot.on('getUser', function(event) {
     return {
         id:   event.data.id,
-        name: 'Zippy the Pinhead'
+        name: 'Zippy the Pinhead',
+        logout() {
+            currentUser.logout();
+        }
     };
 });
 ```
 
 ```javascript
 postRobot.send(someWindow, 'getUser', { id: 1337 }).then(function(event) {
-    console.log(event.source, event.origin, 'Got user:', event.data.name);
+    var user = event.data;
+    
+    console.log(event.source, event.origin, 'Got user:', user);
+
+    user.logout();
 
 }).catch(function(err) {
     console.error(err);
