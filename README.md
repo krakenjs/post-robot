@@ -12,7 +12,7 @@ Send a message to another window, and:
 - Set up a [secure message channel](#secure-message-channel) between two windows on a certain domain
 - Send messages between a [parent and a popup window](#parent-to-popup-messaging) in IE
 
-## Simple listener and sender with error handling
+## Simple listener and sender
 
 ```javascript
 // Set up a listener
@@ -27,7 +27,7 @@ postRobot.on('getUser', function(event) {
 
         // Yep, we're even returning a function to the other window!
 
-        logout() {
+        logout: function() {
             return $currentUser.logout();
         }
     };
