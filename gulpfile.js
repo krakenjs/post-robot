@@ -13,6 +13,7 @@ var FILE_NAME = 'post-robot';
 var MODULE_NAME = 'postRobot';
 
 var WEBPACK_CONFIG = {
+    devtool: 'source-map',
     module: {
         loaders: [
             {
