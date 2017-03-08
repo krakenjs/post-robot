@@ -92,6 +92,9 @@ export function deserializeMethod(source, origin, obj) {
 
             log.debug('Got foreign method result', obj.__name__, data.result);
             return data.result;
+        }, err => {
+            log.debug('Got foreign method error', err.stack || err.toString());
+            throw err;
         });
     }
 
