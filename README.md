@@ -15,26 +15,41 @@ Send a message to another window, and:
 ## Simple listener and sender with error handling
 
 ```javascript
+// Set up a listener
+
 postRobot.on('getUser', function(event) {
+
+    // Have it return some data to the calling window
+
     return {
-        id:   event.data.id,
+        id:   1234,
         name: 'Zippy the Pinhead',
+
+        // Yep, we're even returning a function to the other window!
+
         logout() {
-            currentUser.logout();
+            return $currentUser.logout();
         }
     };
 });
 ```
 
 ```javascript
+// Call the listener, on a different window, on a different domain
+
 postRobot.send(someWindow, 'getUser', { id: 1337 }).then(function(event) {
     var user = event.data;
     
     console.log(event.source, event.origin, 'Got user:', user);
 
+    // Call the user.logout function from the other window!
+
     user.logout();
 
 }).catch(function(err) {
+
+    // Handle any errors that stopped our call from going through
+    
     console.error(err);
 });
 ```
