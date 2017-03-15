@@ -2,9 +2,10 @@
 var gulp = require('gulp');
 var eslint = require('gulp-eslint');
 var webpack = require('webpack');
-var gulpWebpack = require('gulp-webpack');
+var gulpWebpack = require('webpack-stream');
 var Server = require('karma').Server;
 var argv = require('yargs').argv;
+var UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
 gulp.task('test', ['lint', 'karma']);
 gulp.task('build', ['lint', 'karma', 'webpack', 'webpack-min']);
@@ -13,12 +14,12 @@ var FILE_NAME = 'post-robot';
 var MODULE_NAME = 'postRobot';
 
 var WEBPACK_CONFIG = {
-    devtool: 'source-map',
+    // devtool: 'source-map',
     module: {
-        loaders: [
+        rules: [
             {
                 test: /\.js$/,
-                loader: 'babel',
+                loader: 'babel-loader',
                 query: {
                     presets: ['es2015'],
                     plugins: [
@@ -33,7 +34,7 @@ var WEBPACK_CONFIG = {
         ]
     },
     resolve: {
-        modulesDirectories: [
+        modules: [
             'node_modules',
             'src',
             'client'
@@ -48,6 +49,9 @@ var WEBPACK_CONFIG = {
     plugins: [
         new webpack.DefinePlugin({
             __TEST__: false
+        }),
+        new webpack.SourceMapDevToolPlugin({
+            filename: '[file].map'
         })
     ],
     bail: true
@@ -64,23 +68,26 @@ var WEBPACK_CONFIG_MIN = Object.assign({}, WEBPACK_CONFIG, {
         new webpack.DefinePlugin({
             __TEST__: false
         }),
-        new webpack.optimize.UglifyJsPlugin({
+        new webpack.SourceMapDevToolPlugin({
+            filename: '[file].map'
+        }),
+        new UglifyJSPlugin({
             test: /\.js$/,
             exclude: /(node_modules|bower_components)/,
-            minimize: true
+            sourceMap: true
         })
     ]
 });
 
 gulp.task('webpack', ['lint'], function() {
     return gulp.src('src/index.js')
-      .pipe(gulpWebpack(WEBPACK_CONFIG))
+      .pipe(gulpWebpack(WEBPACK_CONFIG, webpack))
       .pipe(gulp.dest('dist'));
 });
 
 gulp.task('webpack-min', ['lint'], function() {
     return gulp.src('src/index.js')
-      .pipe(gulpWebpack(WEBPACK_CONFIG_MIN))
+      .pipe(gulpWebpack(WEBPACK_CONFIG_MIN, webpack))
       .pipe(gulp.dest('dist'));
 });
 
