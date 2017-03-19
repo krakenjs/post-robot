@@ -52,6 +52,13 @@ var WEBPACK_CONFIG = {
         }),
         new webpack.SourceMapDevToolPlugin({
             filename: '[file].map'
+        }),
+        new UglifyJSPlugin({
+            beautify: true,
+            minimize: false,
+            compress: { warnings: false },
+            mangle: false,
+            sourceMap: true
         })
     ],
     bail: true
@@ -72,8 +79,10 @@ var WEBPACK_CONFIG_MIN = Object.assign({}, WEBPACK_CONFIG, {
             filename: '[file].map'
         }),
         new UglifyJSPlugin({
-            test: /\.js$/,
-            exclude: /(node_modules|bower_components)/,
+            beautify: false,
+            minimize: true,
+            compress: { warnings: false },
+            mangle: true,
             sourceMap: true
         })
     ]
