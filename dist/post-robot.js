@@ -73,7 +73,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 31);
+/******/ 	return __webpack_require__(__webpack_require__.s = 32);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -170,7 +170,7 @@ Object.keys(_windows).forEach(function (key) {
   });
 });
 
-var _methods = __webpack_require__(29);
+var _methods = __webpack_require__(26);
 
 Object.keys(_methods).forEach(function (key) {
   if (key === "default" || key === "__esModule") return;
@@ -194,7 +194,7 @@ Object.keys(_tick).forEach(function (key) {
   });
 });
 
-var _ready = __webpack_require__(30);
+var _ready = __webpack_require__(27);
 
 Object.keys(_ready).forEach(function (key) {
   if (key === "default" || key === "__esModule") return;
@@ -577,121 +577,59 @@ var util = exports.util = {
 
 
 Object.defineProperty(exports, "__esModule", {
-  value: true
+    value: true
 });
-exports.winutil = exports.util = exports.destroyBridges = exports.openTunnelToOpener = exports.needsBridgeForDomain = exports.needsBridgeForWin = exports.needsBridgeForBrowser = exports.needsBridge = exports.isBridge = exports.linkUrl = exports.openBridge = exports.parent = undefined;
+exports.Promise = undefined;
+exports.init = init;
+exports.reset = reset;
 
-var _client = __webpack_require__(26);
+var _public = __webpack_require__(30);
 
-Object.keys(_client).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  Object.defineProperty(exports, key, {
+Object.keys(_public).forEach(function (key) {
+    if (key === "default" || key === "__esModule") return;
+    Object.defineProperty(exports, key, {
+        enumerable: true,
+        get: function get() {
+            return _public[key];
+        }
+    });
+});
+
+var _lib = __webpack_require__(1);
+
+Object.defineProperty(exports, 'Promise', {
     enumerable: true,
     get: function get() {
-      return _client[key];
+        return _lib.Promise;
     }
-  });
 });
 
-var _server = __webpack_require__(28);
+var _drivers = __webpack_require__(3);
 
-Object.keys(_server).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function get() {
-      return _server[key];
+var _global = __webpack_require__(2);
+
+var _bridge = __webpack_require__(9);
+
+function init() {
+
+    if (!_global.global.initialized) {
+        (0, _drivers.listenForMessages)();
+        (0, _bridge.openTunnelToOpener)();
+        (0, _lib.initOnReady)();
+        (0, _lib.listenForMethods)();
     }
-  });
-});
 
-var _config = __webpack_require__(27);
+    _global.global.initialized = true;
+}
 
-Object.keys(_config).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function get() {
-      return _config[key];
-    }
-  });
-});
+init();
 
-var _bridge = __webpack_require__(8);
-
-Object.defineProperty(exports, 'openBridge', {
-  enumerable: true,
-  get: function get() {
-    return _bridge.openBridge;
-  }
-});
-Object.defineProperty(exports, 'linkUrl', {
-  enumerable: true,
-  get: function get() {
-    return _bridge.linkUrl;
-  }
-});
-Object.defineProperty(exports, 'isBridge', {
-  enumerable: true,
-  get: function get() {
-    return _bridge.isBridge;
-  }
-});
-Object.defineProperty(exports, 'needsBridge', {
-  enumerable: true,
-  get: function get() {
-    return _bridge.needsBridge;
-  }
-});
-Object.defineProperty(exports, 'needsBridgeForBrowser', {
-  enumerable: true,
-  get: function get() {
-    return _bridge.needsBridgeForBrowser;
-  }
-});
-Object.defineProperty(exports, 'needsBridgeForWin', {
-  enumerable: true,
-  get: function get() {
-    return _bridge.needsBridgeForWin;
-  }
-});
-Object.defineProperty(exports, 'needsBridgeForDomain', {
-  enumerable: true,
-  get: function get() {
-    return _bridge.needsBridgeForDomain;
-  }
-});
-Object.defineProperty(exports, 'openTunnelToOpener', {
-  enumerable: true,
-  get: function get() {
-    return _bridge.openTunnelToOpener;
-  }
-});
-Object.defineProperty(exports, 'destroyBridges', {
-  enumerable: true,
-  get: function get() {
-    return _bridge.destroyBridges;
-  }
-});
-
-var _util = __webpack_require__(4);
-
-Object.defineProperty(exports, 'util', {
-  enumerable: true,
-  get: function get() {
-    return _util.util;
-  }
-});
-
-var _windows = __webpack_require__(7);
-
-var windowUtil = _interopRequireWildcard(_windows);
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj['default'] = obj; return newObj; } }
-
-var parent = exports.parent = (0, _windows.getAncestor)();
-
-var winutil = exports.winutil = windowUtil;
+function reset() {
+    return _global.global.clean.all().then(function () {
+        _global.global.initialized = false;
+        return init();
+    });
+}
 
 /***/ }),
 /* 6 */
@@ -1869,65 +1807,6 @@ function jsonParse() {
 
 
 Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _bridge = __webpack_require__(18);
-
-Object.keys(_bridge).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function get() {
-      return _bridge[key];
-    }
-  });
-});
-
-var _child = __webpack_require__(19);
-
-Object.keys(_child).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function get() {
-      return _child[key];
-    }
-  });
-});
-
-var _common = __webpack_require__(9);
-
-Object.keys(_common).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function get() {
-      return _common[key];
-    }
-  });
-});
-
-var _parent = __webpack_require__(20);
-
-Object.keys(_parent).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function get() {
-      return _parent[key];
-    }
-  });
-});
-
-/***/ }),
-/* 9 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
     value: true
 });
 exports.documentBodyReady = undefined;
@@ -2098,6 +1977,65 @@ function sendBridgeMessage(win, message, domain) {
 _global.global.receiveMessage = function (event) {
     return (0, _drivers.receiveMessage)(event);
 };
+
+/***/ }),
+/* 9 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _bridge = __webpack_require__(18);
+
+Object.keys(_bridge).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function get() {
+      return _bridge[key];
+    }
+  });
+});
+
+var _child = __webpack_require__(19);
+
+Object.keys(_child).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function get() {
+      return _child[key];
+    }
+  });
+});
+
+var _common = __webpack_require__(8);
+
+Object.keys(_common).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function get() {
+      return _common[key];
+    }
+  });
+});
+
+var _parent = __webpack_require__(20);
+
+Object.keys(_parent).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function get() {
+      return _parent[key];
+    }
+  });
+});
 
 /***/ }),
 /* 10 */
@@ -2937,7 +2875,7 @@ var _lib = __webpack_require__(1);
 
 var _drivers = __webpack_require__(3);
 
-var _common = __webpack_require__(9);
+var _common = __webpack_require__(8);
 
 function getRemoteBridgeForWindow(win) {
     return _promise.SyncPromise['try'](function () {
@@ -3092,7 +3030,7 @@ var _interface = __webpack_require__(5);
 
 var _drivers = __webpack_require__(3);
 
-var _common = __webpack_require__(9);
+var _common = __webpack_require__(8);
 
 _global.global.bridges = _global.global.bridges || {};
 
@@ -3655,7 +3593,7 @@ var _lib = __webpack_require__(1);
 
 var _compat = __webpack_require__(11);
 
-var _bridge = __webpack_require__(8);
+var _bridge = __webpack_require__(9);
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -3708,6 +3646,261 @@ var SEND_MESSAGE_STRATEGIES = exports.SEND_MESSAGE_STRATEGIES = (_SEND_MESSAGE_S
 
 /***/ }),
 /* 26 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.listenForMethods = undefined;
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+exports.serializeMethod = serializeMethod;
+exports.serializeMethods = serializeMethods;
+exports.deserializeMethod = deserializeMethod;
+exports.deserializeError = deserializeError;
+exports.deserializeMethods = deserializeMethods;
+
+var _conf = __webpack_require__(0);
+
+var _util = __webpack_require__(4);
+
+var _interface = __webpack_require__(5);
+
+var _log = __webpack_require__(10);
+
+var _promise = __webpack_require__(16);
+
+var _global = __webpack_require__(2);
+
+_global.global.methods = _global.global.methods || {};
+
+var listenForMethods = exports.listenForMethods = _util.util.once(function () {
+    (0, _interface.on)(_conf.CONSTANTS.POST_MESSAGE_NAMES.METHOD, { window: '*', origin: '*' }, function (_ref) {
+        var source = _ref.source,
+            origin = _ref.origin,
+            data = _ref.data;
+
+
+        var meth = _global.global.methods[data.id];
+
+        if (!meth) {
+            throw new Error('Could not find method with id: ' + data.id);
+        }
+
+        if (meth.destination !== source) {
+            throw new Error('Method window does not match');
+        }
+
+        if (meth.domain && meth.domain !== '*' && origin !== meth.domain) {
+            throw new Error('Method domain ' + meth.domain + ' does not match origin ' + origin);
+        }
+
+        _log.log.debug('Call local method', data.name, data.args);
+
+        return _promise.promise.run(function () {
+            return meth.method.apply({ source: source, origin: origin, data: data }, data.args);
+        }).then(function (result) {
+
+            return {
+                result: result,
+                id: data.id,
+                name: data.name
+            };
+        });
+    });
+});
+
+function isSerialized(item, type) {
+    return (typeof item === 'undefined' ? 'undefined' : _typeof(item)) === 'object' && item !== null && item.__type__ === type;
+}
+
+function serializeMethod(destination, domain, method, name) {
+
+    var id = _util.util.uniqueID();
+
+    _global.global.clean.setItem(_global.global.methods, id, { destination: destination, domain: domain, method: method });
+
+    return {
+        __type__: _conf.CONSTANTS.SERIALIZATION_TYPES.METHOD,
+        __id__: id,
+        __name__: name
+    };
+}
+
+function serializeError(err) {
+    return {
+        __type__: _conf.CONSTANTS.SERIALIZATION_TYPES.ERROR,
+        __message__: err.stack || err.message || err.toString()
+    };
+}
+
+function serializeMethods(destination, domain, obj) {
+
+    return _util.util.replaceObject({ obj: obj }, function (item, key) {
+        if (typeof item === 'function') {
+            return serializeMethod(destination, domain, item, key);
+        }
+
+        if (item instanceof Error) {
+            return serializeError(item);
+        }
+    }).obj;
+}
+
+function deserializeMethod(source, origin, obj) {
+
+    function wrapper() {
+        var args = Array.prototype.slice.call(arguments);
+        _log.log.debug('Call foreign method', obj.__name__, args);
+        return (0, _interface.send)(source, _conf.CONSTANTS.POST_MESSAGE_NAMES.METHOD, {
+            id: obj.__id__,
+            name: obj.__name__,
+            args: args
+
+        }, { domain: origin }).then(function (_ref2) {
+            var data = _ref2.data;
+
+
+            _log.log.debug('Got foreign method result', obj.__name__, data.result);
+            return data.result;
+        }, function (err) {
+            _log.log.debug('Got foreign method error', err.stack || err.toString());
+            throw err;
+        });
+    }
+
+    wrapper.__name__ = obj.__name__;
+    wrapper.source = source;
+    wrapper.origin = origin;
+
+    return wrapper;
+}
+
+function deserializeError(source, origin, obj) {
+    return new Error(obj.__message__);
+}
+
+function deserializeMethods(source, origin, obj) {
+
+    return _util.util.replaceObject({ obj: obj }, function (item, key) {
+
+        if (isSerialized(item, _conf.CONSTANTS.SERIALIZATION_TYPES.METHOD)) {
+            return deserializeMethod(source, origin, item);
+        }
+
+        if (isSerialized(item, _conf.CONSTANTS.SERIALIZATION_TYPES.ERROR)) {
+            return deserializeError(source, origin, item);
+        }
+    }).obj;
+}
+
+/***/ }),
+/* 27 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.initOnReady = initOnReady;
+exports.onWindowReady = onWindowReady;
+
+var _conf = __webpack_require__(0);
+
+var _windows = __webpack_require__(7);
+
+var _interface = __webpack_require__(5);
+
+var _log = __webpack_require__(10);
+
+var _promise = __webpack_require__(6);
+
+var _global = __webpack_require__(2);
+
+_global.global.readyPromises = _global.global.readyPromises || [];
+
+function initOnReady() {
+
+    (0, _interface.on)(_conf.CONSTANTS.POST_MESSAGE_NAMES.READY, { window: '*', domain: '*' }, function (event) {
+
+        for (var _iterator = _global.global.readyPromises, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+            var _ref;
+
+            if (_isArray) {
+                if (_i >= _iterator.length) break;
+                _ref = _iterator[_i++];
+            } else {
+                _i = _iterator.next();
+                if (_i.done) break;
+                _ref = _i.value;
+            }
+
+            var item = _ref;
+
+            if (item.win === event.source) {
+                item.promise.resolve(event);
+                return;
+            }
+        }
+
+        _global.global.clean.push(_global.global.readyPromises, {
+            win: event.source,
+            promise: new _promise.SyncPromise().resolve(event)
+        });
+    });
+
+    var parent = (0, _windows.getAncestor)();
+
+    if (parent) {
+        (0, _interface.send)(parent, _conf.CONSTANTS.POST_MESSAGE_NAMES.READY, {}, { domain: '*' })['catch'](function (err) {
+            _log.log.debug(err.stack || err.toString());
+        });
+    }
+}
+
+function onWindowReady(win) {
+    var timeout = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 5000;
+    var name = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'Window';
+
+
+    for (var _iterator2 = _global.global.readyPromises, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
+        var _ref2;
+
+        if (_isArray2) {
+            if (_i2 >= _iterator2.length) break;
+            _ref2 = _iterator2[_i2++];
+        } else {
+            _i2 = _iterator2.next();
+            if (_i2.done) break;
+            _ref2 = _i2.value;
+        }
+
+        var item = _ref2;
+
+        if (item.win === win) {
+            return item.promise;
+        }
+    }
+
+    var promise = new _promise.SyncPromise();
+
+    _global.global.clean.push(_global.global.readyPromises, { win: win, promise: promise });
+
+    setTimeout(function () {
+        return promise.reject(new Error(name + ' did not load after ' + timeout + 'ms'));
+    }, timeout);
+
+    return promise;
+}
+
+/***/ }),
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3889,7 +4082,7 @@ function client() {
 }
 
 /***/ }),
-/* 27 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3934,7 +4127,131 @@ function disable() {
 }
 
 /***/ }),
-/* 28 */
+/* 30 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.winutil = exports.util = exports.destroyBridges = exports.openTunnelToOpener = exports.needsBridgeForDomain = exports.needsBridgeForWin = exports.needsBridgeForBrowser = exports.needsBridge = exports.isBridge = exports.linkUrl = exports.openBridge = exports.parent = undefined;
+
+var _client = __webpack_require__(28);
+
+Object.keys(_client).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function get() {
+      return _client[key];
+    }
+  });
+});
+
+var _server = __webpack_require__(31);
+
+Object.keys(_server).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function get() {
+      return _server[key];
+    }
+  });
+});
+
+var _config = __webpack_require__(29);
+
+Object.keys(_config).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function get() {
+      return _config[key];
+    }
+  });
+});
+
+var _bridge = __webpack_require__(9);
+
+Object.defineProperty(exports, 'openBridge', {
+  enumerable: true,
+  get: function get() {
+    return _bridge.openBridge;
+  }
+});
+Object.defineProperty(exports, 'linkUrl', {
+  enumerable: true,
+  get: function get() {
+    return _bridge.linkUrl;
+  }
+});
+Object.defineProperty(exports, 'isBridge', {
+  enumerable: true,
+  get: function get() {
+    return _bridge.isBridge;
+  }
+});
+Object.defineProperty(exports, 'needsBridge', {
+  enumerable: true,
+  get: function get() {
+    return _bridge.needsBridge;
+  }
+});
+Object.defineProperty(exports, 'needsBridgeForBrowser', {
+  enumerable: true,
+  get: function get() {
+    return _bridge.needsBridgeForBrowser;
+  }
+});
+Object.defineProperty(exports, 'needsBridgeForWin', {
+  enumerable: true,
+  get: function get() {
+    return _bridge.needsBridgeForWin;
+  }
+});
+Object.defineProperty(exports, 'needsBridgeForDomain', {
+  enumerable: true,
+  get: function get() {
+    return _bridge.needsBridgeForDomain;
+  }
+});
+Object.defineProperty(exports, 'openTunnelToOpener', {
+  enumerable: true,
+  get: function get() {
+    return _bridge.openTunnelToOpener;
+  }
+});
+Object.defineProperty(exports, 'destroyBridges', {
+  enumerable: true,
+  get: function get() {
+    return _bridge.destroyBridges;
+  }
+});
+
+var _util = __webpack_require__(4);
+
+Object.defineProperty(exports, 'util', {
+  enumerable: true,
+  get: function get() {
+    return _util.util;
+  }
+});
+
+var _windows = __webpack_require__(7);
+
+var windowUtil = _interopRequireWildcard(_windows);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj['default'] = obj; return newObj; } }
+
+var parent = exports.parent = (0, _windows.getAncestor)();
+
+var winutil = exports.winutil = windowUtil;
+
+/***/ }),
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4064,323 +4381,33 @@ function listener() {
 }
 
 /***/ }),
-/* 29 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 Object.defineProperty(exports, "__esModule", {
-    value: true
+  value: true
 });
-exports.listenForMethods = undefined;
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-exports.serializeMethod = serializeMethod;
-exports.serializeMethods = serializeMethods;
-exports.deserializeMethod = deserializeMethod;
-exports.deserializeError = deserializeError;
-exports.deserializeMethods = deserializeMethods;
-
-var _conf = __webpack_require__(0);
-
-var _util = __webpack_require__(4);
-
-var _interface = __webpack_require__(5);
-
-var _log = __webpack_require__(10);
-
-var _promise = __webpack_require__(16);
-
-var _global = __webpack_require__(2);
-
-_global.global.methods = _global.global.methods || {};
-
-var listenForMethods = exports.listenForMethods = _util.util.once(function () {
-    (0, _interface.on)(_conf.CONSTANTS.POST_MESSAGE_NAMES.METHOD, { window: '*', origin: '*' }, function (_ref) {
-        var source = _ref.source,
-            origin = _ref.origin,
-            data = _ref.data;
-
-
-        var meth = _global.global.methods[data.id];
-
-        if (!meth) {
-            throw new Error('Could not find method with id: ' + data.id);
-        }
-
-        if (meth.destination !== source) {
-            throw new Error('Method window does not match');
-        }
-
-        if (meth.domain && meth.domain !== '*' && origin !== meth.domain) {
-            throw new Error('Method domain ' + meth.domain + ' does not match origin ' + origin);
-        }
-
-        _log.log.debug('Call local method', data.name, data.args);
-
-        return _promise.promise.run(function () {
-            return meth.method.apply({ source: source, origin: origin, data: data }, data.args);
-        }).then(function (result) {
-
-            return {
-                result: result,
-                id: data.id,
-                name: data.name
-            };
-        });
-    });
-});
-
-function isSerialized(item, type) {
-    return (typeof item === 'undefined' ? 'undefined' : _typeof(item)) === 'object' && item !== null && item.__type__ === type;
-}
-
-function serializeMethod(destination, domain, method, name) {
-
-    var id = _util.util.uniqueID();
-
-    _global.global.clean.setItem(_global.global.methods, id, { destination: destination, domain: domain, method: method });
-
-    return {
-        __type__: _conf.CONSTANTS.SERIALIZATION_TYPES.METHOD,
-        __id__: id,
-        __name__: name
-    };
-}
-
-function serializeError(err) {
-    return {
-        __type__: _conf.CONSTANTS.SERIALIZATION_TYPES.ERROR,
-        __message__: err.stack || err.message || err.toString()
-    };
-}
-
-function serializeMethods(destination, domain, obj) {
-
-    return _util.util.replaceObject({ obj: obj }, function (item, key) {
-        if (typeof item === 'function') {
-            return serializeMethod(destination, domain, item, key);
-        }
-
-        if (item instanceof Error) {
-            return serializeError(item);
-        }
-    }).obj;
-}
-
-function deserializeMethod(source, origin, obj) {
-
-    function wrapper() {
-        var args = Array.prototype.slice.call(arguments);
-        _log.log.debug('Call foreign method', obj.__name__, args);
-        return (0, _interface.send)(source, _conf.CONSTANTS.POST_MESSAGE_NAMES.METHOD, {
-            id: obj.__id__,
-            name: obj.__name__,
-            args: args
-
-        }, { domain: origin }).then(function (_ref2) {
-            var data = _ref2.data;
-
-
-            _log.log.debug('Got foreign method result', obj.__name__, data.result);
-            return data.result;
-        }, function (err) {
-            _log.log.debug('Got foreign method error', err.stack || err.toString());
-            throw err;
-        });
-    }
-
-    wrapper.__name__ = obj.__name__;
-    wrapper.source = source;
-    wrapper.origin = origin;
-
-    return wrapper;
-}
-
-function deserializeError(source, origin, obj) {
-    return new Error(obj.__message__);
-}
-
-function deserializeMethods(source, origin, obj) {
-
-    return _util.util.replaceObject({ obj: obj }, function (item, key) {
-
-        if (isSerialized(item, _conf.CONSTANTS.SERIALIZATION_TYPES.METHOD)) {
-            return deserializeMethod(source, origin, item);
-        }
-
-        if (isSerialized(item, _conf.CONSTANTS.SERIALIZATION_TYPES.ERROR)) {
-            return deserializeError(source, origin, item);
-        }
-    }).obj;
-}
-
-/***/ }),
-/* 30 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.initOnReady = initOnReady;
-exports.onWindowReady = onWindowReady;
-
-var _conf = __webpack_require__(0);
-
-var _windows = __webpack_require__(7);
-
-var _interface = __webpack_require__(5);
-
-var _log = __webpack_require__(10);
-
-var _promise = __webpack_require__(6);
-
-var _global = __webpack_require__(2);
-
-_global.global.readyPromises = _global.global.readyPromises || [];
-
-function initOnReady() {
-
-    (0, _interface.on)(_conf.CONSTANTS.POST_MESSAGE_NAMES.READY, { window: '*', domain: '*' }, function (event) {
-
-        for (var _iterator = _global.global.readyPromises, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
-            var _ref;
-
-            if (_isArray) {
-                if (_i >= _iterator.length) break;
-                _ref = _iterator[_i++];
-            } else {
-                _i = _iterator.next();
-                if (_i.done) break;
-                _ref = _i.value;
-            }
-
-            var item = _ref;
-
-            if (item.win === event.source) {
-                item.promise.resolve(event);
-                return;
-            }
-        }
-
-        _global.global.clean.push(_global.global.readyPromises, {
-            win: event.source,
-            promise: new _promise.SyncPromise().resolve(event)
-        });
-    });
-
-    var parent = (0, _windows.getAncestor)();
-
-    if (parent) {
-        (0, _interface.send)(parent, _conf.CONSTANTS.POST_MESSAGE_NAMES.READY, {}, { domain: '*' })['catch'](function (err) {
-            _log.log.debug(err.stack || err.toString());
-        });
-    }
-}
-
-function onWindowReady(win) {
-    var timeout = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 5000;
-    var name = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'Window';
-
-
-    for (var _iterator2 = _global.global.readyPromises, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
-        var _ref2;
-
-        if (_isArray2) {
-            if (_i2 >= _iterator2.length) break;
-            _ref2 = _iterator2[_i2++];
-        } else {
-            _i2 = _iterator2.next();
-            if (_i2.done) break;
-            _ref2 = _i2.value;
-        }
-
-        var item = _ref2;
-
-        if (item.win === win) {
-            return item.promise;
-        }
-    }
-
-    var promise = new _promise.SyncPromise();
-
-    _global.global.clean.push(_global.global.readyPromises, { win: win, promise: promise });
-
-    setTimeout(function () {
-        return promise.reject(new Error(name + ' did not load after ' + timeout + 'ms'));
-    }, timeout);
-
-    return promise;
-}
-
-/***/ }),
-/* 31 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.Promise = undefined;
-exports.init = init;
-exports.reset = reset;
 
 var _interface = __webpack_require__(5);
 
 Object.keys(_interface).forEach(function (key) {
-    if (key === "default" || key === "__esModule") return;
-    Object.defineProperty(exports, key, {
-        enumerable: true,
-        get: function get() {
-            return _interface[key];
-        }
-    });
-});
-
-var _lib = __webpack_require__(1);
-
-Object.defineProperty(exports, 'Promise', {
+  if (key === "default" || key === "__esModule") return;
+  Object.defineProperty(exports, key, {
     enumerable: true,
     get: function get() {
-        return _lib.Promise;
+      return _interface[key];
     }
+  });
 });
 
-var _drivers = __webpack_require__(3);
+var INTERFACE = _interopRequireWildcard(_interface);
 
-var _global = __webpack_require__(2);
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj['default'] = obj; return newObj; } }
 
-var _bridge = __webpack_require__(8);
-
-function init() {
-
-    if (!_global.global.initialized) {
-        (0, _drivers.listenForMessages)();
-        (0, _bridge.openTunnelToOpener)();
-        (0, _lib.initOnReady)();
-        (0, _lib.listenForMethods)();
-    }
-
-    _global.global.initialized = true;
-}
-
-init();
-
-function reset() {
-    return _global.global.clean.all().then(function () {
-        _global.global.initialized = false;
-        return init();
-    });
-}
-
-exports['default'] = module.exports;
+exports['default'] = INTERFACE;
 
 /***/ })
 /******/ ]);
