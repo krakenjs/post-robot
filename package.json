@@ -2,7 +2,7 @@
   "name": "post-robot",
   "version": "4.0.40",
   "description": "Simple postMessage based server.",
-  "main": "dist/post-robot.min.js",
+  "main": "index.js",
   "scripts": {
     "test": "gulp karma"
   },
