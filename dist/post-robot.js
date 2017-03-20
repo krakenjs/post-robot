@@ -1818,8 +1818,12 @@
         }), exports.SEND_MESSAGE_STRATEGIES = void 0;
         var _SEND_MESSAGE_STRATEG, _conf = __webpack_require__(0), _lib = __webpack_require__(1), _compat = __webpack_require__(11), _bridge = __webpack_require__(9);
         exports.SEND_MESSAGE_STRATEGIES = (_SEND_MESSAGE_STRATEG = {}, _defineProperty(_SEND_MESSAGE_STRATEG, _conf.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE, function(win, serializedMessage, domain) {
-            return (0, _compat.emulateIERestrictions)(window, win), domain && 0 === domain.indexOf(_conf.CONSTANTS.MOCK_PROTOCOL) && (domain = win.location.protocol + "//" + win.location.host), 
-            domain && 0 === domain.indexOf(_conf.CONSTANTS.FILE_PROTOCOL) && (domain = "*"), 
+            if ((0, _compat.emulateIERestrictions)(window, win), domain && 0 === domain.indexOf(_conf.CONSTANTS.MOCK_PROTOCOL)) try {
+                domain = win.location.protocol + "//" + win.location.host;
+            } catch (err) {
+                throw new Error("Attempting to send messsage to mock domain " + domain + ", but window is actually cross-domain");
+            }
+            return domain && 0 === domain.indexOf(_conf.CONSTANTS.FILE_PROTOCOL) && (domain = "*"), 
             win.postMessage(serializedMessage, domain);
         }), _defineProperty(_SEND_MESSAGE_STRATEG, _conf.CONSTANTS.SEND_STRATEGIES.BRIDGE, function(win, serializedMessage, domain) {
             if ((0, _lib.isSameDomain)(win)) throw new Error("Post message through bridge disabled between same domain windows");
