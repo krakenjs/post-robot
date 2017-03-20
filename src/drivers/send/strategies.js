@@ -11,7 +11,11 @@ export let SEND_MESSAGE_STRATEGIES = {
         emulateIERestrictions(window, win);
 
         if (domain && domain.indexOf(CONSTANTS.MOCK_PROTOCOL) === 0) {
-            domain = `${win.location.protocol}//${win.location.host}`;
+            try {
+                domain = `${win.location.protocol}//${win.location.host}`;
+            } catch (err) {
+                throw new Error(`Attempting to send messsage to mock domain ${domain}, but window is actually cross-domain`);
+            }
         }
 
         if (domain && domain.indexOf(CONSTANTS.FILE_PROTOCOL) === 0) {
