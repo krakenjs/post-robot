@@ -55,23 +55,6 @@ after(function() {
 
 describe('[post-robot] happy cases', function() {
 
-    it('should allow an iframe dom element in send function', function() {
-
-        return postRobot.send(frameElement, 'setupListener', {
-
-            messageName: 'foo',
-            data: {
-                foo: 'bar'
-            }
-
-        }).then(function() {
-
-            return postRobot.send(frameElement, 'foo').then(function({ data }) {
-                assert.equal(data.foo, 'bar');
-            });
-        });
-    });
-
     it('should set up a simple server and listen for a request', function(done) {
 
         postRobot.on('foobu', function() {
@@ -154,6 +137,35 @@ describe('[post-robot] happy cases', function() {
             });
         });
     });
+
+    it('should set up a simple server and listen for a request from a specific domain', function(done) {
+
+        postRobot.on('domainspecificmessage', { domain: 'mock://test-post-robot-child.com' }, function() {
+            done();
+        });
+
+        postRobot.send(childFrame, 'sendMessageToParent', {
+            messageName: 'domainspecificmessage'
+        }).catch(done);
+    });
+
+
+    it('should message a child with a specific domain and expect a response', function() {
+
+        return postRobot.send(childFrame, 'setupListener', {
+
+            messageName: 'domainspecificmessage',
+            data: {
+                foo: 'bar'
+            }
+
+        }, { domain: 'mock://test-post-robot-child.com' }).then(function() {
+
+            return postRobot.send(childFrame, 'domainspecificmessage').then(function({ data }) {
+                assert.equal(data.foo, 'bar');
+            });
+        });
+    });
 });
 
 
@@ -171,6 +183,23 @@ describe('[post-robot] options', function() {
         }).then(function() {
 
             return postRobot.send('childframe', 'foo').then(function({ data }) {
+                assert.equal(data.foo, 'bar');
+            });
+        });
+    });
+
+    it('should work when referencing the child by element reference', function() {
+
+        return postRobot.send(frameElement, 'setupListener', {
+
+            messageName: 'foo',
+            data: {
+                foo: 'bar'
+            }
+
+        }).then(function() {
+
+            return postRobot.send(frameElement, 'foo').then(function({ data }) {
                 assert.equal(data.foo, 'bar');
             });
         });
