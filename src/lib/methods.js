@@ -1,6 +1,7 @@
 
 import { CONSTANTS } from '../conf';
 import { util } from './util';
+import { matchDomain } from './domain';
 import { on, send } from '../interface';
 import { log } from './log';
 import { promise } from './promise';
@@ -9,7 +10,7 @@ import { global } from '../global';
 global.methods = global.methods || {};
 
 export let listenForMethods = util.once(() => {
-    on(CONSTANTS.POST_MESSAGE_NAMES.METHOD, { window: '*', origin: '*' }, ({ source, origin, data }) => {
+    on(CONSTANTS.POST_MESSAGE_NAMES.METHOD, { window: CONSTANTS.WILDCARD, origin: CONSTANTS.WILDCARD }, ({ source, origin, data }) => {
 
         let meth = global.methods[data.id];
 
@@ -21,7 +22,7 @@ export let listenForMethods = util.once(() => {
             throw new Error(`Method window does not match`);
         }
 
-        if (meth.domain && meth.domain !== '*' && origin !== meth.domain) {
+        if (!matchDomain(meth.domain, origin)) {
             throw new Error(`Method domain ${meth.domain} does not match origin ${origin}`);
         }
 

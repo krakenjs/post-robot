@@ -43,7 +43,9 @@ export let CONSTANTS = {
     FILE_PROTOCOL: 'file:',
 
     BRIDGE_NAME_PREFIX: '__postrobot_bridge__',
-    POSTROBOT_PROXY: '__postrobot_proxy__'
+    POSTROBOT_PROXY: '__postrobot_proxy__',
+
+    WILDCARD: '*'
 };
 
 export let POST_MESSAGE_NAMES_LIST = Object.keys(CONSTANTS.POST_MESSAGE_NAMES).map(key => CONSTANTS.POST_MESSAGE_NAMES[key]);

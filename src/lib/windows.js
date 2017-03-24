@@ -39,6 +39,20 @@ export function isSameDomain(win) {
     return match;
 }
 
+export function isActuallySameDomain(win) {
+
+    try {
+        if (win && win.location && win.location.href) {
+            return true;
+        }
+
+    } catch (err) {
+        global.clean.push(global.domainMatches, { win, match: false });
+        return false;
+    }
+
+    return true;
+}
 
 export function getOpener(win) {
 

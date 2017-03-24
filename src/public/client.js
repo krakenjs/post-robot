@@ -52,7 +52,7 @@ export function request(options) {
             throw new Error('Expected options.window to be a window object, iframe, or iframe element id.');
         }
 
-        options.domain = options.domain || '*';
+        options.domain = options.domain || CONSTANTS.WILDCARD;
 
         let hash = `${options.name}_${util.uniqueID()}`;
         global.clean.setItem(global.listeners.response, hash, options);

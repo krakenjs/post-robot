@@ -28,6 +28,6 @@ global.openTunnelToParent = function openTunnelToParent({ name, source, canary, 
 
             sendMessage.apply(this, arguments);
         }
-    }, { domain: '*' });
+    }, { domain: CONSTANTS.WILDCARD });
 };
 

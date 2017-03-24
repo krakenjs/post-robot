@@ -1,26 +1,9 @@
 
 import { CONSTANTS } from '../../conf';
-import { promise, log, isWindowClosed } from '../../lib';
+import { promise, log, isWindowClosed, matchDomain } from '../../lib';
 
 import { sendMessage } from '../send';
 import { listeners, getRequestListener } from '../listeners';
-
-function matchDomain(domain, origin) {
-
-    if (typeof domain === 'string') {
-        return domain === '*' || origin === domain;
-    }
-
-    if (Object.prototype.toString.call(domain) === '[object RegExp]') {
-        return origin.match(domain);
-    }
-
-    if (Array.isArray(domain)) {
-        return domain.indexOf(origin) !== -1;
-    }
-
-    return false;
-}
 
 export let RECEIVE_MESSAGE_TYPES = {
 

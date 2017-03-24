@@ -166,6 +166,35 @@ describe('[post-robot] happy cases', function() {
             });
         });
     });
+
+    it('should set up a simple server and listen for a request from multiple domains', function(done) {
+
+        postRobot.on('multidomainspecificmessage', { domain: [ 'mock://test-post-robot-child.com', 'mock://non-existant-domain.com' ] }, function() {
+            done();
+        });
+
+        postRobot.send(childFrame, 'sendMessageToParent', {
+            messageName: 'multidomainspecificmessage'
+        }).catch(done);
+    });
+
+
+    it('should message a child with multiple domains and expect a response', function() {
+
+        return postRobot.send(childFrame, 'setupListener', {
+
+            messageName: 'multidomainspecificmessage',
+            data: {
+                foo: 'bar'
+            }
+
+        }, { domain: [ 'mock://test-post-robot-child.com', 'mock://non-existant-domain.com' ] }).then(function() {
+
+            return postRobot.send(childFrame, 'multidomainspecificmessage').then(function({ data }) {
+                assert.equal(data.foo, 'bar');
+            });
+        });
+    });
 });
 
 

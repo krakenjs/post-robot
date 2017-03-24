@@ -1,5 +1,6 @@
 
 import { util } from './util';
+import { CONSTANTS } from '../conf';
 
 let tickMessageName = `__nextTick__postRobot__${util.uniqueID()}`;
 let queue = [];
@@ -12,7 +13,6 @@ window.addEventListener('message', event => {
 });
 
 export function nextTick(method) {
-
     queue.push(method);
-    window.postMessage(tickMessageName, '*');
+    window.postMessage(tickMessageName, CONSTANTS.WILDCARD);
 }

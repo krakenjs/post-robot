@@ -1,6 +1,6 @@
 
 import { CONSTANTS } from '../../conf';
-import { isSameDomain, isSameTopWindow } from '../../lib';
+import { isSameDomain, isSameTopWindow, isActuallySameDomain, util } from '../../lib';
 import { emulateIERestrictions } from '../../compat';
 import { sendBridgeMessage } from '../../bridge';
 
@@ -10,19 +10,37 @@ export let SEND_MESSAGE_STRATEGIES = {
 
         emulateIERestrictions(window, win);
 
-        if (domain && domain.indexOf(CONSTANTS.MOCK_PROTOCOL) === 0) {
-            try {
-                domain = `${win.location.protocol}//${win.location.host}`;
-            } catch (err) {
-                throw new Error(`Attempting to send messsage to mock domain ${domain}, but window is actually cross-domain`);
+        let domains;
+
+        if (Array.isArray(domain)) {
+            domains = domain;
+        } else if (domain) {
+            domains = [ domain ];
+        } else {
+            domains = [ CONSTANTS.WILDCARD ];
+        }
+
+        domains = domains.map(dom => {
+
+            if (dom.indexOf(CONSTANTS.MOCK_PROTOCOL) === 0) {
+
+                if (!isActuallySameDomain(win)) {
+                    throw new Error(`Attempting to send messsage to mock domain ${dom}, but window is actually cross-domain`);
+                }
+
+                return util.getActualDomain(win);
             }
-        }
 
-        if (domain && domain.indexOf(CONSTANTS.FILE_PROTOCOL) === 0) {
-            domain = `*`;
-        }
+            if (dom.indexOf(CONSTANTS.FILE_PROTOCOL) === 0) {
+                return CONSTANTS.WILDCARD;
+            }
 
-        return win.postMessage(serializedMessage, domain);
+            return dom;
+        });
+
+        domains.forEach(dom => {
+            return win.postMessage(serializedMessage, dom);
+        });
     },
 
     [ CONSTANTS.SEND_STRATEGIES.BRIDGE ](win, serializedMessage, domain) {
@@ -56,7 +74,7 @@ export let SEND_MESSAGE_STRATEGIES = {
 
         return foreignGlobal.receiveMessage({
             source: window,
-            origin: domain,
+            origin: util.getDomain(),
             data: serializedMessage
         });
     }
