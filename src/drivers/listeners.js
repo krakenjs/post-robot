@@ -1,5 +1,7 @@
 
 import { global } from '../global';
+import { matchDomain } from '../lib';
+import { CONSTANTS } from '../conf';
 
 global.listeners = global.listeners || {
     request: [],
@@ -13,54 +15,6 @@ export function resetListeners() {
     global.listeners.response = [];
 }
 
-function isRegex(item) {
-    return Object.prototype.toString.call(item) === '[object RegExp]';
-}
-
-function matchDomain(domain, origin) {
-
-    if (typeof domain === 'string') {
-
-        if (isRegex(origin)) {
-            return false;
-        }
-
-        if (Array.isArray(origin)) {
-            return false;
-        }
-
-        return domain === '*' || origin === domain;
-    }
-
-    if (isRegex(domain)) {
-
-        if (isRegex(origin)) {
-            return domain.toString() === origin.toString();
-        }
-
-        if (Array.isArray(origin)) {
-            return false;
-        }
-
-        return origin.match(domain);
-    }
-
-    if (Array.isArray(domain)) {
-
-        if (isRegex(origin)) {
-            return false;
-        }
-
-        if (Array.isArray(origin)) {
-            return JSON.stringify(domain) === JSON.stringify(origin);
-        }
-
-        return domain.indexOf(origin) !== -1;
-    }
-
-    return false;
-}
-
 export function getRequestListener(name, win, domain) {
 
     let result = {};
@@ -71,8 +25,8 @@ export function getRequestListener(name, win, domain) {
             continue;
         }
 
-        let specifiedWin = (requestListener.win && requestListener.win !== '*');
-        let specifiedDomain = (requestListener.domain && requestListener.domain !== '*');
+        let specifiedWin = (requestListener.win && requestListener.win !== CONSTANTS.WILDCARD);
+        let specifiedDomain = (requestListener.domain && requestListener.domain !== CONSTANTS.WILDCARD);
 
         let matchedWin = (specifiedWin && requestListener.win === win);
         let matchedDomain = (specifiedDomain && matchDomain(requestListener.domain, domain));

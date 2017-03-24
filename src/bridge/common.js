@@ -1,6 +1,6 @@
 
 import { CONFIG, CONSTANTS } from '../conf';
-import { util, promise, isSameDomain, isOpener, isSameTopWindow, getUserAgent } from '../lib';
+import { util, promise, isSameDomain, isOpener, isSameTopWindow, getUserAgent, matchDomain } from '../lib';
 import { global } from '../global';
 import { receiveMessage } from '../drivers';
 
@@ -101,7 +101,7 @@ export function registerRemoteSendMessage(win, domain, sendMessage) {
             throw new Error(`Remote window does not match window`);
         }
 
-        if (remoteDomain !== `*` && remoteDomain !== domain) {
+        if (!matchDomain(remoteDomain, domain)) {
             throw new Error(`Remote domain ${remoteDomain} does not match domain ${domain}`);
         }
 

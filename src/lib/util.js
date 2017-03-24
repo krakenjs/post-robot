@@ -229,6 +229,10 @@ export let util = {
         return safeInterval;
     },
 
+    getActualDomain(win) {
+        return `${win.location.protocol}//${win.location.host}`;
+    },
+
     getDomain(win) {
 
         win = win || window;
@@ -242,14 +246,14 @@ export let util = {
         }
 
         if (win.location.protocol === CONSTANTS.FILE_PROTOCOL) {
-            return `${win.location.protocol}//${win.location.host}`;
+            return util.getActualDomain(win);
         }
 
         if (!win.location.host) {
             throw new Error(`Can not read window host`);
         }
 
-        return `${win.location.protocol}//${win.location.host}`;
+        return util.getActualDomain(win);
     },
 
     getDomainFromUrl(url) {
@@ -280,3 +284,7 @@ export let util = {
         return result;
     }
 };
+
+export function isRegex(item) {
+    return Object.prototype.toString.call(item) === '[object RegExp]';
+}

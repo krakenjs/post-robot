@@ -2,6 +2,7 @@
 import { CONFIG } from '../conf';
 import { util, promise, isWindowClosed } from '../lib';
 import { addRequestListener, removeRequestListener } from '../drivers';
+import { CONSTANTS } from '../conf';
 
 export function listen(options) {
 
@@ -29,7 +30,7 @@ export function listen(options) {
         options.window = options.source;
     }
 
-    options.domain = options.domain || '*';
+    options.domain = options.domain || CONSTANTS.WILDCARD;
 
     addRequestListener(options.name, options.window, options.domain, options, override);
 
