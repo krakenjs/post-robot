@@ -31,13 +31,13 @@
             return __webpack_require__.d(getter, "a", getter), getter;
         }, __webpack_require__.o = function(object, property) {
             return Object.prototype.hasOwnProperty.call(object, property);
-        }, __webpack_require__.p = "", __webpack_require__(__webpack_require__.s = 32);
+        }, __webpack_require__.p = "", __webpack_require__(__webpack_require__.s = 33);
     }([ function(module, exports, __webpack_require__) {
         "use strict";
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
-        var _config = __webpack_require__(22);
+        var _config = __webpack_require__(23);
         Object.keys(_config).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -60,7 +60,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
-        var _promise = __webpack_require__(16);
+        var _promise = __webpack_require__(17);
         Object.keys(_promise).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -96,7 +96,7 @@
                 }
             });
         });
-        var _methods = __webpack_require__(26);
+        var _methods = __webpack_require__(27);
         Object.keys(_methods).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -105,7 +105,7 @@
                 }
             });
         });
-        var _tick = __webpack_require__(17);
+        var _tick = __webpack_require__(18);
         Object.keys(_tick).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -114,7 +114,7 @@
                 }
             });
         });
-        var _ready = __webpack_require__(27);
+        var _ready = __webpack_require__(28);
         Object.keys(_ready).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -132,6 +132,15 @@
                 }
             });
         });
+        var _domain = __webpack_require__(16);
+        Object.keys(_domain).forEach(function(key) {
+            "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
+                enumerable: !0,
+                get: function() {
+                    return _domain[key];
+                }
+            });
+        });
     }, function(module, exports, __webpack_require__) {
         "use strict";
         Object.defineProperty(exports, "__esModule", {
@@ -144,7 +153,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
-        var _receive = __webpack_require__(23);
+        var _receive = __webpack_require__(24);
         Object.keys(_receive).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -173,6 +182,9 @@
         });
     }, function(module, exports, __webpack_require__) {
         "use strict";
+        function isRegex(item) {
+            return "[object RegExp]" === Object.prototype.toString.call(item);
+        }
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.util = void 0;
@@ -180,7 +192,9 @@
             return typeof obj;
         } : function(obj) {
             return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-        }, _conf = __webpack_require__(0), util = exports.util = {
+        };
+        exports.isRegex = isRegex;
+        var _conf = __webpack_require__(0), util = exports.util = {
             once: function(method) {
                 if (!method) return method;
                 var called = !1;
@@ -290,12 +304,15 @@
                 }, interval);
                 return safeInterval;
             },
+            getActualDomain: function(win) {
+                return win.location.protocol + "//" + win.location.host;
+            },
             getDomain: function(win) {
                 if (win = win || window, win.mockDomain && 0 === win.mockDomain.indexOf(_conf.CONSTANTS.MOCK_PROTOCOL)) return win.mockDomain;
                 if (!win.location.protocol) throw new Error("Can not read window protocol");
-                if (win.location.protocol === _conf.CONSTANTS.FILE_PROTOCOL) return win.location.protocol + "//" + win.location.host;
+                if (win.location.protocol === _conf.CONSTANTS.FILE_PROTOCOL) return util.getActualDomain(win);
                 if (!win.location.host) throw new Error("Can not read window host");
-                return win.location.protocol + "//" + win.location.host;
+                return util.getActualDomain(win);
             },
             getDomainFromUrl: function(url) {
                 var domain = void 0;
@@ -323,7 +340,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.Promise = void 0, exports.init = init, exports.reset = reset;
-        var _public = __webpack_require__(30);
+        var _public = __webpack_require__(31);
         Object.keys(_public).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -538,6 +555,17 @@
             }), domainMatchTimeout || (domainMatchTimeout = setTimeout(function() {
                 _global.global.domainMatches = [], domainMatchTimeout = null;
             }, 1)), match;
+        }
+        function isActuallySameDomain(win) {
+            try {
+                if (win && win.location && win.location.href) return !0;
+            } catch (err) {
+                return _global.global.clean.push(_global.global.domainMatches, {
+                    win: win,
+                    match: !1
+                }), !1;
+            }
+            return !0;
         }
         function getOpener(win) {
             if (win) try {
@@ -866,11 +894,11 @@
         }
         Object.defineProperty(exports, "__esModule", {
             value: !0
-        }), exports.isSameDomain = isSameDomain, exports.getOpener = getOpener, exports.getParent = getParent, 
-        exports.getParents = getParents, exports.isAncestorParent = isAncestorParent, exports.getFrames = getFrames, 
-        exports.getAllChildFrames = getAllChildFrames, exports.getAllFramesInWindow = getAllFramesInWindow, 
-        exports.getTop = getTop, exports.isWindowClosed = isWindowClosed, exports.getUserAgent = getUserAgent, 
-        exports.getFrameByName = getFrameByName, exports.findChildFrameByName = findChildFrameByName, 
+        }), exports.isSameDomain = isSameDomain, exports.isActuallySameDomain = isActuallySameDomain, 
+        exports.getOpener = getOpener, exports.getParent = getParent, exports.getParents = getParents, 
+        exports.isAncestorParent = isAncestorParent, exports.getFrames = getFrames, exports.getAllChildFrames = getAllChildFrames, 
+        exports.getAllFramesInWindow = getAllFramesInWindow, exports.getTop = getTop, exports.isWindowClosed = isWindowClosed, 
+        exports.getUserAgent = getUserAgent, exports.getFrameByName = getFrameByName, exports.findChildFrameByName = findChildFrameByName, 
         exports.findFrameByName = findFrameByName, exports.isParent = isParent, exports.isOpener = isOpener, 
         exports.getAncestor = getAncestor, exports.getAncestors = getAncestors, exports.isAncestor = isAncestor, 
         exports.isPopup = isPopup, exports.isIframe = isIframe, exports.isFullpage = isFullpage, 
@@ -918,7 +946,7 @@
             if (!remoteWindow) throw new Error("Window not found to register sendMessage to");
             var sendMessageWrapper = function(remoteWin, message, remoteDomain) {
                 if (remoteWin !== win) throw new Error("Remote window does not match window");
-                if ("*" !== remoteDomain && remoteDomain !== domain) throw new Error("Remote domain " + remoteDomain + " does not match domain " + domain);
+                if (!(0, _lib.matchDomain)(remoteDomain, domain)) throw new Error("Remote domain " + remoteDomain + " does not match domain " + domain);
                 sendMessage(message);
             };
             remoteWindow.sendMessagePromise.resolve(sendMessageWrapper), remoteWindow.sendMessagePromise = _lib.promise.Promise.resolve(sendMessageWrapper);
@@ -960,7 +988,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
-        var _bridge = __webpack_require__(18);
+        var _bridge = __webpack_require__(19);
         Object.keys(_bridge).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -969,7 +997,7 @@
                 }
             });
         });
-        var _child = __webpack_require__(19);
+        var _child = __webpack_require__(20);
         Object.keys(_child).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -987,7 +1015,7 @@
                 }
             });
         });
-        var _parent = __webpack_require__(20);
+        var _parent = __webpack_require__(21);
         Object.keys(_parent).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -1075,7 +1103,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
-        var _ie = __webpack_require__(21);
+        var _ie = __webpack_require__(22);
         Object.keys(_ie).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -1124,7 +1152,8 @@
             MOCK_PROTOCOL: "mock:",
             FILE_PROTOCOL: "file:",
             BRIDGE_NAME_PREFIX: "__postrobot_bridge__",
-            POSTROBOT_PROXY: "__postrobot_proxy__"
+            POSTROBOT_PROXY: "__postrobot_proxy__",
+            WILDCARD: "*"
         };
         exports.POST_MESSAGE_NAMES_LIST = Object.keys(CONSTANTS.POST_MESSAGE_NAMES).map(function(key) {
             return CONSTANTS.POST_MESSAGE_NAMES[key];
@@ -1133,12 +1162,6 @@
         "use strict";
         function resetListeners() {
             _global.global.listeners.request = [], _global.global.listeners.response = [];
-        }
-        function isRegex(item) {
-            return "[object RegExp]" === Object.prototype.toString.call(item);
-        }
-        function matchDomain(domain, origin) {
-            return "string" == typeof domain ? !isRegex(origin) && (!Array.isArray(origin) && ("*" === domain || origin === domain)) : isRegex(domain) ? isRegex(origin) ? domain.toString() === origin.toString() : !Array.isArray(origin) && origin.match(domain) : !!Array.isArray(domain) && (!isRegex(origin) && (Array.isArray(origin) ? JSON.stringify(domain) === JSON.stringify(origin) : domain.indexOf(origin) !== -1));
         }
         function getRequestListener(name, win, domain) {
             for (var result = {}, _iterator = _global.global.listeners.request, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
@@ -1152,7 +1175,8 @@
                 }
                 var requestListener = _ref;
                 if (requestListener.name === name) {
-                    var specifiedWin = requestListener.win && "*" !== requestListener.win, specifiedDomain = requestListener.domain && "*" !== requestListener.domain, matchedWin = specifiedWin && requestListener.win === win, matchedDomain = specifiedDomain && matchDomain(requestListener.domain, domain);
+                    var specifiedWin = requestListener.win && requestListener.win !== _conf.CONSTANTS.WILDCARD, specifiedDomain = requestListener.domain && requestListener.domain !== _conf.CONSTANTS.WILDCARD, matchedWin = specifiedWin && requestListener.win === win, matchedDomain = specifiedDomain && (0, 
+                    _lib.matchDomain)(requestListener.domain, domain);
                     specifiedWin && specifiedDomain ? matchedWin && matchedDomain && (result.all = result.all || requestListener.options) : specifiedDomain ? matchedDomain && (result.domain = result.domain || requestListener.options) : specifiedWin ? matchedWin && (result.win = result.win || requestListener.options) : result.name = result.name || requestListener.options;
                 }
             }
@@ -1192,7 +1216,7 @@
             value: !0
         }), exports.listeners = void 0, exports.resetListeners = resetListeners, exports.getRequestListener = getRequestListener, 
         exports.removeRequestListener = removeRequestListener, exports.addRequestListener = addRequestListener;
-        var _global = __webpack_require__(2);
+        var _global = __webpack_require__(2), _lib = __webpack_require__(1), _conf = __webpack_require__(0);
         _global.global.listeners = _global.global.listeners || {
             request: [],
             response: []
@@ -1225,7 +1249,7 @@
                 });
                 var level = void 0;
                 if (level = _conf.POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 || message.type === _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK ? "debug" : "error" === message.ack ? "error" : "info", 
-                _lib.log.logLevel(level, [ "\n\n\t", "#send", message.type.replace(/^postrobot_message_/, ""), "::", message.name, "::", domain || "*", "\n\n", message ]), 
+                _lib.log.logLevel(level, [ "\n\n\t", "#send", message.type.replace(/^postrobot_message_/, ""), "::", message.name, "::", domain || _conf.CONSTANTS.WILDCARD, "\n\n", message ]), 
                 _conf.CONFIG.MOCK_MODE) return delete message.target, window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessage({
                     origin: _lib.util.getDomain(window),
                     source: window,
@@ -1262,7 +1286,7 @@
             return target;
         };
         exports.buildMessage = buildMessage, exports.sendMessage = sendMessage;
-        var _conf = __webpack_require__(0), _lib = __webpack_require__(1), _strategies = __webpack_require__(25);
+        var _conf = __webpack_require__(0), _lib = __webpack_require__(1), _strategies = __webpack_require__(26);
     }, function(module, exports, __webpack_require__) {
         "use strict";
         function cleanup(obj) {
@@ -1345,10 +1369,21 @@
         var _promise = __webpack_require__(6);
     }, function(module, exports, __webpack_require__) {
         "use strict";
+        function matchDomain(domain, origin) {
+            return "string" == typeof domain ? !(0, _util.isRegex)(origin) && (!Array.isArray(origin) && (domain === _conf.CONSTANTS.WILDCARD || origin === domain)) : (0, 
+            _util.isRegex)(domain) ? (0, _util.isRegex)(origin) ? domain.toString() === origin.toString() : !Array.isArray(origin) && origin.match(domain) : !!Array.isArray(domain) && (!(0, 
+            _util.isRegex)(origin) && (Array.isArray(origin) ? JSON.stringify(domain) === JSON.stringify(origin) : domain.indexOf(origin) !== -1));
+        }
+        Object.defineProperty(exports, "__esModule", {
+            value: !0
+        }), exports.matchDomain = matchDomain;
+        var _util = __webpack_require__(4), _conf = __webpack_require__(0);
+    }, function(module, exports, __webpack_require__) {
+        "use strict";
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.promise = exports.Promise = void 0;
-        var _promise = __webpack_require__(6), _tick = __webpack_require__(17), Promise = exports.Promise = _promise.SyncPromise, promise = exports.promise = {
+        var _promise = __webpack_require__(6), _tick = __webpack_require__(18), Promise = exports.Promise = _promise.SyncPromise, promise = exports.promise = {
             Promise: Promise,
             run: function(method) {
                 return Promise.resolve().then(method);
@@ -1402,12 +1437,12 @@
     }, function(module, exports, __webpack_require__) {
         "use strict";
         function nextTick(method) {
-            queue.push(method), window.postMessage(tickMessageName, "*");
+            queue.push(method), window.postMessage(tickMessageName, _conf.CONSTANTS.WILDCARD);
         }
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.nextTick = nextTick;
-        var _util = __webpack_require__(4), tickMessageName = "__nextTick__postRobot__" + _util.util.uniqueID(), queue = [];
+        var _util = __webpack_require__(4), _conf = __webpack_require__(0), tickMessageName = "__nextTick__postRobot__" + _util.util.uniqueID(), queue = [];
         window.addEventListener("message", function(event) {
             if (event.data === tickMessageName) {
                 queue.shift().call();
@@ -1433,7 +1468,7 @@
                     }
                 }
             }, {
-                domain: "*"
+                domain: _conf.CONSTANTS.WILDCARD
             });
         };
     }, function(module, exports, __webpack_require__) {
@@ -1722,7 +1757,7 @@
             value: !0
         }), exports.receiveMessage = receiveMessage, exports.messageListener = messageListener, 
         exports.listenForMessages = listenForMessages;
-        var _conf = __webpack_require__(0), _lib = __webpack_require__(1), _compat = __webpack_require__(11), _global = __webpack_require__(2), _types = __webpack_require__(24);
+        var _conf = __webpack_require__(0), _lib = __webpack_require__(1), _compat = __webpack_require__(11), _global = __webpack_require__(2), _types = __webpack_require__(25);
         _global.global.receivedMessages = _global.global.receivedMessages || [];
     }, function(module, exports, __webpack_require__) {
         "use strict";
@@ -1733,9 +1768,6 @@
                 configurable: !0,
                 writable: !0
             }) : obj[key] = value, obj;
-        }
-        function matchDomain(domain, origin) {
-            return "string" == typeof domain ? "*" === domain || origin === domain : "[object RegExp]" === Object.prototype.toString.call(domain) ? origin.match(domain) : !!Array.isArray(domain) && domain.indexOf(origin) !== -1;
         }
         Object.defineProperty(exports, "__esModule", {
             value: !0
@@ -1750,7 +1782,7 @@
         exports.RECEIVE_MESSAGE_TYPES = (_RECEIVE_MESSAGE_TYPE = {}, _defineProperty(_RECEIVE_MESSAGE_TYPE, _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK, function(source, origin, message) {
             var options = _listeners.listeners.response[message.hash];
             if (!options) throw new Error("No handler found for post message ack for message: " + message.name + " from " + origin + " in " + window.location.protocol + "//" + window.location.host + window.location.pathname);
-            if (!matchDomain(options.domain, origin)) throw new Error("Ack origin " + origin + " does not match domain " + options.domain);
+            if (!(0, _lib.matchDomain)(options.domain, origin)) throw new Error("Ack origin " + origin + " does not match domain " + options.domain);
             options.ack = !0;
         }), _defineProperty(_RECEIVE_MESSAGE_TYPE, _conf.CONSTANTS.POST_MESSAGE_TYPE.REQUEST, function(source, origin, message) {
             function respond(data) {
@@ -1766,7 +1798,7 @@
                 type: _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK
             }), _lib.promise.run(function() {
                 if (!options) throw new Error("No handler found for post message: " + message.name + " from " + origin + " in " + window.location.protocol + "//" + window.location.host + window.location.pathname);
-                if (!matchDomain(options.domain, origin)) throw new Error("Request origin " + origin + " does not match domain " + options.domain);
+                if (!(0, _lib.matchDomain)(options.domain, origin)) throw new Error("Request origin " + origin + " does not match domain " + options.domain);
                 var data = message.data;
                 return _lib.promise.deNodeify(options.handler, {
                     source: source,
@@ -1792,7 +1824,7 @@
         }), _defineProperty(_RECEIVE_MESSAGE_TYPE, _conf.CONSTANTS.POST_MESSAGE_TYPE.RESPONSE, function(source, origin, message) {
             var options = _listeners.listeners.response[message.hash];
             if (!options) throw new Error("No handler found for post message response for message: " + message.name + " from " + origin + " in " + window.location.protocol + "//" + window.location.host + window.location.pathname);
-            if (!matchDomain(options.domain, origin)) throw new Error("Response origin " + origin + " does not match domain " + options.domain);
+            if (!(0, _lib.matchDomain)(options.domain, origin)) throw new Error("Response origin " + origin + " does not match domain " + options.domain);
             if (delete _listeners.listeners.response[message.hash], message.ack === _conf.CONSTANTS.POST_MESSAGE_ACK.ERROR) return options.respond(new Error(message.error));
             if (message.ack === _conf.CONSTANTS.POST_MESSAGE_ACK.SUCCESS) {
                 var data = message.data || message.response;
@@ -1818,13 +1850,18 @@
         }), exports.SEND_MESSAGE_STRATEGIES = void 0;
         var _SEND_MESSAGE_STRATEG, _conf = __webpack_require__(0), _lib = __webpack_require__(1), _compat = __webpack_require__(11), _bridge = __webpack_require__(9);
         exports.SEND_MESSAGE_STRATEGIES = (_SEND_MESSAGE_STRATEG = {}, _defineProperty(_SEND_MESSAGE_STRATEG, _conf.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE, function(win, serializedMessage, domain) {
-            if ((0, _compat.emulateIERestrictions)(window, win), domain && 0 === domain.indexOf(_conf.CONSTANTS.MOCK_PROTOCOL)) try {
-                domain = win.location.protocol + "//" + win.location.host;
-            } catch (err) {
-                throw new Error("Attempting to send messsage to mock domain " + domain + ", but window is actually cross-domain");
-            }
-            return domain && 0 === domain.indexOf(_conf.CONSTANTS.FILE_PROTOCOL) && (domain = "*"), 
-            win.postMessage(serializedMessage, domain);
+            (0, _compat.emulateIERestrictions)(window, win);
+            var domains = void 0;
+            domains = Array.isArray(domain) ? domain : domain ? [ domain ] : [ _conf.CONSTANTS.WILDCARD ], 
+            domains = domains.map(function(dom) {
+                if (0 === dom.indexOf(_conf.CONSTANTS.MOCK_PROTOCOL)) {
+                    if (!(0, _lib.isActuallySameDomain)(win)) throw new Error("Attempting to send messsage to mock domain " + dom + ", but window is actually cross-domain");
+                    return _lib.util.getActualDomain(win);
+                }
+                return 0 === dom.indexOf(_conf.CONSTANTS.FILE_PROTOCOL) ? _conf.CONSTANTS.WILDCARD : dom;
+            }), domains.forEach(function(dom) {
+                return win.postMessage(serializedMessage, dom);
+            });
         }), _defineProperty(_SEND_MESSAGE_STRATEG, _conf.CONSTANTS.SEND_STRATEGIES.BRIDGE, function(win, serializedMessage, domain) {
             if ((0, _lib.isSameDomain)(win)) throw new Error("Post message through bridge disabled between same domain windows");
             if ((0, _lib.isSameTopWindow)(window, win) !== !1) throw new Error("Can only use bridge to communicate between two different windows, not between frames");
@@ -1836,7 +1873,7 @@
             if (!foreignGlobal) throw new Error("Can not find postRobot global on foreign window");
             return foreignGlobal.receiveMessage({
                 source: window,
-                origin: domain,
+                origin: _lib.util.getDomain(),
                 data: serializedMessage
             });
         }), _SEND_MESSAGE_STRATEG);
@@ -1910,17 +1947,17 @@
         exports.serializeMethod = serializeMethod, exports.serializeMethods = serializeMethods, 
         exports.deserializeMethod = deserializeMethod, exports.deserializeError = deserializeError, 
         exports.deserializeMethods = deserializeMethods;
-        var _conf = __webpack_require__(0), _util = __webpack_require__(4), _interface = __webpack_require__(5), _log = __webpack_require__(10), _promise = __webpack_require__(16), _global = __webpack_require__(2);
+        var _conf = __webpack_require__(0), _util = __webpack_require__(4), _domain = __webpack_require__(16), _interface = __webpack_require__(5), _log = __webpack_require__(10), _promise = __webpack_require__(17), _global = __webpack_require__(2);
         _global.global.methods = _global.global.methods || {};
         exports.listenForMethods = _util.util.once(function() {
             (0, _interface.on)(_conf.CONSTANTS.POST_MESSAGE_NAMES.METHOD, {
-                window: "*",
-                origin: "*"
+                window: _conf.CONSTANTS.WILDCARD,
+                origin: _conf.CONSTANTS.WILDCARD
             }, function(_ref) {
                 var source = _ref.source, origin = _ref.origin, data = _ref.data, meth = _global.global.methods[data.id];
                 if (!meth) throw new Error("Could not find method with id: " + data.id);
                 if (meth.destination !== source) throw new Error("Method window does not match");
-                if (meth.domain && "*" !== meth.domain && origin !== meth.domain) throw new Error("Method domain " + meth.domain + " does not match origin " + origin);
+                if (!(0, _domain.matchDomain)(meth.domain, origin)) throw new Error("Method domain " + meth.domain + " does not match origin " + origin);
                 return _log.log.debug("Call local method", data.name, data.args), _promise.promise.run(function() {
                     return meth.method.apply({
                         source: source,
@@ -1940,8 +1977,8 @@
         "use strict";
         function initOnReady() {
             (0, _interface.on)(_conf.CONSTANTS.POST_MESSAGE_NAMES.READY, {
-                window: "*",
-                domain: "*"
+                window: _conf.CONSTANTS.WILDCARD,
+                domain: _conf.CONSTANTS.WILDCARD
             }, function(event) {
                 for (var _iterator = _global.global.readyPromises, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
                     var _ref;
@@ -1962,7 +1999,7 @@
             });
             var parent = (0, _windows.getAncestor)();
             parent && (0, _interface.send)(parent, _conf.CONSTANTS.POST_MESSAGE_NAMES.READY, {}, {
-                domain: "*"
+                domain: _conf.CONSTANTS.WILDCARD
             }).catch(function(err) {
                 _log.log.debug(err.stack || err.toString());
             });
@@ -2010,7 +2047,7 @@
                     options.window = options.window.contentWindow;
                 }
                 if (!options.window) throw new Error("Expected options.window to be a window object, iframe, or iframe element id.");
-                options.domain = options.domain || "*";
+                options.domain = options.domain || _conf.CONSTANTS.WILDCARD;
                 var hash = options.name + "_" + _lib.util.uniqueID();
                 if (_global.global.clean.setItem(_global.global.listeners.response, hash, options), 
                 (0, _lib.isWindowClosed)(options.window)) throw new Error("Target window is closed");
@@ -2096,7 +2133,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.winutil = exports.util = exports.destroyBridges = exports.openTunnelToOpener = exports.needsBridgeForDomain = exports.needsBridgeForWin = exports.needsBridgeForBrowser = exports.needsBridge = exports.isBridge = exports.linkUrl = exports.openBridge = exports.parent = void 0;
-        var _client = __webpack_require__(28);
+        var _client = __webpack_require__(29);
         Object.keys(_client).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -2105,7 +2142,7 @@
                 }
             });
         });
-        var _server = __webpack_require__(31);
+        var _server = __webpack_require__(32);
         Object.keys(_server).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -2114,7 +2151,7 @@
                 }
             });
         });
-        var _config = __webpack_require__(29);
+        var _config = __webpack_require__(30);
         Object.keys(_config).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -2197,7 +2234,7 @@
                 });
             }
             var override = options.override || _conf.CONFIG.MOCK_MODE;
-            if (options.source && (options.window = options.source), options.domain = options.domain || "*", 
+            if (options.source && (options.window = options.source), options.domain = options.domain || _conf.CONSTANTS.WILDCARD, 
             (0, _drivers.addRequestListener)(options.name, options.window, options.domain, options, override), 
             options.handleError = function(err) {
                 options.errorHandler(err);
