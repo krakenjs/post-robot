@@ -103,7 +103,7 @@ gulp.task('webpack-max-ie', function() {
 gulp.task('webpack-min-ie', function() {
     return gulp.src('src/index.js')
         .pipe(gulpWebpack(buildWebpackConfig({
-            filename: `post-robot.ie.js`,
+            filename: `post-robot.ie.min.js`,
             modulename: MODULE_NAME,
             minify: true,
             globals: {
