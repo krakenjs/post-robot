@@ -1,5 +1,1103 @@
-!function(e,n){"object"==typeof exports&&"object"==typeof module?module.exports=n():"function"==typeof define&&define.amd?define("postRobot",[],n):"object"==typeof exports?exports.postRobot=n():e.postRobot=n()}(this,function(){return function(e){function n(t){if(r[t])return r[t].exports;var o=r[t]={i:t,l:!1,exports:{}};return e[t].call(o.exports,o,o.exports,n),o.l=!0,o.exports}var r={};return n.m=e,n.c=r,n.i=function(e){return e},n.d=function(e,r,t){n.o(e,r)||Object.defineProperty(e,r,{configurable:!1,enumerable:!0,get:t})},n.n=function(e){var r=e&&e.__esModule?function(){return e.default}:function(){return e};return n.d(r,"a",r),r},n.o=function(e,n){return Object.prototype.hasOwnProperty.call(e,n)},n.p="",n(n.s=34)}([function(e,n,r){"use strict";Object.defineProperty(n,"__esModule",{value:!0});var t=r(24);Object.keys(t).forEach(function(e){"default"!==e&&"__esModule"!==e&&Object.defineProperty(n,e,{enumerable:!0,get:function(){return t[e]}})});var o=r(12);Object.keys(o).forEach(function(e){"default"!==e&&"__esModule"!==e&&Object.defineProperty(n,e,{enumerable:!0,get:function(){return o[e]}})})},function(e,n,r){"use strict";Object.defineProperty(n,"__esModule",{value:!0});var t=r(17);Object.keys(t).forEach(function(e){"default"!==e&&"__esModule"!==e&&Object.defineProperty(n,e,{enumerable:!0,get:function(){return t[e]}})});var o=r(4);Object.keys(o).forEach(function(e){"default"!==e&&"__esModule"!==e&&Object.defineProperty(n,e,{enumerable:!0,get:function(){return o[e]}})});var i=r(10);Object.keys(i).forEach(function(e){"default"!==e&&"__esModule"!==e&&Object.defineProperty(n,e,{enumerable:!0,get:function(){return i[e]}})});var a=r(7);Object.keys(a).forEach(function(e){"default"!==e&&"__esModule"!==e&&Object.defineProperty(n,e,{enumerable:!0,get:function(){return a[e]}})});var s=r(28);Object.keys(s).forEach(function(e){"default"!==e&&"__esModule"!==e&&Object.defineProperty(n,e,{enumerable:!0,get:function(){return s[e]}})});var u=r(18);Object.keys(u).forEach(function(e){"default"!==e&&"__esModule"!==e&&Object.defineProperty(n,e,{enumerable:!0,get:function(){return u[e]}})});var c=r(29);Object.keys(c).forEach(function(e){"default"!==e&&"__esModule"!==e&&Object.defineProperty(n,e,{enumerable:!0,get:function(){return c[e]}})});var d=r(15);Object.keys(d).forEach(function(e){"default"!==e&&"__esModule"!==e&&Object.defineProperty(n,e,{enumerable:!0,get:function(){return d[e]}})});var l=r(16);Object.keys(l).forEach(function(e){"default"!==e&&"__esModule"!==e&&Object.defineProperty(n,e,{enumerable:!0,get:function(){return l[e]}})})},function(e,n,r){"use strict";Object.defineProperty(n,"__esModule",{value:!0}),n.global=void 0;var t=r(0),o=r(15),i=n.global=window[t.CONSTANTS.WINDOW_PROPS.POSTROBOT]=window[t.CONSTANTS.WINDOW_PROPS.POSTROBOT]||{};i.clean=i.clean||(0,o.cleanup)(i),i.registerSelf=function(){}},function(e,n,r){"use strict";Object.defineProperty(n,"__esModule",{value:!0});var t=r(25);Object.keys(t).forEach(function(e){"default"!==e&&"__esModule"!==e&&Object.defineProperty(n,e,{enumerable:!0,get:function(){return t[e]}})});var o=r(14);Object.keys(o).forEach(function(e){"default"!==e&&"__esModule"!==e&&Object.defineProperty(n,e,{enumerable:!0,get:function(){return o[e]}})});var i=r(13);Object.keys(i).forEach(function(e){"default"!==e&&"__esModule"!==e&&Object.defineProperty(n,e,{enumerable:!0,get:function(){return i[e]}})})},function(e,n,r){"use strict";function t(e){return"[object RegExp]"===Object.prototype.toString.call(e)}Object.defineProperty(n,"__esModule",{value:!0}),n.util=void 0;var o="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(e){return typeof e}:function(e){return e&&"function"==typeof Symbol&&e.constructor===Symbol&&e!==Symbol.prototype?"symbol":typeof e};n.isRegex=t;var i=r(0),a=n.util={once:function(e){if(!e)return e;var n=!1;return function(){if(!n)return n=!0,e.apply(this,arguments)}},noop:function(){},safeHasProp:function(e,n){try{return!!e[n]}catch(e){return!1}},safeGetProp:function(e,n){try{return e[n]}catch(e){return}},listen:function(e,n,r){return e.addEventListener?e.addEventListener(n,r):e.attachEvent("on"+n,r),{cancel:function(){e.removeEventListener?e.removeEventListener(n,r):e.detachEvent("on"+n,r)}}},apply:function(e,n,r){return"function"==typeof e.apply?e.apply(n,r):e(r[0],r[1],r[2],r[3],r[4],r[5],r[6],r[7],r[8],r[9])},find:function(e,n,r){if(!e)return r;for(var t=0;t<e.length;t++)if(n(e[t]))return e[t];return r},map:function(e,n){for(var r=[],t=0;t<e.length;t++)r.push(n(e[t]));return r},some:function(e,n){n=n||Boolean;for(var r=0;r<e.length;r++)if(n(e[r]))return!0;return!1},keys:function(e){var n=[];for(var r in e)e.hasOwnProperty(r)&&n.push(r);return n},values:function(e){var n=[];for(var r in e)e.hasOwnProperty(r)&&n.push(e[r]);return n},getByValue:function(e,n){for(var r in e)if(e.hasOwnProperty(r)&&e[r]===n)return r},uniqueID:function(){var e="0123456789abcdef";return"xxxxxxxxxx".replace(/./g,function(){return e.charAt(Math.floor(Math.random()*e.length))})},memoize:function(e){var n={};return function(){var r=JSON.stringify(Array.prototype.slice.call(arguments));return n.hasOwnProperty(r)||(n[r]=e.apply(this,arguments)),n[r]}},extend:function(e,n){if(!n)return e;for(var r in n)n.hasOwnProperty(r)&&(e[r]=n[r]);return e},each:function(e,n){if(Array.isArray(e))for(var r=0;r<e.length;r++)n(e[r],r);else if("object"===(void 0===e?"undefined":o(e))&&null!==e)for(var t in e)e.hasOwnProperty(t)&&n(e[t],t)},replaceObject:function(e,n){var r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:1;if(r>=100)throw new Error("Self-referential object passed, or object contained too many layers");var t=Array.isArray(e)?[]:{};return a.each(e,function(e,i){var s=n(e,i);void 0!==s?t[i]=s:"object"===(void 0===e?"undefined":o(e))&&null!==e?t[i]=a.replaceObject(e,n,r+1):t[i]=e}),t},safeInterval:function(e,n){function r(){t=setTimeout(r,n),e.call()}var t=void 0;return t=setTimeout(r,n),{cancel:function(){clearTimeout(t)}}},intervalTimeout:function(e,n,r){var t=a.safeInterval(function(){e-=n,e=e<=0?0:e,0===e&&t.cancel(),r(e)},n);return t},getActualDomain:function(e){return e.location.protocol+"//"+e.location.host},getDomain:function(e){if(e=e||window,e.mockDomain&&0===e.mockDomain.indexOf(i.CONSTANTS.MOCK_PROTOCOL))return e.mockDomain;if(!e.location.protocol)throw new Error("Can not read window protocol");if(e.location.protocol===i.CONSTANTS.FILE_PROTOCOL)return a.getActualDomain(e);if(!e.location.host)throw new Error("Can not read window host");return a.getActualDomain(e)},getDomainFromUrl:function(e){var n=void 0;return e.match(/^(https?|mock|file):\/\//)?(n=e,n=n.split("/").slice(0,3).join("/")):this.getDomain()},safeGet:function(e,n){var r=void 0;try{r=e[n]}catch(e){}return r}}},function(e,n,r){"use strict";function t(){u.global.initialized||((0,s.listenForMessages)(),r(9).openTunnelToOpener(),(0,a.initOnReady)(),(0,a.listenForMethods)()),u.global.initialized=!0}function o(){return u.global.clean.all().then(function(){return u.global.initialized=!1,t()})}Object.defineProperty(n,"__esModule",{value:!0}),n.Promise=void 0,n.init=t,n.reset=o;var i=r(32);Object.keys(i).forEach(function(e){"default"!==e&&"__esModule"!==e&&Object.defineProperty(n,e,{enumerable:!0,get:function(){return i[e]}})});var a=r(1);Object.defineProperty(n,"Promise",{enumerable:!0,get:function(){return a.Promise}});var s=r(3),u=r(2);t()},function(e,n,r){"use strict";function t(e,n,r){function t(){if(o){if(a)return r(s);if(i)return n(u)}}var o=!1,i=!1,a=!1,s=void 0,u=void 0;try{e(function(e){u=e,i=!0,t()},function(e){s=e,a=!0,t()})}catch(e){return r(e)}o=!0,t()}function o(e){d.push(e),l=l||setTimeout(i,1)}function i(){l=null;var e=d;d=[];for(var n=0;n<e.length;n++){(function(n){var r=e[n];if(r.silentReject)return"continue";r.handlers.push({onError:function(e){r.silentReject||a(e)}}),r.dispatch()})(n)}}function a(e){if(f.indexOf(e)===-1){f.push(e),setTimeout(function(){throw e},1);for(var n=0;n<c.length;n++)c[n](e)}}function s(e){try{if(!e)return!1;if(window.Window&&e instanceof window.Window)return!1;if(window.constructor&&e instanceof window.constructor)return!1;if(m){var n=m.call(e);if("[object Window]"===n||"[object global]"===n||"[object DOMWindow]"===n)return!1}if(e&&e.then instanceof Function)return!0}catch(e){return!1}return!1}function u(){window.Promise=w}Object.defineProperty(n,"__esModule",{value:!0}),n.patchPromise=u;var c=[],d=[],l=void 0,f=[],m={}.toString,w=n.SyncPromise=function(e){if(this.resolved=!1,this.rejected=!1,this.silentReject=!1,this.handlers=[],o(this),e){var n=this;t(e,function(e){return n.resolve(e)},function(e){return n.reject(e)})}};w.resolve=function(e){return s(e)?e:(new w).resolve(e)},w.reject=function(e){return(new w).reject(e)},w.prototype.resolve=function(e){if(this.resolved||this.rejected)return this;if(s(e))throw new Error("Can not resolve promise with another promise");return this.resolved=!0,this.value=e,this.dispatch(),this},w.prototype.reject=function(e){if(this.resolved||this.rejected)return this;if(s(e))throw new Error("Can not reject promise with another promise");return this.rejected=!0,this.value=e,this.dispatch(),this},w.prototype.asyncReject=function(e){this.silentReject=!0,this.reject(e)},w.prototype.dispatch=function(){var e=this;if(this.resolved||this.rejected)for(;this.handlers.length;){(function(){var n=e.handlers.shift(),r=void 0,t=void 0;try{e.resolved?r=n.onSuccess?n.onSuccess(e.value):e.value:e.rejected&&(n.onError?r=n.onError(e.value):t=e.value)}catch(e){t=e}if(r===e)throw new Error("Can not return a promise from the the then handler of the same promise");if(!n.promise)return"continue";t?n.promise.reject(t):s(r)?r.then(function(e){n.promise.resolve(e)},function(e){n.promise.reject(e)}):n.promise.resolve(r)})()}},w.prototype.then=function(e,n){if(e&&"function"!=typeof e&&!e.call)throw new Error("Promise.then expected a function for success handler");if(n&&"function"!=typeof n&&!n.call)throw new Error("Promise.then expected a function for error handler");var r=new w(null,this);return this.handlers.push({promise:r,onSuccess:e,onError:n}),this.silentReject=!0,this.dispatch(),r},w.prototype.catch=function(e){return this.then(null,e)},w.prototype.finally=function(e){return this.then(function(n){return w.try(e).then(function(){return n})},function(n){return w.try(e).then(function(){throw n})})},w.all=function(e){for(var n=new w,r=e.length,t=[],o=0;o<e.length;o++)!function(o){(s(e[o])?e[o]:w.resolve(e[o])).then(function(e){t[o]=e,0==(r-=1)&&n.resolve(t)},function(e){n.reject(e)})}(o);return r||n.resolve(t),n},w.onPossiblyUnhandledException=function(e){c.push(e)},w.try=function(e){return w.resolve().then(e)},w.delay=function(e){return new w(function(n){setTimeout(n,e)})},w.hash=function(e){var n={},r=[];for(var t in e)!function(t){e.hasOwnProperty(t)&&r.push(w.resolve(e[t]).then(function(e){n[t]=e}))}(t);return w.all(r).then(function(){return n})},w.promisifyCall=function(){var e=Array.prototype.slice.call(arguments),n=e.shift();if("function"!=typeof n)throw new Error("Expected promisifyCall to be called with a function");return new w(function(r,t){return e.push(function(e,n){return e?t(e):r(n)}),n.apply(null,e)})}},function(e,n,r){"use strict";function t(e){for(var n=j.global.domainMatches,r=Array.isArray(n),t=0,n=r?n:n[Symbol.iterator]();;){var o;if(r){if(t>=n.length)break;o=n[t++]}else{if(t=n.next(),t.done)break;o=t.value}var i=o;if(i.win===e)return i.match}var a=void 0;try{a=R.util.getDomain(window)===R.util.getDomain(e)}catch(e){a=!1}return j.global.clean.push(j.global.domainMatches,{win:e,match:a}),I||(I=setTimeout(function(){j.global.domainMatches=[],I=null},1)),a}function o(e){try{if(e&&e.location&&e.location.href)return!0}catch(n){return j.global.clean.push(j.global.domainMatches,{win:e,match:!1}),!1}return!0}function i(e){if(e)try{return e.opener}catch(e){return}}function a(e){if(e)try{if(e.parent&&e.parent!==e)return e.parent}catch(e){return}}function s(e){var n=[];try{for(;e.parent!==e;)n.push(e.parent),e=e.parent}catch(e){}return n}function u(e,n){if(!e||!n)return!1;var r=a(n);return r?r===e:s(n).indexOf(e)!==-1}function c(e){var n=[],r=void 0;try{r=e.frames}catch(n){r=e}var t=void 0;try{t=r.length}catch(e){}if(0===t)return n;if(t){for(var o=0;o<t;o++){var i=void 0;try{i=r[o]}catch(e){continue}n.push(i)}return n}for(var a=0;a<100;a++){var s=void 0;try{s=r[a]}catch(e){return n}if(!s)return n;n.push(s)}return n}function d(e){for(var n=[],r=c(e),t=Array.isArray(r),o=0,r=t?r:r[Symbol.iterator]();;){var i;if(t){if(o>=r.length)break;i=r[o++]}else{if(o=r.next(),o.done)break;i=o.value}var a=i;n.push(a);for(var s=d(a),u=Array.isArray(s),l=0,s=u?s:s[Symbol.iterator]();;){var f;if(u){if(l>=s.length)break;f=s[l++]}else{if(l=s.next(),l.done)break;f=l.value}var m=f;n.push(m)}}return n}function l(e){var n=d(e);n.push(e);for(var r=s(e),t=Array.isArray(r),o=0,r=t?r:r[Symbol.iterator]();;){var i;if(t){if(o>=r.length)break;i=r[o++]}else{if(o=r.next(),o.done)break;i=o.value}var a=i;n.push(a);for(var u=c(a),l=Array.isArray(u),f=0,u=l?u:u[Symbol.iterator]();;){var m;if(l){if(f>=u.length)break;m=u[f++]}else{if(f=u.next(),f.done)break;m=f.value}var w=m;n.indexOf(w)===-1&&n.push(w)}}return n}function f(e){if(e){try{if(e.top)return e.top}catch(e){}if(a(e)===e)return e;try{if(u(window,e))return window.top}catch(e){}try{if(u(e,window))return window.top}catch(e){}for(var n=d(e),r=Array.isArray(n),t=0,n=r?n:n[Symbol.iterator]();;){var o;if(r){if(t>=n.length)break;o=n[t++]}else{if(t=n.next(),t.done)break;o=t.value}var i=o;try{if(i.top)return i.top}catch(e){}if(a(i)===i)return i}}}function m(e){var n=!(arguments.length>1&&void 0!==arguments[1])||arguments[1];try{if(e===window)return!1}catch(e){return!0}try{if(!e)return!0}catch(e){return!0}try{if(e.closed)return!0}catch(e){return!e||"Call was rejected by callee.\r\n"!==e.message}return!!(n&&t(e)&&R.util.safeGet(e,"mockclosed"))}function w(e){return e=e||window,e.navigator.mockUserAgent||e.navigator.userAgent}function p(e,n){for(var r=c(e),o=r,i=Array.isArray(o),a=0,o=i?o:o[Symbol.iterator]();;){var s;if(i){if(a>=o.length)break;s=o[a++]}else{if(a=o.next(),a.done)break;s=a.value}var u=s;try{if(t(u)&&u.name===n&&r.indexOf(u)!==-1)return u}catch(e){}}try{if(r.indexOf(e.frames[n])!==-1)return e.frames[n]}catch(e){}try{if(r.indexOf(e[n])!==-1)return e[n]}catch(e){}}function g(e,n){var r=p(e,n);if(r)return r;for(var t=c(e),o=Array.isArray(t),i=0,t=o?t:t[Symbol.iterator]();;){var a;if(o){if(i>=t.length)break;a=t[i++]}else{if(i=t.next(),i.done)break;a=i.value}var s=a,u=g(s,n);if(u)return u}}function h(e,n){var r=void 0;return r=p(e,n),r?r:g(f(e),n)}function S(e,n){var r=a(n);if(r)return r===e;for(var t=c(e),o=Array.isArray(t),i=0,t=o?t:t[Symbol.iterator]();;){var s;if(o){if(i>=t.length)break;s=t[i++]}else{if(i=t.next(),i.done)break;s=i.value}if(s===n)return!0}return!1}function v(e,n){return e===i(n)}function O(e){e=e||window;var n=i(e);if(n)return n;var r=a(e);return r?r:void 0}function y(e){for(var n=[],r=e;r;)(r=O(r))&&n.push(r);return n}function b(e,n){var r=O(n);if(r)return r===e;if(n===e)return!1;if(f(n)===n)return!1;for(var t=c(e),o=Array.isArray(t),i=0,t=o?t:t[Symbol.iterator]();;){var a;if(o){if(i>=t.length)break;a=t[i++]}else{if(i=t.next(),i.done)break;a=i.value}if(a===n)return!0}return!1}function E(){return Boolean(i(window))}function _(){return Boolean(a(window))}function T(){return Boolean(!_()&&!E())}function A(){return E()?D.CONSTANTS.WINDOW_TYPES.POPUP:_()?D.CONSTANTS.WINDOW_TYPES.IFRAME:D.CONSTANTS.WINDOW_TYPES.FULLPAGE}function P(e,n){for(var r=e,t=Array.isArray(r),o=0,r=t?r:r[Symbol.iterator]();;){var i;if(t){if(o>=r.length)break;i=r[o++]}else{if(o=r.next(),o.done)break;i=o.value}for(var a=i,s=n,u=Array.isArray(s),c=0,s=u?s:s[Symbol.iterator]();;){var d;if(u){if(c>=s.length)break;d=s[c++]}else{if(c=s.next(),c.done)break;d=c.value}if(a===d)return!0}}}function N(e,n){var r=f(e),t=f(n);try{if(r&&t)return r===t}catch(e){}var o=l(e),a=l(n);if(P(o,a))return!0;var s=i(r),u=i(t);return(!s||!P(l(s),a))&&((!u||!P(l(u),o))&&void 0)}function M(){var e=void 0,n=void 0;try{if("{}"!==JSON.stringify({})&&(e=Object.prototype.toJSON,delete Object.prototype.toJSON),"{}"!==JSON.stringify({}))throw new Error("Can not correctly serialize JSON objects");if("[]"!==JSON.stringify([])&&(n=Array.prototype.toJSON,delete Array.prototype.toJSON),"[]"!==JSON.stringify([]))throw new Error("Can not correctly serialize JSON objects")}catch(e){throw new Error("Can not repair JSON.stringify: "+e.message)}var r=JSON.stringify.apply(this,arguments);try{e&&(Object.prototype.toJSON=e),n&&(Array.prototype.toJSON=n)}catch(e){throw new Error("Can not repair JSON.stringify: "+e.message)}return r}function C(){return JSON.parse.apply(this,arguments)}Object.defineProperty(n,"__esModule",{value:!0}),n.isSameDomain=t,n.isActuallySameDomain=o,n.getOpener=i,n.getParent=a,n.getParents=s,n.isAncestorParent=u,n.getFrames=c,n.getAllChildFrames=d,n.getAllFramesInWindow=l,n.getTop=f,n.isWindowClosed=m,n.getUserAgent=w,n.getFrameByName=p,n.findChildFrameByName=g,n.findFrameByName=h,n.isParent=S,n.isOpener=v,n.getAncestor=O,n.getAncestors=y,n.isAncestor=b,n.isPopup=E,n.isIframe=_,n.isFullpage=T,n.getWindowType=A,n.isSameTopWindow=N,n.jsonStringify=M,n.jsonParse=C;var R=r(4),j=r(2),D=r(0);j.global.domainMatches=j.global.domainMatches||[];var I=void 0},function(e,n,r){"use strict";function t(){return!!(0,p.getUserAgent)(window).match(/MSIE|trident|edge/i)||!w.CONFIG.ALLOW_POSTMESSAGE_POPUP}function o(e){return(!e||!(0,p.isSameTopWindow)(window,e))&&(!e||!(0,p.isSameDomain)(e))}function i(e){return!e||p.util.getDomain()!==p.util.getDomainFromUrl(e)}function a(e){var n=e.win,r=e.domain;return t()&&o(n)&&i(r)}function s(e){e=e||p.util.getDomainFromUrl(e);var n=e.replace(/[^a-zA-Z0-9]+/g,"_");return w.CONSTANTS.BRIDGE_NAME_PREFIX+"_"+n}function u(){return window.name&&window.name===s(p.util.getDomain())}function c(e){var n=(arguments.length>1&&void 0!==arguments[1]?arguments[1]:w.CONFIG.BRIDGE_TIMEOUT,new p.promise.Promise);g.global.clean.push(g.global.remoteWindows,{win:e,sendMessagePromise:n})}function d(e){for(var n=0;n<g.global.remoteWindows.length;n++)if(g.global.remoteWindows[n].win===e)return g.global.remoteWindows[n]}function l(e,n,r){var t=d(e);if(!t)throw new Error("Window not found to register sendMessage to");var o=function(t,o,i){if(t!==e)throw new Error("Remote window does not match window");if(!(0,p.matchDomain)(i,n))throw new Error("Remote domain "+i+" does not match domain "+n);r(o)};t.sendMessagePromise.resolve(o),t.sendMessagePromise=p.promise.Promise.resolve(o)}function f(e,n){var r=d(e);if(!r)throw new Error("Window not found on which to reject sendMessage");r.sendMessagePromise.asyncReject(n)}function m(e,n,r){var t=(0,p.isOpener)(window,e),o=(0,p.isOpener)(e,window);if(!t&&!o)throw new Error("Can only send messages to and from parent and popup windows");var i=d(e);if(!i)throw new Error("Window not found to send message to");return i.sendMessagePromise.then(function(t){return t(e,n,r)})}Object.defineProperty(n,"__esModule",{value:!0}),n.documentBodyReady=void 0,n.needsBridgeForBrowser=t,n.needsBridgeForWin=o,n.needsBridgeForDomain=i,n.needsBridge=a,n.getBridgeName=s,n.isBridge=u,n.registerRemoteWindow=c,n.findRemoteWindow=d,n.registerRemoteSendMessage=l,n.rejectRemoteSendMessage=f,n.sendBridgeMessage=m;var w=r(0),p=r(1),g=r(2),h=r(3);n.documentBodyReady=new p.promise.Promise(function(e){if(window.document&&window.document.body)return e(window.document.body);var n=setInterval(function(){if(window.document&&window.document.body)return clearInterval(n),e(window.document.body)},10)});g.global.remoteWindows=g.global.remoteWindows||[],g.global.receiveMessage=function(e){return(0,h.receiveMessage)(e)}},function(e,n,r){"use strict";Object.defineProperty(n,"__esModule",{value:!0});var t=r(19);Object.keys(t).forEach(function(e){"default"!==e&&"__esModule"!==e&&Object.defineProperty(n,e,{enumerable:!0,get:function(){return t[e]}})});var o=r(20);Object.keys(o).forEach(function(e){"default"!==e&&"__esModule"!==e&&Object.defineProperty(n,e,{enumerable:!0,get:function(){return o[e]}})});var i=r(8);Object.keys(i).forEach(function(e){"default"!==e&&"__esModule"!==e&&Object.defineProperty(n,e,{enumerable:!0,get:function(){return i[e]}})});var a=r(22);Object.keys(a).forEach(function(e){"default"!==e&&"__esModule"!==e&&Object.defineProperty(n,e,{enumerable:!0,get:function(){return a[e]}})})},function(e,n,r){"use strict";Object.defineProperty(n,"__esModule",{value:!0}),n.log=void 0;var t="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(e){return typeof e}:function(e){return e&&"function"==typeof Symbol&&e.constructor===Symbol&&e!==Symbol.prototype?"symbol":typeof e},o=r(4),i=r(7),a=r(0),s=["debug","info","warn","error"];Function.prototype.bind&&window.console&&"object"===t(console.log)&&["log","info","warn","error"].forEach(function(e){console[e]=this.bind(console[e],console)},Function.prototype.call);var u=n.log={clearLogs:function(){if(window.console&&window.console.clear&&window.console.clear(),a.CONFIG.LOG_TO_PAGE){var e=document.getElementById("postRobotLogs");e&&e.parentNode.removeChild(e)}},writeToPage:function(e,n){setTimeout(function(){var r=document.getElementById("postRobotLogs");r||(r=document.createElement("div"),r.id="postRobotLogs",r.style.cssText="width: 800px; font-family: monospace; white-space: pre-wrap;",document.body.appendChild(r));var t=document.createElement("div"),a=(new Date).toString().split(" ")[4],s=o.util.map(n,function(e){if("string"==typeof e)return e;if(!e)return Object.prototype.toString.call(e);var n=void 0;try{n=(0,i.jsonStringify)(e,0,2)}catch(e){n="[object]"}return"\n\n"+n+"\n\n"}).join(" "),u=a+" "+e+" "+s;t.innerHTML=u;var c={log:"#ddd",warn:"orange",error:"red",info:"blue",debug:"#aaa"}[e];t.style.cssText="margin-top: 10px; color: "+c+";",r.childNodes.length?r.insertBefore(t,r.childNodes[0]):r.appendChild(t)})},logLevel:function(e,n){setTimeout(function(){try{if(s.indexOf(e)<s.indexOf(a.CONFIG.LOG_LEVEL))return;if(n=Array.prototype.slice.call(n),n.unshift(""+window.location.host+window.location.pathname),n.unshift("::"),n.unshift(""+(0,i.getWindowType)().toLowerCase()),n.unshift("[post-robot]"),a.CONFIG.LOG_TO_PAGE&&u.writeToPage(e,n),!window.console)return;if(window.console[e]||(e="log"),!window.console[e])return;window.console[e].apply(window.console,n)}catch(e){}},1)},debug:function(){u.logLevel("debug",arguments)},info:function(){u.logLevel("info",arguments)},warn:function(){u.logLevel("warn",arguments)},error:function(){u.logLevel("error",arguments)}}},function(e,n,r){"use strict";Object.defineProperty(n,"__esModule",{value:!0});var t=r(23);Object.keys(t).forEach(function(e){"default"!==e&&"__esModule"!==e&&Object.defineProperty(n,e,{enumerable:!0,get:function(){return t[e]}})})},function(e,n,r){"use strict";Object.defineProperty(n,"__esModule",{value:!0});var t=n.CONSTANTS={POST_MESSAGE_TYPE:{REQUEST:"postrobot_message_request",RESPONSE:"postrobot_message_response",ACK:"postrobot_message_ack"},POST_MESSAGE_ACK:{SUCCESS:"success",ERROR:"error"},POST_MESSAGE_NAMES:{METHOD:"postrobot_method",READY:"postrobot_ready",OPEN_TUNNEL:"postrobot_open_tunnel"},WINDOW_TYPES:{FULLPAGE:"fullpage",POPUP:"popup",IFRAME:"iframe"},WINDOW_PROPS:{POSTROBOT:"__postRobot__"},SERIALIZATION_TYPES:{METHOD:"postrobot_method",ERROR:"postrobot_error"},SEND_STRATEGIES:{POST_MESSAGE:"postrobot_post_message",BRIDGE:"postrobot_bridge",GLOBAL:"postrobot_global"},MOCK_PROTOCOL:"mock:",FILE_PROTOCOL:"file:",BRIDGE_NAME_PREFIX:"__postrobot_bridge__",POSTROBOT_PROXY:"__postrobot_proxy__",WILDCARD:"*"};n.POST_MESSAGE_NAMES_LIST=Object.keys(t.POST_MESSAGE_NAMES).map(function(e){return t.POST_MESSAGE_NAMES[e]})},function(e,n,r){"use strict";function t(){s.global.listeners.request=[],s.global.listeners.response=[]}function o(e,n,r){for(var t={},o=s.global.listeners.request,i=Array.isArray(o),a=0,o=i?o:o[Symbol.iterator]();;){var d;if(i){if(a>=o.length)break;d=o[a++]}else{if(a=o.next(),a.done)break;d=a.value}var l=d;if(l.name===e){var f=l.win&&l.win!==c.CONSTANTS.WILDCARD,m=l.domain&&l.domain!==c.CONSTANTS.WILDCARD,w=f&&l.win===n,p=m&&(0,u.matchDomain)(l.domain,r);f&&m?w&&p&&(t.all=t.all||l.options):m?p&&(t.domain=t.domain||l.options):f?w&&(t.win=t.win||l.options):t.name=t.name||l.options}}return t.all||t.domain||t.win||t.name}function i(e){for(var n=s.global.listeners.request,r=Array.isArray(n),t=0,n=r?n:n[Symbol.iterator]();;){var o;if(r){if(t>=n.length)break;o=n[t++]}else{if(t=n.next(),t.done)break;o=t.value}var i=o;i.options===e&&s.global.listeners.request.splice(s.global.listeners.request.indexOf(i),1)}}function a(e,n,r,t,a){var u=o(e,n,r);if(u){if(!a){if(n)throw new Error("Request listener already exists for "+e+" on domain "+r+" for specified window: "+(u.win===n));throw new Error("Request listener already exists for "+e+" on domain "+r)}i(u)}s.global.clean.push(s.global.listeners.request,{name:e,win:n,domain:r,options:t})}Object.defineProperty(n,"__esModule",{value:!0}),n.listeners=void 0,n.resetListeners=t,n.getRequestListener=o,n.removeRequestListener=i,n.addRequestListener=a;var s=r(2),u=r(1),c=r(0);s.global.listeners=s.global.listeners||{request:[],response:[]};n.listeners=s.global.listeners},function(e,n,r){"use strict";function t(e,n,r){return n in e?Object.defineProperty(e,n,{value:r,enumerable:!0,configurable:!0,writable:!0}):e[n]=r,e}function o(e,n){var r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:{},t=u.util.uniqueID(),o=(0,u.getWindowType)();return a({},n,r,{sourceDomain:u.util.getDomain(window),id:n.id||t,windowType:o})}function i(e,n,r){return u.promise.run(function(){n=o(e,n,{data:(0,u.serializeMethods)(e,r,n.data),domain:r});var i=void 0;if(i=s.POST_MESSAGE_NAMES_LIST.indexOf(n.name)!==-1||n.type===s.CONSTANTS.POST_MESSAGE_TYPE.ACK?"debug":"error"===n.ack?"error":"info",u.log.logLevel(i,["\n\n\t","#send",n.type.replace(/^postrobot_message_/,""),"::",n.name,"::",r||s.CONSTANTS.WILDCARD,"\n\n",n]),s.CONFIG.MOCK_MODE)return delete n.target,window[s.CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessage({origin:u.util.getDomain(window),source:window,data:(0,u.jsonStringify)(n,0,2)});if(e===window)throw new Error("Attemping to send message to self");if((0,u.isWindowClosed)(e))throw new Error("Window is closed");u.log.debug("Running send message strategies",n);var a=[],d=(0,u.jsonStringify)(t({},s.CONSTANTS.WINDOW_PROPS.POSTROBOT,n),0,2);return u.promise.map(Object.keys(c.SEND_MESSAGE_STRATEGIES),function(n){return u.promise.run(function(){if(!s.CONFIG.ALLOWED_POST_MESSAGE_METHODS[n])throw new Error("Strategy disallowed: "+n);return c.SEND_MESSAGE_STRATEGIES[n](e,d,r)}).then(function(){return a.push(n+": success"),!0},function(e){return a.push(n+": "+(e.stack||e.toString())+"\n"),!1})}).then(function(e){var r=u.util.some(e),t=n.type+" "+n.name+" "+(r?"success":"error")+":\n  - "+a.join("\n  - ")+"\n";if(u.log.debug(t),!r)throw new Error(t)})})}Object.defineProperty(n,"__esModule",{value:!0});var a=Object.assign||function(e){for(var n=1;n<arguments.length;n++){var r=arguments[n];for(var t in r)Object.prototype.hasOwnProperty.call(r,t)&&(e[t]=r[t])}return e};n.buildMessage=o,n.sendMessage=i;var s=r(0),u=r(1),c=r(27)},function(e,n,r){"use strict";function t(e){var n=[];return{getters:{array:function(){return[]},object:function(){return{}}},set:function(n,r){return e[n]=r,this.register(function(){delete e[n]}),r},push:function(e,n){return e.push(n),this.register(function(){var r=e.indexOf(n);r!==-1&&e.splice(r,1)}),n},setItem:function(e,n,r){return e[n]=r,this.register(function(){delete e[n]}),r},register:function(e,r){r||(r=e,e=void 0),n.push({complete:!1,name:e,run:function(){if(!this.complete)return this.complete=!0,r()}})},hasTasks:function(){return Boolean(n.filter(function(e){return!e.complete}).length)},all:function(){for(var e=[];n.length;)e.push(n.pop().run());return o.SyncPromise.all(e).then(function(){})},run:function(e){for(var r=[],t=[],i=n,a=Array.isArray(i),s=0,i=a?i:i[Symbol.iterator]();;){var u;if(a){if(s>=i.length)break;u=i[s++]}else{if(s=i.next(),s.done)break;u=s.value}var c=u;c.name===e&&(t.push(c),r.push(c.run()))}for(var d=t,l=Array.isArray(d),f=0,d=l?d:d[Symbol.iterator]();;){var m;if(l){if(f>=d.length)break;m=d[f++]}else{if(f=d.next(),f.done)break;m=f.value}var w=m;n.splice(n.indexOf(w),1)}return o.SyncPromise.all(r).then(function(){})}}}Object.defineProperty(n,"__esModule",{value:!0}),n.cleanup=t;var o=r(6)},function(e,n,r){"use strict";function t(e,n){return"string"==typeof e?!(0,o.isRegex)(n)&&(!Array.isArray(n)&&(e===i.CONSTANTS.WILDCARD||n===e)):(0,o.isRegex)(e)?(0,o.isRegex)(n)?e.toString()===n.toString():!Array.isArray(n)&&n.match(e):!!Array.isArray(e)&&(!(0,o.isRegex)(n)&&(Array.isArray(n)?JSON.stringify(e)===JSON.stringify(n):e.indexOf(n)!==-1))}Object.defineProperty(n,"__esModule",{value:!0}),n.matchDomain=t;var o=r(4),i=r(0)},function(e,n,r){"use strict";Object.defineProperty(n,"__esModule",{value:!0}),n.promise=n.Promise=void 0;var t=r(6),o=r(18),i=n.Promise=t.SyncPromise,a=n.promise={Promise:i,run:function(e){return i.resolve().then(e)},nextTick:function(e){return new i(function(n,r){(0,o.nextTick)(function(){return a.run(e).then(n,r)})})},method:function(e){return function(){var n=this,r=arguments;return i.resolve().then(function(){return e.apply(n,r)})}},nodeify:function(e,n){if(!n)return e;e.then(function(e){n(null,e)},function(e){n(e)})},deNodeify:function(e){for(var n=arguments.length,r=Array(n>1?n-1:0),t=1;t<n;t++)r[t-1]=arguments[t];return new i(function(n,t){try{return r.length<e.length?e.apply(void 0,r.concat([function(e,r){return e?t(e):n(r)}])):a.run(function(){return e.apply(void 0,r)}).then(n,t)}catch(e){return t(e)}})},map:function(e,n){for(var r=[],t=0;t<e.length;t++)!function(t){r.push(a.run(function(){return n(e[t])}))}(t);return i.all(r)}}},function(e,n,r){"use strict";function t(e){s.push(e),window.postMessage(a,i.CONSTANTS.WILDCARD)}Object.defineProperty(n,"__esModule",{value:!0}),n.nextTick=t;var o=r(4),i=r(0),a="__nextTick__postRobot__"+o.util.uniqueID(),s=[];window.addEventListener("message",function(e){if(e.data===a){s.shift().call()}})},function(e,n,r){"use strict";var t=r(0),o=r(1),i=r(2),a=r(5);i.global.openTunnelToParent=function(e){var n=e.name,r=e.source,i=e.canary,s=e.sendMessage,u=(0,o.getParent)(window);if(!u)throw new Error("No parent window found to open tunnel to");return(0,a.send)(u,t.CONSTANTS.POST_MESSAGE_NAMES.OPEN_TUNNEL,{name:n,sendMessage:function(){if(!(0,o.isWindowClosed)(r)){try{i()}catch(e){return}s.apply(this,arguments)}}},{domain:t.CONSTANTS.WILDCARD})}},function(e,n,r){"use strict";function t(e){return i.SyncPromise.try(function(){for(var n=(0,s.getFrames)(e),r=Array.isArray(n),t=0,n=r?n:n[Symbol.iterator]();;){var o;if(r){if(t>=n.length)break;o=n[t++]}else{if(t=n.next(),t.done)break;o=t.value}var u=o;try{if(u&&u!==window&&(0,s.isSameDomain)(u)&&u[a.CONSTANTS.WINDOW_PROPS.POSTROBOT])return u}catch(e){continue}}try{var d=(0,s.getFrameByName)(e,(0,c.getBridgeName)(s.util.getDomain()));if(!d)return;return(0,s.isSameDomain)(d)&&d[a.CONSTANTS.WINDOW_PROPS.POSTROBOT]?d:new i.SyncPromise(function(e){var n=void 0;n=setInterval(function(){if((0,s.isSameDomain)(d)&&d[a.CONSTANTS.WINDOW_PROPS.POSTROBOT])return clearInterval(n),clearTimeout(void 0),e(d);setTimeout(function(){return clearInterval(n),e()},2e3)},100)})}catch(e){return}})}function o(){return i.SyncPromise.try(function(){var e=(0,s.getOpener)(window);if(e&&(0,c.needsBridge)({win:e}))return(0,c.registerRemoteWindow)(e),t(e).then(function(n){return n?window.name?n[a.CONSTANTS.WINDOW_PROPS.POSTROBOT].openTunnelToParent({name:window.name,source:window,canary:function(){},sendMessage:function(e){window&&!window.closed&&(0,u.receiveMessage)({data:e,origin:this.origin,source:this.source})}}).then(function(n){var r=n.source,t=n.origin,o=n.data;if(r!==e)throw new Error("Source does not match opener");(0,c.registerRemoteSendMessage)(r,t,o.sendMessage)}).catch(function(n){throw(0,c.rejectRemoteSendMessage)(e,n),n}):(0,c.rejectRemoteSendMessage)(e,new Error("Can not register with opener: window does not have a name")):(0,c.rejectRemoteSendMessage)(e,new Error("Can not register with opener: no bridge found in opener"))})})}Object.defineProperty(n,"__esModule",{value:!0}),n.openTunnelToOpener=o;var i=r(6),a=r(0),s=r(1),u=r(3),c=r(8)},function(e,n,r){"use strict";Object.defineProperty(n,"__esModule",{value:!0});var t=(n.openBridge=void 0,n.linkUrl=void 0,n.isBridge=void 0,n.needsBridge=void 0,n.needsBridgeForBrowser=void 0,n.needsBridgeForWin=void 0,n.needsBridgeForDomain=void 0,n.openTunnelToOpener=void 0,n.destroyBridges=void 0,r(9));n.openBridge=t.openBridge,n.linkUrl=t.linkUrl,n.isBridge=t.isBridge,n.needsBridge=t.needsBridge,n.needsBridgeForBrowser=t.needsBridgeForBrowser,n.needsBridgeForWin=t.needsBridgeForWin,n.needsBridgeForDomain=t.needsBridgeForDomain,n.openTunnelToOpener=t.openTunnelToOpener,n.destroyBridges=t.destroyBridges},function(e,n,r){"use strict";function t(e,n){(0,f.on)(c.CONSTANTS.POST_MESSAGE_NAMES.OPEN_TUNNEL,{source:e,domain:n},function(e){var r=e.origin,t=e.data;if(r!==n)throw new Error("Domain "+n+" does not match origin "+r);if(!t.name)throw new Error("Register window expected to be passed window name");if(!t.sendMessage)throw new Error("Register window expected to be passed sendMessage method");var o=l.global.popupWindows[t.name];if(!o)throw new Error("Window with name "+t.name+" does not exist, or was not opened by this window");if(!o.domain)throw new Error("We do not have a registered domain for window "+t.name);if(o.domain!==r)throw new Error("Message origin "+r+" does not matched registered window origin "+o.domain);return(0,w.registerRemoteSendMessage)(o.win,n,t.sendMessage),{sendMessage:function(e){window&&!window.closed&&(0,m.receiveMessage)({data:e,origin:o.domain,source:o.win})}}})}function o(e,n){d.log.debug("Opening bridge:",e,n);var r=document.createElement("iframe");return r.setAttribute("name",e),r.setAttribute("id",e),r.setAttribute("style","display: none; margin: 0; padding: 0; border: 0px none; overflow: hidden;"),r.setAttribute("frameborder","0"),r.setAttribute("border","0"),r.setAttribute("scrolling","no"),r.setAttribute("allowTransparency","true"),r.setAttribute("tabindex","-1"),r.setAttribute("hidden","true"),r.setAttribute("title",""),r.setAttribute("role","presentation"),r.src=n,r}function i(e,n){return n=n||d.util.getDomainFromUrl(e),l.global.bridges[n]?l.global.bridges[n]:l.global.clean.setItem(l.global.bridges,n,d.promise.run(function(){if(d.util.getDomain()===n)throw new Error("Can not open bridge on the same domain as current domain: "+n);var r=(0,w.getBridgeName)(n);if((0,d.getFrameByName)(window,r))throw new Error("Frame with name "+r+" already exists on page");var i=o(r,e);return w.documentBodyReady.then(function(r){return new d.promise.Promise(function(e,n){setTimeout(e,1)}).then(function(){r.appendChild(i),l.global.clean.register("bridgeFrames",function(){r.removeChild(i),delete l.global.bridges[n]});var o=i.contentWindow;return t(o,n),new d.promise.Promise(function(e,n){i.onload=e,i.onerror=n}).then(function(){return(0,d.onWindowReady)(o,c.CONFIG.BRIDGE_TIMEOUT,"Bridge "+e)}).then(function(){return o})})})}))}function a(){return l.global.clean.run("bridgeFrames")}function s(e,n){for(var r=Object.keys(l.global.popupWindows),t=Array.isArray(r),o=0,r=t?r:r[Symbol.iterator]();;){var i;if(t){if(o>=r.length)break;i=r[o++]}else{if(o=r.next(),o.done)break;i=o.value}var a=i,s=l.global.popupWindows[a];if(s.win===e){s.domain=d.util.getDomainFromUrl(n),(0,w.registerRemoteWindow)(e);break}}}Object.defineProperty(n,"__esModule",{value:!0});var u=function(){function e(e,n){var r=[],t=!0,o=!1,i=void 0;try{for(var a,s=e[Symbol.iterator]();!(t=(a=s.next()).done)&&(r.push(a.value),!n||r.length!==n);t=!0);}catch(e){o=!0,i=e}finally{try{!t&&s.return&&s.return()}finally{if(o)throw i}}return r}return function(n,r){if(Array.isArray(n))return n;if(Symbol.iterator in Object(n))return e(n,r);throw new TypeError("Invalid attempt to destructure non-iterable instance")}}();n.openBridge=i,n.destroyBridges=a,n.linkUrl=s;var c=r(0),d=r(1),l=r(2),f=r(5),m=r(3),w=r(8);l.global.bridges=l.global.bridges||{},l.global.popupWindows=l.global.popupWindows||{};var p=window.open;window.open=function(e,n,r,t){var o=e;if(e&&0===e.indexOf(c.CONSTANTS.MOCK_PROTOCOL)){var i=e.split("|"),a=u(i,2);o=a[0],e=a[1]}o&&(o=d.util.getDomainFromUrl(o));var s=p.call(this,e,n,r,t);return e&&(0,w.registerRemoteWindow)(s),n&&l.global.clean.setItem(l.global.popupWindows,n,{win:s,domain:o}),s}},function(e,n,r){"use strict";function t(e,n){if(!o.CONFIG.ALLOW_POSTMESSAGE_POPUP&&(0,i.isSameTopWindow)(e,n)===!1)throw new Error("Can not send and receive post messages between two different windows (disabled to emulate IE)")}Object.defineProperty(n,"__esModule",{value:!0}),n.emulateIERestrictions=t;var o=r(0),i=r(1)},function(e,n,r){"use strict";function t(e,n,r){return n in e?Object.defineProperty(e,n,{value:r,enumerable:!0,configurable:!0,writable:!0}):e[n]=r,e}Object.defineProperty(n,"__esModule",{value:!0}),n.CONFIG=void 0;var o,i=r(12),a=n.CONFIG={ALLOW_POSTMESSAGE_POPUP:!0,LOG_LEVEL:"info",BRIDGE_TIMEOUT:5e3,ACK_TIMEOUT:1e3,LOG_TO_PAGE:!1,MOCK_MODE:!1,ALLOWED_POST_MESSAGE_METHODS:(o={},t(o,i.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE,!0),t(o,i.CONSTANTS.SEND_STRATEGIES.BRIDGE,!0),t(o,i.CONSTANTS.SEND_STRATEGIES.GLOBAL,!0),o)};0===window.location.href.indexOf(i.CONSTANTS.FILE_PROTOCOL)&&(a.ALLOW_POSTMESSAGE_POPUP=!0)},function(e,n,r){"use strict";function t(e){try{e=(0,u.jsonParse)(e)}catch(e){return}if(e&&(e=e[s.CONSTANTS.WINDOW_PROPS.POSTROBOT])&&e.type&&d.RECEIVE_MESSAGE_TYPES[e.type])return e}function o(e){if(!window||window.closed)throw new Error("Message recieved in closed window");try{if(!e.source)return}catch(e){return}var n=e.source,r=e.origin,o=e.data,i=t(o);if(i&&(0!==i.sourceDomain.indexOf(s.CONSTANTS.MOCK_PROTOCOL)&&0!==i.sourceDomain.indexOf(s.CONSTANTS.FILE_PROTOCOL)||(r=i.sourceDomain),c.global.receivedMessages.indexOf(i.id)===-1)){c.global.clean.push(c.global.receivedMessages,i.id);var a=void 0;if(a=s.POST_MESSAGE_NAMES_LIST.indexOf(i.name)!==-1||i.type===s.CONSTANTS.POST_MESSAGE_TYPE.ACK?"debug":"error"===i.ack?"error":"info",u.log.logLevel(a,["\n\n\t","#receive",i.type.replace(/^postrobot_message_/,""),"::",i.name,"::",r,"\n\n",i]),(0,u.isWindowClosed)(n))return u.log.debug("Source window is closed - can not send "+i.type+" "+i.name);i.data&&(i.data=(0,u.deserializeMethods)(n,r,i.data)),d.RECEIVE_MESSAGE_TYPES[i.type](n,r,i)}}function i(e){try{e.source}catch(e){return}e={source:e.source||e.sourceElement,origin:e.origin||e.originalEvent.origin,data:e.data};try{r(11).emulateIERestrictions(e.source,window)}catch(e){return}o(e)}function a(){var e=u.util.listen(window,"message",i);c.global.clean.register("listener",function(){e.cancel()})}Object.defineProperty(n,"__esModule",{value:!0}),n.receiveMessage=o,n.messageListener=i,n.listenForMessages=a;var s=r(0),u=r(1),c=r(2),d=r(26);c.global.receivedMessages=c.global.receivedMessages||[]},function(e,n,r){"use strict";function t(e,n,r){return n in e?Object.defineProperty(e,n,{value:r,enumerable:!0,configurable:!0,writable:!0}):e[n]=r,e}Object.defineProperty(n,"__esModule",{value:!0}),n.RECEIVE_MESSAGE_TYPES=void 0;var o,i=Object.assign||function(e){for(var n=1;n<arguments.length;n++){var r=arguments[n];for(var t in r)Object.prototype.hasOwnProperty.call(r,t)&&(e[t]=r[t])}return e},a=r(0),s=r(1),u=r(14),c=r(13);n.RECEIVE_MESSAGE_TYPES=(o={},t(o,a.CONSTANTS.POST_MESSAGE_TYPE.ACK,function(e,n,r){var t=c.listeners.response[r.hash];if(!t)throw new Error("No handler found for post message ack for message: "+r.name+" from "+n+" in "+window.location.protocol+"//"+window.location.host+window.location.pathname);if(!(0,s.matchDomain)(t.domain,n))throw new Error("Ack origin "+n+" does not match domain "+t.domain);t.ack=!0}),t(o,a.CONSTANTS.POST_MESSAGE_TYPE.REQUEST,function(e,n,r){function t(t){return r.fireAndForget||(0,s.isWindowClosed)(e)?s.promise.Promise.resolve():(0,u.sendMessage)(e,i({target:r.originalSource,hash:r.hash,name:r.name},t),n)}var o=(0,c.getRequestListener)(r.name,e,n);return s.promise.Promise.all([t({type:a.CONSTANTS.POST_MESSAGE_TYPE.ACK}),s.promise.run(function(){if(!o)throw new Error("No handler found for post message: "+r.name+" from "+n+" in "+window.location.protocol+"//"+window.location.host+window.location.pathname);if(!(0,s.matchDomain)(o.domain,n))throw new Error("Request origin "+n+" does not match domain "+o.domain);var t=r.data;return s.promise.deNodeify(o.handler,{source:e,origin:n,data:t})}).then(function(e){return t({type:a.CONSTANTS.POST_MESSAGE_TYPE.RESPONSE,ack:a.CONSTANTS.POST_MESSAGE_ACK.SUCCESS,data:e})},function(e){return t({type:a.CONSTANTS.POST_MESSAGE_TYPE.RESPONSE,ack:a.CONSTANTS.POST_MESSAGE_ACK.ERROR,error:e.stack?e.message+"\n"+e.stack:e.toString()})})]).catch(function(e){if(o&&o.handleError)return o.handleError(e);s.log.error(e.stack||e.toString())})}),t(o,a.CONSTANTS.POST_MESSAGE_TYPE.RESPONSE,function(e,n,r){var t=c.listeners.response[r.hash];if(!t)throw new Error("No handler found for post message response for message: "+r.name+" from "+n+" in "+window.location.protocol+"//"+window.location.host+window.location.pathname);if(!(0,s.matchDomain)(t.domain,n))throw new Error("Response origin "+n+" does not match domain "+t.domain);if(delete c.listeners.response[r.hash],r.ack===a.CONSTANTS.POST_MESSAGE_ACK.ERROR)return t.respond(new Error(r.error));if(r.ack===a.CONSTANTS.POST_MESSAGE_ACK.SUCCESS){var o=r.data||r.response;return t.respond(null,{source:e,origin:n,data:o})}}),o)},function(e,n,r){"use strict";Object.defineProperty(n,"__esModule",{value:!0}),n.SEND_MESSAGE_STRATEGIES=void 0;var t=r(0),o=r(1),i=n.SEND_MESSAGE_STRATEGIES={};i[t.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE]=function(e,n,i){try{r(11).emulateIERestrictions(window,e)}catch(e){return}var a=void 0;a=Array.isArray(i)?i:i?[i]:[t.CONSTANTS.WILDCARD],a=a.map(function(n){if(0===n.indexOf(t.CONSTANTS.MOCK_PROTOCOL)){if(!(0,o.isActuallySameDomain)(e))throw new Error("Attempting to send messsage to mock domain "+n+", but window is actually cross-domain");return o.util.getActualDomain(e)}return 0===n.indexOf(t.CONSTANTS.FILE_PROTOCOL)?t.CONSTANTS.WILDCARD:n}),a.forEach(function(r){return e.postMessage(n,r)})};var a=r(9).sendBridgeMessage;i[t.CONSTANTS.SEND_STRATEGIES.BRIDGE]=function(e,n,r){if((0,o.isSameDomain)(e))throw new Error("Post message through bridge disabled between same domain windows");if((0,o.isSameTopWindow)(window,e)!==!1)throw new Error("Can only use bridge to communicate between two different windows, not between frames");a(e,n,r)},i[t.CONSTANTS.SEND_STRATEGIES.GLOBAL]=function(e,n,r){if(!(0,o.isSameDomain)(e))throw new Error("Post message through global disabled between different domain windows");if((0,o.isSameTopWindow)(window,e)!==!1)throw new Error("Can only use global to communicate between two different windows, not between frames");var i=e[t.CONSTANTS.WINDOW_PROPS.POSTROBOT];if(!i)throw new Error("Can not find postRobot global on foreign window");return i.receiveMessage({source:window,origin:o.util.getDomain(),data:n})}},function(e,n,r){"use strict";function t(e,n){return"object"===(void 0===e?"undefined":d(e))&&null!==e&&e.__type__===n}function o(e,n,r,t){var o=f.util.uniqueID();return h.global.clean.setItem(h.global.methods,o,{destination:e,domain:n,method:r}),{__type__:l.CONSTANTS.SERIALIZATION_TYPES.METHOD,__id__:o,__name__:t}}function i(e){return{__type__:l.CONSTANTS.SERIALIZATION_TYPES.ERROR,__message__:e.stack||e.message||e.toString()}}function a(e,n,r){return f.util.replaceObject({obj:r},function(r,t){return"function"==typeof r?o(e,n,r,t):r instanceof Error?i(r):void 0}).obj}function s(e,n,r){function t(){var t=Array.prototype.slice.call(arguments);return p.log.debug("Call foreign method",r.__name__,t),(0,w.send)(e,l.CONSTANTS.POST_MESSAGE_NAMES.METHOD,{id:r.__id__,name:r.__name__,args:t},{domain:n}).then(function(e){var n=e.data;return p.log.debug("Got foreign method result",r.__name__,n.result),n.result},function(e){throw p.log.debug("Got foreign method error",e.stack||e.toString()),e})}return t.__name__=r.__name__,t.source=e,t.origin=n,t}function u(e,n,r){return new Error(r.__message__)}function c(e,n,r){return f.util.replaceObject({obj:r},function(r,o){return t(r,l.CONSTANTS.SERIALIZATION_TYPES.METHOD)?s(e,n,r):t(r,l.CONSTANTS.SERIALIZATION_TYPES.ERROR)?u(e,n,r):void 0}).obj}Object.defineProperty(n,"__esModule",{value:!0}),n.listenForMethods=void 0;var d="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(e){return typeof e}:function(e){return e&&"function"==typeof Symbol&&e.constructor===Symbol&&e!==Symbol.prototype?"symbol":typeof e};n.serializeMethod=o,n.serializeMethods=a,n.deserializeMethod=s,n.deserializeError=u,n.deserializeMethods=c;var l=r(0),f=r(4),m=r(16),w=r(5),p=r(10),g=r(17),h=r(2);h.global.methods=h.global.methods||{};n.listenForMethods=f.util.once(function(){(0,w.on)(l.CONSTANTS.POST_MESSAGE_NAMES.METHOD,{window:l.CONSTANTS.WILDCARD,origin:l.CONSTANTS.WILDCARD},function(e){var n=e.source,r=e.origin,t=e.data,o=h.global.methods[t.id];if(!o)throw new Error("Could not find method with id: "+t.id);if(o.destination!==n)throw new Error("Method window does not match");if(!(0,m.matchDomain)(o.domain,r))throw new Error("Method domain "+o.domain+" does not match origin "+r);return p.log.debug("Call local method",t.name,t.args),g.promise.run(function(){return o.method.apply({source:n,origin:r,data:t},t.args)}).then(function(e){return{result:e,id:t.id,name:t.name}})})})},function(e,n,r){"use strict";function t(){(0,s.on)(i.CONSTANTS.POST_MESSAGE_NAMES.READY,{window:i.CONSTANTS.WILDCARD,domain:i.CONSTANTS.WILDCARD},function(e){for(var n=d.global.readyPromises,r=Array.isArray(n),t=0,n=r?n:n[Symbol.iterator]();;){var o;if(r){if(t>=n.length)break;o=n[t++]}else{if(t=n.next(),t.done)break;o=t.value}var i=o;if(i.win===e.source)return void i.promise.resolve(e)}d.global.clean.push(d.global.readyPromises,{win:e.source,promise:(new c.SyncPromise).resolve(e)})});var e=(0,a.getAncestor)();e&&(0,s.send)(e,i.CONSTANTS.POST_MESSAGE_NAMES.READY,{},{domain:i.CONSTANTS.WILDCARD}).catch(function(e){u.log.debug(e.stack||e.toString())})}function o(e){for(var n=arguments.length>1&&void 0!==arguments[1]?arguments[1]:5e3,r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:"Window",t=d.global.readyPromises,o=Array.isArray(t),i=0,t=o?t:t[Symbol.iterator]();;){var a;if(o){if(i>=t.length)break;a=t[i++]}else{if(i=t.next(),i.done)break;a=i.value}var s=a;if(s.win===e)return s.promise}var u=new c.SyncPromise;return d.global.clean.push(d.global.readyPromises,{win:e,promise:u}),setTimeout(function(){return u.reject(new Error(r+" did not load after "+n+"ms"))},n),u}Object.defineProperty(n,"__esModule",{value:!0}),n.initOnReady=t,n.onWindowReady=o;var i=r(0),a=r(7),s=r(5),u=r(10),c=r(6),d=r(2);d.global.readyPromises=d.global.readyPromises||[]},function(e,n,r){"use strict";function t(e){return d.promise.nodeify(new d.promise.Promise(function(n,r){if(!e.name)throw new Error("Expected options.name");if(s.CONFIG.MOCK_MODE)e.window=window;else if("string"==typeof e.window){var t=document.getElementById(e.window);if(!t)throw new Error("Expected options.window "+e.window+" to be a valid element id");if("iframe"!==t.tagName.toLowerCase())throw new Error("Expected options.window "+e.window+" to be an iframe");if(!t.contentWindow)throw new Error("Iframe must have contentWindow.  Make sure it has a src attribute and is in the DOM.");e.window=t.contentWindow}else if(e.window instanceof HTMLElement){if("iframe"!==e.window.tagName.toLowerCase())throw new Error("Expected options.window "+e.window+" to be an iframe");if(!e.window.contentWindow)throw new Error("Iframe must have contentWindow.  Make sure it has a src attribute and is in the DOM.");e.window=e.window.contentWindow}if(!e.window)throw new Error("Expected options.window to be a window object, iframe, or iframe element id.");e.domain=e.domain||s.CONSTANTS.WILDCARD;var o=e.name+"_"+d.util.uniqueID();if(c.global.clean.setItem(c.global.listeners.response,o,e),(0,d.isWindowClosed)(e.window))throw new Error("Target window is closed");var i=!1;return e.respond=function(e,t){return e||(i=!0),e?r(e):n(t)},d.promise.run(function(){if((0,d.isAncestor)(window,e.window))return(0,d.onWindowReady)(e.window)}).then(function(){if((0,u.sendMessage)(e.window,{hash:o,type:s.CONSTANTS.POST_MESSAGE_TYPE.REQUEST,name:e.name,data:e.data,fireAndForget:e.fireAndForget},e.domain).catch(r),e.fireAndForget)return n();var t=d.util.intervalTimeout(s.CONFIG.ACK_TIMEOUT,100,function(n){return e.ack||(0,d.isWindowClosed)(e.window)?t.cancel():n?void 0:r(new Error("No ack for postMessage "+e.name+" in "+s.CONFIG.ACK_TIMEOUT+"ms"))});if(e.timeout)var a=d.util.intervalTimeout(e.timeout,100,function(n){return i||(0,d.isWindowClosed)(e.window)?a.cancel():n?void 0:r(new Error("Post message response timed out after "+e.timeout+" ms"))},e.timeout)}).catch(r)}),e.callback)}function o(e,n,r,o,i){return i||(o||"function"!=typeof r?"function"==typeof o&&(i=o,o={}):(i=r,o={},r={})),o=o||{},o.window=e,o.name=n,o.data=r,o.callback=i,t(o)}function i(e,n,r,t){var i=(0,d.getAncestor)();return i?o(i,e,n,r,t):new d.promise.Promise(function(e,n){return n(new Error("Window does not have a parent"))})}function a(){var e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{};if(!e.window)throw new Error("Expected options.window");return{send:function(n,r,t){return o(e.window,n,r,e,t)}}}Object.defineProperty(n,"__esModule",{value:!0}),n.send=void 0,n.request=t,n.sendToParent=i,n.client=a;var s=r(0),u=r(3),c=r(2),d=r(1);n.send=o},function(e,n,r){"use strict";function t(){a.CONFIG.MOCK_MODE=!0}function o(){a.CONFIG.MOCK_MODE=!1}function i(){delete window[a.CONSTANTS.WINDOW_PROPS.POSTROBOT],window.removeEventListener("message",s.messageListener)}Object.defineProperty(n,"__esModule",{value:!0}),n.CONSTANTS=n.CONFIG=void 0,n.enableMockMode=t,n.disableMockMode=o;var a=r(0);Object.defineProperty(n,"CONFIG",{enumerable:!0,get:function(){return a.CONFIG}}),Object.defineProperty(n,"CONSTANTS",{enumerable:!0,get:function(){return a.CONSTANTS}}),n.disable=i;var s=r(3)},function(e,n,r){"use strict";Object.defineProperty(n,"__esModule",{value:!0}),n.winutil=n.util=n.bridge=n.parent=void 0;var t=r(30);Object.keys(t).forEach(function(e){"default"!==e&&"__esModule"!==e&&Object.defineProperty(n,e,{enumerable:!0,get:function(){return t[e]}})});var o=r(33);Object.keys(o).forEach(function(e){"default"!==e&&"__esModule"!==e&&Object.defineProperty(n,e,{enumerable:!0,get:function(){return o[e]}})});var i=r(31);Object.keys(i).forEach(function(e){"default"!==e&&"__esModule"!==e&&Object.defineProperty(n,e,{enumerable:!0,get:function(){return i[e]}})});var a=r(4);Object.defineProperty(n,"util",{enumerable:!0,get:function(){return a.util}});var s=r(7),u=function(e){if(e&&e.__esModule)return e;var n={};if(null!=e)for(var r in e)Object.prototype.hasOwnProperty.call(e,r)&&(n[r]=e[r]);return n.default=e,n}(s);n.parent=(0,s.getAncestor)(),n.bridge=void 0;n.bridge=r(21);n.winutil=u},function(e,n,r){"use strict";function t(e){if(!e.name)throw new Error("Expected options.name");if(e.handler=e.handler||u.util.noop,e.errorHandler=e.errorHandler||function(e){throw e},e.once){var n=e.handler;e.handler=u.util.once(function(){return(0,c.removeRequestListener)(e),n.apply(this,arguments)})}var r=e.override||s.CONFIG.MOCK_MODE;if(e.source&&(e.window=e.source),e.domain=e.domain||s.CONSTANTS.WILDCARD,(0,c.addRequestListener)(e.name,e.window,e.domain,e,r),e.handleError=function(n){e.errorHandler(n)},e.window&&e.errorOnClose)var t=u.util.safeInterval(function(){(0,u.isWindowClosed)(e.window)&&(t.cancel(),e.handleError(new Error("Post message target window is closed")))},50);return{cancel:function(){(0,c.removeRequestListener)(e)}}}function o(e,n,r,o){return"function"==typeof n&&(o=r,r=n,n={}),n=n||{},n.name=e,n.handler=r||n.handler,n.errorHandler=o||n.errorHandler,t(n)}function i(e,n,r,o){"function"==typeof n&&(o=r,r=n,n={}),n=n||{},n.name=e,n.handler=r||n.handler,n.errorHandler=o||n.errorHandler,n.once=!0;var i=new u.promise.Promise(function(e,r){n.handler=n.handler||function(n){return e(n)},n.errorHandler=n.errorHandler||r}),a=t(n);return u.util.extend(i,a),i}function a(){var e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{};return{on:function(n,r,t){return o(n,e,r,t)}}}Object.defineProperty(n,"__esModule",{value:!0}),n.on=void 0,n.listen=t,n.once=i,n.listener=a;var s=r(0),u=r(1),c=r(3);n.on=o},function(e,n,r){"use strict";Object.defineProperty(n,"__esModule",{value:!0});var t=r(5);Object.keys(t).forEach(function(e){"default"!==e&&"__esModule"!==e&&Object.defineProperty(n,e,{enumerable:!0,get:function(){return t[e]}})});var o=function(e){if(e&&e.__esModule)return e;var n={};if(null!=e)for(var r in e)Object.prototype.hasOwnProperty.call(e,r)&&(n[r]=e[r]);return n.default=e,n}(t);n.default=o}])});
-//# sourceMappingURL=post-robot.ie.js.map      };
+!function(root, factory) {
+    "object" == typeof exports && "object" == typeof module ? module.exports = factory() : "function" == typeof define && define.amd ? define("postRobot", [], factory) : "object" == typeof exports ? exports.postRobot = factory() : root.postRobot = factory();
+}(this, function() {
+    return function(modules) {
+        function __webpack_require__(moduleId) {
+            if (installedModules[moduleId]) return installedModules[moduleId].exports;
+            var module = installedModules[moduleId] = {
+                i: moduleId,
+                l: !1,
+                exports: {}
+            };
+            return modules[moduleId].call(module.exports, module, module.exports, __webpack_require__), 
+            module.l = !0, module.exports;
+        }
+        var installedModules = {};
+        return __webpack_require__.m = modules, __webpack_require__.c = installedModules, 
+        __webpack_require__.i = function(value) {
+            return value;
+        }, __webpack_require__.d = function(exports, name, getter) {
+            __webpack_require__.o(exports, name) || Object.defineProperty(exports, name, {
+                configurable: !1,
+                enumerable: !0,
+                get: getter
+            });
+        }, __webpack_require__.n = function(module) {
+            var getter = module && module.__esModule ? function() {
+                return module.default;
+            } : function() {
+                return module;
+            };
+            return __webpack_require__.d(getter, "a", getter), getter;
+        }, __webpack_require__.o = function(object, property) {
+            return Object.prototype.hasOwnProperty.call(object, property);
+        }, __webpack_require__.p = "", __webpack_require__(__webpack_require__.s = 34);
+    }([ function(module, exports, __webpack_require__) {
+        "use strict";
+        Object.defineProperty(exports, "__esModule", {
+            value: !0
+        });
+        var _config = __webpack_require__(24);
+        Object.keys(_config).forEach(function(key) {
+            "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
+                enumerable: !0,
+                get: function() {
+                    return _config[key];
+                }
+            });
+        });
+        var _constants = __webpack_require__(12);
+        Object.keys(_constants).forEach(function(key) {
+            "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
+                enumerable: !0,
+                get: function() {
+                    return _constants[key];
+                }
+            });
+        });
+    }, function(module, exports, __webpack_require__) {
+        "use strict";
+        Object.defineProperty(exports, "__esModule", {
+            value: !0
+        });
+        var _promise = __webpack_require__(17);
+        Object.keys(_promise).forEach(function(key) {
+            "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
+                enumerable: !0,
+                get: function() {
+                    return _promise[key];
+                }
+            });
+        });
+        var _util = __webpack_require__(4);
+        Object.keys(_util).forEach(function(key) {
+            "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
+                enumerable: !0,
+                get: function() {
+                    return _util[key];
+                }
+            });
+        });
+        var _log = __webpack_require__(10);
+        Object.keys(_log).forEach(function(key) {
+            "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
+                enumerable: !0,
+                get: function() {
+                    return _log[key];
+                }
+            });
+        });
+        var _windows = __webpack_require__(7);
+        Object.keys(_windows).forEach(function(key) {
+            "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
+                enumerable: !0,
+                get: function() {
+                    return _windows[key];
+                }
+            });
+        });
+        var _methods = __webpack_require__(28);
+        Object.keys(_methods).forEach(function(key) {
+            "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
+                enumerable: !0,
+                get: function() {
+                    return _methods[key];
+                }
+            });
+        });
+        var _tick = __webpack_require__(18);
+        Object.keys(_tick).forEach(function(key) {
+            "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
+                enumerable: !0,
+                get: function() {
+                    return _tick[key];
+                }
+            });
+        });
+        var _ready = __webpack_require__(29);
+        Object.keys(_ready).forEach(function(key) {
+            "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
+                enumerable: !0,
+                get: function() {
+                    return _ready[key];
+                }
+            });
+        });
+        var _cleanup = __webpack_require__(15);
+        Object.keys(_cleanup).forEach(function(key) {
+            "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
+                enumerable: !0,
+                get: function() {
+                    return _cleanup[key];
+                }
+            });
+        });
+        var _domain = __webpack_require__(16);
+        Object.keys(_domain).forEach(function(key) {
+            "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
+                enumerable: !0,
+                get: function() {
+                    return _domain[key];
+                }
+            });
+        });
+    }, function(module, exports, __webpack_require__) {
+        "use strict";
+        Object.defineProperty(exports, "__esModule", {
+            value: !0
+        }), exports.global = void 0;
+        var _conf = __webpack_require__(0), _cleanup = __webpack_require__(15), global = exports.global = window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT] = window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT] || {};
+        global.clean = global.clean || (0, _cleanup.cleanup)(global), global.registerSelf = function() {};
+    }, function(module, exports, __webpack_require__) {
+        "use strict";
+        Object.defineProperty(exports, "__esModule", {
+            value: !0
+        });
+        var _receive = __webpack_require__(25);
+        Object.keys(_receive).forEach(function(key) {
+            "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
+                enumerable: !0,
+                get: function() {
+                    return _receive[key];
+                }
+            });
+        });
+        var _send = __webpack_require__(14);
+        Object.keys(_send).forEach(function(key) {
+            "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
+                enumerable: !0,
+                get: function() {
+                    return _send[key];
+                }
+            });
+        });
+        var _listeners = __webpack_require__(13);
+        Object.keys(_listeners).forEach(function(key) {
+            "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
+                enumerable: !0,
+                get: function() {
+                    return _listeners[key];
+                }
+            });
+        });
+    }, function(module, exports, __webpack_require__) {
+        "use strict";
+        function isRegex(item) {
+            return "[object RegExp]" === Object.prototype.toString.call(item);
+        }
+        Object.defineProperty(exports, "__esModule", {
+            value: !0
+        }), exports.util = void 0;
+        var _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
+            return typeof obj;
+        } : function(obj) {
+            return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+        };
+        exports.isRegex = isRegex;
+        var _conf = __webpack_require__(0), util = exports.util = {
+            once: function(method) {
+                if (!method) return method;
+                var called = !1;
+                return function() {
+                    if (!called) return called = !0, method.apply(this, arguments);
+                };
+            },
+            noop: function() {},
+            safeHasProp: function(obj, name) {
+                try {
+                    return !!obj[name];
+                } catch (err) {
+                    return !1;
+                }
+            },
+            safeGetProp: function(obj, name) {
+                try {
+                    return obj[name];
+                } catch (err) {
+                    return;
+                }
+            },
+            listen: function(win, event, handler) {
+                return win.addEventListener ? win.addEventListener(event, handler) : win.attachEvent("on" + event, handler), 
+                {
+                    cancel: function() {
+                        win.removeEventListener ? win.removeEventListener(event, handler) : win.detachEvent("on" + event, handler);
+                    }
+                };
+            },
+            apply: function(method, context, args) {
+                return "function" == typeof method.apply ? method.apply(context, args) : method(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9]);
+            },
+            find: function(collection, method, def) {
+                if (!collection) return def;
+                for (var i = 0; i < collection.length; i++) if (method(collection[i])) return collection[i];
+                return def;
+            },
+            map: function(collection, method) {
+                for (var results = [], i = 0; i < collection.length; i++) results.push(method(collection[i]));
+                return results;
+            },
+            some: function(collection, method) {
+                method = method || Boolean;
+                for (var i = 0; i < collection.length; i++) if (method(collection[i])) return !0;
+                return !1;
+            },
+            keys: function(mapping) {
+                var result = [];
+                for (var key in mapping) mapping.hasOwnProperty(key) && result.push(key);
+                return result;
+            },
+            values: function(mapping) {
+                var result = [];
+                for (var key in mapping) mapping.hasOwnProperty(key) && result.push(mapping[key]);
+                return result;
+            },
+            getByValue: function(mapping, value) {
+                for (var key in mapping) if (mapping.hasOwnProperty(key) && mapping[key] === value) return key;
+            },
+            uniqueID: function() {
+                var chars = "0123456789abcdef";
+                return "xxxxxxxxxx".replace(/./g, function() {
+                    return chars.charAt(Math.floor(Math.random() * chars.length));
+                });
+            },
+            memoize: function(method) {
+                var results = {};
+                return function() {
+                    var args = JSON.stringify(Array.prototype.slice.call(arguments));
+                    return results.hasOwnProperty(args) || (results[args] = method.apply(this, arguments)), 
+                    results[args];
+                };
+            },
+            extend: function(obj, source) {
+                if (!source) return obj;
+                for (var key in source) source.hasOwnProperty(key) && (obj[key] = source[key]);
+                return obj;
+            },
+            each: function(obj, callback) {
+                if (Array.isArray(obj)) for (var i = 0; i < obj.length; i++) callback(obj[i], i); else if ("object" === (void 0 === obj ? "undefined" : _typeof(obj)) && null !== obj) for (var key in obj) obj.hasOwnProperty(key) && callback(obj[key], key);
+            },
+            replaceObject: function(obj, callback) {
+                var depth = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : 1;
+                if (depth >= 100) throw new Error("Self-referential object passed, or object contained too many layers");
+                var newobj = Array.isArray(obj) ? [] : {};
+                return util.each(obj, function(item, key) {
+                    var result = callback(item, key);
+                    void 0 !== result ? newobj[key] = result : "object" === (void 0 === item ? "undefined" : _typeof(item)) && null !== item ? newobj[key] = util.replaceObject(item, callback, depth + 1) : newobj[key] = item;
+                }), newobj;
+            },
+            safeInterval: function(method, time) {
+                function runInterval() {
+                    timeout = setTimeout(runInterval, time), method.call();
+                }
+                var timeout = void 0;
+                return timeout = setTimeout(runInterval, time), {
+                    cancel: function() {
+                        clearTimeout(timeout);
+                    }
+                };
+            },
+            intervalTimeout: function(time, interval, method) {
+                var safeInterval = util.safeInterval(function() {
+                    time -= interval, time = time <= 0 ? 0 : time, 0 === time && safeInterval.cancel(), 
+                    method(time);
+                }, interval);
+                return safeInterval;
+            },
+            getActualDomain: function(win) {
+                return win.location.protocol + "//" + win.location.host;
+            },
+            getDomain: function(win) {
+                if (win = win || window, win.mockDomain && 0 === win.mockDomain.indexOf(_conf.CONSTANTS.MOCK_PROTOCOL)) return win.mockDomain;
+                if (!win.location.protocol) throw new Error("Can not read window protocol");
+                if (win.location.protocol === _conf.CONSTANTS.FILE_PROTOCOL) return util.getActualDomain(win);
+                if (!win.location.host) throw new Error("Can not read window host");
+                return util.getActualDomain(win);
+            },
+            getDomainFromUrl: function(url) {
+                var domain = void 0;
+                return url.match(/^(https?|mock|file):\/\//) ? (domain = url, domain = domain.split("/").slice(0, 3).join("/")) : this.getDomain();
+            },
+            safeGet: function(obj, prop) {
+                var result = void 0;
+                try {
+                    result = obj[prop];
+                } catch (err) {}
+                return result;
+            }
+        };
+    }, function(module, exports, __webpack_require__) {
+        "use strict";
+        function init() {
+            _global.global.initialized || ((0, _drivers.listenForMessages)(), __webpack_require__(9).openTunnelToOpener(), 
+            (0, _lib.initOnReady)(), (0, _lib.listenForMethods)()), _global.global.initialized = !0;
+        }
+        function reset() {
+            return _global.global.clean.all().then(function() {
+                return _global.global.initialized = !1, init();
+            });
+        }
+        Object.defineProperty(exports, "__esModule", {
+            value: !0
+        }), exports.Promise = void 0, exports.init = init, exports.reset = reset;
+        var _public = __webpack_require__(32);
+        Object.keys(_public).forEach(function(key) {
+            "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
+                enumerable: !0,
+                get: function() {
+                    return _public[key];
+                }
+            });
+        });
+        var _lib = __webpack_require__(1);
+        Object.defineProperty(exports, "Promise", {
+            enumerable: !0,
+            get: function() {
+                return _lib.Promise;
+            }
+        });
+        var _drivers = __webpack_require__(3), _global = __webpack_require__(2);
+        init();
+    }, function(module, exports, __webpack_require__) {
+        "use strict";
+        function trycatch(method, successHandler, errorHandler) {
+            function flush() {
+                if (isCalled) {
+                    if (isError) return errorHandler(err);
+                    if (isSuccess) return successHandler(res);
+                }
+            }
+            var isCalled = !1, isSuccess = !1, isError = !1, err = void 0, res = void 0;
+            try {
+                method(function(result) {
+                    res = result, isSuccess = !0, flush();
+                }, function(error) {
+                    err = error, isError = !0, flush();
+                });
+            } catch (error) {
+                return errorHandler(error);
+            }
+            isCalled = !0, flush();
+        }
+        function addPossiblyUnhandledPromise(promise) {
+            possiblyUnhandledPromises.push(promise), possiblyUnhandledPromiseTimeout = possiblyUnhandledPromiseTimeout || setTimeout(flushPossiblyUnhandledPromises, 1);
+        }
+        function flushPossiblyUnhandledPromises() {
+            possiblyUnhandledPromiseTimeout = null;
+            var promises = possiblyUnhandledPromises;
+            possiblyUnhandledPromises = [];
+            for (var i = 0; i < promises.length; i++) {
+                (function(i) {
+                    var promise = promises[i];
+                    if (promise.silentReject) return "continue";
+                    promise.handlers.push({
+                        onError: function(err) {
+                            promise.silentReject || dispatchError(err);
+                        }
+                    }), promise.dispatch();
+                })(i);
+            }
+        }
+        function dispatchError(err) {
+            if (dispatchedErrors.indexOf(err) === -1) {
+                dispatchedErrors.push(err), setTimeout(function() {
+                    throw err;
+                }, 1);
+                for (var j = 0; j < possiblyUnhandledPromiseHandlers.length; j++) possiblyUnhandledPromiseHandlers[j](err);
+            }
+        }
+        function isPromise(item) {
+            try {
+                if (!item) return !1;
+                if (window.Window && item instanceof window.Window) return !1;
+                if (window.constructor && item instanceof window.constructor) return !1;
+                if (toString) {
+                    var name = toString.call(item);
+                    if ("[object Window]" === name || "[object global]" === name || "[object DOMWindow]" === name) return !1;
+                }
+                if (item && item.then instanceof Function) return !0;
+            } catch (err) {
+                return !1;
+            }
+            return !1;
+        }
+        function patchPromise() {
+            window.Promise = SyncPromise;
+        }
+        Object.defineProperty(exports, "__esModule", {
+            value: !0
+        }), exports.patchPromise = patchPromise;
+        var possiblyUnhandledPromiseHandlers = [], possiblyUnhandledPromises = [], possiblyUnhandledPromiseTimeout = void 0, dispatchedErrors = [], toString = {}.toString, SyncPromise = exports.SyncPromise = function(handler) {
+            if (this.resolved = !1, this.rejected = !1, this.silentReject = !1, this.handlers = [], 
+            addPossiblyUnhandledPromise(this), handler) {
+                var self = this;
+                trycatch(handler, function(res) {
+                    return self.resolve(res);
+                }, function(err) {
+                    return self.reject(err);
+                });
+            }
+        };
+        SyncPromise.resolve = function(value) {
+            return isPromise(value) ? value : new SyncPromise().resolve(value);
+        }, SyncPromise.reject = function(error) {
+            return new SyncPromise().reject(error);
+        }, SyncPromise.prototype.resolve = function(result) {
+            if (this.resolved || this.rejected) return this;
+            if (isPromise(result)) throw new Error("Can not resolve promise with another promise");
+            return this.resolved = !0, this.value = result, this.dispatch(), this;
+        }, SyncPromise.prototype.reject = function(error) {
+            if (this.resolved || this.rejected) return this;
+            if (isPromise(error)) throw new Error("Can not reject promise with another promise");
+            return this.rejected = !0, this.value = error, this.dispatch(), this;
+        }, SyncPromise.prototype.asyncReject = function(error) {
+            this.silentReject = !0, this.reject(error);
+        }, SyncPromise.prototype.dispatch = function() {
+            var _this = this;
+            if (this.resolved || this.rejected) for (;this.handlers.length; ) {
+                (function() {
+                    var handler = _this.handlers.shift(), result = void 0, error = void 0;
+                    try {
+                        _this.resolved ? result = handler.onSuccess ? handler.onSuccess(_this.value) : _this.value : _this.rejected && (handler.onError ? result = handler.onError(_this.value) : error = _this.value);
+                    } catch (err) {
+                        error = err;
+                    }
+                    if (result === _this) throw new Error("Can not return a promise from the the then handler of the same promise");
+                    if (!handler.promise) return "continue";
+                    error ? handler.promise.reject(error) : isPromise(result) ? result.then(function(res) {
+                        handler.promise.resolve(res);
+                    }, function(err) {
+                        handler.promise.reject(err);
+                    }) : handler.promise.resolve(result);
+                })();
+            }
+        }, SyncPromise.prototype.then = function(onSuccess, onError) {
+            if (onSuccess && "function" != typeof onSuccess && !onSuccess.call) throw new Error("Promise.then expected a function for success handler");
+            if (onError && "function" != typeof onError && !onError.call) throw new Error("Promise.then expected a function for error handler");
+            var promise = new SyncPromise(null, this);
+            return this.handlers.push({
+                promise: promise,
+                onSuccess: onSuccess,
+                onError: onError
+            }), this.silentReject = !0, this.dispatch(), promise;
+        }, SyncPromise.prototype.catch = function(onError) {
+            return this.then(null, onError);
+        }, SyncPromise.prototype.finally = function(handler) {
+            return this.then(function(result) {
+                return SyncPromise.try(handler).then(function() {
+                    return result;
+                });
+            }, function(err) {
+                return SyncPromise.try(handler).then(function() {
+                    throw err;
+                });
+            });
+        }, SyncPromise.all = function(promises) {
+            for (var promise = new SyncPromise(), count = promises.length, results = [], i = 0; i < promises.length; i++) !function(i) {
+                (isPromise(promises[i]) ? promises[i] : SyncPromise.resolve(promises[i])).then(function(result) {
+                    results[i] = result, 0 == (count -= 1) && promise.resolve(results);
+                }, function(err) {
+                    promise.reject(err);
+                });
+            }(i);
+            return count || promise.resolve(results), promise;
+        }, SyncPromise.onPossiblyUnhandledException = function(handler) {
+            possiblyUnhandledPromiseHandlers.push(handler);
+        }, SyncPromise.try = function(method) {
+            return SyncPromise.resolve().then(method);
+        }, SyncPromise.delay = function(delay) {
+            return new SyncPromise(function(resolve) {
+                setTimeout(resolve, delay);
+            });
+        }, SyncPromise.hash = function(obj) {
+            var results = {}, promises = [];
+            for (var key in obj) !function(key) {
+                obj.hasOwnProperty(key) && promises.push(SyncPromise.resolve(obj[key]).then(function(result) {
+                    results[key] = result;
+                }));
+            }(key);
+            return SyncPromise.all(promises).then(function() {
+                return results;
+            });
+        }, SyncPromise.promisifyCall = function() {
+            var args = Array.prototype.slice.call(arguments), method = args.shift();
+            if ("function" != typeof method) throw new Error("Expected promisifyCall to be called with a function");
+            return new SyncPromise(function(resolve, reject) {
+                return args.push(function(err, result) {
+                    return err ? reject(err) : resolve(result);
+                }), method.apply(null, args);
+            });
+        };
+    }, function(module, exports, __webpack_require__) {
+        "use strict";
+        function isSameDomain(win) {
+            for (var _iterator = _global.global.domainMatches, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
+                var _ref;
+                if (_isArray) {
+                    if (_i >= _iterator.length) break;
+                    _ref = _iterator[_i++];
+                } else {
+                    if (_i = _iterator.next(), _i.done) break;
+                    _ref = _i.value;
+                }
+                var _match = _ref;
+                if (_match.win === win) return _match.match;
+            }
+            var match = void 0;
+            try {
+                match = _util.util.getDomain(window) === _util.util.getDomain(win);
+            } catch (err) {
+                match = !1;
+            }
+            return _global.global.clean.push(_global.global.domainMatches, {
+                win: win,
+                match: match
+            }), domainMatchTimeout || (domainMatchTimeout = setTimeout(function() {
+                _global.global.domainMatches = [], domainMatchTimeout = null;
+            }, 1)), match;
+        }
+        function isActuallySameDomain(win) {
+            try {
+                if (win && win.location && win.location.href) return !0;
+            } catch (err) {
+                return _global.global.clean.push(_global.global.domainMatches, {
+                    win: win,
+                    match: !1
+                }), !1;
+            }
+            return !0;
+        }
+        function getOpener(win) {
+            if (win) try {
+                return win.opener;
+            } catch (err) {
+                return;
+            }
+        }
+        function getParent(win) {
+            if (win) try {
+                if (win.parent && win.parent !== win) return win.parent;
+            } catch (err) {
+                return;
+            }
+        }
+        function getParents(win) {
+            var result = [];
+            try {
+                for (;win.parent !== win; ) result.push(win.parent), win = win.parent;
+            } catch (err) {}
+            return result;
+        }
+        function isAncestorParent(parent, child) {
+            if (!parent || !child) return !1;
+            var childParent = getParent(child);
+            return childParent ? childParent === parent : getParents(child).indexOf(parent) !== -1;
+        }
+        function getFrames(win) {
+            var result = [], frames = void 0;
+            try {
+                frames = win.frames;
+            } catch (err) {
+                frames = win;
+            }
+            var len = void 0;
+            try {
+                len = frames.length;
+            } catch (err) {}
+            if (0 === len) return result;
+            if (len) {
+                for (var i = 0; i < len; i++) {
+                    var frame = void 0;
+                    try {
+                        frame = frames[i];
+                    } catch (err) {
+                        continue;
+                    }
+                    result.push(frame);
+                }
+                return result;
+            }
+            for (var _i2 = 0; _i2 < 100; _i2++) {
+                var _frame = void 0;
+                try {
+                    _frame = frames[_i2];
+                } catch (err) {
+                    return result;
+                }
+                if (!_frame) return result;
+                result.push(_frame);
+            }
+            return result;
+        }
+        function getAllChildFrames(win) {
+            for (var result = [], _iterator2 = getFrames(win), _isArray2 = Array.isArray(_iterator2), _i3 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator](); ;) {
+                var _ref2;
+                if (_isArray2) {
+                    if (_i3 >= _iterator2.length) break;
+                    _ref2 = _iterator2[_i3++];
+                } else {
+                    if (_i3 = _iterator2.next(), _i3.done) break;
+                    _ref2 = _i3.value;
+                }
+                var frame = _ref2;
+                result.push(frame);
+                for (var _iterator3 = getAllChildFrames(frame), _isArray3 = Array.isArray(_iterator3), _i4 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator](); ;) {
+                    var _ref3;
+                    if (_isArray3) {
+                        if (_i4 >= _iterator3.length) break;
+                        _ref3 = _iterator3[_i4++];
+                    } else {
+                        if (_i4 = _iterator3.next(), _i4.done) break;
+                        _ref3 = _i4.value;
+                    }
+                    var childFrame = _ref3;
+                    result.push(childFrame);
+                }
+            }
+            return result;
+        }
+        function getAllFramesInWindow(win) {
+            var result = getAllChildFrames(win);
+            result.push(win);
+            for (var _iterator4 = getParents(win), _isArray4 = Array.isArray(_iterator4), _i5 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator](); ;) {
+                var _ref4;
+                if (_isArray4) {
+                    if (_i5 >= _iterator4.length) break;
+                    _ref4 = _iterator4[_i5++];
+                } else {
+                    if (_i5 = _iterator4.next(), _i5.done) break;
+                    _ref4 = _i5.value;
+                }
+                var parent = _ref4;
+                result.push(parent);
+                for (var _iterator5 = getFrames(parent), _isArray5 = Array.isArray(_iterator5), _i6 = 0, _iterator5 = _isArray5 ? _iterator5 : _iterator5[Symbol.iterator](); ;) {
+                    var _ref5;
+                    if (_isArray5) {
+                        if (_i6 >= _iterator5.length) break;
+                        _ref5 = _iterator5[_i6++];
+                    } else {
+                        if (_i6 = _iterator5.next(), _i6.done) break;
+                        _ref5 = _i6.value;
+                    }
+                    var frame = _ref5;
+                    result.indexOf(frame) === -1 && result.push(frame);
+                }
+            }
+            return result;
+        }
+        function getTop(win) {
+            if (win) {
+                try {
+                    if (win.top) return win.top;
+                } catch (err) {}
+                if (getParent(win) === win) return win;
+                try {
+                    if (isAncestorParent(window, win)) return window.top;
+                } catch (err) {}
+                try {
+                    if (isAncestorParent(win, window)) return window.top;
+                } catch (err) {}
+                for (var _iterator6 = getAllChildFrames(win), _isArray6 = Array.isArray(_iterator6), _i7 = 0, _iterator6 = _isArray6 ? _iterator6 : _iterator6[Symbol.iterator](); ;) {
+                    var _ref6;
+                    if (_isArray6) {
+                        if (_i7 >= _iterator6.length) break;
+                        _ref6 = _iterator6[_i7++];
+                    } else {
+                        if (_i7 = _iterator6.next(), _i7.done) break;
+                        _ref6 = _i7.value;
+                    }
+                    var frame = _ref6;
+                    try {
+                        if (frame.top) return frame.top;
+                    } catch (err) {}
+                    if (getParent(frame) === frame) return frame;
+                }
+            }
+        }
+        function isWindowClosed(win) {
+            var allowMock = !(arguments.length > 1 && void 0 !== arguments[1]) || arguments[1];
+            try {
+                if (win === window) return !1;
+            } catch (err) {
+                return !0;
+            }
+            try {
+                if (!win) return !0;
+            } catch (err) {
+                return !0;
+            }
+            try {
+                if (win.closed) return !0;
+            } catch (err) {
+                return !err || "Call was rejected by callee.\r\n" !== err.message;
+            }
+            return !!(allowMock && isSameDomain(win) && _util.util.safeGet(win, "mockclosed"));
+        }
+        function getUserAgent(win) {
+            return win = win || window, win.navigator.mockUserAgent || win.navigator.userAgent;
+        }
+        function getFrameByName(win, name) {
+            for (var winFrames = getFrames(win), _iterator7 = winFrames, _isArray7 = Array.isArray(_iterator7), _i8 = 0, _iterator7 = _isArray7 ? _iterator7 : _iterator7[Symbol.iterator](); ;) {
+                var _ref7;
+                if (_isArray7) {
+                    if (_i8 >= _iterator7.length) break;
+                    _ref7 = _iterator7[_i8++];
+                } else {
+                    if (_i8 = _iterator7.next(), _i8.done) break;
+                    _ref7 = _i8.value;
+                }
+                var childFrame = _ref7;
+                try {
+                    if (isSameDomain(childFrame) && childFrame.name === name && winFrames.indexOf(childFrame) !== -1) return childFrame;
+                } catch (err) {}
+            }
+            try {
+                if (winFrames.indexOf(win.frames[name]) !== -1) return win.frames[name];
+            } catch (err) {}
+            try {
+                if (winFrames.indexOf(win[name]) !== -1) return win[name];
+            } catch (err) {}
+        }
+        function findChildFrameByName(win, name) {
+            var frame = getFrameByName(win, name);
+            if (frame) return frame;
+            for (var _iterator8 = getFrames(win), _isArray8 = Array.isArray(_iterator8), _i9 = 0, _iterator8 = _isArray8 ? _iterator8 : _iterator8[Symbol.iterator](); ;) {
+                var _ref8;
+                if (_isArray8) {
+                    if (_i9 >= _iterator8.length) break;
+                    _ref8 = _iterator8[_i9++];
+                } else {
+                    if (_i9 = _iterator8.next(), _i9.done) break;
+                    _ref8 = _i9.value;
+                }
+                var childFrame = _ref8, namedFrame = findChildFrameByName(childFrame, name);
+                if (namedFrame) return namedFrame;
+            }
+        }
+        function findFrameByName(win, name) {
+            var frame = void 0;
+            return frame = getFrameByName(win, name), frame ? frame : findChildFrameByName(getTop(win), name);
+        }
+        function isParent(win, frame) {
+            var frameParent = getParent(frame);
+            if (frameParent) return frameParent === win;
+            for (var _iterator9 = getFrames(win), _isArray9 = Array.isArray(_iterator9), _i10 = 0, _iterator9 = _isArray9 ? _iterator9 : _iterator9[Symbol.iterator](); ;) {
+                var _ref9;
+                if (_isArray9) {
+                    if (_i10 >= _iterator9.length) break;
+                    _ref9 = _iterator9[_i10++];
+                } else {
+                    if (_i10 = _iterator9.next(), _i10.done) break;
+                    _ref9 = _i10.value;
+                }
+                if (_ref9 === frame) return !0;
+            }
+            return !1;
+        }
+        function isOpener(parent, child) {
+            return parent === getOpener(child);
+        }
+        function getAncestor(win) {
+            win = win || window;
+            var opener = getOpener(win);
+            if (opener) return opener;
+            var parent = getParent(win);
+            return parent ? parent : void 0;
+        }
+        function getAncestors(win) {
+            for (var results = [], ancestor = win; ancestor; ) (ancestor = getAncestor(ancestor)) && results.push(ancestor);
+            return results;
+        }
+        function isAncestor(parent, child) {
+            var actualParent = getAncestor(child);
+            if (actualParent) return actualParent === parent;
+            if (child === parent) return !1;
+            if (getTop(child) === child) return !1;
+            for (var _iterator10 = getFrames(parent), _isArray10 = Array.isArray(_iterator10), _i11 = 0, _iterator10 = _isArray10 ? _iterator10 : _iterator10[Symbol.iterator](); ;) {
+                var _ref10;
+                if (_isArray10) {
+                    if (_i11 >= _iterator10.length) break;
+                    _ref10 = _iterator10[_i11++];
+                } else {
+                    if (_i11 = _iterator10.next(), _i11.done) break;
+                    _ref10 = _i11.value;
+                }
+                if (_ref10 === child) return !0;
+            }
+            return !1;
+        }
+        function isPopup() {
+            return Boolean(getOpener(window));
+        }
+        function isIframe() {
+            return Boolean(getParent(window));
+        }
+        function isFullpage() {
+            return Boolean(!isIframe() && !isPopup());
+        }
+        function getWindowType() {
+            return isPopup() ? _conf.CONSTANTS.WINDOW_TYPES.POPUP : isIframe() ? _conf.CONSTANTS.WINDOW_TYPES.IFRAME : _conf.CONSTANTS.WINDOW_TYPES.FULLPAGE;
+        }
+        function anyMatch(collection1, collection2) {
+            for (var _iterator11 = collection1, _isArray11 = Array.isArray(_iterator11), _i12 = 0, _iterator11 = _isArray11 ? _iterator11 : _iterator11[Symbol.iterator](); ;) {
+                var _ref11;
+                if (_isArray11) {
+                    if (_i12 >= _iterator11.length) break;
+                    _ref11 = _iterator11[_i12++];
+                } else {
+                    if (_i12 = _iterator11.next(), _i12.done) break;
+                    _ref11 = _i12.value;
+                }
+                for (var item1 = _ref11, _iterator12 = collection2, _isArray12 = Array.isArray(_iterator12), _i13 = 0, _iterator12 = _isArray12 ? _iterator12 : _iterator12[Symbol.iterator](); ;) {
+                    var _ref12;
+                    if (_isArray12) {
+                        if (_i13 >= _iterator12.length) break;
+                        _ref12 = _iterator12[_i13++];
+                    } else {
+                        if (_i13 = _iterator12.next(), _i13.done) break;
+                        _ref12 = _i13.value;
+                    }
+                    if (item1 === _ref12) return !0;
+                }
+            }
+        }
+        function isSameTopWindow(win1, win2) {
+            var top1 = getTop(win1), top2 = getTop(win2);
+            try {
+                if (top1 && top2) return top1 === top2;
+            } catch (err) {}
+            var allFrames1 = getAllFramesInWindow(win1), allFrames2 = getAllFramesInWindow(win2);
+            if (anyMatch(allFrames1, allFrames2)) return !0;
+            var opener1 = getOpener(top1), opener2 = getOpener(top2);
+            return (!opener1 || !anyMatch(getAllFramesInWindow(opener1), allFrames2)) && ((!opener2 || !anyMatch(getAllFramesInWindow(opener2), allFrames1)) && void 0);
+        }
+        function jsonStringify() {
+            var objectToJSON = void 0, arrayToJSON = void 0;
+            try {
+                if ("{}" !== JSON.stringify({}) && (objectToJSON = Object.prototype.toJSON, delete Object.prototype.toJSON), 
+                "{}" !== JSON.stringify({})) throw new Error("Can not correctly serialize JSON objects");
+                if ("[]" !== JSON.stringify([]) && (arrayToJSON = Array.prototype.toJSON, delete Array.prototype.toJSON), 
+                "[]" !== JSON.stringify([])) throw new Error("Can not correctly serialize JSON objects");
+            } catch (err) {
+                throw new Error("Can not repair JSON.stringify: " + err.message);
+            }
+            var result = JSON.stringify.apply(this, arguments);
+            try {
+                objectToJSON && (Object.prototype.toJSON = objectToJSON), arrayToJSON && (Array.prototype.toJSON = arrayToJSON);
+            } catch (err) {
+                throw new Error("Can not repair JSON.stringify: " + err.message);
+            }
+            return result;
+        }
+        function jsonParse() {
+            return JSON.parse.apply(this, arguments);
+        }
+        Object.defineProperty(exports, "__esModule", {
+            value: !0
+        }), exports.isSameDomain = isSameDomain, exports.isActuallySameDomain = isActuallySameDomain, 
+        exports.getOpener = getOpener, exports.getParent = getParent, exports.getParents = getParents, 
+        exports.isAncestorParent = isAncestorParent, exports.getFrames = getFrames, exports.getAllChildFrames = getAllChildFrames, 
+        exports.getAllFramesInWindow = getAllFramesInWindow, exports.getTop = getTop, exports.isWindowClosed = isWindowClosed, 
+        exports.getUserAgent = getUserAgent, exports.getFrameByName = getFrameByName, exports.findChildFrameByName = findChildFrameByName, 
+        exports.findFrameByName = findFrameByName, exports.isParent = isParent, exports.isOpener = isOpener, 
+        exports.getAncestor = getAncestor, exports.getAncestors = getAncestors, exports.isAncestor = isAncestor, 
+        exports.isPopup = isPopup, exports.isIframe = isIframe, exports.isFullpage = isFullpage, 
+        exports.getWindowType = getWindowType, exports.isSameTopWindow = isSameTopWindow, 
+        exports.jsonStringify = jsonStringify, exports.jsonParse = jsonParse;
+        var _util = __webpack_require__(4), _global = __webpack_require__(2), _conf = __webpack_require__(0);
+        _global.global.domainMatches = _global.global.domainMatches || [];
+        var domainMatchTimeout = void 0;
+    }, function(module, exports, __webpack_require__) {
+        "use strict";
+        function needsBridgeForBrowser() {
+            return !!(0, _lib.getUserAgent)(window).match(/MSIE|trident|edge/i) || !_conf.CONFIG.ALLOW_POSTMESSAGE_POPUP;
+        }
+        function needsBridgeForWin(win) {
+            return (!win || !(0, _lib.isSameTopWindow)(window, win)) && (!win || !(0, _lib.isSameDomain)(win));
+        }
+        function needsBridgeForDomain(domain) {
+            return !domain || _lib.util.getDomain() !== _lib.util.getDomainFromUrl(domain);
+        }
+        function needsBridge(_ref) {
+            var win = _ref.win, domain = _ref.domain;
+            return needsBridgeForBrowser() && needsBridgeForWin(win) && needsBridgeForDomain(domain);
+        }
+        function getBridgeName(domain) {
+            domain = domain || _lib.util.getDomainFromUrl(domain);
+            var sanitizedDomain = domain.replace(/[^a-zA-Z0-9]+/g, "_");
+            return _conf.CONSTANTS.BRIDGE_NAME_PREFIX + "_" + sanitizedDomain;
+        }
+        function isBridge() {
+            return window.name && window.name === getBridgeName(_lib.util.getDomain());
+        }
+        function registerRemoteWindow(win) {
+            var sendMessagePromise = (arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : _conf.CONFIG.BRIDGE_TIMEOUT, 
+            new _lib.promise.Promise());
+            _global.global.clean.push(_global.global.remoteWindows, {
+                win: win,
+                sendMessagePromise: sendMessagePromise
+            });
+        }
+        function findRemoteWindow(win) {
+            for (var i = 0; i < _global.global.remoteWindows.length; i++) if (_global.global.remoteWindows[i].win === win) return _global.global.remoteWindows[i];
+        }
+        function registerRemoteSendMessage(win, domain, sendMessage) {
+            var remoteWindow = findRemoteWindow(win);
+            if (!remoteWindow) throw new Error("Window not found to register sendMessage to");
+            var sendMessageWrapper = function(remoteWin, message, remoteDomain) {
+                if (remoteWin !== win) throw new Error("Remote window does not match window");
+                if (!(0, _lib.matchDomain)(remoteDomain, domain)) throw new Error("Remote domain " + remoteDomain + " does not match domain " + domain);
+                sendMessage(message);
+            };
+            remoteWindow.sendMessagePromise.resolve(sendMessageWrapper), remoteWindow.sendMessagePromise = _lib.promise.Promise.resolve(sendMessageWrapper);
+        }
+        function rejectRemoteSendMessage(win, err) {
+            var remoteWindow = findRemoteWindow(win);
+            if (!remoteWindow) throw new Error("Window not found on which to reject sendMessage");
+            remoteWindow.sendMessagePromise.asyncReject(err);
+        }
+        function sendBridgeMessage(win, message, domain) {
+            var messagingChild = (0, _lib.isOpener)(window, win), messagingParent = (0, _lib.isOpener)(win, window);
+            if (!messagingChild && !messagingParent) throw new Error("Can only send messages to and from parent and popup windows");
+            var remoteWindow = findRemoteWindow(win);
+            if (!remoteWindow) throw new Error("Window not found to send message to");
+            return remoteWindow.sendMessagePromise.then(function(sendMessage) {
+                return sendMessage(win, message, domain);
+            });
+        }
+        Object.defineProperty(exports, "__esModule", {
+            value: !0
+        }), exports.documentBodyReady = void 0, exports.needsBridgeForBrowser = needsBridgeForBrowser, 
+        exports.needsBridgeForWin = needsBridgeForWin, exports.needsBridgeForDomain = needsBridgeForDomain, 
+        exports.needsBridge = needsBridge, exports.getBridgeName = getBridgeName, exports.isBridge = isBridge, 
+        exports.registerRemoteWindow = registerRemoteWindow, exports.findRemoteWindow = findRemoteWindow, 
+        exports.registerRemoteSendMessage = registerRemoteSendMessage, exports.rejectRemoteSendMessage = rejectRemoteSendMessage, 
+        exports.sendBridgeMessage = sendBridgeMessage;
+        var _conf = __webpack_require__(0), _lib = __webpack_require__(1), _global = __webpack_require__(2), _drivers = __webpack_require__(3);
+        exports.documentBodyReady = new _lib.promise.Promise(function(resolve) {
+            if (window.document && window.document.body) return resolve(window.document.body);
+            var interval = setInterval(function() {
+                if (window.document && window.document.body) return clearInterval(interval), resolve(window.document.body);
+            }, 10);
+        });
+        _global.global.remoteWindows = _global.global.remoteWindows || [], _global.global.receiveMessage = function(event) {
+            return (0, _drivers.receiveMessage)(event);
+        };
+    }, function(module, exports, __webpack_require__) {
+        "use strict";
+        Object.defineProperty(exports, "__esModule", {
+            value: !0
+        });
+        var _bridge = __webpack_require__(19);
+        Object.keys(_bridge).forEach(function(key) {
+            "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
+                enumerable: !0,
+                get: function() {
+                    return _bridge[key];
+                }
+            });
+        });
+        var _child = __webpack_require__(20);
+        Object.keys(_child).forEach(function(key) {
+            "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
+                enumerable: !0,
+                get: function() {
+                    return _child[key];
+                }
+            });
+        });
+        var _common = __webpack_require__(8);
+        Object.keys(_common).forEach(function(key) {
+            "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
+                enumerable: !0,
+                get: function() {
+                    return _common[key];
+                }
+            });
+        });
+        var _parent = __webpack_require__(22);
+        Object.keys(_parent).forEach(function(key) {
+            "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
+                enumerable: !0,
+                get: function() {
+                    return _parent[key];
+                }
+            });
+        });
+    }, function(module, exports, __webpack_require__) {
+        "use strict";
+        Object.defineProperty(exports, "__esModule", {
+            value: !0
+        }), exports.log = void 0;
+        var _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
+            return typeof obj;
+        } : function(obj) {
+            return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+        }, _util = __webpack_require__(4), _windows = __webpack_require__(7), _conf = __webpack_require__(0), LOG_LEVELS = [ "debug", "info", "warn", "error" ];
+        Function.prototype.bind && window.console && "object" === _typeof(console.log) && [ "log", "info", "warn", "error" ].forEach(function(method) {
+            console[method] = this.bind(console[method], console);
+        }, Function.prototype.call);
+        var log = exports.log = {
+            clearLogs: function() {
+                if (window.console && window.console.clear && window.console.clear(), _conf.CONFIG.LOG_TO_PAGE) {
+                    var container = document.getElementById("postRobotLogs");
+                    container && container.parentNode.removeChild(container);
+                }
+            },
+            writeToPage: function(level, args) {
+                setTimeout(function() {
+                    var container = document.getElementById("postRobotLogs");
+                    container || (container = document.createElement("div"), container.id = "postRobotLogs", 
+                    container.style.cssText = "width: 800px; font-family: monospace; white-space: pre-wrap;", 
+                    document.body.appendChild(container));
+                    var el = document.createElement("div"), date = new Date().toString().split(" ")[4], payload = _util.util.map(args, function(item) {
+                        if ("string" == typeof item) return item;
+                        if (!item) return Object.prototype.toString.call(item);
+                        var json = void 0;
+                        try {
+                            json = (0, _windows.jsonStringify)(item, 0, 2);
+                        } catch (e) {
+                            json = "[object]";
+                        }
+                        return "\n\n" + json + "\n\n";
+                    }).join(" "), msg = date + " " + level + " " + payload;
+                    el.innerHTML = msg;
+                    var color = {
+                        log: "#ddd",
+                        warn: "orange",
+                        error: "red",
+                        info: "blue",
+                        debug: "#aaa"
+                    }[level];
+                    el.style.cssText = "margin-top: 10px; color: " + color + ";", container.childNodes.length ? container.insertBefore(el, container.childNodes[0]) : container.appendChild(el);
+                });
+            },
+            logLevel: function(level, args) {
+                setTimeout(function() {
+                    try {
+                        if (LOG_LEVELS.indexOf(level) < LOG_LEVELS.indexOf(_conf.CONFIG.LOG_LEVEL)) return;
+                        if (args = Array.prototype.slice.call(args), args.unshift("" + window.location.host + window.location.pathname), 
+                        args.unshift("::"), args.unshift("" + (0, _windows.getWindowType)().toLowerCase()), 
+                        args.unshift("[post-robot]"), _conf.CONFIG.LOG_TO_PAGE && log.writeToPage(level, args), 
+                        !window.console) return;
+                        if (window.console[level] || (level = "log"), !window.console[level]) return;
+                        window.console[level].apply(window.console, args);
+                    } catch (err) {}
+                }, 1);
+            },
+            debug: function() {
+                log.logLevel("debug", arguments);
+            },
+            info: function() {
+                log.logLevel("info", arguments);
+            },
+            warn: function() {
+                log.logLevel("warn", arguments);
+            },
+            error: function() {
+                log.logLevel("error", arguments);
+            }
+        };
     }, function(module, exports, __webpack_require__) {
         "use strict";
         Object.defineProperty(exports, "__esModule", {
