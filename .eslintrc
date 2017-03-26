@@ -23,6 +23,7 @@
     "document": true,
     "Promise": false,
     "__TEST__": true,
+    "__IE_POPUP_SUPPORT__": true,
     "HTMLElement": true
   },
 
@@ -210,7 +211,7 @@
     "padded-blocks": 0,
     "quote-props": 0,
     "quotes": [2, "single", {
-      allowTemplateLiterals: true
+      "allowTemplateLiterals": true
     }],
     "require-jsdoc": 0,
     "semi-spacing": 2,

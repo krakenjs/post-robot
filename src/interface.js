@@ -2,13 +2,16 @@
 import { initOnReady, listenForMethods } from './lib';
 import { listenForMessages } from './drivers';
 import { global } from './global';
-import { openTunnelToOpener } from './bridge';
 
 export function init() {
 
     if (!global.initialized) {
         listenForMessages();
-        openTunnelToOpener();
+
+        if (__IE_POPUP_SUPPORT__) {
+            require('./bridge').openTunnelToOpener();
+        }
+
         initOnReady();
         listenForMethods();
     }

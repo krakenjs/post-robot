@@ -28,7 +28,7 @@ let bridge;
 let childWindow, childFrame, otherChildFrame, frameElement;
 
 before(function() {
-    return postRobot.openBridge('/base/test/bridge.htm', 'mock://test-post-robot-child.com').then(frame => {
+    return postRobot.bridge.openBridge('/base/test/bridge.htm', 'mock://test-post-robot-child.com').then(frame => {
         bridge = frame;
     }).then(function() {
 

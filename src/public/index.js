@@ -9,7 +9,11 @@ import * as windowUtil from '../lib/windows';
 
 export let parent = getAncestor();
 
-export { openBridge, linkUrl, isBridge, needsBridge, needsBridgeForBrowser, needsBridgeForWin, needsBridgeForDomain, openTunnelToOpener, destroyBridges } from '../bridge';
+export let bridge;
+
+if (__IE_POPUP_SUPPORT__) {
+    bridge = require('../bridge/interface');
+}
 
 export { util } from '../lib/util';
 

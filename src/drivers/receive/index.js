@@ -1,7 +1,6 @@
 
 import { CONSTANTS, POST_MESSAGE_NAMES_LIST } from '../../conf';
 import { deserializeMethods, log, isWindowClosed, jsonParse, util } from '../../lib';
-import { emulateIERestrictions } from '../../compat';
 import { global } from '../../global';
 
 import { RECEIVE_MESSAGE_TYPES } from './types';
@@ -107,10 +106,12 @@ export function messageListener(event) {
         data: event.data
     };
 
-    try {
-        emulateIERestrictions(event.source, window);
-    } catch (err) {
-        return;
+    if (__IE_POPUP_SUPPORT__) {
+        try {
+            require('../../compat').emulateIERestrictions(event.source, window);
+        } catch (err) {
+            return;
+        }
     }
 
     receiveMessage(event);

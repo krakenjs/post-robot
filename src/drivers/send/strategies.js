@@ -1,49 +1,60 @@
 
 import { CONSTANTS } from '../../conf';
 import { isSameDomain, isSameTopWindow, isActuallySameDomain, util } from '../../lib';
-import { emulateIERestrictions } from '../../compat';
-import { sendBridgeMessage } from '../../bridge';
 
-export let SEND_MESSAGE_STRATEGIES = {
+export let SEND_MESSAGE_STRATEGIES = {};
 
-    [ CONSTANTS.SEND_STRATEGIES.POST_MESSAGE ](win, serializedMessage, domain) {
 
-        emulateIERestrictions(window, win);
 
-        let domains;
 
-        if (Array.isArray(domain)) {
-            domains = domain;
-        } else if (domain) {
-            domains = [ domain ];
-        } else {
-            domains = [ CONSTANTS.WILDCARD ];
+SEND_MESSAGE_STRATEGIES[CONSTANTS.SEND_STRATEGIES.POST_MESSAGE] = (win, serializedMessage, domain) => {
+
+    if (__IE_POPUP_SUPPORT__) {
+        try {
+            require('../../compat').emulateIERestrictions(window, win);
+        } catch (err) {
+            return;
+        }
+    }
+
+    let domains;
+
+    if (Array.isArray(domain)) {
+        domains = domain;
+    } else if (domain) {
+        domains = [ domain ];
+    } else {
+        domains = [ CONSTANTS.WILDCARD ];
+    }
+
+    domains = domains.map(dom => {
+
+        if (dom.indexOf(CONSTANTS.MOCK_PROTOCOL) === 0) {
+
+            if (!isActuallySameDomain(win)) {
+                throw new Error(`Attempting to send messsage to mock domain ${dom}, but window is actually cross-domain`);
+            }
+
+            return util.getActualDomain(win);
         }
 
-        domains = domains.map(dom => {
+        if (dom.indexOf(CONSTANTS.FILE_PROTOCOL) === 0) {
+            return CONSTANTS.WILDCARD;
+        }
 
-            if (dom.indexOf(CONSTANTS.MOCK_PROTOCOL) === 0) {
+        return dom;
+    });
 
-                if (!isActuallySameDomain(win)) {
-                    throw new Error(`Attempting to send messsage to mock domain ${dom}, but window is actually cross-domain`);
-                }
+    domains.forEach(dom => {
+        return win.postMessage(serializedMessage, dom);
+    });
+};
 
-                return util.getActualDomain(win);
-            }
+if (__IE_POPUP_SUPPORT__) {
 
-            if (dom.indexOf(CONSTANTS.FILE_PROTOCOL) === 0) {
-                return CONSTANTS.WILDCARD;
-            }
+    let sendBridgeMessage = require('../../bridge').sendBridgeMessage;
 
-            return dom;
-        });
-
-        domains.forEach(dom => {
-            return win.postMessage(serializedMessage, dom);
-        });
-    },
-
-    [ CONSTANTS.SEND_STRATEGIES.BRIDGE ](win, serializedMessage, domain) {
+    SEND_MESSAGE_STRATEGIES[CONSTANTS.SEND_STRATEGIES.BRIDGE] = (win, serializedMessage, domain) => {
 
         if (isSameDomain(win)) {
             throw new Error(`Post message through bridge disabled between same domain windows`);
@@ -53,10 +64,10 @@ export let SEND_MESSAGE_STRATEGIES = {
             throw new Error(`Can only use bridge to communicate between two different windows, not between frames`);
         }
 
-        return sendBridgeMessage(win, serializedMessage, domain);
-    },
+        sendBridgeMessage(win, serializedMessage, domain);
+    };
 
-    [ CONSTANTS.SEND_STRATEGIES.GLOBAL ](win, serializedMessage, domain) {
+    SEND_MESSAGE_STRATEGIES[CONSTANTS.SEND_STRATEGIES.GLOBAL] = (win, serializedMessage, domain) => {
 
         if (!isSameDomain(win)) {
             throw new Error(`Post message through global disabled between different domain windows`);
@@ -77,5 +88,5 @@ export let SEND_MESSAGE_STRATEGIES = {
             origin: util.getDomain(),
             data: serializedMessage
         });
-    }
-};
+    };
+}

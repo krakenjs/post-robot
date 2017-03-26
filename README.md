@@ -293,14 +293,16 @@ a. Create a bridge path on the domain of your popup, for example `http://yy.com/
 <script src="http://yy.com/js/post-robot.js"></script>
 ```
 
-b. In the parent page, `xx.com`, which opens the popup, include the following javascript:
+b. Use the special `ie` build of post-robot: `post-robot.ie.js` in `dist/`
+
+c. In the parent page, `xx.com`, which opens the popup, include the following javascript:
 
 ```html
 <!-- http://xx.com -->
 
 <script>
-    postRobot.openBridge('http://yy.com/bridge.html');
+    postRobot.bridge.openBridge('http://yy.com/bridge.html');
 </script>
 ```
 
-c. Now `xx.com` and `yy.com` can communicate freely using post-robot, in IE.
+Now `xx.com` and `yy.com` can communicate freely using post-robot, in IE.

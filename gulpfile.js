@@ -10,95 +10,109 @@ var UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 gulp.task('test', ['lint', 'karma']);
 gulp.task('build', ['lint', 'karma', 'webpack', 'webpack-min']);
 
-var FILE_NAME = 'post-robot';
 var MODULE_NAME = 'postRobot';
 
-var WEBPACK_CONFIG = {
-    // devtool: 'source-map',
-    module: {
-        rules: [
-            {
-                test: /\.js$/,
-                loader: 'babel-loader',
-                query: {
-                    presets: ['es2015'],
-                    plugins: [
-                        'transform-object-rest-spread',
-                        'syntax-object-rest-spread',
-                        'transform-es3-property-literals',
-                        'transform-es3-member-expression-literals',
-                        ['transform-es2015-for-of', {loose: true}]
-                    ]
+function buildWebpackConfig({  filename, modulename, minify = false, globals = {} }) {
+
+    return {
+        module: {
+            rules: [
+                {
+                    test: /\.js$/,
+                    loader: 'babel-loader',
+                    query: {
+                        presets: ['es2015'],
+                        plugins: [
+                            'transform-object-rest-spread',
+                            'syntax-object-rest-spread',
+                            'transform-es3-property-literals',
+                            'transform-es3-member-expression-literals',
+                            ['transform-es2015-for-of', {loose: true}]
+                        ]
+                    }
                 }
+            ]
+        },
+        resolve: {
+            modules: [
+                'node_modules',
+                'src',
+                'client'
+            ]
+        },
+        output: {
+            filename: filename,
+            libraryTarget: 'umd',
+            umdNamedDefine: true,
+            library: modulename
+        },
+        plugins: [
+            new webpack.DefinePlugin(Object.assign({
+                __TEST__: false,
+                __IE_POPUP_SUPPORT__: false
+            }, globals)),
+            new webpack.SourceMapDevToolPlugin({
+                filename: '[file].map'
+            }),
+            new UglifyJSPlugin({
+                test: /\.js$/,
+                beautify: !minify,
+                minimize: minify,
+                compress: { warnings: false },
+                mangle: minify,
+                sourceMap: true
+            })
+        ],
+        bail: true
+    };
+}
+
+gulp.task('webpack', [ 'webpack-max', 'webpack-min', 'webpack-max-ie', 'webpack-min-ie' ]);
+
+gulp.task('webpack-max', function() {
+    return gulp.src('src/index.js')
+        .pipe(gulpWebpack(buildWebpackConfig({
+            filename: `post-robot.js`,
+            modulename: MODULE_NAME
+        }), webpack))
+        .pipe(gulp.dest('dist'));
+});
+
+gulp.task('webpack-min', function() {
+    return gulp.src('src/index.js')
+        .pipe(gulpWebpack(buildWebpackConfig({
+            filename: `post-robot.min.js`,
+            modulename: MODULE_NAME,
+            minify: true
+        }), webpack))
+        .pipe(gulp.dest('dist'));
+});
+
+gulp.task('webpack-max-ie', function() {
+    return gulp.src('src/index.js')
+        .pipe(gulpWebpack(buildWebpackConfig({
+            filename: `post-robot.ie.js`,
+            modulename: MODULE_NAME,
+            globals: {
+                __IE_POPUP_SUPPORT__: true
             }
-        ]
-    },
-    resolve: {
-        modules: [
-            'node_modules',
-            'src',
-            'client'
-        ]
-    },
-    output: {
-        filename: `${FILE_NAME}.js`,
-        libraryTarget: 'umd',
-        umdNamedDefine: true,
-        library: MODULE_NAME
-    },
-    plugins: [
-        new webpack.DefinePlugin({
-            __TEST__: false
-        }),
-        new webpack.SourceMapDevToolPlugin({
-            filename: '[file].map'
-        }),
-        new UglifyJSPlugin({
-            beautify: true,
-            minimize: false,
-            compress: { warnings: false },
-            mangle: false,
-            sourceMap: true
-        })
-    ],
-    bail: true
-};
-
-var WEBPACK_CONFIG_MIN = Object.assign({}, WEBPACK_CONFIG, {
-    output: {
-        filename: `${FILE_NAME}.min.js`,
-        libraryTarget: 'umd',
-        umdNamedDefine: true,
-        library: MODULE_NAME
-    },
-    plugins: [
-        new webpack.DefinePlugin({
-            __TEST__: false
-        }),
-        new webpack.SourceMapDevToolPlugin({
-            filename: '[file].map'
-        }),
-        new UglifyJSPlugin({
-            beautify: false,
-            minimize: true,
-            compress: { warnings: false },
-            mangle: true,
-            sourceMap: true
-        })
-    ]
+        }), webpack))
+        .pipe(gulp.dest('dist'));
 });
 
-gulp.task('webpack', ['lint'], function() {
+gulp.task('webpack-min-ie', function() {
     return gulp.src('src/index.js')
-      .pipe(gulpWebpack(WEBPACK_CONFIG, webpack))
-      .pipe(gulp.dest('dist'));
+        .pipe(gulpWebpack(buildWebpackConfig({
+            filename: `post-robot.ie.js`,
+            modulename: MODULE_NAME,
+            minify: true,
+            globals: {
+                __IE_POPUP_SUPPORT__: true
+            }
+        }), webpack))
+        .pipe(gulp.dest('dist'));
 });
 
-gulp.task('webpack-min', ['lint'], function() {
-    return gulp.src('src/index.js')
-      .pipe(gulpWebpack(WEBPACK_CONFIG_MIN, webpack))
-      .pipe(gulp.dest('dist'));
-});
 
 gulp.task('lint', function() {
     return gulp.src('src/**').pipe(eslint())
