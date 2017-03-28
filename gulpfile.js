@@ -6,15 +6,32 @@ var gulpWebpack = require('webpack-stream');
 var Server = require('karma').Server;
 var argv = require('yargs').argv;
 var UglifyJSPlugin = require('uglifyjs-webpack-plugin');
+var yargs = require('yargs');
 
 gulp.task('test', ['lint', 'karma']);
 gulp.task('build', ['lint', 'karma', 'webpack', 'webpack-min']);
 
 var MODULE_NAME = 'postRobot';
 
+
+
 function buildWebpackConfig({  filename, modulename, minify = false, globals = {} }) {
 
     return {
+        stats: {
+            hash: yargs.argv['debug'] ? true : false,
+            timings: yargs.argv['debug'] ? true : false,
+            chunks: yargs.argv['debug'] ? true : false,
+            chunkModules: yargs.argv['debug'] ? true : false,
+            modules: yargs.argv['debug'] ? true : false,
+            cached: yargs.argv['debug'] ? true : false,
+            cachedAssets: yargs.argv['debug'] ? true : false,
+            reasons: yargs.argv['debug'] ? true : false,
+            source: yargs.argv['debug'] ? true : false,
+            errorDetails: yargs.argv['debug'] ? true : false,
+            performance: yargs.argv['debug'] ? true : false,
+            warnings: yargs.argv['debug'] ? true : false
+        },
         module: {
             rules: [
                 {
@@ -142,5 +159,5 @@ gulp.task('karma', ['lint'], function (done) {
         done();
     });
 
-    server.start();
+    return server.start();
 });
