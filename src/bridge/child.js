@@ -1,12 +1,12 @@
 
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { CONSTANTS } from '../conf';
-import { isSameDomain, getOpener, getFrames, util, getFrameByName } from '../lib';
+import { isSameDomain, getOpener, getFrames, util, getFrameByName, weakMapMemoize } from '../lib';
 import { receiveMessage } from '../drivers';
 
 import { needsBridge, registerRemoteWindow, rejectRemoteSendMessage, registerRemoteSendMessage, getBridgeName } from './common';
 
-function getRemoteBridgeForWindow(win) {
+let awaitRemoteBridgeForWindow = weakMapMemoize(win => {
     return Promise.try(() => {
         for (let frame of getFrames(win)) {
             try {
@@ -53,7 +53,7 @@ function getRemoteBridgeForWindow(win) {
             return;
         }
     });
-}
+});
 
 export function openTunnelToOpener() {
     return Promise.try(() => {
@@ -70,7 +70,7 @@ export function openTunnelToOpener() {
 
         registerRemoteWindow(opener);
 
-        return getRemoteBridgeForWindow(opener).then(bridge => {
+        return awaitRemoteBridgeForWindow(opener).then(bridge => {
 
             if (!bridge) {
                 return rejectRemoteSendMessage(opener, new Error(`Can not register with opener: no bridge found in opener`));

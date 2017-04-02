@@ -68,6 +68,7 @@
     "yargs": "^4.7.1"
   },
   "dependencies": {
+    "cross-domain-safe-weakmap": "^1.0.1",
     "sync-browser-mocks": "^1.0.3"
   }
 }

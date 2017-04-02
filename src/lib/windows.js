@@ -1,18 +1,18 @@
 
+import { WeakMap } from 'cross-domain-safe-weakmap/src';
+
 import { util } from './util';
 import { global } from '../global';
 import { CONSTANTS } from '../conf';
 
-global.domainMatches = global.domainMatches || [];
+global.domainMatches = global.domainMatches || new WeakMap();
 
 let domainMatchTimeout;
 
 export function isSameDomain(win) {
 
-    for (let match of global.domainMatches) {
-        if (match.win === win) {
-            return match.match;
-        }
+    if (global.domainMatches.has(win)) {
+        return global.domainMatches.get(win);
     }
 
     let match;
@@ -27,11 +27,11 @@ export function isSameDomain(win) {
         match = false;
     }
 
-    global.clean.push(global.domainMatches, { win, match });
+    global.domainMatches.set(win, match);
 
     if (!domainMatchTimeout) {
         domainMatchTimeout = setTimeout(() => {
-            global.domainMatches = [];
+            global.domainMatches = new WeakMap();
             domainMatchTimeout = null;
         }, 1);
     }

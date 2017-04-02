@@ -1,4 +1,6 @@
 
+import { WeakMap } from 'cross-domain-safe-weakmap/src';
+
 import { CONFIG, CONSTANTS } from '../conf';
 import { util, promise, isSameDomain, isOpener, isSameTopWindow, getUserAgent, matchDomain } from '../lib';
 import { global } from '../global';
@@ -72,19 +74,14 @@ export let documentBodyReady = new promise.Promise(resolve => {
     }, 10);
 });
 
-global.remoteWindows = global.remoteWindows || [];
+global.remoteWindows = global.remoteWindows || new WeakMap();
 
 export function registerRemoteWindow(win, timeout = CONFIG.BRIDGE_TIMEOUT) {
-    let sendMessagePromise = new promise.Promise();
-    global.clean.push(global.remoteWindows, { win, sendMessagePromise });
+    global.clean.setItem(global.remoteWindows, win, { sendMessagePromise: new promise.Promise() });
 }
 
 export function findRemoteWindow(win) {
-    for (let i = 0; i < global.remoteWindows.length; i++) {
-        if (global.remoteWindows[i].win === win) {
-            return global.remoteWindows[i];
-        }
-    }
+    return global.remoteWindows.get(win);
 }
 
 export function registerRemoteSendMessage(win, domain, sendMessage) {

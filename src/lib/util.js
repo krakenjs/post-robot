@@ -1,4 +1,5 @@
 
+import { WeakMap } from 'cross-domain-safe-weakmap/src';
 import { CONSTANTS } from '../conf';
 
 export let util = {
@@ -287,4 +288,25 @@ export let util = {
 
 export function isRegex(item) {
     return Object.prototype.toString.call(item) === '[object RegExp]';
+}
+
+export function weakMapMemoize(method) {
+
+    let map = new WeakMap();
+
+    return function(arg) {
+        let result = map.get(arg);
+
+        if (typeof result !== 'undefined') {
+            return result;
+        }
+
+        result = method.call(this, arg);
+
+        if (typeof result !== 'undefined') {
+            map.set(arg, result);
+        }
+
+        return result;
+    };
 }

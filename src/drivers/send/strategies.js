@@ -31,6 +31,10 @@ SEND_MESSAGE_STRATEGIES[CONSTANTS.SEND_STRATEGIES.POST_MESSAGE] = (win, serializ
 
         if (dom.indexOf(CONSTANTS.MOCK_PROTOCOL) === 0) {
 
+            if (window.location.protocol === CONSTANTS.FILE_PROTOCOL) {
+                return CONSTANTS.WILDCARD;
+            }
+
             if (!isActuallySameDomain(win)) {
                 throw new Error(`Attempting to send messsage to mock domain ${dom}, but window is actually cross-domain`);
             }
@@ -78,7 +82,7 @@ if (__IE_POPUP_SUPPORT__) {
         }
 
         let foreignGlobal = win[CONSTANTS.WINDOW_PROPS.POSTROBOT];
-        
+
         if (!foreignGlobal) {
             throw new Error(`Can not find postRobot global on foreign window`);
         }

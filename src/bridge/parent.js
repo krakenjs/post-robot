@@ -1,13 +1,18 @@
 
+import { WeakMap } from 'cross-domain-safe-weakmap/src';
+
 import { CONFIG, CONSTANTS } from '../conf';
 import { util, promise, log, onWindowReady, getFrameByName } from '../lib';
 import { global } from '../global';
 import { on } from '../interface';
 import { receiveMessage } from '../drivers';
 
+import { getBridgeName, documentBodyReady, registerRemoteSendMessage, registerRemoteWindow } from './common';
+
 global.bridges = global.bridges || {};
 
-import { getBridgeName, documentBodyReady, registerRemoteSendMessage, registerRemoteWindow } from './common';
+global.popupWindowsByWin = global.popupWindowsByWin || new WeakMap();
+global.popupWindowsByName = global.popupWindowsByName || {};
 
 function listenForRegister(source, domain) {
     on(CONSTANTS.POST_MESSAGE_NAMES.OPEN_TUNNEL, { source, domain }, ({ origin, data }) => {
@@ -24,7 +29,7 @@ function listenForRegister(source, domain) {
             throw new Error(`Register window expected to be passed sendMessage method`);
         }
 
-        let winDetails = global.popupWindows[data.name];
+        let winDetails = global.popupWindowsByName[data.name];
 
         if (!winDetails) {
             throw new Error(`Window with name ${data.name} does not exist, or was not opened by this window`);
@@ -146,8 +151,6 @@ export function destroyBridges() {
     return global.clean.run('bridgeFrames');
 }
 
-global.popupWindows = global.popupWindows || {};
-
 let windowOpen = window.open;
 
 window.open = function(url, name, options, last) {
@@ -169,7 +172,9 @@ window.open = function(url, name, options, last) {
     }
 
     if (name) {
-        global.clean.setItem(global.popupWindows, name, { win, domain });
+        let winOptions = { name, domain, win };
+        global.clean.setItem(global.popupWindowsByWin, win, winOptions);
+        global.clean.setItem(global.popupWindowsByName, name, winOptions);
     }
 
     return win;
@@ -177,15 +182,10 @@ window.open = function(url, name, options, last) {
 
 export function linkUrl(win, url) {
 
-    for (let name of Object.keys(global.popupWindows)) {
-        let winOptions = global.popupWindows[name];
+    let winOptions = global.popupWindowsByWin.get(win);
 
-        if (winOptions.win === win) {
-            winOptions.domain = util.getDomainFromUrl(url);
-
-            registerRemoteWindow(win);
-
-            break;
-        }
+    if (winOptions) {
+        winOptions.domain = util.getDomainFromUrl(url);
+        registerRemoteWindow(win);
     }
 }

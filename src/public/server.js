@@ -1,7 +1,6 @@
 
-import { CONFIG } from '../conf';
 import { util, promise, isWindowClosed } from '../lib';
-import { addRequestListener, removeRequestListener } from '../drivers';
+import { addRequestListener } from '../drivers';
 import { CONSTANTS } from '../conf';
 
 export function listen(options) {
@@ -16,26 +15,23 @@ export function listen(options) {
         throw err;
     };
 
-    if (options.once) {
-        let handler = options.handler;
-        options.handler = util.once(function() {
-            removeRequestListener(options);
-            return handler.apply(this, arguments);
-        });
-    }
-
-    let override = options.override || CONFIG.MOCK_MODE;
-
     if (options.source) {
         options.window = options.source;
     }
 
     options.domain = options.domain || CONSTANTS.WILDCARD;
 
-    addRequestListener(options.name, options.window, options.domain, options, override);
+    let requestListener = addRequestListener({ name: options.name, win: options.window, domain: options.domain }, options);
+
+    if (options.once) {
+        let handler = options.handler;
+        options.handler = util.once(function() {
+            requestListener.cancel();
+            return handler.apply(this, arguments);
+        });
+    }
 
     options.handleError = err => {
-        // removeRequestListener(options);
         options.errorHandler(err);
     };
 
@@ -50,7 +46,7 @@ export function listen(options) {
 
     return {
         cancel() {
-            removeRequestListener(options);
+            requestListener.cancel();
         }
     };
 }

@@ -238,15 +238,15 @@ describe('[post-robot] options', function() {
 
         var count = 0;
 
-        postRobot.once('foobu', { override: true }, function() {
+        postRobot.once('foobuz', function() {
             count += 1;
         });
 
         return postRobot.send(childFrame, 'sendMessageToParent', {
-            messageName: 'foobu'
+            messageName: 'foobuz'
         }).then(function() {
             return postRobot.send(childFrame, 'sendMessageToParent', {
-                messageName: 'foobu'
+                messageName: 'foobuz'
             }).then(function() {
                 throw new Error('Expected success handler to not be called');
             }, function() {
@@ -259,23 +259,23 @@ describe('[post-robot] options', function() {
 
         var count = 0;
 
-        postRobot.once('foobu', { override: true }, function({ source, data }) {
+        postRobot.once('foobuzz', function({ source, data }) {
             count += data.add;
         });
 
         return postRobot.send(childFrame, 'sendMessageToParent', {
-            messageName: 'foobu',
+            messageName: 'foobuzz',
             data: {
                 add: 2
             }
         }).then(function() {
 
-            postRobot.once('foobu', { override: true }, function({ source, data }) {
+            postRobot.once('foobuzz', function({ source, data }) {
                 count += data.add;
             });
 
             return postRobot.send(childFrame, 'sendMessageToParent', {
-                messageName: 'foobu',
+                messageName: 'foobuzz',
                 data: {
                     add: 3
                 }
@@ -368,7 +368,7 @@ describe('[post-robot] error cases', function() {
         postRobot.CONFIG.ALLOWED_POST_MESSAGE_METHODS = {};
 
         return postRobot.send(childFrame, 'sendMessageToParent', {
-            messageName: 'foobu'
+            messageName: 'foobuzzz'
         }).then(function() {
             throw new Error('Expected success handler to not be called');
         }, function(err) {
@@ -388,7 +388,7 @@ describe('[post-robot] error cases', function() {
         postRobot.CONFIG.ALLOW_POSTMESSAGE_POPUP = false;
 
         return postRobot.send(childWindow, 'sendMessageToParent', {
-            messageName: 'foobu'
+            messageName: 'foobuzzzz'
         }).then(function() {
             throw new Error('Expected success handler to not be called');
         }, function(err) {
@@ -400,12 +400,12 @@ describe('[post-robot] error cases', function() {
 
     it('should fail to send a message when the expected domain does not match', function() {
 
-        postRobot.on('foobu', { domain: 'http://www.zombo.com' }, function() {
+        postRobot.on('foobuzzzzz', { domain: 'http://www.zombo.com' }, function() {
             done();
         });
 
         return postRobot.send(childFrame, 'sendMessageToParent', {
-            messageName: 'foobu'
+            messageName: 'foobuzzzzz'
         }).then(function() {
             throw new Error('Expected success handler to not be called');
         }, function(err) {

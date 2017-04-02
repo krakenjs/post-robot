@@ -3,13 +3,13 @@ import { CONSTANTS } from '../../conf';
 import { promise, log, isWindowClosed, matchDomain } from '../../lib';
 
 import { sendMessage } from '../send';
-import { listeners, getRequestListener } from '../listeners';
+import { getRequestListener, getResponseListener, deleteResponseListener } from '../listeners';
 
 export let RECEIVE_MESSAGE_TYPES = {
 
     [ CONSTANTS.POST_MESSAGE_TYPE.ACK ]: (source, origin, message) => {
 
-        let options = listeners.response[message.hash];
+        let options = getResponseListener(message.hash);
 
         if (!options) {
             throw new Error(`No handler found for post message ack for message: ${message.name} from ${origin} in ${window.location.protocol}//${window.location.host}${window.location.pathname}`);
@@ -24,7 +24,7 @@ export let RECEIVE_MESSAGE_TYPES = {
 
     [ CONSTANTS.POST_MESSAGE_TYPE.REQUEST ]: (source, origin, message) => {
 
-        let options = getRequestListener(message.name, source, origin);
+        let options = getRequestListener({ name: message.name, win: source, domain: origin });
 
         function respond(data) {
 
@@ -89,7 +89,7 @@ export let RECEIVE_MESSAGE_TYPES = {
 
     [ CONSTANTS.POST_MESSAGE_TYPE.RESPONSE ]: (source, origin, message) => {
 
-        let options = listeners.response[message.hash];
+        let options = getResponseListener(message.hash);
 
         if (!options) {
             throw new Error(`No handler found for post message response for message: ${message.name} from ${origin} in ${window.location.protocol}//${window.location.host}${window.location.pathname}`);
@@ -99,7 +99,7 @@ export let RECEIVE_MESSAGE_TYPES = {
             throw new Error(`Response origin ${origin} does not match domain ${options.domain}`);
         }
 
-        delete listeners.response[message.hash];
+        deleteResponseListener(message.hash);
 
         if (message.ack === CONSTANTS.POST_MESSAGE_ACK.ERROR) {
             return options.respond(new Error(message.error));
