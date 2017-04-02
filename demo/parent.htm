@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 
-<script src="../dist/post-robot.js"></script>
+<script src="../dist/post-robot.ie.js"></script>
 
 <button onclick="openWindow()">open</button>
 
 <div id="messages"></div>
 
 <script>
-    postRobot.openBridge('./bridge.htm', 'mock://foo.com');
+    postRobot.bridge.openBridge('./bridge.htm', 'mock://foo.com');
 
 	function openWindow() {
 		window.open('mock://foo.com|./child.htm', Math.random().toString().replace(/[^a-z0-9]+/g, ''));

@@ -32,6 +32,17 @@ export function cleanup(obj) {
         },
 
         setItem(mapping, key, item) {
+
+            if (typeof mapping.set === 'function' && typeof mapping.delete === 'function') {
+                mapping.set(key, item);
+
+                this.register(() => {
+                    mapping.delete(key);
+                });
+
+                return item;
+            }
+
             mapping[key] = item;
             this.register(() => {
                 delete mapping[key];

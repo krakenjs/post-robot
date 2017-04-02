@@ -1,7 +1,6 @@
 
 import { CONFIG, CONSTANTS } from '../conf';
-import { sendMessage } from '../drivers';
-import { global } from '../global';
+import { sendMessage, addResponseListener } from '../drivers';
 import { util, promise, getAncestor, isAncestor, onWindowReady, isWindowClosed } from '../lib';
 
 
@@ -13,7 +12,7 @@ export function request(options) {
             throw new Error('Expected options.name');
         }
 
-        
+
         if (CONFIG.MOCK_MODE) {
             options.window = window;
 
@@ -34,9 +33,9 @@ export function request(options) {
 
             options.window = el.contentWindow;
 
-            
+
         } else if (options.window instanceof HTMLElement) {
-            
+
             if (options.window.tagName.toLowerCase() !== 'iframe') {
                 throw new Error(`Expected options.window ${options.window} to be an iframe`);
             }
@@ -44,7 +43,7 @@ export function request(options) {
             if (!options.window.contentWindow) {
                 throw new Error('Iframe must have contentWindow.  Make sure it has a src attribute and is in the DOM.');
             }
-            
+
             options.window = options.window.contentWindow;
         }
 
@@ -55,7 +54,7 @@ export function request(options) {
         options.domain = options.domain || CONSTANTS.WILDCARD;
 
         let hash = `${options.name}_${util.uniqueID()}`;
-        global.clean.setItem(global.listeners.response, hash, options);
+        addResponseListener(hash, options);
 
         if (isWindowClosed(options.window)) {
             throw new Error('Target window is closed');
@@ -166,4 +165,3 @@ export function client(options = {}) {
         }
     };
 }
-
