@@ -77,7 +77,7 @@ export let documentBodyReady = new promise.Promise(resolve => {
 global.remoteWindows = global.remoteWindows || new WeakMap();
 
 export function registerRemoteWindow(win, timeout = CONFIG.BRIDGE_TIMEOUT) {
-    global.clean.setItem(global.remoteWindows, win, { sendMessagePromise: new promise.Promise() });
+    global.remoteWindows.set(win, { sendMessagePromise: new promise.Promise() });
 }
 
 export function findRemoteWindow(win) {

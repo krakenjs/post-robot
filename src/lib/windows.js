@@ -47,7 +47,7 @@ export function isActuallySameDomain(win) {
         }
 
     } catch (err) {
-        global.clean.push(global.domainMatches, { win, match: false });
+        global.domainMatches.push({ win, match: false });
         return false;
     }
 

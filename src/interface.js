@@ -21,12 +21,5 @@ export function init() {
 
 init();
 
-export function reset() {
-    return global.clean.all().then(() => {
-        global.initialized = false;
-        return init();
-    });
-}
-
 export * from './public';
 export { Promise } from './lib';

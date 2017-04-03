@@ -2,7 +2,7 @@
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
 
 import { CONFIG, CONSTANTS } from '../conf';
-import { util, promise, log, onWindowReady, getFrameByName } from '../lib';
+import { util, promise, log, onWindowReady, getFrameByName, isWindowClosed } from '../lib';
 import { global } from '../global';
 import { on } from '../interface';
 import { receiveMessage } from '../drivers';
@@ -95,7 +95,7 @@ export function openBridge(url, domain) {
         return global.bridges[domain];
     }
 
-    return global.clean.setItem(global.bridges, domain, promise.run(() => {
+    global.bridges[domain] = promise.run(() => {
 
         if (util.getDomain() === domain) {
             throw new Error(`Can not open bridge on the same domain as current domain: ${domain}`);
@@ -120,11 +120,6 @@ export function openBridge(url, domain) {
 
                 body.appendChild(iframe);
 
-                global.clean.register('bridgeFrames', () => {
-                    body.removeChild(iframe);
-                    delete global.bridges[domain];
-                });
-
                 let bridge = iframe.contentWindow;
 
                 listenForRegister(bridge, domain);
@@ -144,11 +139,9 @@ export function openBridge(url, domain) {
                 });
             });
         });
-    }));
-}
+    });
 
-export function destroyBridges() {
-    return global.clean.run('bridgeFrames');
+    return global.bridges[domain];
 }
 
 let windowOpen = window.open;
@@ -171,10 +164,16 @@ window.open = function(url, name, options, last) {
         registerRemoteWindow(win);
     }
 
+    for (let winName of Object.keys(global.popupWindowsByName)) {
+        if (isWindowClosed(global.popupWindowsByName[winName].win)) {
+            delete global.popupWindowsByName[winName];
+        }
+    }
+
     if (name) {
         let winOptions = { name, domain, win };
-        global.clean.setItem(global.popupWindowsByWin, win, winOptions);
-        global.clean.setItem(global.popupWindowsByName, name, winOptions);
+        global.popupWindowsByWin.set(win, winOptions);
+        global.popupWindowsByName[name] = winOptions;
     }
 
     return win;
