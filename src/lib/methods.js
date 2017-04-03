@@ -1,4 +1,6 @@
 
+import { WeakMap } from 'cross-domain-safe-weakmap/src';
+
 import { CONSTANTS } from '../conf';
 import { util } from './util';
 import { matchDomain } from './domain';
@@ -7,19 +9,21 @@ import { log } from './log';
 import { promise } from './promise';
 import { global } from '../global';
 
-global.methods = global.methods || {};
+global.methods = global.methods || new WeakMap();
 
 export let listenForMethods = util.once(() => {
     on(CONSTANTS.POST_MESSAGE_NAMES.METHOD, { window: CONSTANTS.WILDCARD, origin: CONSTANTS.WILDCARD }, ({ source, origin, data }) => {
 
-        let meth = global.methods[data.id];
+        let methods = global.methods.get(source);
+
+        if (!methods) {
+            throw new Error(`Could not find any methods this window has privileges to call`);
+        }
+
+        let meth = methods[data.id];
 
         if (!meth) {
             throw new Error(`Could not find method with id: ${data.id}`);
-        }
-
-        if (meth.destination !== source) {
-            throw new Error(`Method window does not match`);
         }
 
         if (!matchDomain(meth.domain, origin)) {
@@ -50,7 +54,14 @@ export function serializeMethod(destination, domain, method, name) {
 
     let id = util.uniqueID();
 
-    global.clean.setItem(global.methods, id, { destination, domain, method });
+    let methods = global.methods.get(destination);
+
+    if (!methods) {
+        methods = {};
+        global.methods.set(destination, methods);
+    }
+
+    methods[id] = { domain, method };
 
     return {
         __type__: CONSTANTS.SERIALIZATION_TYPES.METHOD,
