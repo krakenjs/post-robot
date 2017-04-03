@@ -1666,12 +1666,12 @@
             return "object" === ("undefined" == typeof item ? "undefined" : _typeof(item)) && null !== item && item.__type__ === type;
         }
         function serializeMethod(destination, domain, method, name) {
-            var id = _util.util.uniqueID();
-            return _global.global.clean.setItem(_global.global.methods, id, {
-                destination: destination,
+            var id = _util.util.uniqueID(), methods = _global.global.methods.get(destination);
+            return methods || (methods = {}, _global.global.methods.set(destination, methods)), 
+            methods[id] = {
                 domain: domain,
                 method: method
-            }), {
+            }, {
                 __type__: _conf.CONSTANTS.SERIALIZATION_TYPES.METHOD,
                 __id__: id,
                 __name__: name
@@ -1730,16 +1730,17 @@
         exports.serializeMethod = serializeMethod, exports.serializeMethods = serializeMethods, 
         exports.deserializeMethod = deserializeMethod, exports.deserializeError = deserializeError, 
         exports.deserializeMethods = deserializeMethods;
-        var _conf = __webpack_require__(0), _util = __webpack_require__(2), _domain = __webpack_require__(14), _interface = __webpack_require__(7), _log = __webpack_require__(9), _promise = __webpack_require__(15), _global = __webpack_require__(3);
-        _global.global.methods = _global.global.methods || {};
+        var _src = __webpack_require__(4), _conf = __webpack_require__(0), _util = __webpack_require__(2), _domain = __webpack_require__(14), _interface = __webpack_require__(7), _log = __webpack_require__(9), _promise = __webpack_require__(15), _global = __webpack_require__(3);
+        _global.global.methods = _global.global.methods || new _src.WeakMap();
         exports.listenForMethods = _util.util.once(function() {
             (0, _interface.on)(_conf.CONSTANTS.POST_MESSAGE_NAMES.METHOD, {
                 window: _conf.CONSTANTS.WILDCARD,
                 origin: _conf.CONSTANTS.WILDCARD
             }, function(_ref) {
-                var source = _ref.source, origin = _ref.origin, data = _ref.data, meth = _global.global.methods[data.id];
+                var source = _ref.source, origin = _ref.origin, data = _ref.data, methods = _global.global.methods.get(source);
+                if (!methods) throw new Error("Could not find any methods this window has privileges to call");
+                var meth = methods[data.id];
                 if (!meth) throw new Error("Could not find method with id: " + data.id);
-                if (meth.destination !== source) throw new Error("Method window does not match");
                 if (!(0, _domain.matchDomain)(meth.domain, origin)) throw new Error("Method domain " + meth.domain + " does not match origin " + origin);
                 return _log.log.debug("Call local method", data.name, data.args), _promise.promise.run(function() {
                     return meth.method.apply({

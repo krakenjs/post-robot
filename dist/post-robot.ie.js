@@ -69,7 +69,7 @@
                 }
             });
         });
-        var _util = __webpack_require__(4);
+        var _util = __webpack_require__(5);
         Object.keys(_util).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -149,6 +149,27 @@
         var _conf = __webpack_require__(0), _cleanup = __webpack_require__(16), global = exports.global = window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT] = window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT] || {};
         global.clean = global.clean || (0, _cleanup.cleanup)(global), global.registerSelf = function() {};
     }, function(module, exports, __webpack_require__) {
+        function _interopRequireWildcard(obj) {
+            if (obj && obj.__esModule) return obj;
+            var newObj = {};
+            if (null != obj) for (var key in obj) Object.prototype.hasOwnProperty.call(obj, key) && (newObj[key] = obj[key]);
+            return newObj.default = obj, newObj;
+        }
+        Object.defineProperty(exports, "__esModule", {
+            value: !0
+        });
+        var _interface = __webpack_require__(20);
+        Object.keys(_interface).forEach(function(key) {
+            "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
+                enumerable: !0,
+                get: function() {
+                    return _interface[key];
+                }
+            });
+        });
+        var INTERFACE = _interopRequireWildcard(_interface);
+        exports.default = INTERFACE;
+    }, function(module, exports, __webpack_require__) {
         "use strict";
         Object.defineProperty(exports, "__esModule", {
             value: !0
@@ -202,7 +223,7 @@
             return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
         };
         exports.isRegex = isRegex, exports.weakMapMemoize = weakMapMemoize;
-        var _src = __webpack_require__(5), _conf = __webpack_require__(0), util = exports.util = {
+        var _src = __webpack_require__(3), _conf = __webpack_require__(0), util = exports.util = {
             once: function(method) {
                 if (!method) return method;
                 var called = !1;
@@ -335,27 +356,6 @@
             }
         };
     }, function(module, exports, __webpack_require__) {
-        function _interopRequireWildcard(obj) {
-            if (obj && obj.__esModule) return obj;
-            var newObj = {};
-            if (null != obj) for (var key in obj) Object.prototype.hasOwnProperty.call(obj, key) && (newObj[key] = obj[key]);
-            return newObj.default = obj, newObj;
-        }
-        Object.defineProperty(exports, "__esModule", {
-            value: !0
-        });
-        var _interface = __webpack_require__(20);
-        Object.keys(_interface).forEach(function(key) {
-            "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
-                enumerable: !0,
-                get: function() {
-                    return _interface[key];
-                }
-            });
-        });
-        var INTERFACE = _interopRequireWildcard(_interface);
-        exports.default = INTERFACE;
-    }, function(module, exports, __webpack_require__) {
         "use strict";
         function init() {
             _global.global.initialized || ((0, _drivers.listenForMessages)(), __webpack_require__(10).openTunnelToOpener(), 
@@ -385,7 +385,7 @@
                 return _lib.Promise;
             }
         });
-        var _drivers = __webpack_require__(3), _global = __webpack_require__(2);
+        var _drivers = __webpack_require__(4), _global = __webpack_require__(2);
         init();
     }, function(module, exports, __webpack_require__) {
         "use strict";
@@ -922,7 +922,7 @@
         exports.isPopup = isPopup, exports.isIframe = isIframe, exports.isFullpage = isFullpage, 
         exports.getWindowType = getWindowType, exports.isSameTopWindow = isSameTopWindow, 
         exports.jsonStringify = jsonStringify, exports.jsonParse = jsonParse;
-        var _src = __webpack_require__(5), _util = __webpack_require__(4), _global = __webpack_require__(2), _conf = __webpack_require__(0);
+        var _src = __webpack_require__(3), _util = __webpack_require__(5), _global = __webpack_require__(2), _conf = __webpack_require__(0);
         _global.global.domainMatches = _global.global.domainMatches || new _src.WeakMap();
         var domainMatchTimeout = void 0;
     }, function(module, exports, __webpack_require__) {
@@ -989,7 +989,7 @@
         exports.registerRemoteWindow = registerRemoteWindow, exports.findRemoteWindow = findRemoteWindow, 
         exports.registerRemoteSendMessage = registerRemoteSendMessage, exports.rejectRemoteSendMessage = rejectRemoteSendMessage, 
         exports.sendBridgeMessage = sendBridgeMessage;
-        var _src = __webpack_require__(5), _conf = __webpack_require__(0), _lib = __webpack_require__(1), _global = __webpack_require__(2), _drivers = __webpack_require__(3);
+        var _src = __webpack_require__(3), _conf = __webpack_require__(0), _lib = __webpack_require__(1), _global = __webpack_require__(2), _drivers = __webpack_require__(4);
         exports.documentBodyReady = new _lib.promise.Promise(function(resolve) {
             if (window.document && window.document.body) return resolve(window.document.body);
             var interval = setInterval(function() {
@@ -1050,7 +1050,7 @@
             return typeof obj;
         } : function(obj) {
             return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-        }, _util = __webpack_require__(4), _windows = __webpack_require__(8), _conf = __webpack_require__(0), LOG_LEVELS = [ "debug", "info", "warn", "error" ];
+        }, _util = __webpack_require__(5), _windows = __webpack_require__(8), _conf = __webpack_require__(0), LOG_LEVELS = [ "debug", "info", "warn", "error" ];
         Function.prototype.bind && window.console && "object" === _typeof(console.log) && [ "log", "info", "warn", "error" ].forEach(function(method) {
             console[method] = this.bind(console[method], console);
         }, Function.prototype.call);
@@ -1280,7 +1280,7 @@
         }), exports.resetListeners = resetListeners, exports.addResponseListener = addResponseListener, 
         exports.getResponseListener = getResponseListener, exports.deleteResponseListener = deleteResponseListener, 
         exports.getRequestListener = getRequestListener, exports.addRequestListener = addRequestListener;
-        var _src = __webpack_require__(5), _global = __webpack_require__(2), _lib = __webpack_require__(1), _conf = __webpack_require__(0);
+        var _src = __webpack_require__(3), _global = __webpack_require__(2), _lib = __webpack_require__(1), _conf = __webpack_require__(0);
         _global.global.responseListeners = _global.global.responseListeners || {}, _global.global.requestListeners = _global.global.requestListeners || {}, 
         _global.global.WINDOW_WILDCARD = _global.global.WINDOW_WILDCARD || new function() {}();
         var __DOMAIN_REGEX__ = "__domain_regex__";
@@ -1442,7 +1442,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.matchDomain = matchDomain;
-        var _util = __webpack_require__(4), _conf = __webpack_require__(0);
+        var _util = __webpack_require__(5), _conf = __webpack_require__(0);
     }, function(module, exports, __webpack_require__) {
         "use strict";
         Object.defineProperty(exports, "__esModule", {
@@ -1506,7 +1506,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.nextTick = nextTick;
-        var _util = __webpack_require__(4), _conf = __webpack_require__(0), tickMessageName = "__nextTick__postRobot__" + _util.util.uniqueID(), queue = [];
+        var _util = __webpack_require__(5), _conf = __webpack_require__(0), tickMessageName = "__nextTick__postRobot__" + _util.util.uniqueID(), queue = [];
         window.addEventListener("message", function(event) {
             if (event.data === tickMessageName) {
                 var method = queue.shift();
@@ -1668,7 +1668,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.openTunnelToOpener = openTunnelToOpener;
-        var _promise = __webpack_require__(7), _conf = __webpack_require__(0), _lib = __webpack_require__(1), _drivers = __webpack_require__(3), _common = __webpack_require__(9), awaitRemoteBridgeForWindow = (0, 
+        var _promise = __webpack_require__(7), _conf = __webpack_require__(0), _lib = __webpack_require__(1), _drivers = __webpack_require__(4), _common = __webpack_require__(9), awaitRemoteBridgeForWindow = (0, 
         _lib.weakMapMemoize)(function(win) {
             return _promise.SyncPromise.try(function() {
                 for (var _iterator = (0, _lib.getFrames)(win), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
@@ -1810,7 +1810,7 @@
             };
         }();
         exports.openBridge = openBridge, exports.destroyBridges = destroyBridges, exports.linkUrl = linkUrl;
-        var _src = __webpack_require__(5), _conf = __webpack_require__(0), _lib = __webpack_require__(1), _global = __webpack_require__(2), _interface = __webpack_require__(6), _drivers = __webpack_require__(3), _common = __webpack_require__(9);
+        var _src = __webpack_require__(3), _conf = __webpack_require__(0), _lib = __webpack_require__(1), _global = __webpack_require__(2), _interface = __webpack_require__(6), _drivers = __webpack_require__(4), _common = __webpack_require__(9);
         _global.global.bridges = _global.global.bridges || {}, _global.global.popupWindowsByWin = _global.global.popupWindowsByWin || new _src.WeakMap(), 
         _global.global.popupWindowsByName = _global.global.popupWindowsByName || {};
         var windowOpen = window.open;
@@ -2053,12 +2053,12 @@
             return "object" === ("undefined" == typeof item ? "undefined" : _typeof(item)) && null !== item && item.__type__ === type;
         }
         function serializeMethod(destination, domain, method, name) {
-            var id = _util.util.uniqueID();
-            return _global.global.clean.setItem(_global.global.methods, id, {
-                destination: destination,
+            var id = _util.util.uniqueID(), methods = _global.global.methods.get(destination);
+            return methods || (methods = {}, _global.global.methods.set(destination, methods)), 
+            methods[id] = {
                 domain: domain,
                 method: method
-            }), {
+            }, {
                 __type__: _conf.CONSTANTS.SERIALIZATION_TYPES.METHOD,
                 __id__: id,
                 __name__: name
@@ -2117,16 +2117,17 @@
         exports.serializeMethod = serializeMethod, exports.serializeMethods = serializeMethods, 
         exports.deserializeMethod = deserializeMethod, exports.deserializeError = deserializeError, 
         exports.deserializeMethods = deserializeMethods;
-        var _conf = __webpack_require__(0), _util = __webpack_require__(4), _domain = __webpack_require__(17), _interface = __webpack_require__(6), _log = __webpack_require__(11), _promise = __webpack_require__(18), _global = __webpack_require__(2);
-        _global.global.methods = _global.global.methods || {};
+        var _src = __webpack_require__(3), _conf = __webpack_require__(0), _util = __webpack_require__(5), _domain = __webpack_require__(17), _interface = __webpack_require__(6), _log = __webpack_require__(11), _promise = __webpack_require__(18), _global = __webpack_require__(2);
+        _global.global.methods = _global.global.methods || new _src.WeakMap();
         exports.listenForMethods = _util.util.once(function() {
             (0, _interface.on)(_conf.CONSTANTS.POST_MESSAGE_NAMES.METHOD, {
                 window: _conf.CONSTANTS.WILDCARD,
                 origin: _conf.CONSTANTS.WILDCARD
             }, function(_ref) {
-                var source = _ref.source, origin = _ref.origin, data = _ref.data, meth = _global.global.methods[data.id];
+                var source = _ref.source, origin = _ref.origin, data = _ref.data, methods = _global.global.methods.get(source);
+                if (!methods) throw new Error("Could not find any methods this window has privileges to call");
+                var meth = methods[data.id];
                 if (!meth) throw new Error("Could not find method with id: " + data.id);
-                if (meth.destination !== source) throw new Error("Method window does not match");
                 if (!(0, _domain.matchDomain)(meth.domain, origin)) throw new Error("Method domain " + meth.domain + " does not match origin " + origin);
                 return _log.log.debug("Call local method", data.name, data.args), _promise.promise.run(function() {
                     return meth.method.apply({
@@ -2171,7 +2172,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.initOnReady = initOnReady, exports.onWindowReady = onWindowReady;
-        var _src = __webpack_require__(5), _conf = __webpack_require__(0), _windows = __webpack_require__(8), _interface = __webpack_require__(6), _log = __webpack_require__(11), _promise = __webpack_require__(7), _global = __webpack_require__(2);
+        var _src = __webpack_require__(3), _conf = __webpack_require__(0), _windows = __webpack_require__(8), _interface = __webpack_require__(6), _log = __webpack_require__(11), _promise = __webpack_require__(7), _global = __webpack_require__(2);
         _global.global.readyPromises = _global.global.readyPromises || new _src.WeakMap();
     }, function(module, exports, __webpack_require__) {
         "use strict";
@@ -2240,7 +2241,7 @@
             value: !0
         }), exports.send = void 0, exports.request = request, exports.sendToParent = sendToParent, 
         exports.client = client;
-        var _conf = __webpack_require__(0), _drivers = __webpack_require__(3), _lib = __webpack_require__(1);
+        var _conf = __webpack_require__(0), _drivers = __webpack_require__(4), _lib = __webpack_require__(1);
         exports.send = _send;
     }, function(module, exports, __webpack_require__) {
         "use strict";
@@ -2269,7 +2270,7 @@
                 return _conf.CONSTANTS;
             }
         }), exports.disable = disable;
-        var _drivers = __webpack_require__(3);
+        var _drivers = __webpack_require__(4);
     }, function(module, exports, __webpack_require__) {
         "use strict";
         function _interopRequireWildcard(obj) {
@@ -2308,7 +2309,7 @@
                 }
             });
         });
-        var _util = __webpack_require__(4);
+        var _util = __webpack_require__(5);
         Object.defineProperty(exports, "util", {
             enumerable: !0,
             get: function() {
@@ -2375,7 +2376,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.on = void 0, exports.listen = listen, exports.once = once, exports.listener = listener;
-        var _lib = __webpack_require__(1), _drivers = __webpack_require__(3), _conf = __webpack_require__(0);
+        var _lib = __webpack_require__(1), _drivers = __webpack_require__(4), _conf = __webpack_require__(0);
         exports.on = _on;
     }, function(module, exports, __webpack_require__) {
         "use strict";
