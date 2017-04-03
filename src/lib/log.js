@@ -86,7 +86,9 @@ export let log = {
     logLevel(level, args) {
         setTimeout(() => {
             try {
-                if (LOG_LEVELS.indexOf(level) < LOG_LEVELS.indexOf(CONFIG.LOG_LEVEL)) {
+                let logLevel = window.LOG_LEVEL || CONFIG.LOG_LEVEL;
+
+                if (LOG_LEVELS.indexOf(level) < LOG_LEVELS.indexOf(logLevel)) {
                     return;
                 }
 
