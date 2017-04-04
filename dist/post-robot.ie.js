@@ -1078,7 +1078,8 @@
             logLevel: function(level, args) {
                 setTimeout(function() {
                     try {
-                        if (LOG_LEVELS.indexOf(level) < LOG_LEVELS.indexOf(_conf.CONFIG.LOG_LEVEL)) return;
+                        var logLevel = window.LOG_LEVEL || _conf.CONFIG.LOG_LEVEL;
+                        if (LOG_LEVELS.indexOf(level) < LOG_LEVELS.indexOf(logLevel)) return;
                         if (args = Array.prototype.slice.call(args), args.unshift("" + window.location.host + window.location.pathname), 
                         args.unshift("::"), args.unshift("" + (0, _windows.getWindowType)().toLowerCase()), 
                         args.unshift("[post-robot]"), _conf.CONFIG.LOG_TO_PAGE && log.writeToPage(level, args), 
@@ -1517,21 +1518,44 @@
         }();
     }, function(module, exports, __webpack_require__) {
         "use strict";
+        function cleanTunnelWindows() {
+            for (var tunnelWindows = _global.global.tunnelWindows, _iterator = Object.keys(tunnelWindows), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
+                var _ref;
+                if (_isArray) {
+                    if (_i >= _iterator.length) break;
+                    _ref = _iterator[_i++];
+                } else {
+                    if (_i = _iterator.next(), _i.done) break;
+                    _ref = _i.value;
+                }
+                var key = _ref, tunnelWindow = tunnelWindows[key];
+                (0, _lib.isWindowClosed)(tunnelWindow.source) && (delete tunnelWindow.source, delete tunnelWindows[key]);
+            }
+        }
+        function addTunnelWindow(data) {
+            return cleanTunnelWindows(), _global.global.tunnelWindowId += 1, _global.global.tunnelWindows[_global.global.tunnelWindowId] = data, 
+            _global.global.tunnelWindowId;
+        }
+        function getTunnelWindow(id) {
+            return _global.global.tunnelWindows[id];
+        }
         var _conf = __webpack_require__(0), _lib = __webpack_require__(1), _global = __webpack_require__(2), _interface = __webpack_require__(6);
-        _global.global.openTunnelToParent = function(_ref) {
-            var name = _ref.name, source = _ref.source, canary = _ref.canary, _sendMessage = _ref.sendMessage, remoteWindow = (0, 
-            _lib.getParent)(window);
-            if (!remoteWindow) throw new Error("No parent window found to open tunnel to");
-            return (0, _interface.send)(remoteWindow, _conf.CONSTANTS.POST_MESSAGE_NAMES.OPEN_TUNNEL, {
-                name: name,
+        _global.global.tunnelWindows = _global.global.tunnelWindows || {}, _global.global.tunnelWindowId = 0, 
+        _global.global.openTunnelToParent = function(data) {
+            var parentWindow = (0, _lib.getParent)(window);
+            if (!parentWindow) throw new Error("No parent window found to open tunnel to");
+            var id = addTunnelWindow(data);
+            return (0, _interface.send)(parentWindow, _conf.CONSTANTS.POST_MESSAGE_NAMES.OPEN_TUNNEL, {
+                name: data.name,
                 sendMessage: function() {
-                    if (!(0, _lib.isWindowClosed)(source)) {
+                    var tunnelWindow = getTunnelWindow(id);
+                    if (tunnelWindow && tunnelWindow.source && !(0, _lib.isWindowClosed)(tunnelWindow.source)) {
                         try {
-                            canary();
+                            tunnelWindow.canary();
                         } catch (err) {
                             return;
                         }
-                        _sendMessage.apply(this, arguments);
+                        tunnelWindow.sendMessage.apply(this, arguments);
                     }
                 }
             }, {
@@ -1629,18 +1653,20 @@
                 if (origin !== domain) throw new Error("Domain " + domain + " does not match origin " + origin);
                 if (!data.name) throw new Error("Register window expected to be passed window name");
                 if (!data.sendMessage) throw new Error("Register window expected to be passed sendMessage method");
-                var winDetails = _global.global.popupWindowsByName[data.name];
-                if (!winDetails) throw new Error("Window with name " + data.name + " does not exist, or was not opened by this window");
-                if (!winDetails.domain) throw new Error("We do not have a registered domain for window " + data.name);
-                if (winDetails.domain !== origin) throw new Error("Message origin " + origin + " does not matched registered window origin " + winDetails.domain);
-                return (0, _common.registerRemoteSendMessage)(winDetails.win, domain, data.sendMessage), 
+                if (!_global.global.popupWindowsByName[data.name]) throw new Error("Window with name " + data.name + " does not exist, or was not opened by this window");
+                if (!_global.global.popupWindowsByName[data.name].domain) throw new Error("We do not have a registered domain for window " + data.name);
+                if (_global.global.popupWindowsByName[data.name].domain !== origin) throw new Error("Message origin " + origin + " does not matched registered window origin " + _global.global.popupWindowsByName[data.name].domain);
+                return (0, _common.registerRemoteSendMessage)(_global.global.popupWindowsByName[data.name].win, domain, data.sendMessage), 
                 {
                     sendMessage: function(message) {
-                        window && !window.closed && (0, _drivers.receiveMessage)({
-                            data: message,
-                            origin: winDetails.domain,
-                            source: winDetails.win
-                        });
+                        if (window && !window.closed) {
+                            var winDetails = _global.global.popupWindowsByName[data.name];
+                            winDetails && (0, _drivers.receiveMessage)({
+                                data: message,
+                                origin: winDetails.domain,
+                                source: winDetails.win
+                            });
+                        }
                     }
                 };
             });

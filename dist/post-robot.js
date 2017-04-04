@@ -793,7 +793,8 @@
             logLevel: function(level, args) {
                 setTimeout(function() {
                     try {
-                        if (LOG_LEVELS.indexOf(level) < LOG_LEVELS.indexOf(_conf.CONFIG.LOG_LEVEL)) return;
+                        var logLevel = window.LOG_LEVEL || _conf.CONFIG.LOG_LEVEL;
+                        if (LOG_LEVELS.indexOf(level) < LOG_LEVELS.indexOf(logLevel)) return;
                         if (args = Array.prototype.slice.call(args), args.unshift("" + window.location.host + window.location.pathname), 
                         args.unshift("::"), args.unshift("" + (0, _windows.getWindowType)().toLowerCase()), 
                         args.unshift("[post-robot]"), _conf.CONFIG.LOG_TO_PAGE && log.writeToPage(level, args), 
