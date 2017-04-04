@@ -29,26 +29,30 @@ function listenForRegister(source, domain) {
             throw new Error(`Register window expected to be passed sendMessage method`);
         }
 
-        let winDetails = global.popupWindowsByName[data.name];
-
-        if (!winDetails) {
+        if (!global.popupWindowsByName[data.name]) {
             throw new Error(`Window with name ${data.name} does not exist, or was not opened by this window`);
         }
 
-        if (!winDetails.domain) {
+        if (!global.popupWindowsByName[data.name].domain) {
             throw new Error(`We do not have a registered domain for window ${data.name}`);
         }
 
-        if (winDetails.domain !== origin) {
-            throw new Error(`Message origin ${origin} does not matched registered window origin ${winDetails.domain}`);
+        if (global.popupWindowsByName[data.name].domain !== origin) {
+            throw new Error(`Message origin ${origin} does not matched registered window origin ${global.popupWindowsByName[data.name].domain}`);
         }
 
-        registerRemoteSendMessage(winDetails.win, domain, data.sendMessage);
+        registerRemoteSendMessage(global.popupWindowsByName[data.name].win, domain, data.sendMessage);
 
         return {
             sendMessage(message) {
 
                 if (!window || window.closed) {
+                    return;
+                }
+
+                let winDetails = global.popupWindowsByName[data.name];
+
+                if (!winDetails) {
                     return;
                 }
 
