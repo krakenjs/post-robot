@@ -15,7 +15,8 @@ export let CONSTANTS = {
     POST_MESSAGE_NAMES: {
         METHOD: 'postrobot_method',
         READY: 'postrobot_ready',
-        OPEN_TUNNEL: 'postrobot_open_tunnel'
+        OPEN_TUNNEL: 'postrobot_open_tunnel',
+        OPEN_TUNNEL_TO_PARENT: 'postrobot_open_tunnel_to_parent'
     },
 
     WINDOW_TYPES: {

@@ -56,10 +56,6 @@ export function getBridgeName(domain) {
     return id;
 }
 
-export function isBridge() {
-    return window.name && window.name === getBridgeName(util.getDomain());
-}
-
 export let documentBodyReady = new promise.Promise(resolve => {
 
     if (window.document && window.document.body) {

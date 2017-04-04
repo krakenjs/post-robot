@@ -8,6 +8,7 @@ export let needsBridgeForWin;
 export let needsBridgeForDomain;
 export let openTunnelToOpener;
 export let destroyBridges;
+export let setupBridgeTunnelOpener;
 
 if (__IE_POPUP_SUPPORT__) {
 
@@ -22,4 +23,5 @@ if (__IE_POPUP_SUPPORT__) {
     needsBridgeForDomain = bridge.needsBridgeForDomain;
     openTunnelToOpener = bridge.openTunnelToOpener;
     destroyBridges = bridge.destroyBridges;
+    setupBridgeTunnelOpener = bridge.setupBridgeTunnelOpener;
 }

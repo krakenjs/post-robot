@@ -1,33 +1,47 @@
 
+import { getBridgeName } from './common';
 import { CONSTANTS } from '../conf';
-import { getParent, isWindowClosed } from '../lib';
-import { global } from '../global';
-import { send } from '../interface';
+import { getParent, isWindowClosed, isSameDomain, util } from '../lib';
+import { send, on } from '../interface';
 
-global.openTunnelToParent = function openTunnelToParent({ name, source, canary, sendMessage }) {
+export function isBridge() {
+    return window.name && window.name === getBridgeName(util.getDomain());
+}
 
-    let remoteWindow = getParent(window);
+export function setupBridgeTunnelOpener() {
+    if (isBridge()) {
 
-    if (!remoteWindow) {
-        throw new Error(`No parent window found to open tunnel to`);
+        on(CONSTANTS.POST_MESSAGE_NAMES.OPEN_TUNNEL_TO_PARENT, { domain: util.getDomain() }, ({ source, origin, data }) => {
+
+            if (!isSameDomain(source)) {
+                throw new Error(`Can not open tunnel from different domain`);
+            }
+
+            let remoteWindow = getParent(window);
+
+            if (!remoteWindow) {
+                throw new Error(`No parent window found to open tunnel to`);
+            }
+
+            return send(remoteWindow, CONSTANTS.POST_MESSAGE_NAMES.OPEN_TUNNEL, {
+
+                name: data.name,
+
+                sendMessage(message) {
+                    if (isWindowClosed(source)) {
+                        return;
+                    }
+
+                    return data.sendMessage(this.origin, message);
+                }
+
+            }, { domain: CONSTANTS.WILDCARD }).then(event => {
+
+                return {
+                    origin: event.origin,
+                    sendMessage: event.data.sendMessage
+                };
+            });
+        });
     }
-
-    return send(remoteWindow, CONSTANTS.POST_MESSAGE_NAMES.OPEN_TUNNEL, {
-        name,
-        sendMessage() {
-
-            if (isWindowClosed(source)) {
-                return;
-            }
-
-            try {
-                canary();
-            } catch (err) {
-                return;
-            }
-
-            sendMessage.apply(this, arguments);
-        }
-    }, { domain: CONSTANTS.WILDCARD });
-};
-
+}

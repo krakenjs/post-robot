@@ -1,8 +1,9 @@
 
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { CONSTANTS } from '../conf';
-import { isSameDomain, getOpener, getFrames, util, getFrameByName, weakMapMemoize } from '../lib';
+import { isSameDomain, getOpener, getParent, getFrames, util, getFrameByName, weakMapMemoize } from '../lib';
 import { receiveMessage } from '../drivers';
+import { send } from '../interface';
 
 import { needsBridge, registerRemoteWindow, rejectRemoteSendMessage, registerRemoteSendMessage, getBridgeName } from './common';
 
@@ -80,17 +81,17 @@ export function openTunnelToOpener() {
                 return rejectRemoteSendMessage(opener, new Error(`Can not register with opener: window does not have a name`));
             }
 
-            return bridge[CONSTANTS.WINDOW_PROPS.POSTROBOT].openTunnelToParent({
+            let bridgeParent = getParent(bridge);
+
+            if (!bridgeParent) {
+                return rejectRemoteSendMessage(opener, new Error(`Can not register with opener: bridge does not have a parent`));
+            }
+
+            return send(bridge, CONSTANTS.POST_MESSAGE_NAMES.OPEN_TUNNEL_TO_PARENT, {
 
                 name: window.name,
 
-                source: window,
-
-                canary() {
-                    // pass
-                },
-
-                sendMessage(message) {
+                sendMessage(origin, message) {
 
                     if (!window || window.closed) {
                         return;
@@ -98,18 +99,16 @@ export function openTunnelToOpener() {
 
                     receiveMessage({
                         data:   message,
-                        origin: this.origin,
-                        source: this.source
+                        origin,
+                        source: bridgeParent
                     });
                 }
 
-            }).then(({ source, origin, data }) => {
+            }, { domain: util.getDomain() }).then(({ data }) => {
 
-                if (source !== opener) {
-                    throw new Error(`Source does not match opener`);
-                }
-
-                registerRemoteSendMessage(source, origin, data.sendMessage);
+                registerRemoteSendMessage(bridgeParent, data.origin, function(message) {
+                    return data.sendMessage.apply(this, arguments);
+                });
 
             }).catch(err => {
 

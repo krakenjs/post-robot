@@ -9,6 +9,7 @@ export function init() {
         listenForMessages();
 
         if (__IE_POPUP_SUPPORT__) {
+            require('./bridge').setupBridgeTunnelOpener();
             require('./bridge').openTunnelToOpener();
         }
 
