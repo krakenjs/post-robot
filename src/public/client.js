@@ -6,7 +6,7 @@ import { util, promise, getAncestor, isAncestor, onWindowReady, isWindowClosed }
 
 export function request(options) {
 
-    return promise.nodeify(new promise.Promise((resolve, reject) => {
+    let prom = promise.run(() => {
 
         if (!options.name) {
             throw new Error('Expected options.name');
@@ -62,14 +62,6 @@ export function request(options) {
 
         let hasResult = false;
 
-        options.respond = (err, result) => {
-            if (!err) {
-                hasResult = true;
-            }
-
-            return err ? reject(err) : resolve(result);
-        };
-
         return promise.run(() => {
 
             if (isAncestor(window, options.window)) {
@@ -78,50 +70,63 @@ export function request(options) {
 
         }).then(() => {
 
-            sendMessage(options.window, {
-                hash,
-                type: CONSTANTS.POST_MESSAGE_TYPE.REQUEST,
-                name: options.name,
-                data: options.data,
-                fireAndForget: options.fireAndForget
-            }, options.domain).catch(reject);
+            return new promise.Promise((resolve, reject) => {
 
-            if (options.fireAndForget) {
-                return resolve();
-            }
+                options.respond = (err, result) => {
+                    if (!err) {
+                        hasResult = true;
+                    }
 
-            let ackTimeout = util.intervalTimeout(CONFIG.ACK_TIMEOUT, 100, remaining => {
+                    return err ? reject(err) : resolve(result);
+                };
 
-                if (options.ack || isWindowClosed(options.window)) {
-                    return ackTimeout.cancel();
+                sendMessage(options.window, {
+                    hash,
+                    type: CONSTANTS.POST_MESSAGE_TYPE.REQUEST,
+                    name: options.name,
+                    data: options.data,
+                    fireAndForget: options.fireAndForget
+                }, options.domain).catch(reject);
+
+                if (options.fireAndForget) {
+                    return resolve();
                 }
 
-                if (!remaining) {
-                    return reject(new Error(`No ack for postMessage ${options.name} in ${CONFIG.ACK_TIMEOUT}ms`));
-                }
-            });
-
-            if (options.timeout) {
-                let timeout = util.intervalTimeout(options.timeout, 100, remaining => {
-
-                    if (hasResult || isWindowClosed(options.window)) {
-                        return timeout.cancel();
+                let ackTimeout = util.intervalTimeout(CONFIG.ACK_TIMEOUT, 100, remaining => {
+                    if (options.ack || isWindowClosed(options.window)) {
+                        return ackTimeout.cancel();
                     }
 
                     if (!remaining) {
-                        return reject(new Error(`Post message response timed out after ${options.timeout} ms`));
+                        return reject(new Error(`No ack for postMessage ${options.name} in ${CONFIG.ACK_TIMEOUT}ms`));
                     }
+                });
 
-                }, options.timeout);
-            }
+                if (options.timeout) {
+                    let timeout = util.intervalTimeout(options.timeout, 100, remaining => {
+
+                        if (hasResult || isWindowClosed(options.window)) {
+                            return timeout.cancel();
+                        }
+
+                        if (!remaining) {
+
+                            return reject(new Error(`Post message response timed out after ${options.timeout} ms`));
+                        }
+
+                    }, options.timeout);
+                }
+            });
 
         }).catch(err => {
 
             deleteResponseListener(hash);
-            return reject(err);
-        });
 
-    }), options.callback);
+            throw err;
+        });
+    });
+
+    return promise.nodeify(prom, options.callback);
 }
 
 export function send(window, name, data, options, callback) {
