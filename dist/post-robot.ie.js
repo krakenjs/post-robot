@@ -2171,7 +2171,7 @@
     }, function(module, exports, __webpack_require__) {
         "use strict";
         function request(options) {
-            return _lib.promise.nodeify(new _lib.promise.Promise(function(resolve, reject) {
+            var prom = _lib.promise.run(function() {
                 if (!options.name) throw new Error("Expected options.name");
                 if (_conf.CONFIG.MOCK_MODE) options.window = window; else if ("string" == typeof options.window) {
                     var el = document.getElementById(options.window);
@@ -2189,28 +2189,31 @@
                 var hash = options.name + "_" + _lib.util.uniqueID();
                 if ((0, _drivers.addResponseListener)(hash, options), (0, _lib.isWindowClosed)(options.window)) throw new Error("Target window is closed");
                 var hasResult = !1;
-                return options.respond = function(err, result) {
-                    return err || (hasResult = !0), err ? reject(err) : resolve(result);
-                }, _lib.promise.run(function() {
+                return _lib.promise.run(function() {
                     if ((0, _lib.isAncestor)(window, options.window)) return (0, _lib.onWindowReady)(options.window);
                 }).then(function() {
-                    if ((0, _drivers.sendMessage)(options.window, {
-                        hash: hash,
-                        type: _conf.CONSTANTS.POST_MESSAGE_TYPE.REQUEST,
-                        name: options.name,
-                        data: options.data,
-                        fireAndForget: options.fireAndForget
-                    }, options.domain).catch(reject), options.fireAndForget) return resolve();
-                    var ackTimeout = _lib.util.intervalTimeout(_conf.CONFIG.ACK_TIMEOUT, 100, function(remaining) {
-                        return options.ack || (0, _lib.isWindowClosed)(options.window) ? ackTimeout.cancel() : remaining ? void 0 : reject(new Error("No ack for postMessage " + options.name + " in " + _conf.CONFIG.ACK_TIMEOUT + "ms"));
+                    return new _lib.promise.Promise(function(resolve, reject) {
+                        if (options.respond = function(err, result) {
+                            return err || (hasResult = !0), err ? reject(err) : resolve(result);
+                        }, (0, _drivers.sendMessage)(options.window, {
+                            hash: hash,
+                            type: _conf.CONSTANTS.POST_MESSAGE_TYPE.REQUEST,
+                            name: options.name,
+                            data: options.data,
+                            fireAndForget: options.fireAndForget
+                        }, options.domain).catch(reject), options.fireAndForget) return resolve();
+                        var ackTimeout = _lib.util.intervalTimeout(_conf.CONFIG.ACK_TIMEOUT, 100, function(remaining) {
+                            return options.ack || (0, _lib.isWindowClosed)(options.window) ? ackTimeout.cancel() : remaining ? void 0 : reject(new Error("No ack for postMessage " + options.name + " in " + _conf.CONFIG.ACK_TIMEOUT + "ms"));
+                        });
+                        if (options.timeout) var timeout = _lib.util.intervalTimeout(options.timeout, 100, function(remaining) {
+                            return hasResult || (0, _lib.isWindowClosed)(options.window) ? timeout.cancel() : remaining ? void 0 : reject(new Error("Post message response timed out after " + options.timeout + " ms"));
+                        }, options.timeout);
                     });
-                    if (options.timeout) var timeout = _lib.util.intervalTimeout(options.timeout, 100, function(remaining) {
-                        return hasResult || (0, _lib.isWindowClosed)(options.window) ? timeout.cancel() : remaining ? void 0 : reject(new Error("Post message response timed out after " + options.timeout + " ms"));
-                    }, options.timeout);
                 }).catch(function(err) {
-                    return (0, _drivers.deleteResponseListener)(hash), reject(err);
+                    throw (0, _drivers.deleteResponseListener)(hash), err;
                 });
-            }), options.callback);
+            });
+            return _lib.promise.nodeify(prom, options.callback);
         }
         function _send(window, name, data, options, callback) {
             return callback || (options || "function" != typeof data ? "function" == typeof options && (callback = options, 
