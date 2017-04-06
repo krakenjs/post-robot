@@ -2,6 +2,9 @@
 
 set -e;
 
+rm -rf node_modules/cross-domain-safe-weakmap node_modules/sync-browser-mocks
+npm install cross-domain-safe-weakmap sync-browser-mocks
+
 gulp build;
 
 git add dist;
