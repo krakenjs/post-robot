@@ -1,6 +1,6 @@
 
 import { CONFIG, CONSTANTS } from '../conf';
-import { sendMessage, addResponseListener } from '../drivers';
+import { sendMessage, addResponseListener, deleteResponseListener } from '../drivers';
 import { util, promise, getAncestor, isAncestor, onWindowReady, isWindowClosed } from '../lib';
 
 
@@ -115,7 +115,11 @@ export function request(options) {
                 }, options.timeout);
             }
 
-        }).catch(reject);
+        }).catch(err => {
+
+            deleteResponseListener(hash);
+            return reject(err);
+        });
 
     }), options.callback);
 }
