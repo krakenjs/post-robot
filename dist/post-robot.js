@@ -1788,7 +1788,9 @@
                     if (options.timeout) var timeout = _lib.util.intervalTimeout(options.timeout, 100, function(remaining) {
                         return hasResult || (0, _lib.isWindowClosed)(options.window) ? timeout.cancel() : remaining ? void 0 : reject(new Error("Post message response timed out after " + options.timeout + " ms"));
                     }, options.timeout);
-                }).catch(reject);
+                }).catch(function(err) {
+                    return (0, _drivers.deleteResponseListener)(hash), reject(err);
+                });
             }), options.callback);
         }
         function _send(window, name, data, options, callback) {
