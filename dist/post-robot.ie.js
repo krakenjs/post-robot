@@ -31,13 +31,13 @@
             return __webpack_require__.d(getter, "a", getter), getter;
         }, __webpack_require__.o = function(object, property) {
             return Object.prototype.hasOwnProperty.call(object, property);
-        }, __webpack_require__.p = "", __webpack_require__(__webpack_require__.s = 37);
+        }, __webpack_require__.p = "", __webpack_require__(__webpack_require__.s = 38);
     }([ function(module, exports, __webpack_require__) {
         "use strict";
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
-        var _config = __webpack_require__(27);
+        var _config = __webpack_require__(28);
         Object.keys(_config).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -96,7 +96,7 @@
                 }
             });
         });
-        var _methods = __webpack_require__(31);
+        var _methods = __webpack_require__(32);
         Object.keys(_methods).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -114,7 +114,7 @@
                 }
             });
         });
-        var _ready = __webpack_require__(32);
+        var _ready = __webpack_require__(33);
         Object.keys(_ready).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -140,6 +140,7 @@
         var _conf = __webpack_require__(0), global = exports.global = window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT] = window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT] || {};
         global.registerSelf = function() {};
     }, function(module, exports, __webpack_require__) {
+        "use strict";
         function _interopRequireWildcard(obj) {
             if (obj && obj.__esModule) return obj;
             var newObj = {};
@@ -165,7 +166,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
-        var _receive = __webpack_require__(28);
+        var _receive = __webpack_require__(29);
         Object.keys(_receive).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -355,7 +356,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.Promise = void 0, exports.init = init;
-        var _public = __webpack_require__(35);
+        var _public = __webpack_require__(36);
         Object.keys(_public).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -991,7 +992,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
-        var _bridge = __webpack_require__(22);
+        var _bridge = __webpack_require__(23);
         Object.keys(_bridge).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -1000,7 +1001,7 @@
                 }
             });
         });
-        var _child = __webpack_require__(23);
+        var _child = __webpack_require__(24);
         Object.keys(_child).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -1018,7 +1019,7 @@
                 }
             });
         });
-        var _parent = __webpack_require__(25);
+        var _parent = __webpack_require__(26);
         Object.keys(_parent).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -1107,7 +1108,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
-        var _ie = __webpack_require__(26);
+        var _ie = __webpack_require__(27);
         Object.keys(_ie).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -1335,7 +1336,7 @@
             return target;
         };
         exports.buildMessage = buildMessage, exports.sendMessage = sendMessage;
-        var _conf = __webpack_require__(0), _lib = __webpack_require__(1), _strategies = __webpack_require__(30);
+        var _conf = __webpack_require__(0), _lib = __webpack_require__(1), _strategies = __webpack_require__(31);
     }, function(module, exports, __webpack_require__) {
         "use strict";
         function matchDomain(domain, origin) {
@@ -1418,24 +1419,53 @@
             }
         });
     }, function(module, exports, __webpack_require__) {
+        "use strict";
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
-        var WeakMap = exports.WeakMap = void 0;
-        window.WeakMap ? exports.WeakMap = WeakMap = window.WeakMap : exports.WeakMap = WeakMap = __webpack_require__(21).WeakMap;
-    }, function(module, exports) {
-        function isWindow(obj) {
-            if (windows.indexOf(obj) !== -1) return !0;
+        var _weakmap = __webpack_require__(22);
+        Object.defineProperty(exports, "WeakMap", {
+            enumerable: !0,
+            get: function() {
+                return _weakmap.WeakMap;
+            }
+        });
+    }, function(module, exports, __webpack_require__) {
+        "use strict";
+        function hasNativeWeakMap() {
+            if (!window.WeakMap) return !1;
+            if (!window.Object.freeze) return !1;
             try {
-                if (obj && obj.self === obj) return windows.push(obj), !0;
+                var testWeakMap = new window.WeakMap(), testKey = {}, testValue = "__testvalue__";
+                return window.Object.freeze(testKey), testWeakMap.set(testKey, testValue), testWeakMap.get(testKey) === testValue;
+            } catch (err) {
+                return !1;
+            }
+        }
+        Object.defineProperty(exports, "__esModule", {
+            value: !0
+        }), exports.hasNativeWeakMap = hasNativeWeakMap;
+    }, function(module, exports, __webpack_require__) {
+        "use strict";
+        function isWindow(obj) {
+            try {
+                if (obj && obj.self === obj) return !0;
             } catch (err) {}
+            return !1;
+        }
+        function isClosedWindow(obj) {
+            try {
+                if (obj && obj !== window && obj.closed) return !0;
+            } catch (err) {
+                return !err || "Call was rejected by callee.\r\n" !== err.message;
+            }
             return !1;
         }
         Object.defineProperty(exports, "__esModule", {
             value: !0
-        }), exports.isWindow = isWindow;
-        var windows = [];
+        }), exports.isWindow = isWindow, exports.isClosedWindow = isClosedWindow;
     }, function(module, exports, __webpack_require__) {
+        "use strict";
         function _classCallCheck(instance, Constructor) {
             if (!(instance instanceof Constructor)) throw new TypeError("Cannot call a class as a function");
         }
@@ -1454,65 +1484,96 @@
                 return protoProps && defineProperties(Constructor.prototype, protoProps), staticProps && defineProperties(Constructor, staticProps), 
                 Constructor;
             };
-        }(), _util = __webpack_require__(20), defineProperty = Object.defineProperty, counter = Date.now() % 1e9;
+        }(), _util = __webpack_require__(21), _native = __webpack_require__(20), defineProperty = Object.defineProperty, counter = Date.now() % 1e9;
         exports.WeakMap = function() {
             function WeakMap() {
-                _classCallCheck(this, WeakMap), counter += 1, this.name = "__weakmap_" + (1e9 * Math.random() >>> 0) + "__" + counter, 
+                if (_classCallCheck(this, WeakMap), counter += 1, this.name = "__weakmap_" + (1e9 * Math.random() >>> 0) + "__" + counter, 
+                (0, _native.hasNativeWeakMap)()) try {
+                    this.weakmap = new window.WeakMap();
+                } catch (err) {}
                 this.keys = [], this.values = [];
             }
             return _createClass(WeakMap, [ {
+                key: "_cleanupClosedWindows",
+                value: function() {
+                    for (var weakmap = this.weakmap, keys = this.keys, i = 0; i < keys.length; i++) {
+                        var value = keys[i];
+                        if ((0, _util.isClosedWindow)(value)) {
+                            if (weakmap) try {
+                                weakmap.delete(value);
+                            } catch (err) {}
+                            keys.splice(i, 1), this.values.splice(i, 1), i -= 1;
+                        }
+                    }
+                }
+            }, {
                 key: "set",
                 value: function(key, value) {
-                    if ((0, _util.isWindow)(key)) return this.safeSet(key, value);
-                    var name = this.name, entry = key[name];
-                    entry && entry[0] === key ? entry[1] = value : defineProperty(key, name, {
-                        value: [ key, value ],
-                        writable: !0
-                    });
+                    var weakmap = this.weakmap;
+                    if (weakmap) try {
+                        weakmap.set(key, value);
+                    } catch (err) {
+                        delete this.weakmap;
+                    }
+                    if ((0, _util.isWindow)(key)) {
+                        this._cleanupClosedWindows();
+                        var keys = this.keys, values = this.values, index = keys.indexOf(key);
+                        index === -1 ? (keys.push(key), values.push(value)) : values[index] = value;
+                    } else {
+                        var name = this.name, entry = key[name];
+                        entry && entry[0] === key ? entry[1] = value : defineProperty(key, name, {
+                            value: [ key, value ],
+                            writable: !0
+                        });
+                    }
                 }
             }, {
                 key: "get",
                 value: function(key) {
-                    if ((0, _util.isWindow)(key)) return this.safeGet(key);
+                    var weakmap = this.weakmap;
+                    if (weakmap) try {
+                        if (weakmap.has(key)) return weakmap.get(key);
+                    } catch (err) {
+                        delete this.weakmap;
+                    }
+                    if ((0, _util.isWindow)(key)) {
+                        var keys = this.keys, index = keys.indexOf(key);
+                        if (index === -1) return;
+                        return this.values[index];
+                    }
                     var entry = key[this.name];
-                    return entry && entry[0] === key ? entry[1] : void 0;
+                    if (entry && entry[0] === key) return entry[1];
                 }
             }, {
                 key: "delete",
                 value: function(key) {
-                    if ((0, _util.isWindow)(key)) return this.safeDelete(key);
-                    var entry = key[this.name];
-                    entry && entry[0] === key && (entry[0] = entry[1] = void 0);
+                    var weakmap = this.weakmap;
+                    if (weakmap) try {
+                        weakmap.delete(key);
+                    } catch (err) {
+                        delete this.weakmap;
+                    }
+                    if ((0, _util.isWindow)(key)) {
+                        this._cleanupClosedWindows();
+                        var keys = this.keys, index = keys.indexOf(key);
+                        index !== -1 && (keys.splice(index, 1), this.values.splice(index, 1));
+                    } else {
+                        var entry = key[this.name];
+                        entry && entry[0] === key && (entry[0] = entry[1] = void 0);
+                    }
                 }
             }, {
                 key: "has",
                 value: function(key) {
-                    if ((0, _util.isWindow)(key)) return this.safeHas(key);
+                    var weakmap = this.weakmap;
+                    if (weakmap) try {
+                        return weakmap.has(key);
+                    } catch (err) {
+                        delete this.weakmap;
+                    }
+                    if ((0, _util.isWindow)(key)) return this._cleanupClosedWindows(), this.keys.indexOf(key) !== -1;
                     var entry = key[this.name];
                     return !(!entry || entry[0] !== key);
-                }
-            }, {
-                key: "safeSet",
-                value: function(key, value) {
-                    var keys = this.keys, values = this.values, index = keys.indexOf(key);
-                    return index === -1 ? (keys.push(key), void values.push(value)) : void (values[index] = value);
-                }
-            }, {
-                key: "safeGet",
-                value: function(key) {
-                    var keys = this.keys, index = keys.indexOf(key);
-                    if (index !== -1) return this.values[index];
-                }
-            }, {
-                key: "safeDelete",
-                value: function(key) {
-                    var keys = this.keys, index = keys.indexOf(key);
-                    index !== -1 && (keys.splice(index, 1), this.values.splice(index, 1));
-                }
-            }, {
-                key: "safeHas",
-                value: function(key) {
-                    return this.keys.indexOf(key) !== -1;
                 }
             } ]), WeakMap;
         }();
@@ -1858,7 +1919,7 @@
             value: !0
         }), exports.receiveMessage = receiveMessage, exports.messageListener = messageListener, 
         exports.listenForMessages = listenForMessages;
-        var _conf = __webpack_require__(0), _lib = __webpack_require__(1), _global = __webpack_require__(2), _types = __webpack_require__(29);
+        var _conf = __webpack_require__(0), _lib = __webpack_require__(1), _global = __webpack_require__(2), _types = __webpack_require__(30);
         _global.global.receivedMessages = _global.global.receivedMessages || [];
     }, function(module, exports, __webpack_require__) {
         "use strict";
@@ -2215,7 +2276,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.winutil = exports.util = exports.bridge = exports.parent = void 0;
-        var _client = __webpack_require__(33);
+        var _client = __webpack_require__(34);
         Object.keys(_client).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -2224,7 +2285,7 @@
                 }
             });
         });
-        var _server = __webpack_require__(36);
+        var _server = __webpack_require__(37);
         Object.keys(_server).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -2233,7 +2294,7 @@
                 }
             });
         });
-        var _config = __webpack_require__(34);
+        var _config = __webpack_require__(35);
         Object.keys(_config).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -2251,7 +2312,7 @@
         });
         var _windows = __webpack_require__(7), windowUtil = _interopRequireWildcard(_windows), bridge = (exports.parent = (0, 
         _windows.getAncestor)(), exports.bridge = void 0);
-        exports.bridge = bridge = __webpack_require__(24);
+        exports.bridge = bridge = __webpack_require__(25);
         exports.winutil = windowUtil;
     }, function(module, exports, __webpack_require__) {
         "use strict";
