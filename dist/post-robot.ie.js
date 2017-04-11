@@ -2088,7 +2088,8 @@
                     name: obj.__name__,
                     args: args
                 }, {
-                    domain: origin
+                    domain: origin,
+                    timeout: 1 / 0
                 }).then(function(_ref2) {
                     var data = _ref2.data;
                     return _log.log.debug("Got foreign method result", obj.__name__, data.result), data.result;
@@ -2160,7 +2161,8 @@
             });
             var parent = (0, _windows.getAncestor)();
             parent && (0, _interface.send)(parent, _conf.CONSTANTS.POST_MESSAGE_NAMES.READY, {}, {
-                domain: _conf.CONSTANTS.WILDCARD
+                domain: _conf.CONSTANTS.WILDCARD,
+                timeout: 1 / 0
             }).catch(function(err) {
                 _log.log.debug(err.stack || err.toString());
             });
