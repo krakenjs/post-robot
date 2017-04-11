@@ -100,7 +100,7 @@ export function deserializeMethod(source, origin, obj) {
             name: obj.__name__,
             args
 
-        }, { domain: origin }).then(({ data }) => {
+        }, { domain: origin, timeout: Infinity }).then(({ data }) => {
 
             log.debug('Got foreign method result', obj.__name__, data.result);
             return data.result;

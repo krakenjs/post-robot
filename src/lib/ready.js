@@ -28,7 +28,7 @@ export function initOnReady() {
     let parent = getAncestor();
 
     if (parent) {
-        send(parent, CONSTANTS.POST_MESSAGE_NAMES.READY, {}, { domain: CONSTANTS.WILDCARD }).catch(err => {
+        send(parent, CONSTANTS.POST_MESSAGE_NAMES.READY, {}, { domain: CONSTANTS.WILDCARD, timeout: Infinity }).catch(err => {
             log.debug(err.stack || err.toString());
         });
     }
