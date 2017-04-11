@@ -1857,6 +1857,7 @@
             LOG_LEVEL: "info",
             BRIDGE_TIMEOUT: 5e3,
             ACK_TIMEOUT: 1e3,
+            RES_TIMEOUT: 1e4,
             LOG_TO_PAGE: !1,
             MOCK_MODE: !1,
             ALLOWED_POST_MESSAGE_METHODS: (_ALLOWED_POST_MESSAGE = {}, _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE, !0), 
@@ -2202,12 +2203,12 @@
                             data: options.data,
                             fireAndForget: options.fireAndForget
                         }, options.domain).catch(reject), options.fireAndForget) return resolve();
-                        var ackTimeout = _lib.util.intervalTimeout(_conf.CONFIG.ACK_TIMEOUT, 100, function(remaining) {
-                            return options.ack || (0, _lib.isWindowClosed)(options.window) ? ackTimeout.cancel() : remaining ? void 0 : reject(new Error("No ack for postMessage " + options.name + " in " + _conf.CONFIG.ACK_TIMEOUT + "ms"));
-                        });
-                        if (options.timeout) var timeout = _lib.util.intervalTimeout(options.timeout, 100, function(remaining) {
-                            return hasResult || (0, _lib.isWindowClosed)(options.window) ? timeout.cancel() : remaining ? void 0 : reject(new Error("Post message response timed out after " + options.timeout + " ms"));
-                        }, options.timeout);
+                        var ackTimeout = _conf.CONFIG.ACK_TIMEOUT, resTimeout = options.timeout || _conf.CONFIG.RES_TIMEOUT, interval = _lib.util.safeInterval(function() {
+                            return options.ack && hasResult ? interval.cancel() : (0, _lib.isWindowClosed)(options.window) ? (interval.cancel(), 
+                            reject(options.ack ? new Error("Window closed for " + options.name + " before response") : new Error("Window closed for " + options.name + " before ack"))) : (ackTimeout -= 100, 
+                            resTimeout -= 100, ackTimeout <= 0 && !options.ack ? (interval.cancel(), reject(new Error("No ack for postMessage " + options.name + " in " + _conf.CONFIG.ACK_TIMEOUT + "ms"))) : resTimeout <= 0 && !hasResult ? (interval.cancel(), 
+                            reject(new Error("No response for postMessage " + options.name + " in " + (options.timeout || _conf.CONFIG.RES_TIMEOUT) + "ms"))) : void 0);
+                        }, 100);
                     });
                 }).catch(function(err) {
                     throw (0, _drivers.deleteResponseListener)(hash), err;
