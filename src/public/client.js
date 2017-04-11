@@ -3,7 +3,6 @@ import { CONFIG, CONSTANTS } from '../conf';
 import { sendMessage, addResponseListener, deleteResponseListener } from '../drivers';
 import { util, promise, getAncestor, isAncestor, onWindowReady, isWindowClosed } from '../lib';
 
-
 export function request(options) {
 
     let prom = promise.run(() => {
@@ -92,30 +91,39 @@ export function request(options) {
                     return resolve();
                 }
 
-                let ackTimeout = util.intervalTimeout(CONFIG.ACK_TIMEOUT, 100, remaining => {
-                    if (options.ack || isWindowClosed(options.window)) {
-                        return ackTimeout.cancel();
+                let ackTimeout = CONFIG.ACK_TIMEOUT;
+                let resTimeout = options.timeout || CONFIG.RES_TIMEOUT;
+
+                let interval = util.safeInterval(() => {
+
+                    if (options.ack && hasResult) {
+                        return interval.cancel();
                     }
 
-                    if (!remaining) {
+                    if (isWindowClosed(options.window)) {
+                        interval.cancel();
+
+                        if (!options.ack) {
+                            return reject(new Error(`Window closed for ${options.name} before ack`));
+                        }
+
+                        return reject(new Error(`Window closed for ${options.name} before response`));
+                    }
+
+                    ackTimeout -= 100;
+                    resTimeout -= 100;
+
+                    if (ackTimeout <= 0 && !options.ack) {
+                        interval.cancel();
                         return reject(new Error(`No ack for postMessage ${options.name} in ${CONFIG.ACK_TIMEOUT}ms`));
                     }
-                });
 
-                if (options.timeout) {
-                    let timeout = util.intervalTimeout(options.timeout, 100, remaining => {
+                    if (resTimeout <= 0 && !hasResult) {
+                        interval.cancel();
+                        return reject(new Error(`No response for postMessage ${options.name} in ${options.timeout || CONFIG.RES_TIMEOUT}ms`));
+                    }
 
-                        if (hasResult || isWindowClosed(options.window)) {
-                            return timeout.cancel();
-                        }
-
-                        if (!remaining) {
-
-                            return reject(new Error(`Post message response timed out after ${options.timeout} ms`));
-                        }
-
-                    }, options.timeout);
-                }
+                }, 100);
             });
 
         }).catch(err => {

@@ -2,16 +2,18 @@
 import { CONSTANTS } from './constants';
 
 export let CONFIG = {
-    
+
     ALLOW_POSTMESSAGE_POPUP: __TEST__ ? false : true,
 
     LOG_LEVEL: 'info',
 
     BRIDGE_TIMEOUT: 5000,
+    
     ACK_TIMEOUT: 1000,
+    RES_TIMEOUT: __TEST__ ? 2000 : 10000,
 
     LOG_TO_PAGE: false,
-    
+
     MOCK_MODE: false,
 
     ALLOWED_POST_MESSAGE_METHODS: {
