@@ -1,15 +1,15 @@
 
 import { CONSTANTS, CONFIG, POST_MESSAGE_NAMES_LIST } from '../../conf';
-import { util, promise, serializeMethods, log, isWindowClosed, getWindowType, jsonStringify } from '../../lib';
+import { uniqueID, getDomain, some, promise, serializeMethods, log, isWindowClosed, getWindowType, jsonStringify } from '../../lib';
 
 import { SEND_MESSAGE_STRATEGIES } from './strategies';
 
 
 export function buildMessage(win, message, options = {}) {
 
-    let id   = util.uniqueID();
+    let id   = uniqueID();
     let type = getWindowType();
-    let sourceDomain = util.getDomain(window);
+    let sourceDomain = getDomain(window);
 
     return {
         ...message,
@@ -44,7 +44,7 @@ export function sendMessage(win, message, domain) {
         if (CONFIG.MOCK_MODE) {
             delete message.target;
             return window[CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessage({
-                origin: util.getDomain(window),
+                origin: getDomain(window),
                 source: window,
                 data: jsonStringify(message, 0, 2)
             });
@@ -86,7 +86,7 @@ export function sendMessage(win, message, domain) {
 
         }).then(results => {
 
-            let success = util.some(results);
+            let success = some(results);
             let status = `${message.type} ${message.name} ${success ? 'success' : 'error'}:\n  - ${messages.join('\n  - ')}\n`;
 
             log.debug(status);

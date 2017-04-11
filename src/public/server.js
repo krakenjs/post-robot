@@ -1,5 +1,5 @@
 
-import { util, promise, isWindowClosed } from '../lib';
+import { noop, once as onceFunction, extend, safeInterval, promise, isWindowClosed } from '../lib';
 import { addRequestListener } from '../drivers';
 import { CONSTANTS } from '../conf';
 
@@ -9,7 +9,7 @@ export function listen(options) {
         throw new Error('Expected options.name');
     }
 
-    options.handler = options.handler || util.noop;
+    options.handler = options.handler || noop;
 
     options.errorHandler = options.errorHandler || function(err) {
         throw err;
@@ -25,7 +25,7 @@ export function listen(options) {
 
     if (options.once) {
         let handler = options.handler;
-        options.handler = util.once(function() {
+        options.handler = onceFunction(function() {
             requestListener.cancel();
             return handler.apply(this, arguments);
         });
@@ -36,7 +36,7 @@ export function listen(options) {
     };
 
     if (options.window && options.errorOnClose) {
-        let interval = util.safeInterval(() => {
+        let interval = safeInterval(() => {
             if (isWindowClosed(options.window)) {
                 interval.cancel();
                 options.handleError(new Error('Post message target window is closed'));
@@ -90,7 +90,7 @@ export function once(name, options, handler, errorHandler) {
 
     let myListener = listen(options);
 
-    util.extend(prom, myListener);
+    extend(prom, myListener);
 
     return prom;
 }

@@ -1,5 +1,5 @@
 
-import { util } from './util';
+import { map } from './util';
 import { getWindowType, jsonStringify } from './windows';
 import { CONFIG } from '../conf';
 
@@ -43,7 +43,7 @@ export let log = {
 
             let date = (new Date()).toString().split(' ')[4];
 
-            let payload = util.map(args, item => {
+            let payload = map(args, item => {
                 if (typeof item === 'string') {
                     return item;
                 }

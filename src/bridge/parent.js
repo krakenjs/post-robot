@@ -2,7 +2,7 @@
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
 
 import { CONFIG, CONSTANTS } from '../conf';
-import { util, promise, log, onWindowReady, getFrameByName, isWindowClosed } from '../lib';
+import { getDomainFromUrl, getDomain, promise, log, onWindowReady, getFrameByName, isWindowClosed } from '../lib';
 import { global } from '../global';
 import { on } from '../interface';
 import { receiveMessage } from '../drivers';
@@ -93,7 +93,7 @@ function openBridgeFrame(name, url) {
 
 export function openBridge(url, domain) {
 
-    domain = domain || util.getDomainFromUrl(url);
+    domain = domain || getDomainFromUrl(url);
 
     if (global.bridges[domain]) {
         return global.bridges[domain];
@@ -101,7 +101,7 @@ export function openBridge(url, domain) {
 
     global.bridges[domain] = promise.run(() => {
 
-        if (util.getDomain() === domain) {
+        if (getDomain() === domain) {
             throw new Error(`Can not open bridge on the same domain as current domain: ${domain}`);
         }
 
@@ -159,7 +159,7 @@ window.open = function(url, name, options, last) {
     }
 
     if (domain) {
-        domain = util.getDomainFromUrl(domain);
+        domain = getDomainFromUrl(domain);
     }
 
     let win = windowOpen.call(this, url, name, options, last);
@@ -188,7 +188,7 @@ export function linkUrl(win, url) {
     let winOptions = global.popupWindowsByWin.get(win);
 
     if (winOptions) {
-        winOptions.domain = util.getDomainFromUrl(url);
+        winOptions.domain = getDomainFromUrl(url);
         registerRemoteWindow(win);
     }
 }

@@ -1,8 +1,8 @@
 
-import { util } from './util';
+import { uniqueID } from './util';
 import { CONSTANTS } from '../conf';
 
-let tickMessageName = `__nextTick__postRobot__${util.uniqueID()}`;
+let tickMessageName = `__nextTick__postRobot__${uniqueID()}`;
 let queue = [];
 
 window.addEventListener('message', event => {

@@ -1,6 +1,6 @@
 
 import { CONSTANTS, POST_MESSAGE_NAMES_LIST } from '../../conf';
-import { deserializeMethods, log, isWindowClosed, jsonParse, util } from '../../lib';
+import { deserializeMethods, log, isWindowClosed, jsonParse, listen } from '../../lib';
 import { global } from '../../global';
 
 import { RECEIVE_MESSAGE_TYPES } from './types';
@@ -118,5 +118,5 @@ export function messageListener(event) {
 }
 
 export function listenForMessages() {
-    util.listen(window, 'message', messageListener);
+    listen(window, 'message', messageListener);
 }

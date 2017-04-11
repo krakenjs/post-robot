@@ -2,7 +2,7 @@
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
 
 import { CONSTANTS } from '../conf';
-import { util } from './util';
+import { once, uniqueID, replaceObject } from './util';
 import { matchDomain } from './domain';
 import { on, send } from '../interface';
 import { log } from './log';
@@ -11,7 +11,7 @@ import { global } from '../global';
 
 global.methods = global.methods || new WeakMap();
 
-export let listenForMethods = util.once(() => {
+export let listenForMethods = once(() => {
     on(CONSTANTS.POST_MESSAGE_NAMES.METHOD, { window: CONSTANTS.WILDCARD, origin: CONSTANTS.WILDCARD }, ({ source, origin, data }) => {
 
         let methods = global.methods.get(source);
@@ -52,7 +52,7 @@ function isSerialized(item, type) {
 
 export function serializeMethod(destination, domain, method, name) {
 
-    let id = util.uniqueID();
+    let id = uniqueID();
 
     let methods = global.methods.get(destination);
 
@@ -79,7 +79,7 @@ function serializeError(err) {
 
 export function serializeMethods(destination, domain, obj) {
 
-    return util.replaceObject({ obj }, (item, key) => {
+    return replaceObject({ obj }, (item, key) => {
         if (typeof item === 'function') {
             return serializeMethod(destination, domain, item, key);
         }
@@ -123,7 +123,7 @@ export function deserializeError(source, origin, obj) {
 
 export function deserializeMethods(source, origin, obj) {
 
-    return util.replaceObject({ obj }, (item, key) => {
+    return replaceObject({ obj }, (item, key) => {
 
         if (isSerialized(item, CONSTANTS.SERIALIZATION_TYPES.METHOD)) {
             return deserializeMethod(source, origin, item);

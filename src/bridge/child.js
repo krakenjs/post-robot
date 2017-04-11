@@ -1,7 +1,7 @@
 
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { CONSTANTS } from '../conf';
-import { isSameDomain, getOpener, getFrames, util, getFrameByName, weakMapMemoize } from '../lib';
+import { isSameDomain, getOpener, getFrames, getDomain, getFrameByName, weakMapMemoize } from '../lib';
 import { receiveMessage } from '../drivers';
 
 import { needsBridge, registerRemoteWindow, rejectRemoteSendMessage, registerRemoteSendMessage, getBridgeName } from './common';
@@ -20,7 +20,7 @@ let awaitRemoteBridgeForWindow = weakMapMemoize(win => {
         }
 
         try {
-            let frame = getFrameByName(win, getBridgeName(util.getDomain()));
+            let frame = getFrameByName(win, getBridgeName(getDomain()));
 
             if (!frame) {
                 return;

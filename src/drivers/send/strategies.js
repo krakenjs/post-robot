@@ -1,6 +1,6 @@
 
 import { CONSTANTS } from '../../conf';
-import { isSameDomain, isSameTopWindow, isActuallySameDomain, util } from '../../lib';
+import { isSameDomain, isSameTopWindow, isActuallySameDomain, getActualDomain, getDomain } from '../../lib';
 
 export let SEND_MESSAGE_STRATEGIES = {};
 
@@ -39,7 +39,7 @@ SEND_MESSAGE_STRATEGIES[CONSTANTS.SEND_STRATEGIES.POST_MESSAGE] = (win, serializ
                 throw new Error(`Attempting to send messsage to mock domain ${dom}, but window is actually cross-domain`);
             }
 
-            return util.getActualDomain(win);
+            return getActualDomain(win);
         }
 
         if (dom.indexOf(CONSTANTS.FILE_PROTOCOL) === 0) {
@@ -89,7 +89,7 @@ if (__IE_POPUP_SUPPORT__) {
 
         return foreignGlobal.receiveMessage({
             source: window,
-            origin: util.getDomain(),
+            origin: getDomain(),
             data: serializedMessage
         });
     };

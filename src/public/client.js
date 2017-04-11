@@ -1,7 +1,7 @@
 
 import { CONFIG, CONSTANTS } from '../conf';
 import { sendMessage, addResponseListener, deleteResponseListener } from '../drivers';
-import { util, promise, getAncestor, isAncestor, onWindowReady, isWindowClosed } from '../lib';
+import { uniqueID, safeInterval, promise, getAncestor, isAncestor, onWindowReady, isWindowClosed } from '../lib';
 
 export function request(options) {
 
@@ -52,7 +52,7 @@ export function request(options) {
 
         options.domain = options.domain || CONSTANTS.WILDCARD;
 
-        let hash = `${options.name}_${util.uniqueID()}`;
+        let hash = `${options.name}_${uniqueID()}`;
         addResponseListener(hash, options);
 
         if (isWindowClosed(options.window)) {
@@ -94,7 +94,7 @@ export function request(options) {
                 let ackTimeout = CONFIG.ACK_TIMEOUT;
                 let resTimeout = options.timeout || CONFIG.RES_TIMEOUT;
 
-                let interval = util.safeInterval(() => {
+                let interval = safeInterval(() => {
 
                     if (options.ack && hasResult) {
                         return interval.cancel();

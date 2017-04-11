@@ -2,7 +2,7 @@
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
 
 import { CONFIG, CONSTANTS } from '../conf';
-import { util, promise, isSameDomain, isOpener, isSameTopWindow, getUserAgent, matchDomain } from '../lib';
+import { getDomain, getDomainFromUrl, promise, isSameDomain, isOpener, isSameTopWindow, getUserAgent, matchDomain } from '../lib';
 import { global } from '../global';
 import { receiveMessage } from '../drivers';
 
@@ -34,7 +34,7 @@ export function needsBridgeForWin(win) {
 
 export function needsBridgeForDomain(domain) {
 
-    if (domain && util.getDomain() === util.getDomainFromUrl(domain)) {
+    if (domain && getDomain() === getDomainFromUrl(domain)) {
         return false;
     }
 
@@ -47,7 +47,7 @@ export function needsBridge({ win, domain }) {
 
 export function getBridgeName(domain) {
 
-    domain = domain || util.getDomainFromUrl(domain);
+    domain = domain || getDomainFromUrl(domain);
 
     let sanitizedDomain = domain.replace(/[^a-zA-Z0-9]+/g, '_');
 
@@ -57,7 +57,7 @@ export function getBridgeName(domain) {
 }
 
 export function isBridge() {
-    return window.name && window.name === getBridgeName(util.getDomain());
+    return window.name && window.name === getBridgeName(getDomain());
 }
 
 export let documentBodyReady = new promise.Promise(resolve => {

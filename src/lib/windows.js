@@ -1,7 +1,7 @@
 
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
 
-import { util } from './util';
+import { getDomain, safeGet } from './util';
 import { global } from '../global';
 import { CONSTANTS } from '../conf';
 
@@ -18,7 +18,7 @@ export function isSameDomain(win) {
     let match;
 
     try {
-        if (util.getDomain(window) === util.getDomain(win)) {
+        if (getDomain(window) === getDomain(win)) {
             match = true;
         } else {
             match = false;
@@ -305,7 +305,7 @@ export function isWindowClosed(win, allowMock = true) {
     }
 
 
-    if (allowMock && isSameDomain(win) && util.safeGet(win, 'mockclosed')) {
+    if (allowMock && isSameDomain(win) && safeGet(win, 'mockclosed')) {
         return true;
     }
 
