@@ -2,6 +2,7 @@
 import { initOnReady, listenForMethods } from './lib';
 import { listenForMessages } from './drivers';
 import { global } from './global';
+export { cleanUpWindow } from './clean';
 
 export function init() {
 

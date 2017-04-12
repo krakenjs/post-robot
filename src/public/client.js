@@ -1,7 +1,12 @@
 
+import { WeakMap } from 'cross-domain-safe-weakmap/src';
+
 import { CONFIG, CONSTANTS } from '../conf';
 import { sendMessage, addResponseListener, deleteResponseListener } from '../drivers';
 import { uniqueID, safeInterval, promise, getAncestor, isAncestor, onWindowReady, isWindowClosed } from '../lib';
+import { global } from '../global';
+
+global.requestPromises = global.requestPromises || new WeakMap();
 
 export function request(options) {
 
@@ -10,7 +15,6 @@ export function request(options) {
         if (!options.name) {
             throw new Error('Expected options.name');
         }
-
 
         if (CONFIG.MOCK_MODE) {
             options.window = window;
@@ -61,7 +65,14 @@ export function request(options) {
 
         let hasResult = false;
 
-        return promise.run(() => {
+        let requestPromises = global.requestPromises.get(options.window);
+
+        if (!requestPromises) {
+            requestPromises = [];
+            global.requestPromises.set(options.window, requestPromises);
+        }
+
+        let requestPromise = promise.run(() => {
 
             if (isAncestor(window, options.window)) {
                 return onWindowReady(options.window);
@@ -72,8 +83,10 @@ export function request(options) {
             return new promise.Promise((resolve, reject) => {
 
                 options.respond = (err, result) => {
+
                     if (!err) {
                         hasResult = true;
+                        requestPromises.splice(requestPromises.indexOf(requestPromise, 1));
                     }
 
                     return err ? reject(err) : resolve(result);
@@ -125,13 +138,15 @@ export function request(options) {
 
                 }, 100);
             });
-
-        }).catch(err => {
-
-            deleteResponseListener(hash);
-
-            throw err;
         });
+
+        requestPromise.catch(() => {
+            deleteResponseListener(hash);
+        });
+
+        requestPromises.push(requestPromise);
+
+        return requestPromise;
     });
 
     return promise.nodeify(prom, options.callback);
