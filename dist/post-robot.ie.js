@@ -1822,6 +1822,7 @@
             }
             domain && (domain = (0, _lib.getDomainFromUrl)(domain));
             var win = windowOpen.call(this, url, name, options, last);
+            if (!win) return win;
             url && (0, _common.registerRemoteWindow)(win);
             for (var _iterator = Object.keys(_global.global.popupWindowsByName), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
                 var _ref2;
