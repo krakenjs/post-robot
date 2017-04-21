@@ -68,7 +68,7 @@ if (__IE_POPUP_SUPPORT__) {
             throw new Error(`Can only use bridge to communicate between two different windows, not between frames`);
         }
 
-        sendBridgeMessage(win, serializedMessage, domain);
+        return sendBridgeMessage(win, serializedMessage, domain);
     };
 
     SEND_MESSAGE_STRATEGIES[CONSTANTS.SEND_STRATEGIES.GLOBAL] = (win, serializedMessage, domain) => {
