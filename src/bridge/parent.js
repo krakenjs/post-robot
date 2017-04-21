@@ -164,6 +164,10 @@ window.open = function(url, name, options, last) {
 
     let win = windowOpen.call(this, url, name, options, last);
 
+    if (!win) {
+        return win;
+    }
+
     if (url) {
         registerRemoteWindow(win);
     }
