@@ -264,7 +264,7 @@ export function getDomainFromUrl(url) {
     if (url.match(/^(https?|mock|file):\/\//)) {
         domain = url;
     } else {
-        return this.getDomain();
+        return getDomain();
     }
 
     domain = domain.split('/').slice(0, 3).join('/');
