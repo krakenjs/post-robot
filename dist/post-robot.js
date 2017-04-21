@@ -262,7 +262,7 @@
         }
         function getDomainFromUrl(url) {
             var domain = void 0;
-            return url.match(/^(https?|mock|file):\/\//) ? (domain = url, domain = domain.split("/").slice(0, 3).join("/")) : this.getDomain();
+            return url.match(/^(https?|mock|file):\/\//) ? (domain = url, domain = domain.split("/").slice(0, 3).join("/")) : getDomain();
         }
         function safeGet(obj, prop) {
             var result = void 0;
