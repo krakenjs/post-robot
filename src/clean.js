@@ -17,9 +17,15 @@ export function cleanUpWindow(win) {
         }
     }
 
+    if (global.popupWindowsByWin) {
+        global.popupWindowsByWin.delete(win);
+    }
+
+    if (global.remoteWindows) {
+        global.remoteWindows.delete(win);
+    }
+
     global.requestPromises.delete(win);
-    global.popupWindowsByWin.delete(win);
-    global.remoteWindows.delete(win);
     global.methods.delete(win);
     global.readyPromises.delete(win);
     global.domainMatches.delete(win);
