@@ -13,7 +13,7 @@ export function cleanUpWindow(win) {
 
     if (requestPromises) {
         for (let promise of requestPromises) {
-            promise.reject(new Error(`Window cleaned up`));
+            promise.reject(new Error(`No response from window - cleaned up`));
         }
     }
 
