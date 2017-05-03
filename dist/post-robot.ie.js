@@ -137,10 +137,16 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.global = void 0;
-        var _conf = __webpack_require__(0);
-        (exports.global = window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT] = window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT] || {}).registerSelf = function() {};
+        var _conf = __webpack_require__(0), global = exports.global = window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT] = window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT] || {};
+        global.registerSelf = function() {};
     }, function(module, exports, __webpack_require__) {
         "use strict";
+        function _interopRequireWildcard(obj) {
+            if (obj && obj.__esModule) return obj;
+            var newObj = {};
+            if (null != obj) for (var key in obj) Object.prototype.hasOwnProperty.call(obj, key) && (newObj[key] = obj[key]);
+            return newObj.default = obj, newObj;
+        }
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
@@ -153,12 +159,7 @@
                 }
             });
         });
-        var INTERFACE = function(obj) {
-            if (obj && obj.__esModule) return obj;
-            var newObj = {};
-            if (null != obj) for (var key in obj) Object.prototype.hasOwnProperty.call(obj, key) && (newObj[key] = obj[key]);
-            return newObj.default = obj, newObj;
-        }(_interface);
+        var INTERFACE = _interopRequireWildcard(_interface);
         exports.default = INTERFACE;
     }, function(module, exports, __webpack_require__) {
         "use strict";
@@ -274,7 +275,7 @@
             return obj;
         }
         function each(obj, callback) {
-            if (Array.isArray(obj)) for (var i = 0; i < obj.length; i++) callback(obj[i], i); else if ("object" === (void 0 === obj ? "undefined" : _typeof(obj)) && null !== obj) for (var key in obj) obj.hasOwnProperty(key) && callback(obj[key], key);
+            if (Array.isArray(obj)) for (var i = 0; i < obj.length; i++) callback(obj[i], i); else if ("object" === ("undefined" == typeof obj ? "undefined" : _typeof(obj)) && null !== obj) for (var key in obj) obj.hasOwnProperty(key) && callback(obj[key], key);
         }
         function replaceObject(obj, callback) {
             var depth = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : 1;
@@ -282,7 +283,7 @@
             var newobj = Array.isArray(obj) ? [] : {};
             return each(obj, function(item, key) {
                 var result = callback(item, key);
-                void 0 !== result ? newobj[key] = result : "object" === (void 0 === item ? "undefined" : _typeof(item)) && null !== item ? newobj[key] = replaceObject(item, callback, depth + 1) : newobj[key] = item;
+                void 0 !== result ? newobj[key] = result : "object" === ("undefined" == typeof item ? "undefined" : _typeof(item)) && null !== item ? newobj[key] = replaceObject(item, callback, depth + 1) : newobj[key] = item;
             }), newobj;
         }
         function safeInterval(method, time) {
@@ -331,8 +332,8 @@
             var weakmap = new _src.WeakMap();
             return function(arg) {
                 var result = weakmap.get(arg);
-                return void 0 !== result ? result : (result = method.call(this, arg), void 0 !== result && weakmap.set(arg, result), 
-                result);
+                return "undefined" != typeof result ? result : (result = method.call(this, arg), 
+                "undefined" != typeof result && weakmap.set(arg, result), result);
             };
         }
         Object.defineProperty(exports, "__esModule", {
@@ -634,7 +635,8 @@
                     if (_i9 = _iterator8.next(), _i9.done) break;
                     _ref8 = _i9.value;
                 }
-                if (_ref8 === frame) return !0;
+                var childFrame = _ref8;
+                if (childFrame === frame) return !0;
             }
             return !1;
         }
@@ -649,7 +651,8 @@
             return parent ? parent : void 0;
         }
         function getAncestors(win) {
-            for (var results = [], ancestor = win; ancestor; ) (ancestor = getAncestor(ancestor)) && results.push(ancestor);
+            for (var results = [], ancestor = win; ancestor; ) ancestor = getAncestor(ancestor), 
+            ancestor && results.push(ancestor);
             return results;
         }
         function isAncestor(parent, child) {
@@ -666,7 +669,8 @@
                     if (_i10 = _iterator9.next(), _i10.done) break;
                     _ref9 = _i10.value;
                 }
-                if (_ref9 === child) return !0;
+                var frame = _ref9;
+                if (frame === child) return !0;
             }
             return !1;
         }
@@ -701,7 +705,8 @@
                         if (_i12 = _iterator11.next(), _i12.done) break;
                         _ref11 = _i12.value;
                     }
-                    if (item1 === _ref11) return !0;
+                    var item2 = _ref11;
+                    if (item1 === item2) return !0;
                 }
             }
         }
@@ -779,16 +784,15 @@
             possiblyUnhandledPromiseTimeout = null;
             var promises = possiblyUnhandledPromises;
             possiblyUnhandledPromises = [];
-            for (var i = 0; i < promises.length; i++) {
-                (function(i) {
-                    var promise = promises[i];
-                    if (promise.silentReject) return "continue";
-                    promise.handlers.push({
-                        onError: function(err) {
-                            promise.silentReject || dispatchError(err);
-                        }
-                    }), promise.dispatch();
-                })(i);
+            for (var _loop = function(i) {
+                var promise = promises[i];
+                return promise.silentReject ? "continue" : (promise.handlers.push({
+                    onError: function(err) {
+                        promise.silentReject || dispatchError(err);
+                    }
+                }), void promise.dispatch());
+            }, i = 0; i < promises.length; i++) {
+                _loop(i);
             }
         }
         function dispatchError(err) {
@@ -847,22 +851,21 @@
             this.silentReject = !0, this.reject(error);
         }, SyncPromise.prototype.dispatch = function() {
             var _this = this;
-            if (this.resolved || this.rejected) for (;this.handlers.length; ) {
-                (function() {
-                    var handler = _this.handlers.shift(), result = void 0, error = void 0;
-                    try {
-                        _this.resolved ? result = handler.onSuccess ? handler.onSuccess(_this.value) : _this.value : _this.rejected && (handler.onError ? result = handler.onError(_this.value) : error = _this.value);
-                    } catch (err) {
-                        error = err;
-                    }
-                    if (result === _this) throw new Error("Can not return a promise from the the then handler of the same promise");
-                    if (!handler.promise) return "continue";
-                    error ? handler.promise.reject(error) : isPromise(result) ? result.then(function(res) {
-                        handler.promise.resolve(res);
-                    }, function(err) {
-                        handler.promise.reject(err);
-                    }) : handler.promise.resolve(result);
-                })();
+            if (this.resolved || this.rejected) for (var _loop2 = function() {
+                var handler = _this.handlers.shift(), result = void 0, error = void 0;
+                try {
+                    _this.resolved ? result = handler.onSuccess ? handler.onSuccess(_this.value) : _this.value : _this.rejected && (handler.onError ? result = handler.onError(_this.value) : error = _this.value);
+                } catch (err) {
+                    error = err;
+                }
+                if (result === _this) throw new Error("Can not return a promise from the the then handler of the same promise");
+                return handler.promise ? void (error ? handler.promise.reject(error) : isPromise(result) ? result.then(function(res) {
+                    handler.promise.resolve(res);
+                }, function(err) {
+                    handler.promise.reject(err);
+                }) : handler.promise.resolve(result)) : "continue";
+            }; this.handlers.length; ) {
+                _loop2();
             }
         }, SyncPromise.prototype.then = function(onSuccess, onError) {
             if (onSuccess && "function" != typeof onSuccess && !onSuccess.call) throw new Error("Promise.then expected a function for success handler");
@@ -886,13 +889,14 @@
                 });
             });
         }, SyncPromise.all = function(promises) {
-            for (var promise = new SyncPromise(), count = promises.length, results = [], i = 0; i < promises.length; i++) !function(i) {
-                (isPromise(promises[i]) ? promises[i] : SyncPromise.resolve(promises[i])).then(function(result) {
-                    results[i] = result, 0 == (count -= 1) && promise.resolve(results);
+            for (var promise = new SyncPromise(), count = promises.length, results = [], _loop3 = function(i) {
+                var prom = isPromise(promises[i]) ? promises[i] : SyncPromise.resolve(promises[i]);
+                prom.then(function(result) {
+                    results[i] = result, count -= 1, 0 === count && promise.resolve(results);
                 }, function(err) {
                     promise.reject(err);
                 });
-            }(i);
+            }, i = 0; i < promises.length; i++) _loop3(i);
             return count || promise.resolve(results), promise;
         }, SyncPromise.onPossiblyUnhandledException = function(handler) {
             possiblyUnhandledPromiseHandlers.push(handler);
@@ -903,12 +907,12 @@
                 setTimeout(resolve, delay);
             });
         }, SyncPromise.hash = function(obj) {
-            var results = {}, promises = [];
-            for (var key in obj) !function(key) {
+            var results = {}, promises = [], _loop4 = function(key) {
                 obj.hasOwnProperty(key) && promises.push(SyncPromise.resolve(obj[key]).then(function(result) {
                     results[key] = result;
                 }));
-            }(key);
+            };
+            for (var key in obj) _loop4(key);
             return SyncPromise.all(promises).then(function() {
                 return results;
             });
@@ -938,8 +942,8 @@
         }
         function getBridgeName(domain) {
             domain = domain || (0, _lib.getDomainFromUrl)(domain);
-            var sanitizedDomain = domain.replace(/[^a-zA-Z0-9]+/g, "_");
-            return _conf.CONSTANTS.BRIDGE_NAME_PREFIX + "_" + sanitizedDomain;
+            var sanitizedDomain = domain.replace(/[^a-zA-Z0-9]+/g, "_"), id = _conf.CONSTANTS.BRIDGE_NAME_PREFIX + "_" + sanitizedDomain;
+            return id;
         }
         function isBridge() {
             return window.name && window.name === getBridgeName((0, _lib.getDomain)());
@@ -1264,10 +1268,11 @@
                         if (_i5 = _iterator3.next(), _i5.done) break;
                         _ref5 = _i5.value;
                     }
+                    var _item = _ref5;
                     addRequestListener({
                         name: name,
                         win: win,
-                        domain: _ref5
+                        domain: _item
                     }, listener);
                 }
             }
@@ -1293,9 +1298,9 @@
         }
         function buildMessage(win, message) {
             var options = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : {}, id = (0, 
-            _lib.uniqueID)(), type = (0, _lib.getWindowType)();
+            _lib.uniqueID)(), type = (0, _lib.getWindowType)(), sourceDomain = (0, _lib.getDomain)(window);
             return _extends({}, message, options, {
-                sourceDomain: (0, _lib.getDomain)(window),
+                sourceDomain: sourceDomain,
                 id: message.id || id,
                 windowType: type
             });
@@ -1383,12 +1388,11 @@
                 };
             },
             nodeify: function(prom, callback) {
-                if (!callback) return prom;
-                prom.then(function(result) {
+                return callback ? void prom.then(function(result) {
                     callback(null, result);
                 }, function(err) {
                     callback(err);
-                });
+                }) : prom;
             },
             deNodeify: function(method) {
                 for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) args[_key - 1] = arguments[_key];
@@ -1405,11 +1409,11 @@
                 });
             },
             map: function(items, method) {
-                for (var results = [], i = 0; i < items.length; i++) !function(i) {
+                for (var results = [], _loop = function(i) {
                     results.push(promise.run(function() {
                         return method(items[i]);
                     }));
-                }(i);
+                }, i = 0; i < items.length; i++) _loop(i);
                 return Promise.all(results);
             }
         };
@@ -1425,7 +1429,8 @@
         _util.uniqueID)(), queue = [];
         window.addEventListener("message", function(event) {
             if (event.data === tickMessageName) {
-                queue.shift().call();
+                var method = queue.shift();
+                method.call();
             }
         });
     }, function(module, exports, __webpack_require__) {
@@ -1446,9 +1451,8 @@
             if (!window.WeakMap) return !1;
             if (!window.Object.freeze) return !1;
             try {
-                var testWeakMap = new window.WeakMap(), testKey = {};
-                return window.Object.freeze(testKey), testWeakMap.set(testKey, "__testvalue__"), 
-                "__testvalue__" === testWeakMap.get(testKey);
+                var testWeakMap = new window.WeakMap(), testKey = {}, testValue = "__testvalue__";
+                return window.Object.freeze(testKey), testWeakMap.set(testKey, testValue), testWeakMap.get(testKey) === testValue;
             } catch (err) {
                 return !1;
             }
@@ -1694,11 +1698,10 @@
                     var frame = (0, _lib.getFrameByName)(win, (0, _common.getBridgeName)((0, _lib.getDomain)()));
                     if (!frame) return;
                     return (0, _lib.isSameDomain)(frame) && frame[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT] ? frame : new _promise.SyncPromise(function(resolve) {
-                        var interval = void 0;
+                        var interval = void 0, timeout = void 0;
                         interval = setInterval(function() {
-                            if ((0, _lib.isSameDomain)(frame) && frame[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT]) return clearInterval(interval), 
-                            clearTimeout(void 0), resolve(frame);
-                            setTimeout(function() {
+                            return (0, _lib.isSameDomain)(frame) && frame[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT] ? (clearInterval(interval), 
+                            clearTimeout(timeout), resolve(frame)) : void setTimeout(function() {
                                 return clearInterval(interval), resolve();
                             }, 2e3);
                         }, 100);
@@ -1713,14 +1716,12 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
-        var bridge = (exports.openBridge = void 0, exports.linkUrl = void 0, exports.isBridge = void 0, 
-        exports.needsBridge = void 0, exports.needsBridgeForBrowser = void 0, exports.needsBridgeForWin = void 0, 
-        exports.needsBridgeForDomain = void 0, exports.openTunnelToOpener = void 0, exports.destroyBridges = void 0, 
-        __webpack_require__(10));
-        exports.openBridge = bridge.openBridge, exports.linkUrl = bridge.linkUrl, exports.isBridge = bridge.isBridge, 
-        exports.needsBridge = bridge.needsBridge, exports.needsBridgeForBrowser = bridge.needsBridgeForBrowser, 
-        exports.needsBridgeForWin = bridge.needsBridgeForWin, exports.needsBridgeForDomain = bridge.needsBridgeForDomain, 
-        exports.openTunnelToOpener = bridge.openTunnelToOpener, exports.destroyBridges = bridge.destroyBridges;
+        var openBridge = exports.openBridge = void 0, linkUrl = exports.linkUrl = void 0, isBridge = exports.isBridge = void 0, needsBridge = exports.needsBridge = void 0, needsBridgeForBrowser = exports.needsBridgeForBrowser = void 0, needsBridgeForWin = exports.needsBridgeForWin = void 0, needsBridgeForDomain = exports.needsBridgeForDomain = void 0, openTunnelToOpener = exports.openTunnelToOpener = void 0, destroyBridges = exports.destroyBridges = void 0, bridge = __webpack_require__(10);
+        exports.openBridge = openBridge = bridge.openBridge, exports.linkUrl = linkUrl = bridge.linkUrl, 
+        exports.isBridge = isBridge = bridge.isBridge, exports.needsBridge = needsBridge = bridge.needsBridge, 
+        exports.needsBridgeForBrowser = needsBridgeForBrowser = bridge.needsBridgeForBrowser, 
+        exports.needsBridgeForWin = needsBridgeForWin = bridge.needsBridgeForWin, exports.needsBridgeForDomain = needsBridgeForDomain = bridge.needsBridgeForDomain, 
+        exports.openTunnelToOpener = openTunnelToOpener = bridge.openTunnelToOpener, exports.destroyBridges = destroyBridges = bridge.destroyBridges;
     }, function(module, exports, __webpack_require__) {
         "use strict";
         function listenForRegister(source, domain) {
@@ -1762,8 +1763,8 @@
         function openBridge(url, domain) {
             return domain = domain || (0, _lib.getDomainFromUrl)(url), _global.global.bridges[domain] ? _global.global.bridges[domain] : (_global.global.bridges[domain] = _lib.promise.run(function() {
                 if ((0, _lib.getDomain)() === domain) throw new Error("Can not open bridge on the same domain as current domain: " + domain);
-                var name = (0, _common.getBridgeName)(domain);
-                if ((0, _lib.getFrameByName)(window, name)) throw new Error("Frame with name " + name + " already exists on page");
+                var name = (0, _common.getBridgeName)(domain), frame = (0, _lib.getFrameByName)(window, name);
+                if (frame) throw new Error("Frame with name " + name + " already exists on page");
                 var iframe = openBridgeFrame(name, url);
                 return _common.documentBodyReady.then(function(body) {
                     return new _lib.promise.Promise(function(resolve, reject) {
@@ -1863,7 +1864,7 @@
                     _ref = _i.value;
                 }
                 var promise = _ref;
-                promise.reject(new Error("Window cleaned up"));
+                promise.reject(new Error("No response from window - cleaned up"));
             }
             _global.global.popupWindowsByWin && _global.global.popupWindowsByWin.delete(win), 
             _global.global.remoteWindows && _global.global.remoteWindows.delete(win), _global.global.requestPromises.delete(win), 
@@ -1917,7 +1918,7 @@
             } catch (err) {
                 return;
             }
-            if (message && (message = message[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT]) && message.type && _types.RECEIVE_MESSAGE_TYPES[message.type]) return message;
+            if (message && (message = message[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT], message && message.type && _types.RECEIVE_MESSAGE_TYPES[message.type])) return message;
         }
         function receiveMessage(event) {
             if (!window || window.closed) throw new Error("Message recieved in closed window");
@@ -2028,8 +2029,7 @@
                     error: err.stack ? err.message + "\n" + err.stack : err.toString()
                 });
             }) ]).catch(function(err) {
-                if (options && options.handleError) return options.handleError(err);
-                _lib.log.error(err.stack || err.toString());
+                return options && options.handleError ? options.handleError(err) : void _lib.log.error(err.stack || err.toString());
             });
         }), _defineProperty(_RECEIVE_MESSAGE_TYPE, _conf.CONSTANTS.POST_MESSAGE_TYPE.RESPONSE, function(source, origin, message) {
             var options = (0, _listeners.getResponseListener)(message.hash);
@@ -2089,7 +2089,7 @@
     }, function(module, exports, __webpack_require__) {
         "use strict";
         function isSerialized(item, type) {
-            return "object" === (void 0 === item ? "undefined" : _typeof(item)) && null !== item && item.__type__ === type;
+            return "object" === ("undefined" == typeof item ? "undefined" : _typeof(item)) && null !== item && item.__type__ === type;
         }
         function serializeMethod(destination, domain, method, name) {
             var id = (0, _util.uniqueID)(), methods = _global.global.methods.get(destination);
@@ -2133,8 +2133,8 @@
                     throw _log.log.debug("Got foreign method error", err.stack || err.toString()), err;
                 });
             }
-            return wrapper.__name__ = obj.__name__, wrapper.source = source, wrapper.origin = origin, 
-            wrapper;
+            return wrapper.__name__ = obj.__name__, wrapper.__xdomain__ = !0, wrapper.source = source, 
+            wrapper.origin = origin, wrapper;
         }
         function deserializeError(source, origin, obj) {
             return new Error(obj.__message__);
@@ -2324,6 +2324,12 @@
         var _drivers = __webpack_require__(4);
     }, function(module, exports, __webpack_require__) {
         "use strict";
+        function _interopRequireWildcard(obj) {
+            if (obj && obj.__esModule) return obj;
+            var newObj = {};
+            if (null != obj) for (var key in obj) Object.prototype.hasOwnProperty.call(obj, key) && (newObj[key] = obj[key]);
+            return newObj.default = obj, newObj;
+        }
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.winutil = exports.util = exports.bridge = exports.parent = void 0;
@@ -2361,14 +2367,9 @@
                 return _util.util;
             }
         });
-        var _windows = __webpack_require__(7), windowUtil = function(obj) {
-            if (obj && obj.__esModule) return obj;
-            var newObj = {};
-            if (null != obj) for (var key in obj) Object.prototype.hasOwnProperty.call(obj, key) && (newObj[key] = obj[key]);
-            return newObj.default = obj, newObj;
-        }(_windows);
-        exports.parent = (0, _windows.getAncestor)(), exports.bridge = void 0;
-        exports.bridge = __webpack_require__(25);
+        var _windows = __webpack_require__(7), windowUtil = _interopRequireWildcard(_windows), bridge = (exports.parent = (0, 
+        _windows.getAncestor)(), exports.bridge = void 0);
+        exports.bridge = bridge = __webpack_require__(25);
         exports.winutil = windowUtil;
     }, function(module, exports, __webpack_require__) {
         "use strict";
@@ -2430,6 +2431,12 @@
         exports.on = _on;
     }, function(module, exports, __webpack_require__) {
         "use strict";
+        function _interopRequireWildcard(obj) {
+            if (obj && obj.__esModule) return obj;
+            var newObj = {};
+            if (null != obj) for (var key in obj) Object.prototype.hasOwnProperty.call(obj, key) && (newObj[key] = obj[key]);
+            return newObj.default = obj, newObj;
+        }
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
@@ -2442,12 +2449,7 @@
                 }
             });
         });
-        var INTERFACE = function(obj) {
-            if (obj && obj.__esModule) return obj;
-            var newObj = {};
-            if (null != obj) for (var key in obj) Object.prototype.hasOwnProperty.call(obj, key) && (newObj[key] = obj[key]);
-            return newObj.default = obj, newObj;
-        }(_interface);
+        var INTERFACE = _interopRequireWildcard(_interface);
         exports.default = INTERFACE;
     } ]);
 });
