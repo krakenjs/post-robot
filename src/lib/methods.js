@@ -111,6 +111,8 @@ export function deserializeMethod(source, origin, obj) {
     }
 
     wrapper.__name__ = obj.__name__;
+    wrapper.__xdomain__ = true;
+
     wrapper.source = source;
     wrapper.origin = origin;
 
