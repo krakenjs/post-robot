@@ -309,19 +309,15 @@ export function isWindowClosed(win, allowMock = true) {
         return true;
     }
 
-    /*
-
-    // IE9... don't even ask. If an iframe is removed from the parent page, .closed does not get set to true
+    // Mobile safari
 
     try {
-        if (win.parent === win && !getOpener(win) && win !== getTop(window)) {
-            // return true;
+        if (!win.parent || !win.top) {
+            return true;
         }
     } catch (err) {
         // pass
     }
-
-    */
 
 
     return false;
