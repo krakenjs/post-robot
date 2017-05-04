@@ -54,19 +54,6 @@ export function isActuallySameDomain(win) {
     return true;
 }
 
-export function getOpener(win) {
-
-    if (!win) {
-        return;
-    }
-
-    try {
-        return win.opener;
-    } catch (err) {
-        return;
-    }
-}
-
 export function getParent(win) {
 
     if (!win) {
@@ -77,6 +64,24 @@ export function getParent(win) {
         if (win.parent && win.parent !== win) {
             return win.parent;
         }
+    } catch (err) {
+        return;
+    }
+}
+
+export function getOpener(win) {
+
+    if (!win) {
+        return;
+    }
+
+    // Make sure we're not actually an iframe which has had window.open() called on us
+    if (getParent(win)) {
+        return;
+    }
+
+    try {
+        return win.opener;
     } catch (err) {
         return;
     }
