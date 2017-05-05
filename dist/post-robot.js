@@ -378,16 +378,16 @@
             }
             return !0;
         }
-        function getOpener(win) {
+        function getParent(win) {
             if (win) try {
-                return win.opener;
+                if (win.parent && win.parent !== win) return win.parent;
             } catch (err) {
                 return;
             }
         }
-        function getParent(win) {
-            if (win) try {
-                if (win.parent && win.parent !== win) return win.parent;
+        function getOpener(win) {
+            if (win && !getParent(win)) try {
+                return win.opener;
             } catch (err) {
                 return;
             }
@@ -542,7 +542,11 @@
             } catch (err) {
                 return !err || "Call was rejected by callee.\r\n" !== err.message;
             }
-            return !!(allowMock && isSameDomain(win) && (0, _util.safeGet)(win, "mockclosed"));
+            if (allowMock && isSameDomain(win) && (0, _util.safeGet)(win, "mockclosed")) return !0;
+            try {
+                if (!win.parent || !win.top) return !0;
+            } catch (err) {}
+            return !1;
         }
         function getUserAgent(win) {
             return win = win || window, win.navigator.mockUserAgent || win.navigator.userAgent;
@@ -710,7 +714,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.isSameDomain = isSameDomain, exports.isActuallySameDomain = isActuallySameDomain, 
-        exports.getOpener = getOpener, exports.getParent = getParent, exports.getParents = getParents, 
+        exports.getParent = getParent, exports.getOpener = getOpener, exports.getParents = getParents, 
         exports.isAncestorParent = isAncestorParent, exports.getFrames = getFrames, exports.getAllChildFrames = getAllChildFrames, 
         exports.getAllFramesInWindow = getAllFramesInWindow, exports.getTop = getTop, exports.isWindowClosed = isWindowClosed, 
         exports.getUserAgent = getUserAgent, exports.getFrameByName = getFrameByName, exports.findChildFrameByName = findChildFrameByName, 
