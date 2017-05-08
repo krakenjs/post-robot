@@ -285,21 +285,18 @@ In order to use post-robot in IE9+ with popup windows, you will need to set up a
 +---------------------+
 ```
 
-a. Create a bridge path on the domain of your popup, for example `http://yy.com/bridge.html`, and include post-robot:
+
+a. Use the special `ie` build of post-robot: `dist/post-robot.ie.js`.
+
+b. Create a bridge path on the domain of your popup, for example `http://yy.com/bridge.html`, and include post-robot:
 
 ```html
-<!-- http://yy.com/bridge.html -->
-
-<script src="http://yy.com/js/post-robot.js"></script>
+<script src="http://yy.com/js/post-robot.ie.js"></script>
 ```
 
-b. Use the special `ie` build of post-robot: `post-robot.ie.js` in `dist/`
-
-c. In the parent page, `xx.com`, which opens the popup, include the following javascript:
+c. In the parent page on `xx.com` which opens the popup, include the following javascript:
 
 ```html
-<!-- http://xx.com -->
-
 <script>
     postRobot.bridge.openBridge('http://yy.com/bridge.html');
 </script>
