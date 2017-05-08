@@ -39,25 +39,6 @@ export let promise = {
         });
     },
 
-    deNodeify(method, ...args) {
-        return new Promise((resolve, reject) => {
-            try {
-                if (args.length < method.length) {
-                    return method(...args, (err, result) => {
-                        return err ? reject(err) : resolve(result);
-                    });
-                }
-
-                return promise.run(() => {
-                    return method(...args);
-                }).then(resolve, reject);
-
-            } catch (err) {
-                return reject(err);
-            }
-        });
-    },
-
     map(items, method) {
 
         let results = [];

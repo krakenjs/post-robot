@@ -149,32 +149,20 @@ export function request(options) {
         return requestPromise;
     });
 
-    return promise.nodeify(prom, options.callback);
+    return prom;
 }
 
-export function send(window, name, data, options, callback) {
-
-    if (!callback) {
-        if (!options && typeof data === 'function') {
-            callback = data;
-            options = {};
-            data = {};
-        } else if (typeof options === 'function') {
-            callback = options;
-            options = {};
-        }
-    }
+export function send(window, name, data, options) {
 
     options = options || {};
     options.window = window;
     options.name = name;
     options.data = data;
-    options.callback = callback;
 
     return request(options);
 }
 
-export function sendToParent(name, data, options, callback) {
+export function sendToParent(name, data, options) {
 
     let win = getAncestor();
 
@@ -182,7 +170,7 @@ export function sendToParent(name, data, options, callback) {
         return new promise.Promise((resolve, reject) => reject(new Error('Window does not have a parent')));
     }
 
-    return send(win, name, data, options, callback);
+    return send(win, name, data, options);
 }
 
 export function client(options = {}) {
@@ -192,8 +180,8 @@ export function client(options = {}) {
     }
 
     return {
-        send(name, data, callback) {
-            return send(options.window, name, data, options, callback);
+        send(name, data) {
+            return send(options.window, name, data, options);
         }
     };
 }

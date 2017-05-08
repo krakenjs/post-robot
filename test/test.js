@@ -102,25 +102,6 @@ describe('[post-robot] happy cases', function() {
         });
     });
 
-    it('should message a child and expect a response with a callback', function(done) {
-
-        postRobot.send(childFrame, 'setupListener', {
-
-            messageName: 'foo',
-            data: {
-                foo: 'bar2'
-            }
-
-        }).then(function() {
-
-            return postRobot.send(childFrame, 'foo', function(err, event) {
-                assert.equal(event.data.foo, 'bar2');
-                done();
-            });
-
-        }).catch(done);
-    });
-
     it('should pass a function across windows and be able to call it later', function(done) {
 
         postRobot.send(childFrame, 'setupListener', {
@@ -331,18 +312,7 @@ describe('[post-robot] error cases', function() {
             assert.ok(err);
         });
     });
-
-    it('should get a callback error when messaging with an unknown name', function(done) {
-
-        postRobot.send(childFrame, 'doesntexist', function(err, event) {
-            assert.ok(err);
-            if (event) {
-                throw new Error('Expected event to be blank');
-            }
-            done();
-        });
-    });
-
+    
     it('should error out if you try to register the same listener name twice', function() {
 
         postRobot.on('onceonly', function() {
