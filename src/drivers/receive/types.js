@@ -58,7 +58,7 @@ export let RECEIVE_MESSAGE_TYPES = {
 
                 let data = message.data;
 
-                return promise.deNodeify(options.handler, { source, origin, data });
+                return options.handler({ source, origin, data });
 
             }).then(data => {
 
