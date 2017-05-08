@@ -1398,20 +1398,6 @@
                     callback(err);
                 }) : prom;
             },
-            deNodeify: function(method) {
-                for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) args[_key - 1] = arguments[_key];
-                return new Promise(function(resolve, reject) {
-                    try {
-                        return args.length < method.length ? method.apply(void 0, args.concat([ function(err, result) {
-                            return err ? reject(err) : resolve(result);
-                        } ])) : promise.run(function() {
-                            return method.apply(void 0, args);
-                        }).then(resolve, reject);
-                    } catch (err) {
-                        return reject(err);
-                    }
-                });
-            },
             map: function(items, method) {
                 for (var results = [], _loop = function(i) {
                     results.push(promise.run(function() {
@@ -2015,7 +2001,7 @@
                 if (!options) throw new Error("No handler found for post message: " + message.name + " from " + origin + " in " + window.location.protocol + "//" + window.location.host + window.location.pathname);
                 if (!(0, _lib.matchDomain)(options.domain, origin)) throw new Error("Request origin " + origin + " does not match domain " + options.domain);
                 var data = message.data;
-                return _lib.promise.deNodeify(options.handler, {
+                return options.handler({
                     source: source,
                     origin: origin,
                     data: data
@@ -2268,17 +2254,15 @@
                     (0, _drivers.deleteResponseListener)(hash);
                 }), requestPromises.push(requestPromise), requestPromise;
             });
-            return _lib.promise.nodeify(prom, options.callback);
+            return prom;
         }
-        function _send(window, name, data, options, callback) {
-            return callback || (options || "function" != typeof data ? "function" == typeof options && (callback = options, 
-            options = {}) : (callback = data, options = {}, data = {})), options = options || {}, 
-            options.window = window, options.name = name, options.data = data, options.callback = callback, 
+        function _send(window, name, data, options) {
+            return options = options || {}, options.window = window, options.name = name, options.data = data, 
             request(options);
         }
-        function sendToParent(name, data, options, callback) {
+        function sendToParent(name, data, options) {
             var win = (0, _lib.getAncestor)();
-            return win ? _send(win, name, data, options, callback) : new _lib.promise.Promise(function(resolve, reject) {
+            return win ? _send(win, name, data, options) : new _lib.promise.Promise(function(resolve, reject) {
                 return reject(new Error("Window does not have a parent"));
             });
         }
@@ -2286,8 +2270,8 @@
             var options = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {};
             if (!options.window) throw new Error("Expected options.window");
             return {
-                send: function(name, data, callback) {
-                    return _send(options.window, name, data, options, callback);
+                send: function(name, data) {
+                    return _send(options.window, name, data, options);
                 }
             };
         }
