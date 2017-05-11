@@ -926,20 +926,22 @@
         }, SyncPromise.prototype.reject = function(error) {
             if (this.resolved || this.rejected) return this;
             if (isPromise(error)) throw new Error("Can not reject promise with another promise");
-            return this.rejected = !0, this.value = error, this.dispatch(), this;
+            return error instanceof Error || (error = new Error("Expected reject to be called with Error, got " + error)), 
+            this.rejected = !0, this.value = error, this.dispatch(), this;
         }, SyncPromise.prototype.asyncReject = function(error) {
             this.silentReject = !0, this.reject(error);
         }, SyncPromise.prototype.dispatch = function() {
             var _this = this;
             if (this.resolved || this.rejected) for (var _loop2 = function() {
-                var handler = _this.handlers.shift(), result = void 0, error = void 0;
+                var handler = _this.handlers.shift(), isError = !1, result = void 0, error = void 0;
                 try {
-                    _this.resolved ? result = handler.onSuccess ? handler.onSuccess(_this.value) : _this.value : _this.rejected && (handler.onError ? result = handler.onError(_this.value) : error = _this.value);
+                    _this.resolved ? result = handler.onSuccess ? handler.onSuccess(_this.value) : _this.value : _this.rejected && (handler.onError ? result = handler.onError(_this.value) : (isError = !0, 
+                    error = _this.value));
                 } catch (err) {
-                    error = err;
+                    isError = !0, error = err;
                 }
                 if (result === _this) throw new Error("Can not return a promise from the the then handler of the same promise");
-                return handler.promise ? void (error ? handler.promise.reject(error) : isPromise(result) ? result.then(function(res) {
+                return handler.promise ? void (isError ? handler.promise.reject(error) : isPromise(result) ? result.then(function(res) {
                     handler.promise.resolve(res);
                 }, function(err) {
                     handler.promise.reject(err);

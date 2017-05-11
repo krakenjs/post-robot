@@ -850,20 +850,22 @@
         }, SyncPromise.prototype.reject = function(error) {
             if (this.resolved || this.rejected) return this;
             if (isPromise(error)) throw new Error("Can not reject promise with another promise");
-            return this.rejected = !0, this.value = error, this.dispatch(), this;
+            return error instanceof Error || (error = new Error("Expected reject to be called with Error, got " + error)), 
+            this.rejected = !0, this.value = error, this.dispatch(), this;
         }, SyncPromise.prototype.asyncReject = function(error) {
             this.silentReject = !0, this.reject(error);
         }, SyncPromise.prototype.dispatch = function() {
             var _this = this;
             if (this.resolved || this.rejected) for (var _loop2 = function() {
-                var handler = _this.handlers.shift(), result = void 0, error = void 0;
+                var handler = _this.handlers.shift(), isError = !1, result = void 0, error = void 0;
                 try {
-                    _this.resolved ? result = handler.onSuccess ? handler.onSuccess(_this.value) : _this.value : _this.rejected && (handler.onError ? result = handler.onError(_this.value) : error = _this.value);
+                    _this.resolved ? result = handler.onSuccess ? handler.onSuccess(_this.value) : _this.value : _this.rejected && (handler.onError ? result = handler.onError(_this.value) : (isError = !0, 
+                    error = _this.value));
                 } catch (err) {
-                    error = err;
+                    isError = !0, error = err;
                 }
                 if (result === _this) throw new Error("Can not return a promise from the the then handler of the same promise");
-                return handler.promise ? void (error ? handler.promise.reject(error) : isPromise(result) ? result.then(function(res) {
+                return handler.promise ? void (isError ? handler.promise.reject(error) : isPromise(result) ? result.then(function(res) {
                     handler.promise.resolve(res);
                 }, function(err) {
                     handler.promise.reject(err);
@@ -1588,6 +1590,12 @@
         }();
     }, function(module, exports, __webpack_require__) {
         "use strict";
+        function deleteTunnelWindow(id) {
+            try {
+                _global.global.tunnelWindows[id] && delete _global.global.tunnelWindows[id].source;
+            } catch (err) {}
+            delete _global.global.tunnelWindows[id];
+        }
         function cleanTunnelWindows() {
             for (var tunnelWindows = _global.global.tunnelWindows, _iterator = Object.keys(tunnelWindows), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
                 var _ref;
@@ -1599,7 +1607,13 @@
                     _ref = _i.value;
                 }
                 var key = _ref, tunnelWindow = tunnelWindows[key];
-                (0, _lib.isWindowClosed)(tunnelWindow.source) && (delete tunnelWindow.source, delete tunnelWindows[key]);
+                try {
+                    (0, _lib.noop)(tunnelWindow.source);
+                } catch (err) {
+                    deleteTunnelWindow(key);
+                    continue;
+                }
+                (0, _lib.isWindowClosed)(tunnelWindow.source) && deleteTunnelWindow(key);
             }
         }
         function addTunnelWindow(data) {
@@ -1619,6 +1633,11 @@
                 name: data.name,
                 sendMessage: function() {
                     var tunnelWindow = getTunnelWindow(id);
+                    try {
+                        (0, _lib.noop)(tunnelWindow && tunnelWindow.source);
+                    } catch (err) {
+                        return void deleteTunnelWindow(id);
+                    }
                     if (tunnelWindow && tunnelWindow.source && !(0, _lib.isWindowClosed)(tunnelWindow.source)) {
                         try {
                             tunnelWindow.canary();
@@ -1645,6 +1664,11 @@
                         source: window,
                         canary: function() {},
                         sendMessage: function(message) {
+                            try {
+                                (0, _lib.noop)(window);
+                            } catch (err) {
+                                return;
+                            }
                             window && !window.closed && (0, _drivers.receiveMessage)({
                                 data: message,
                                 origin: this.origin,
