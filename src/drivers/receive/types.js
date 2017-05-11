@@ -70,10 +70,25 @@ export let RECEIVE_MESSAGE_TYPES = {
 
             }, err => {
 
+                let stack = err.stack;
+                let message = err.message;
+
+                let error;
+
+                if (stack) {
+                    if (!message || stack.indexOf(message) !== -1) {
+                        error = stack;
+                    } else {
+                        error = `${err.message}\n${err.stack}`;
+                    }
+                } else {
+                    error = message;
+                }
+
                 return respond({
                     type: CONSTANTS.POST_MESSAGE_TYPE.RESPONSE,
                     ack: CONSTANTS.POST_MESSAGE_ACK.ERROR,
-                    error: err.stack ? `${err.message}\n${err.stack}` : err.toString()
+                    error
                 });
             })
 
