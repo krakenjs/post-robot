@@ -1,6 +1,6 @@
 
 import { CONSTANTS } from '../conf';
-import { getParent, isWindowClosed } from '../lib';
+import { getParent, isWindowClosed, noop } from '../lib';
 import { global } from '../global';
 import { send } from '../interface';
 
@@ -20,15 +20,34 @@ import { send } from '../interface';
 global.tunnelWindows = global.tunnelWindows || {};
 global.tunnelWindowId = 0;
 
+function deleteTunnelWindow(id) {
+
+    try {
+        if (global.tunnelWindows[id]) {
+            delete global.tunnelWindows[id].source;
+        }
+    } catch (err) {
+        // pass
+    }
+
+    delete global.tunnelWindows[id];
+}
+
 function cleanTunnelWindows() {
     let tunnelWindows = global.tunnelWindows;
 
     for (let key of Object.keys(tunnelWindows)) {
         let tunnelWindow = tunnelWindows[key];
 
+        try {
+            noop(tunnelWindow.source);
+        } catch (err) {
+            deleteTunnelWindow(key);
+            continue;
+        }
+
         if (isWindowClosed(tunnelWindow.source)) {
-            delete tunnelWindow.source;
-            delete tunnelWindows[key];
+            deleteTunnelWindow(key);
         }
     }
 }
@@ -61,6 +80,14 @@ global.openTunnelToParent = function openTunnelToParent(data) {
         sendMessage() {
 
             let tunnelWindow = getTunnelWindow(id);
+
+            try {
+                 // IE gets antsy if you try to even reference a closed window
+                noop(tunnelWindow && tunnelWindow.source);
+            } catch (err) {
+                deleteTunnelWindow(id);
+                return;
+            }
 
             if (!tunnelWindow || !tunnelWindow.source || isWindowClosed(tunnelWindow.source)) {
                 return;

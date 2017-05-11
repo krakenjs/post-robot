@@ -1,7 +1,7 @@
 
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { CONSTANTS } from '../conf';
-import { isSameDomain, getOpener, getFrames, getDomain, getFrameByName, weakMapMemoize } from '../lib';
+import { isSameDomain, getOpener, getFrames, getDomain, getFrameByName, weakMapMemoize, noop } from '../lib';
 import { receiveMessage } from '../drivers';
 
 import { needsBridge, registerRemoteWindow, rejectRemoteSendMessage, registerRemoteSendMessage, getBridgeName } from './common';
@@ -91,6 +91,12 @@ export function openTunnelToOpener() {
                 },
 
                 sendMessage(message) {
+
+                    try {
+                        noop(window);
+                    } catch (err) {
+                        return;
+                    }
 
                     if (!window || window.closed) {
                         return;
