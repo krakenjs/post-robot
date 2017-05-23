@@ -71,18 +71,18 @@ export let RECEIVE_MESSAGE_TYPES = {
             }, err => {
 
                 let stack = err.stack;
-                let message = err.message;
+                let errmessage = err.message;
 
                 let error;
 
                 if (stack) {
-                    if (!message || stack.indexOf(message) !== -1) {
+                    if (!errmessage || stack.indexOf(errmessage) !== -1) {
                         error = stack;
                     } else {
-                        error = `${err.message}\n${err.stack}`;
+                        error = `${errmessage}\n${stack}`;
                     }
                 } else {
-                    error = message;
+                    error = errmessage;
                 }
 
                 return respond({
