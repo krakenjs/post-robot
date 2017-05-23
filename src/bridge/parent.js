@@ -178,8 +178,14 @@ window.open = function(url, name, options, last) {
         }
     }
 
-    if (name) {
-        let winOptions = { name, domain, win };
+    if (name && win) {
+        let winOptions = global.popupWindowsByWin.get(win) ||
+                         global.popupWindowsByName[name] || {};
+
+        winOptions.name = winOptions.name || name;
+        winOptions.win = winOptions.win || win;
+        winOptions.domain = winOptions.domain || domain;
+
         global.popupWindowsByWin.set(win, winOptions);
         global.popupWindowsByName[name] = winOptions;
     }
