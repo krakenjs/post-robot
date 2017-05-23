@@ -926,7 +926,7 @@
         }, SyncPromise.prototype.reject = function(error) {
             if (this.resolved || this.rejected) return this;
             if (isPromise(error)) throw new Error("Can not reject promise with another promise");
-            return error instanceof Error || (error = new Error("Expected reject to be called with Error, got " + error)), 
+            return error || (error = new Error("Expected reject to be called with Error, got " + error)), 
             this.rejected = !0, this.value = error, this.dispatch(), this;
         }, SyncPromise.prototype.asyncReject = function(error) {
             this.silentReject = !0, this.reject(error);
@@ -1616,10 +1616,12 @@
                     data: data
                 });
             }, function(err) {
-                return respond({
+                var stack = err.stack, errmessage = err.message, error = void 0;
+                return error = stack ? errmessage && stack.indexOf(errmessage) === -1 ? errmessage + "\n" + stack : stack : errmessage, 
+                respond({
                     type: _conf.CONSTANTS.POST_MESSAGE_TYPE.RESPONSE,
                     ack: _conf.CONSTANTS.POST_MESSAGE_ACK.ERROR,
-                    error: err.stack ? err.message + "\n" + err.stack : err.toString()
+                    error: error
                 });
             }) ]).catch(function(err) {
                 return options && options.handleError ? options.handleError(err) : void _lib.log.error(err.stack || err.toString());
