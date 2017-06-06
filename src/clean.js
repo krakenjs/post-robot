@@ -28,5 +28,4 @@ export function cleanUpWindow(win) {
     global.requestPromises.delete(win);
     global.methods.delete(win);
     global.readyPromises.delete(win);
-    global.domainMatches.delete(win);
 }
