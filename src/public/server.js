@@ -1,5 +1,7 @@
 
-import { noop, once as onceFunction, extend, safeInterval, promise, isWindowClosed } from '../lib';
+import { isWindowClosed } from 'cross-domain-utils/src';
+
+import { noop, once as onceFunction, extend, safeInterval, promise } from '../lib';
 import { addRequestListener } from '../drivers';
 import { CONSTANTS } from '../conf';
 

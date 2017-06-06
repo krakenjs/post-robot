@@ -1,6 +1,5 @@
 
-import { map } from './util';
-import { getWindowType, jsonStringify } from './windows';
+import { map, getWindowType, jsonStringify } from './util';
 import { CONFIG } from '../conf';
 
 const LOG_LEVELS = ['debug', 'info', 'warn', 'error'];

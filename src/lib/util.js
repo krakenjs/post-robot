@@ -1,6 +1,8 @@
 
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
+import { isPopup, isIframe, getDomain } from 'cross-domain-utils/src';
 import { CONSTANTS } from '../conf';
+
 
 export function once(method) {
     if (!method) {
@@ -230,33 +232,6 @@ export function intervalTimeout(time, interval, method) {
     return safeInterval;
 }
 
-export function getActualDomain(win) {
-    return `${win.location.protocol}//${win.location.host}`;
-}
-
-export function getDomain(win) {
-
-    win = win || window;
-
-    if (win.mockDomain && win.mockDomain.indexOf(CONSTANTS.MOCK_PROTOCOL) === 0) {
-        return win.mockDomain;
-    }
-
-    if (!win.location.protocol) {
-        throw new Error(`Can not read window protocol`);
-    }
-
-    if (win.location.protocol === CONSTANTS.FILE_PROTOCOL) {
-        return getActualDomain(win);
-    }
-
-    if (!win.location.host) {
-        throw new Error(`Can not read window host`);
-    }
-
-    return getActualDomain(win);
-}
-
 export function getDomainFromUrl(url) {
 
     let domain;
@@ -308,4 +283,65 @@ export function weakMapMemoize(method) {
 
         return result;
     };
+}
+
+export function getWindowType() {
+    if (isPopup()) {
+        return CONSTANTS.WINDOW_TYPES.POPUP;
+    }
+    if (isIframe()) {
+        return CONSTANTS.WINDOW_TYPES.IFRAME;
+    }
+    return CONSTANTS.WINDOW_TYPES.FULLPAGE;
+}
+
+export function jsonStringify() {
+
+    let objectToJSON;
+    let arrayToJSON;
+
+    try {
+        if (JSON.stringify({}) !== '{}') {
+            objectToJSON = Object.prototype.toJSON;
+            delete Object.prototype.toJSON;
+        }
+
+        if (JSON.stringify({}) !== '{}') {
+            throw new Error(`Can not correctly serialize JSON objects`);
+        }
+
+        if (JSON.stringify([]) !== '[]') {
+            arrayToJSON  = Array.prototype.toJSON;
+            delete Array.prototype.toJSON;
+        }
+
+        if (JSON.stringify([]) !== '[]') {
+            throw new Error(`Can not correctly serialize JSON objects`);
+        }
+
+    } catch (err) {
+        throw new Error(`Can not repair JSON.stringify: ${err.message}`);
+    }
+
+    let result = JSON.stringify.apply(this, arguments);
+
+    try {
+        if (objectToJSON) {
+            Object.prototype.toJSON = objectToJSON; // eslint-disable-line
+        }
+
+        if (arrayToJSON) {
+            Array.prototype.toJSON = arrayToJSON; // eslint-disable-line
+        }
+
+    } catch (err) {
+        throw new Error(`Can not repair JSON.stringify: ${err.message}`);
+    }
+
+
+    return result;
+}
+
+export function jsonParse() {
+    return JSON.parse.apply(this, arguments);
 }

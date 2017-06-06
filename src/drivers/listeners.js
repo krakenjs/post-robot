@@ -1,8 +1,9 @@
 
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
+import { matchDomain } from 'cross-domain-utils/src';
 
 import { global } from '../global';
-import { matchDomain, isRegex } from '../lib';
+import { isRegex } from '../lib';
 import { CONSTANTS } from '../conf';
 
 export function resetListeners() {

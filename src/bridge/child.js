@@ -1,7 +1,8 @@
 
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
+import { isSameDomain, getOpener, getFrames, getDomain, getFrameByName } from 'cross-domain-utils/src';
 import { CONSTANTS } from '../conf';
-import { isSameDomain, getOpener, getFrames, getDomain, getFrameByName, weakMapMemoize, noop } from '../lib';
+import { weakMapMemoize, noop } from '../lib';
 import { receiveMessage } from '../drivers';
 
 import { needsBridge, registerRemoteWindow, rejectRemoteSendMessage, registerRemoteSendMessage, getBridgeName } from './common';

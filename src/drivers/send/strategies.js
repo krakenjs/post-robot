@@ -1,6 +1,7 @@
 
+import { isSameDomain, isSameTopWindow, isActuallySameDomain, getActualDomain, getDomain } from 'cross-domain-utils/src';
+
 import { CONSTANTS } from '../../conf';
-import { isSameDomain, isSameTopWindow, isActuallySameDomain, getActualDomain, getDomain } from '../../lib';
 
 export let SEND_MESSAGE_STRATEGIES = {};
 

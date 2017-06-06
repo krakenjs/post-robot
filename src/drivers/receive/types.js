@@ -1,6 +1,8 @@
 
+import { isWindowClosed, matchDomain } from 'cross-domain-utils/src';
+
 import { CONSTANTS } from '../../conf';
-import { promise, log, isWindowClosed, matchDomain } from '../../lib';
+import { promise, log } from '../../lib';
 
 import { sendMessage } from '../send';
 import { getRequestListener, getResponseListener, deleteResponseListener } from '../listeners';

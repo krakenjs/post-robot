@@ -1,11 +1,9 @@
 
-import { getAncestor } from '../lib/windows';
+import { getAncestor } from 'cross-domain-utils/src';
 
 export * from './client';
 export * from './server';
 export * from './config';
-
-import * as windowUtil from '../lib/windows';
 
 export let parent = getAncestor();
 
@@ -16,5 +14,3 @@ if (__IE_POPUP_SUPPORT__) {
 }
 
 export { util } from '../lib/util';
-
-export let winutil = windowUtil;

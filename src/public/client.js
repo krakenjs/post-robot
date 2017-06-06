@@ -1,9 +1,10 @@
 
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
+import { getAncestor, isAncestor, isWindowClosed } from 'cross-domain-utils/src';
 
 import { CONFIG, CONSTANTS } from '../conf';
 import { sendMessage, addResponseListener, deleteResponseListener } from '../drivers';
-import { uniqueID, safeInterval, promise, getAncestor, isAncestor, onWindowReady, isWindowClosed } from '../lib';
+import { uniqueID, safeInterval, promise, onWindowReady } from '../lib';
 import { global } from '../global';
 
 global.requestPromises = global.requestPromises || new WeakMap();

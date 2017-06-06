@@ -1,8 +1,9 @@
 
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
+import { getDomain, isSameDomain, isOpener, isSameTopWindow, matchDomain, getUserAgent } from 'cross-domain-utils/src';
 
 import { CONFIG, CONSTANTS } from '../conf';
-import { getDomain, getDomainFromUrl, promise, isSameDomain, isOpener, isSameTopWindow, getUserAgent, matchDomain } from '../lib';
+import { getDomainFromUrl, promise } from '../lib';
 import { global } from '../global';
 import { receiveMessage } from '../drivers';
 

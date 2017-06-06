@@ -1,6 +1,8 @@
 
+import { isWindowClosed } from 'cross-domain-utils/src';
+
 import { CONSTANTS, POST_MESSAGE_NAMES_LIST } from '../../conf';
-import { deserializeMethods, log, isWindowClosed, jsonParse, listen } from '../../lib';
+import { deserializeMethods, log, jsonParse, listen } from '../../lib';
 import { global } from '../../global';
 
 import { RECEIVE_MESSAGE_TYPES } from './types';

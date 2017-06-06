@@ -1,6 +1,7 @@
 
 import { CONSTANTS } from '../conf';
-import { getParent, isWindowClosed, noop } from '../lib';
+import { getParent, isWindowClosed } from 'cross-domain-utils/src';
+import { noop } from '../lib';
 import { global } from '../global';
 import { send } from '../interface';
 

@@ -1,9 +1,9 @@
 
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
+import { matchDomain } from 'cross-domain-utils/src';
 
 import { CONSTANTS } from '../conf';
 import { once, uniqueID, replaceObject } from './util';
-import { matchDomain } from './domain';
 import { on, send } from '../interface';
 import { log } from './log';
 import { promise } from './promise';

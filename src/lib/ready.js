@@ -1,8 +1,8 @@
 
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
+import { getAncestor } from 'cross-domain-utils/src';
 
 import { CONSTANTS } from '../conf';
-import { getAncestor } from './windows';
 import { on, send } from '../interface';
 import { log } from './log';
 import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';

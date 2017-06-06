@@ -1,6 +1,7 @@
 
+import { getDomain, isWindowClosed } from 'cross-domain-utils/src';
 import { CONSTANTS, CONFIG, POST_MESSAGE_NAMES_LIST } from '../../conf';
-import { uniqueID, getDomain, some, promise, serializeMethods, log, isWindowClosed, getWindowType, jsonStringify } from '../../lib';
+import { uniqueID, some, promise, serializeMethods, log, getWindowType, jsonStringify } from '../../lib';
 
 import { SEND_MESSAGE_STRATEGIES } from './strategies';
 
