@@ -56,6 +56,7 @@
             });
         });
     }, function(module, exports, __webpack_require__) {
+        "use strict";
         function setWindowMatch(win, match) {
             global.domainMatches = global.domainMatches || new _src.WeakMap(), global.domainMatches.set(win, match), 
             domainMatchTimeout || (domainMatchTimeout = setTimeout(function() {
@@ -1577,7 +1578,8 @@
                 }
             } ]), WeakMap;
         }();
-    }, function(module, exports) {
+    }, function(module, exports, __webpack_require__) {
+        "use strict";
         function isRegex(item) {
             return "[object RegExp]" === Object.prototype.toString.call(item);
         }
@@ -1876,7 +1878,7 @@
             }
             _global.global.popupWindowsByWin && _global.global.popupWindowsByWin.delete(win), 
             _global.global.remoteWindows && _global.global.remoteWindows.delete(win), _global.global.requestPromises.delete(win), 
-            _global.global.methods.delete(win), _global.global.readyPromises.delete(win), _global.global.domainMatches.delete(win);
+            _global.global.methods.delete(win), _global.global.readyPromises.delete(win);
         }
         Object.defineProperty(exports, "__esModule", {
             value: !0
