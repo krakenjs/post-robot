@@ -1,17 +1,18 @@
 
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
+import { SyncPromise } from 'sync-browser-mocks/src/promise';
 import { getAncestor, isAncestor, isWindowClosed } from 'cross-domain-utils/src';
 
 import { CONFIG, CONSTANTS } from '../conf';
 import { sendMessage, addResponseListener, deleteResponseListener } from '../drivers';
-import { uniqueID, safeInterval, promise, onWindowReady } from '../lib';
+import { uniqueID, safeInterval, onWindowReady } from '../lib';
 import { global } from '../global';
 
 global.requestPromises = global.requestPromises || new WeakMap();
 
 export function request(options) {
 
-    let prom = promise.run(() => {
+    let prom = SyncPromise.try(() => {
 
         if (!options.name) {
             throw new Error('Expected options.name');
@@ -73,7 +74,7 @@ export function request(options) {
             global.requestPromises.set(options.window, requestPromises);
         }
 
-        let requestPromise = promise.run(() => {
+        let requestPromise = SyncPromise.try(() => {
 
             if (isAncestor(window, options.window)) {
                 return onWindowReady(options.window);
@@ -81,7 +82,7 @@ export function request(options) {
 
         }).then(() => {
 
-            return new promise.Promise((resolve, reject) => {
+            return new SyncPromise((resolve, reject) => {
 
                 options.respond = (err, result) => {
 
@@ -168,7 +169,7 @@ export function sendToParent(name, data, options) {
     let win = getAncestor();
 
     if (!win) {
-        return new promise.Promise((resolve, reject) => reject(new Error('Window does not have a parent')));
+        return new SyncPromise((resolve, reject) => reject(new Error('Window does not have a parent')));
     }
 
     return send(win, name, data, options);

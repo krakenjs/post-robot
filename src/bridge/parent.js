@@ -1,9 +1,10 @@
 
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
+import { SyncPromise } from 'sync-browser-mocks/src/promise';
 import { getDomain, getFrameByName, isWindowClosed } from 'cross-domain-utils/src';
 
 import { CONFIG, CONSTANTS } from '../conf';
-import { getDomainFromUrl, promise, log, onWindowReady } from '../lib';
+import { getDomainFromUrl, log, onWindowReady } from '../lib';
 import { global } from '../global';
 import { on } from '../interface';
 import { receiveMessage } from '../drivers';
@@ -100,7 +101,7 @@ export function openBridge(url, domain) {
         return global.bridges[domain];
     }
 
-    global.bridges[domain] = promise.run(() => {
+    global.bridges[domain] = SyncPromise.try(() => {
 
         if (getDomain() === domain) {
             throw new Error(`Can not open bridge on the same domain as current domain: ${domain}`);
@@ -117,7 +118,7 @@ export function openBridge(url, domain) {
 
         return documentBodyReady.then(body => {
 
-            return new promise.Promise((resolve, reject) => {
+            return new SyncPromise((resolve, reject) => {
 
                 setTimeout(resolve, 1);
 
@@ -129,7 +130,7 @@ export function openBridge(url, domain) {
 
                 listenForRegister(bridge, domain);
 
-                return new promise.Promise((resolve, reject) => {
+                return new SyncPromise((resolve, reject) => {
 
                     iframe.onload = resolve;
                     iframe.onerror = reject;

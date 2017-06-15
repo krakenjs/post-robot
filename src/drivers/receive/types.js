@@ -1,8 +1,9 @@
 
+import { SyncPromise } from 'sync-browser-mocks/src/promise';
 import { isWindowClosed, matchDomain } from 'cross-domain-utils/src';
 
 import { CONSTANTS } from '../../conf';
-import { promise, log } from '../../lib';
+import { log } from '../../lib';
 
 import { sendMessage } from '../send';
 import { getRequestListener, getResponseListener, deleteResponseListener } from '../listeners';
@@ -31,7 +32,7 @@ export let RECEIVE_MESSAGE_TYPES = {
         function respond(data) {
 
             if (message.fireAndForget || isWindowClosed(source)) {
-                return promise.Promise.resolve();
+                return SyncPromise.resolve();
             }
 
             return sendMessage(source, {
@@ -42,13 +43,13 @@ export let RECEIVE_MESSAGE_TYPES = {
             }, origin);
         }
 
-        return promise.Promise.all([
+        return SyncPromise.all([
 
             respond({
                 type: CONSTANTS.POST_MESSAGE_TYPE.ACK
             }),
 
-            promise.run(() => {
+            SyncPromise.try(() => {
 
                 if (!options) {
                     throw new Error(`No handler found for post message: ${message.name} from ${origin} in ${window.location.protocol}//${window.location.host}${window.location.pathname}`);

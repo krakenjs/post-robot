@@ -1,7 +1,8 @@
 
 import { isWindowClosed } from 'cross-domain-utils/src';
+import { SyncPromise } from 'sync-browser-mocks/src/promise';
 
-import { noop, once as onceFunction, extend, safeInterval, promise } from '../lib';
+import { noop, once as onceFunction, extend, safeInterval } from '../lib';
 import { addRequestListener } from '../drivers';
 import { CONSTANTS } from '../conf';
 
@@ -85,7 +86,7 @@ export function once(name, options, handler, errorHandler) {
     options.errorHandler = errorHandler || options.errorHandler;
     options.once = true;
 
-    let prom = new promise.Promise((resolve, reject) => {
+    let prom = new SyncPromise((resolve, reject) => {
         options.handler = options.handler || (event => resolve(event));
         options.errorHandler = options.errorHandler || reject;
     });

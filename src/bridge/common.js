@@ -1,9 +1,10 @@
 
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
+import { SyncPromise } from 'sync-browser-mocks/src/promise';
 import { getDomain, isSameDomain, isOpener, isSameTopWindow, matchDomain, getUserAgent } from 'cross-domain-utils/src';
 
 import { CONFIG, CONSTANTS } from '../conf';
-import { getDomainFromUrl, promise } from '../lib';
+import { getDomainFromUrl } from '../lib';
 import { global } from '../global';
 import { receiveMessage } from '../drivers';
 
@@ -61,7 +62,7 @@ export function isBridge() {
     return window.name && window.name === getBridgeName(getDomain());
 }
 
-export let documentBodyReady = new promise.Promise(resolve => {
+export let documentBodyReady = new SyncPromise(resolve => {
 
     if (window.document && window.document.body) {
         return resolve(window.document.body);
@@ -78,7 +79,7 @@ export let documentBodyReady = new promise.Promise(resolve => {
 global.remoteWindows = global.remoteWindows || new WeakMap();
 
 export function registerRemoteWindow(win, timeout = CONFIG.BRIDGE_TIMEOUT) {
-    global.remoteWindows.set(win, { sendMessagePromise: new promise.Promise() });
+    global.remoteWindows.set(win, { sendMessagePromise: new SyncPromise() });
 }
 
 export function findRemoteWindow(win) {
@@ -107,7 +108,7 @@ export function registerRemoteSendMessage(win, domain, sendMessage) {
     };
 
     remoteWindow.sendMessagePromise.resolve(sendMessageWrapper);
-    remoteWindow.sendMessagePromise = promise.Promise.resolve(sendMessageWrapper);
+    remoteWindow.sendMessagePromise = SyncPromise.resolve(sendMessageWrapper);
 }
 
 export function rejectRemoteSendMessage(win, err) {

@@ -1,4 +1,6 @@
 
+import { SyncPromise } from 'sync-browser-mocks/src/promise';
+
 import { enableIE8Mode } from './common';
 import postRobot from 'src/index';
 
@@ -37,7 +39,7 @@ before(function() {
         otherChildFrame = createIframe('child.htm');
         frameElement = document.getElementById('childframe');
 
-        return promise.Promise.all([
+        return SyncPromise.all([
             onWindowReady(childWindow),
             onWindowReady(childFrame),
             onWindowReady(otherChildFrame)
@@ -312,7 +314,7 @@ describe('[post-robot] error cases', function() {
             assert.ok(err);
         });
     });
-    
+
     it('should error out if you try to register the same listener name twice', function() {
 
         postRobot.on('onceonly', function() {

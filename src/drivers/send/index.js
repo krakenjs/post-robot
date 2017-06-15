@@ -1,7 +1,9 @@
 
 import { getDomain, isWindowClosed } from 'cross-domain-utils/src';
+import { SyncPromise } from 'sync-browser-mocks/src/promise';
+
 import { CONSTANTS, CONFIG, POST_MESSAGE_NAMES_LIST } from '../../conf';
-import { uniqueID, some, promise, serializeMethods, log, getWindowType, jsonStringify } from '../../lib';
+import { uniqueID, some, serializeMethods, log, getWindowType, jsonStringify, promiseMap } from '../../lib';
 
 import { SEND_MESSAGE_STRATEGIES } from './strategies';
 
@@ -23,7 +25,7 @@ export function buildMessage(win, message, options = {}) {
 
 
 export function sendMessage(win, message, domain) {
-    return promise.run(() => {
+    return SyncPromise.try(() => {
 
         message = buildMessage(win, message, {
             data: serializeMethods(win, domain, message.data),
@@ -67,9 +69,9 @@ export function sendMessage(win, message, domain) {
             [ CONSTANTS.WINDOW_PROPS.POSTROBOT ]: message
         }, 0, 2);
 
-        return promise.map(Object.keys(SEND_MESSAGE_STRATEGIES), strategyName => {
+        return promiseMap(Object.keys(SEND_MESSAGE_STRATEGIES), strategyName => {
 
-            return promise.run(() => {
+            return SyncPromise.try(() => {
 
                 if (!CONFIG.ALLOWED_POST_MESSAGE_METHODS[strategyName]) {
                     throw new Error(`Strategy disallowed: ${strategyName}`);

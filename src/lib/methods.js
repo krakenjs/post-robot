@@ -1,12 +1,12 @@
 
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
 import { matchDomain } from 'cross-domain-utils/src';
+import { SyncPromise } from 'sync-browser-mocks/src/promise';
 
 import { CONSTANTS } from '../conf';
 import { once, uniqueID, replaceObject } from './util';
 import { on, send } from '../interface';
 import { log } from './log';
-import { promise } from './promise';
 import { global } from '../global';
 
 global.methods = global.methods || new WeakMap();
@@ -32,7 +32,7 @@ export let listenForMethods = once(() => {
 
         log.debug('Call local method', data.name, data.args);
 
-        return promise.run(() => {
+        return SyncPromise.try(() => {
             return meth.method.apply({ source, origin, data }, data.args);
 
         }).then(result => {
