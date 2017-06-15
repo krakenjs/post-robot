@@ -1,6 +1,6 @@
 
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
-import { SyncPromise } from 'sync-browser-mocks/src/promise';
+import { ZalgoPromise } from 'zalgo-promise';
 import { getDomain, getFrameByName, isWindowClosed } from 'cross-domain-utils/src';
 
 import { CONFIG, CONSTANTS } from '../conf';
@@ -101,7 +101,7 @@ export function openBridge(url, domain) {
         return global.bridges[domain];
     }
 
-    global.bridges[domain] = SyncPromise.try(() => {
+    global.bridges[domain] = ZalgoPromise.try(() => {
 
         if (getDomain() === domain) {
             throw new Error(`Can not open bridge on the same domain as current domain: ${domain}`);
@@ -118,7 +118,7 @@ export function openBridge(url, domain) {
 
         return documentBodyReady.then(body => {
 
-            return new SyncPromise((resolve, reject) => {
+            return new ZalgoPromise((resolve, reject) => {
 
                 setTimeout(resolve, 1);
 
@@ -130,7 +130,7 @@ export function openBridge(url, domain) {
 
                 listenForRegister(bridge, domain);
 
-                return new SyncPromise((resolve, reject) => {
+                return new ZalgoPromise((resolve, reject) => {
 
                     iframe.onload = resolve;
                     iframe.onerror = reject;

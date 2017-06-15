@@ -74,6 +74,6 @@
   "dependencies": {
     "cross-domain-safe-weakmap": "^1.0.1",
     "cross-domain-utils": "^1.0.1",
-    "sync-browser-mocks": "^1.0.3"
+    "zalgo-promise": "^1.0.3"
   }
 }

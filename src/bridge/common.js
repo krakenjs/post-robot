@@ -1,6 +1,6 @@
 
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
-import { SyncPromise } from 'sync-browser-mocks/src/promise';
+import { ZalgoPromise } from 'zalgo-promise';
 import { getDomain, isSameDomain, isOpener, isSameTopWindow, matchDomain, getUserAgent } from 'cross-domain-utils/src';
 
 import { CONFIG, CONSTANTS } from '../conf';
@@ -62,7 +62,7 @@ export function isBridge() {
     return window.name && window.name === getBridgeName(getDomain());
 }
 
-export let documentBodyReady = new SyncPromise(resolve => {
+export let documentBodyReady = new ZalgoPromise(resolve => {
 
     if (window.document && window.document.body) {
         return resolve(window.document.body);
@@ -79,7 +79,7 @@ export let documentBodyReady = new SyncPromise(resolve => {
 global.remoteWindows = global.remoteWindows || new WeakMap();
 
 export function registerRemoteWindow(win, timeout = CONFIG.BRIDGE_TIMEOUT) {
-    global.remoteWindows.set(win, { sendMessagePromise: new SyncPromise() });
+    global.remoteWindows.set(win, { sendMessagePromise: new ZalgoPromise() });
 }
 
 export function findRemoteWindow(win) {
@@ -108,7 +108,7 @@ export function registerRemoteSendMessage(win, domain, sendMessage) {
     };
 
     remoteWindow.sendMessagePromise.resolve(sendMessageWrapper);
-    remoteWindow.sendMessagePromise = SyncPromise.resolve(sendMessageWrapper);
+    remoteWindow.sendMessagePromise = ZalgoPromise.resolve(sendMessageWrapper);
 }
 
 export function rejectRemoteSendMessage(win, err) {

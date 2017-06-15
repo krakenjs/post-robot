@@ -12,8 +12,8 @@ if ! git diff-index --quiet --cached HEAD; then
     exit 1;
 fi;
 
-rm -rf node_modules/cross-domain-safe-weakmap node_modules/sync-browser-mocks node_modules/cross-domain-utils
-npm install cross-domain-safe-weakmap sync-browser-mocks cross-domain-utils
+rm -rf node_modules/cross-domain-safe-weakmap node_modules/zalgo-promise node_modules/cross-domain-utils
+npm install cross-domain-safe-weakmap zalgo-promise cross-domain-utils
 
 gulp build;
 

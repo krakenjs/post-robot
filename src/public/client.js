@@ -1,6 +1,6 @@
 
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
-import { SyncPromise } from 'sync-browser-mocks/src/promise';
+import { ZalgoPromise } from 'zalgo-promise';
 import { getAncestor, isAncestor, isWindowClosed } from 'cross-domain-utils/src';
 
 import { CONFIG, CONSTANTS } from '../conf';
@@ -12,7 +12,7 @@ global.requestPromises = global.requestPromises || new WeakMap();
 
 export function request(options) {
 
-    let prom = SyncPromise.try(() => {
+    let prom = ZalgoPromise.try(() => {
 
         if (!options.name) {
             throw new Error('Expected options.name');
@@ -74,7 +74,7 @@ export function request(options) {
             global.requestPromises.set(options.window, requestPromises);
         }
 
-        let requestPromise = SyncPromise.try(() => {
+        let requestPromise = ZalgoPromise.try(() => {
 
             if (isAncestor(window, options.window)) {
                 return onWindowReady(options.window);
@@ -82,7 +82,7 @@ export function request(options) {
 
         }).then(() => {
 
-            return new SyncPromise((resolve, reject) => {
+            return new ZalgoPromise((resolve, reject) => {
 
                 options.respond = (err, result) => {
 
@@ -169,7 +169,7 @@ export function sendToParent(name, data, options) {
     let win = getAncestor();
 
     if (!win) {
-        return new SyncPromise((resolve, reject) => reject(new Error('Window does not have a parent')));
+        return new ZalgoPromise((resolve, reject) => reject(new Error('Window does not have a parent')));
     }
 
     return send(win, name, data, options);

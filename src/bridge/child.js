@@ -1,5 +1,5 @@
 
-import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
+import { ZalgoPromise } from 'zalgo-promise';
 import { isSameDomain, getOpener, getFrames, getDomain, getFrameByName } from 'cross-domain-utils/src';
 import { CONSTANTS } from '../conf';
 import { weakMapMemoize, noop } from '../lib';
@@ -8,7 +8,7 @@ import { receiveMessage } from '../drivers';
 import { needsBridge, registerRemoteWindow, rejectRemoteSendMessage, registerRemoteSendMessage, getBridgeName } from './common';
 
 let awaitRemoteBridgeForWindow = weakMapMemoize(win => {
-    return Promise.try(() => {
+    return ZalgoPromise.try(() => {
         for (let frame of getFrames(win)) {
             try {
                 if (frame && frame !== window && isSameDomain(frame) && frame[CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
@@ -31,7 +31,7 @@ let awaitRemoteBridgeForWindow = weakMapMemoize(win => {
                 return frame;
             }
 
-            return new Promise(resolve => {
+            return new ZalgoPromise(resolve => {
 
                 let interval;
                 let timeout;
@@ -57,7 +57,7 @@ let awaitRemoteBridgeForWindow = weakMapMemoize(win => {
 });
 
 export function openTunnelToOpener() {
-    return Promise.try(() => {
+    return ZalgoPromise.try(() => {
 
         let opener = getOpener(window);
 

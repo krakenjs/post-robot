@@ -1,11 +1,11 @@
 
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
 import { getAncestor } from 'cross-domain-utils/src';
+import { ZalgoPromise } from 'zalgo-promise';
 
 import { CONSTANTS } from '../conf';
 import { on, send } from '../interface';
 import { log } from './log';
-import { SyncPromise as Promise } from 'sync-browser-mocks/src/promise';
 import { global } from '../global';
 
 global.readyPromises = global.readyPromises || new WeakMap();
@@ -20,7 +20,7 @@ export function initOnReady() {
         if (promise) {
             promise.resolve(event);
         } else {
-            promise = new Promise().resolve(event);
+            promise = new ZalgoPromise().resolve(event);
             global.readyPromises.set(win, promise);
         }
     });
@@ -42,7 +42,7 @@ export function onWindowReady(win, timeout = 5000, name = 'Window') {
         return promise;
     }
 
-    promise = new Promise();
+    promise = new ZalgoPromise();
     global.readyPromises.set(win, promise);
     setTimeout(() => promise.reject(new Error(`${name} did not load after ${timeout}ms`)), timeout);
 

@@ -1,12 +1,12 @@
 
-import { SyncPromise } from 'sync-browser-mocks/src/promise';
+import { ZalgoPromise } from 'zalgo-promise';
 
 export function promiseMap(items, method) {
     let results = [];
     for (let i = 0; i < items.length; i++) {
-        results.push(SyncPromise.try(() => {
+        results.push(ZalgoPromise.try(() => {
             return method(items[i]);
         }));
     }
-    return SyncPromise.all(results);
+    return ZalgoPromise.all(results);
 }

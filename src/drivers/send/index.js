@@ -1,6 +1,6 @@
 
 import { getDomain, isWindowClosed } from 'cross-domain-utils/src';
-import { SyncPromise } from 'sync-browser-mocks/src/promise';
+import { ZalgoPromise } from 'zalgo-promise';
 
 import { CONSTANTS, CONFIG, POST_MESSAGE_NAMES_LIST } from '../../conf';
 import { uniqueID, some, serializeMethods, log, getWindowType, jsonStringify, promiseMap } from '../../lib';
@@ -25,7 +25,7 @@ export function buildMessage(win, message, options = {}) {
 
 
 export function sendMessage(win, message, domain) {
-    return SyncPromise.try(() => {
+    return ZalgoPromise.try(() => {
 
         message = buildMessage(win, message, {
             data: serializeMethods(win, domain, message.data),
@@ -71,7 +71,7 @@ export function sendMessage(win, message, domain) {
 
         return promiseMap(Object.keys(SEND_MESSAGE_STRATEGIES), strategyName => {
 
-            return SyncPromise.try(() => {
+            return ZalgoPromise.try(() => {
 
                 if (!CONFIG.ALLOWED_POST_MESSAGE_METHODS[strategyName]) {
                     throw new Error(`Strategy disallowed: ${strategyName}`);

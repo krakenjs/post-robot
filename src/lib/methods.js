@@ -1,7 +1,7 @@
 
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
 import { matchDomain } from 'cross-domain-utils/src';
-import { SyncPromise } from 'sync-browser-mocks/src/promise';
+import { ZalgoPromise } from 'zalgo-promise';
 
 import { CONSTANTS } from '../conf';
 import { once, uniqueID, replaceObject } from './util';
@@ -32,7 +32,7 @@ export let listenForMethods = once(() => {
 
         log.debug('Call local method', data.name, data.args);
 
-        return SyncPromise.try(() => {
+        return ZalgoPromise.try(() => {
             return meth.method.apply({ source, origin, data }, data.args);
 
         }).then(result => {

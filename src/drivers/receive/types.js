@@ -1,5 +1,5 @@
 
-import { SyncPromise } from 'sync-browser-mocks/src/promise';
+import { ZalgoPromise } from 'zalgo-promise';
 import { isWindowClosed, matchDomain } from 'cross-domain-utils/src';
 
 import { CONSTANTS } from '../../conf';
@@ -32,7 +32,7 @@ export let RECEIVE_MESSAGE_TYPES = {
         function respond(data) {
 
             if (message.fireAndForget || isWindowClosed(source)) {
-                return SyncPromise.resolve();
+                return ZalgoPromise.resolve();
             }
 
             return sendMessage(source, {
@@ -43,13 +43,13 @@ export let RECEIVE_MESSAGE_TYPES = {
             }, origin);
         }
 
-        return SyncPromise.all([
+        return ZalgoPromise.all([
 
             respond({
                 type: CONSTANTS.POST_MESSAGE_TYPE.ACK
             }),
 
-            SyncPromise.try(() => {
+            ZalgoPromise.try(() => {
 
                 if (!options) {
                     throw new Error(`No handler found for post message: ${message.name} from ${origin} in ${window.location.protocol}//${window.location.host}${window.location.pathname}`);

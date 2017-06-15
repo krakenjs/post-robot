@@ -1,5 +1,5 @@
 
-import { SyncPromise } from 'sync-browser-mocks/src/promise';
+import { ZalgoPromise } from 'zalgo-promise';
 
 import { enableIE8Mode } from './common';
 import postRobot from 'src/index';
@@ -39,7 +39,7 @@ before(function() {
         otherChildFrame = createIframe('child.htm');
         frameElement = document.getElementById('childframe');
 
-        return SyncPromise.all([
+        return ZalgoPromise.all([
             onWindowReady(childWindow),
             onWindowReady(childFrame),
             onWindowReady(otherChildFrame)
