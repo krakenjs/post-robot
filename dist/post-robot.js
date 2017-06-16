@@ -31,13 +31,13 @@
             return __webpack_require__.d(getter, "a", getter), getter;
         }, __webpack_require__.o = function(object, property) {
             return Object.prototype.hasOwnProperty.call(object, property);
-        }, __webpack_require__.p = "", __webpack_require__(__webpack_require__.s = 25);
+        }, __webpack_require__.p = "", __webpack_require__(__webpack_require__.s = 26);
     }([ function(module, exports, __webpack_require__) {
         "use strict";
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
-        var _config = __webpack_require__(21);
+        var _config = __webpack_require__(22);
         Object.keys(_config).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -425,7 +425,8 @@
         };
     }, function(module, exports, __webpack_require__) {
         "use strict";
-        module.exports = __webpack_require__(19);
+        var _promise = __webpack_require__(19);
+        module.exports = _promise.ZalgoPromise, module.exports.ZalgoPromise = _promise.ZalgoPromise;
     }, function(module, exports, __webpack_require__) {
         "use strict";
         Object.defineProperty(exports, "__esModule", {
@@ -438,7 +439,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
-        var _promise = __webpack_require__(27);
+        var _promise = __webpack_require__(28);
         Object.keys(_promise).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -465,7 +466,7 @@
                 }
             });
         });
-        var _methods = __webpack_require__(26);
+        var _methods = __webpack_require__(27);
         Object.keys(_methods).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -474,7 +475,7 @@
                 }
             });
         });
-        var _ready = __webpack_require__(28);
+        var _ready = __webpack_require__(29);
         Object.keys(_ready).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -509,7 +510,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
-        var _receive = __webpack_require__(22);
+        var _receive = __webpack_require__(23);
         Object.keys(_receive).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -720,14 +721,14 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.Promise = exports.cleanUpWindow = void 0;
-        var _clean = __webpack_require__(20);
+        var _clean = __webpack_require__(21);
         Object.defineProperty(exports, "cleanUpWindow", {
             enumerable: !0,
             get: function() {
                 return _clean.cleanUpWindow;
             }
         }), exports.init = init;
-        var _public = __webpack_require__(31);
+        var _public = __webpack_require__(32);
         Object.keys(_public).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -995,7 +996,7 @@
             });
         }
         function sendMessage(win, message, domain) {
-            return _zalgoPromise.ZalgoPromise.try(function() {
+            return _src2.ZalgoPromise.try(function() {
                 message = buildMessage(win, message, {
                     data: (0, _lib.serializeMethods)(win, domain, message.data),
                     domain: domain
@@ -1013,7 +1014,7 @@
                 _lib.log.debug("Running send message strategies", message);
                 var messages = [], serializedMessage = (0, _lib.jsonStringify)(_defineProperty({}, _conf.CONSTANTS.WINDOW_PROPS.POSTROBOT, message), 0, 2);
                 return (0, _lib.promiseMap)(Object.keys(_strategies.SEND_MESSAGE_STRATEGIES), function(strategyName) {
-                    return _zalgoPromise.ZalgoPromise.try(function() {
+                    return _src2.ZalgoPromise.try(function() {
                         if (!_conf.CONFIG.ALLOWED_POST_MESSAGE_METHODS[strategyName]) throw new Error("Strategy disallowed: " + strategyName);
                         return _strategies.SEND_MESSAGE_STRATEGIES[strategyName](win, serializedMessage, domain);
                     }).then(function() {
@@ -1039,7 +1040,7 @@
             return target;
         };
         exports.buildMessage = buildMessage, exports.sendMessage = sendMessage;
-        var _src = __webpack_require__(1), _zalgoPromise = __webpack_require__(2), _conf = __webpack_require__(0), _lib = __webpack_require__(4), _strategies = __webpack_require__(24);
+        var _src = __webpack_require__(1), _src2 = __webpack_require__(2), _conf = __webpack_require__(0), _lib = __webpack_require__(4), _strategies = __webpack_require__(25);
     }, function(module, exports, __webpack_require__) {
         "use strict";
         Object.defineProperty(exports, "__esModule", {
@@ -1214,298 +1215,233 @@
         }), exports.isRegex = isRegex;
     }, function(module, exports, __webpack_require__) {
         "use strict";
-        module.exports = function(module) {
-            return module.webpackPolyfill || (module.deprecate = function() {}, module.paths = [], 
-            module.children || (module.children = []), Object.defineProperty(module, "loaded", {
-                enumerable: !0,
-                get: function() {
-                    return module.l;
+        function dispatchPossiblyUnhandledError(err) {
+            if (-1 === dispatchedErrors.indexOf(err)) {
+                dispatchedErrors.push(err), setTimeout(function() {
+                    throw err;
+                }, 1);
+                for (var j = 0; j < possiblyUnhandledPromiseHandlers.length; j++) possiblyUnhandledPromiseHandlers[j](err);
+            }
+        }
+        function onPossiblyUnhandledException(handler) {
+            return possiblyUnhandledPromiseHandlers.push(handler), {
+                cancel: function() {
+                    possiblyUnhandledPromiseHandlers.splice(possiblyUnhandledPromiseHandlers.indexOf(handler), 1);
                 }
-            }), Object.defineProperty(module, "id", {
-                enumerable: !0,
-                get: function() {
-                    return module.i;
-                }
-            }), module.webpackPolyfill = 1), module;
-        };
+            };
+        }
+        Object.defineProperty(exports, "__esModule", {
+            value: !0
+        }), exports.dispatchPossiblyUnhandledError = dispatchPossiblyUnhandledError, exports.onPossiblyUnhandledException = onPossiblyUnhandledException;
+        var possiblyUnhandledPromiseHandlers = [], dispatchedErrors = [];
     }, function(module, exports, __webpack_require__) {
         "use strict";
-        (function(module) {
-            var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__, _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
-                return typeof obj;
-            } : function(obj) {
-                return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+        function _classCallCheck(instance, Constructor) {
+            if (!(instance instanceof Constructor)) throw new TypeError("Cannot call a class as a function");
+        }
+        Object.defineProperty(exports, "__esModule", {
+            value: !0
+        }), exports.ZalgoPromise = void 0;
+        var _createClass = function() {
+            function defineProperties(target, props) {
+                for (var i = 0; i < props.length; i++) {
+                    var descriptor = props[i];
+                    descriptor.enumerable = descriptor.enumerable || !1, descriptor.configurable = !0, 
+                    "value" in descriptor && (descriptor.writable = !0), Object.defineProperty(target, descriptor.key, descriptor);
+                }
+            }
+            return function(Constructor, protoProps, staticProps) {
+                return protoProps && defineProperties(Constructor.prototype, protoProps), staticProps && defineProperties(Constructor, staticProps), 
+                Constructor;
             };
-            !function(root, factory) {
-                "object" == _typeof(exports) && "object" == _typeof(module) ? module.exports = factory() : (__WEBPACK_AMD_DEFINE_ARRAY__ = [], 
-                __WEBPACK_AMD_DEFINE_FACTORY__ = factory, void 0 !== (__WEBPACK_AMD_DEFINE_RESULT__ = "function" == typeof __WEBPACK_AMD_DEFINE_FACTORY__ ? __WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__) : __WEBPACK_AMD_DEFINE_FACTORY__) && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-            }(0, function() {
-                return function(modules) {
-                    function __webpack_require__(moduleId) {
-                        if (installedModules[moduleId]) return installedModules[moduleId].exports;
-                        var module = installedModules[moduleId] = {
-                            i: moduleId,
-                            l: !1,
-                            exports: {}
-                        };
-                        return modules[moduleId].call(module.exports, module, module.exports, __webpack_require__), 
-                        module.l = !0, module.exports;
-                    }
-                    var installedModules = {};
-                    return __webpack_require__.m = modules, __webpack_require__.c = installedModules, 
-                    __webpack_require__.i = function(value) {
-                        return value;
-                    }, __webpack_require__.d = function(exports, name, getter) {
-                        __webpack_require__.o(exports, name) || Object.defineProperty(exports, name, {
-                            configurable: !1,
-                            enumerable: !0,
-                            get: getter
+        }(), _utils = __webpack_require__(20), _exceptions = __webpack_require__(18), ZalgoPromise = function() {
+            function ZalgoPromise(handler) {
+                var _this = this;
+                if (_classCallCheck(this, ZalgoPromise), this.resolved = !1, this.rejected = !1, 
+                this.errorHandled = !1, this.handlers = [], handler) {
+                    var _result = void 0, _error = void 0, resolved = !1, rejected = !1, isAsync = !1;
+                    try {
+                        handler(function(res) {
+                            isAsync ? _this.resolve(res) : (resolved = !0, _result = res);
+                        }, function(err) {
+                            isAsync ? _this.reject(err) : (rejected = !0, _error = err);
                         });
-                    }, __webpack_require__.n = function(module) {
-                        var getter = module && module.__esModule ? function() {
-                            return module.default;
-                        } : function() {
-                            return module;
-                        };
-                        return __webpack_require__.d(getter, "a", getter), getter;
-                    }, __webpack_require__.o = function(object, property) {
-                        return Object.prototype.hasOwnProperty.call(object, property);
-                    }, __webpack_require__.p = "", __webpack_require__(__webpack_require__.s = "./src/index.js");
-                }({
-                    "./src/exceptions.js": function(module, exports, __webpack_require__) {
-                        function dispatchPossiblyUnhandledError(err) {
-                            if (-1 === dispatchedErrors.indexOf(err)) {
-                                dispatchedErrors.push(err), setTimeout(function() {
-                                    throw err;
-                                }, 1);
-                                for (var j = 0; j < possiblyUnhandledPromiseHandlers.length; j++) possiblyUnhandledPromiseHandlers[j](err);
-                            }
-                        }
-                        function onPossiblyUnhandledException(handler) {
-                            return possiblyUnhandledPromiseHandlers.push(handler), {
-                                cancel: function() {
-                                    possiblyUnhandledPromiseHandlers.splice(possiblyUnhandledPromiseHandlers.indexOf(handler), 1);
-                                }
-                            };
-                        }
-                        Object.defineProperty(exports, "__esModule", {
-                            value: !0
-                        }), exports.dispatchPossiblyUnhandledError = dispatchPossiblyUnhandledError, exports.onPossiblyUnhandledException = onPossiblyUnhandledException;
-                        var possiblyUnhandledPromiseHandlers = [], dispatchedErrors = [];
-                    },
-                    "./src/index.js": function(module, exports, __webpack_require__) {
-                        var _promise = __webpack_require__("./src/promise.js");
-                        module.exports = _promise.ZalgoPromise, module.exports.ZalgoPromise = _promise.ZalgoPromise;
-                    },
-                    "./src/promise.js": function(module, exports, __webpack_require__) {
-                        function _classCallCheck(instance, Constructor) {
-                            if (!(instance instanceof Constructor)) throw new TypeError("Cannot call a class as a function");
-                        }
-                        Object.defineProperty(exports, "__esModule", {
-                            value: !0
-                        }), exports.ZalgoPromise = void 0;
-                        var _createClass = function() {
-                            function defineProperties(target, props) {
-                                for (var i = 0; i < props.length; i++) {
-                                    var descriptor = props[i];
-                                    descriptor.enumerable = descriptor.enumerable || !1, descriptor.configurable = !0, 
-                                    "value" in descriptor && (descriptor.writable = !0), Object.defineProperty(target, descriptor.key, descriptor);
-                                }
-                            }
-                            return function(Constructor, protoProps, staticProps) {
-                                return protoProps && defineProperties(Constructor.prototype, protoProps), staticProps && defineProperties(Constructor, staticProps), 
-                                Constructor;
-                            };
-                        }(), _utils = __webpack_require__("./src/utils.js"), _exceptions = __webpack_require__("./src/exceptions.js"), ZalgoPromise = function() {
-                            function ZalgoPromise(handler) {
-                                var _this = this;
-                                if (_classCallCheck(this, ZalgoPromise), this.resolved = !1, this.rejected = !1, 
-                                this.errorHandled = !1, this.handlers = [], handler) {
-                                    var _result = void 0, _error = void 0, resolved = !1, rejected = !1, isAsync = !1;
-                                    try {
-                                        handler(function(res) {
-                                            isAsync ? _this.resolve(res) : (resolved = !0, _result = res);
-                                        }, function(err) {
-                                            isAsync ? _this.reject(err) : (rejected = !0, _error = err);
-                                        });
-                                    } catch (err) {
-                                        return void this.reject(err);
-                                    }
-                                    isAsync = !0, resolved ? this.resolve(_result) : rejected && this.reject(_error);
-                                }
-                            }
-                            return _createClass(ZalgoPromise, [ {
-                                key: "resolve",
-                                value: function(result) {
-                                    if (this.resolved || this.rejected) return this;
-                                    if ((0, _utils.isPromise)(result)) throw new Error("Can not resolve promise with another promise");
-                                    return this.resolved = !0, this.value = result, this.dispatch(), this;
-                                }
-                            }, {
-                                key: "reject",
-                                value: function(error) {
-                                    var _this2 = this;
-                                    if (this.resolved || this.rejected) return this;
-                                    if ((0, _utils.isPromise)(error)) throw new Error("Can not reject promise with another promise");
-                                    if (!error) {
-                                        var _err = error && "function" == typeof error.toString ? error.toString() : Object.prototype.toString.call(error);
-                                        error = new Error("Expected reject to be called with Error, got " + _err);
-                                    }
-                                    return this.rejected = !0, this.error = error, this.errorHandled || setTimeout(function() {
-                                        _this2.errorHandled || (0, _exceptions.dispatchPossiblyUnhandledError)(error);
-                                    }, 1), this.dispatch(), this;
-                                }
-                            }, {
-                                key: "asyncReject",
-                                value: function(error) {
-                                    this.errorHandled = !0, this.reject(error);
-                                }
-                            }, {
-                                key: "dispatch",
-                                value: function() {
-                                    var _this3 = this, resolved = this.resolved, rejected = this.rejected, handlers = this.handlers;
-                                    if (resolved || rejected) {
-                                        for (var i = 0; i < handlers.length; ) !function() {
-                                            var _handlers$i = handlers[i], onSuccess = _handlers$i.onSuccess, onError = _handlers$i.onError, promise = _handlers$i.promise;
-                                            i += 1;
-                                            var isError = !1, result = void 0, error = void 0;
-                                            if (resolved) try {
-                                                result = onSuccess ? onSuccess(_this3.value) : _this3.value;
-                                            } catch (err) {
-                                                isError = !0, error = err;
-                                            } else if (rejected) if (onError) try {
-                                                result = onError(_this3.error);
-                                            } catch (err) {
-                                                isError = !0, error = err;
-                                            } else isError = !0, error = _this3.error;
-                                            if (result === _this3) throw new Error("Can not return a promise from the the then handler of the same promise");
-                                            if (!promise) return "continue";
-                                            isError ? promise.reject(error) : (0, _utils.isPromise)(result) ? result.then(function(res) {
-                                                promise.resolve(res);
-                                            }, function(err) {
-                                                promise.reject(err);
-                                            }) : promise.resolve(result);
-                                        }();
-                                        handlers.length = 0;
-                                    }
-                                }
-                            }, {
-                                key: "then",
-                                value: function(onSuccess, onError) {
-                                    if (onSuccess && "function" != typeof onSuccess && !onSuccess.call) throw new Error("Promise.then expected a function for success handler");
-                                    if (onError && "function" != typeof onError && !onError.call) throw new Error("Promise.then expected a function for error handler");
-                                    var promise = new ZalgoPromise();
-                                    return this.handlers.push({
-                                        promise: promise,
-                                        onSuccess: onSuccess,
-                                        onError: onError
-                                    }), this.errorHandled = !0, this.dispatch(), promise;
-                                }
-                            }, {
-                                key: "catch",
-                                value: function(onError) {
-                                    return this.then(void 0, onError);
-                                }
-                            }, {
-                                key: "finally",
-                                value: function(handler) {
-                                    return this.then(function(result) {
-                                        return ZalgoPromise.try(handler).then(function() {
-                                            return result;
-                                        });
-                                    }, function(err) {
-                                        return ZalgoPromise.try(handler).then(function() {
-                                            throw err;
-                                        });
-                                    });
-                                }
-                            }, {
-                                key: "toPromise",
-                                value: function() {
-                                    if (!window.Promise) throw new Error("Could not find window.Promise");
-                                    return window.Promise.resolve(this);
-                                }
-                            } ], [ {
-                                key: "resolve",
-                                value: function(_value) {
-                                    return (0, _utils.isPromise)(_value) || _value instanceof ZalgoPromise ? _value : new ZalgoPromise().resolve(_value);
-                                }
-                            }, {
-                                key: "reject",
-                                value: function(error) {
-                                    return new ZalgoPromise().reject(error);
-                                }
-                            }, {
-                                key: "all",
-                                value: function(promises) {
-                                    for (var promise = new ZalgoPromise(), count = promises.length, results = [], i = 0; i < promises.length; i++) !function(i) {
-                                        var val = promises[i];
-                                        ZalgoPromise.resolve(val).then(function(result) {
-                                            results[i] = result, 0 === (count -= 1) && promise.resolve(results);
-                                        }, function(err) {
-                                            promise.reject(err);
-                                        });
-                                    }(i);
-                                    return count || promise.resolve(results), promise;
-                                }
-                            }, {
-                                key: "onPossiblyUnhandledException",
-                                value: function(handler) {
-                                    return (0, _exceptions.onPossiblyUnhandledException)(handler);
-                                }
-                            }, {
-                                key: "try",
-                                value: function(method) {
-                                    return ZalgoPromise.resolve().then(method);
-                                }
-                            }, {
-                                key: "delay",
-                                value: function(_delay) {
-                                    return new ZalgoPromise(function(resolve) {
-                                        setTimeout(resolve, _delay);
-                                    });
-                                }
-                            }, {
-                                key: "hash",
-                                value: function(obj) {
-                                    var results = {}, promises = [];
-                                    for (var key in obj) !function(key) {
-                                        obj.hasOwnProperty(key) && promises.push(ZalgoPromise.resolve(obj[key]).then(function(result) {
-                                            results[key] = result;
-                                        }));
-                                    }(key);
-                                    return ZalgoPromise.all(promises).then(function() {
-                                        return results;
-                                    });
-                                }
-                            } ]), ZalgoPromise;
-                        }();
-                        exports.ZalgoPromise = ZalgoPromise, new ZalgoPromise().resolve(void 0);
-                    },
-                    "./src/utils.js": function(module, exports, __webpack_require__) {
-                        function isPromise(item) {
-                            try {
-                                if (!item) return !1;
-                                if (window.Window && item instanceof window.Window) return !1;
-                                if (window.constructor && item instanceof window.constructor) return !1;
-                                if (toString) {
-                                    var name = toString.call(item);
-                                    if ("[object Window]" === name || "[object global]" === name || "[object DOMWindow]" === name) return !1;
-                                }
-                                if (item && item.then instanceof Function) return !0;
-                            } catch (err) {
-                                return !1;
-                            }
-                            return !1;
-                        }
-                        Object.defineProperty(exports, "__esModule", {
-                            value: !0
-                        }), exports.isPromise = isPromise;
-                        var toString = {}.toString;
+                    } catch (err) {
+                        return void this.reject(err);
                     }
-                });
-            });
-        }).call(exports, __webpack_require__(18)(module));
+                    isAsync = !0, resolved ? this.resolve(_result) : rejected && this.reject(_error);
+                }
+            }
+            return _createClass(ZalgoPromise, [ {
+                key: "resolve",
+                value: function(result) {
+                    if (this.resolved || this.rejected) return this;
+                    if ((0, _utils.isPromise)(result)) throw new Error("Can not resolve promise with another promise");
+                    return this.resolved = !0, this.value = result, this.dispatch(), this;
+                }
+            }, {
+                key: "reject",
+                value: function(error) {
+                    var _this2 = this;
+                    if (this.resolved || this.rejected) return this;
+                    if ((0, _utils.isPromise)(error)) throw new Error("Can not reject promise with another promise");
+                    if (!error) {
+                        var _err = error && "function" == typeof error.toString ? error.toString() : Object.prototype.toString.call(error);
+                        error = new Error("Expected reject to be called with Error, got " + _err);
+                    }
+                    return this.rejected = !0, this.error = error, this.errorHandled || setTimeout(function() {
+                        _this2.errorHandled || (0, _exceptions.dispatchPossiblyUnhandledError)(error);
+                    }, 1), this.dispatch(), this;
+                }
+            }, {
+                key: "asyncReject",
+                value: function(error) {
+                    this.errorHandled = !0, this.reject(error);
+                }
+            }, {
+                key: "dispatch",
+                value: function() {
+                    var _this3 = this, resolved = this.resolved, rejected = this.rejected, handlers = this.handlers;
+                    if (resolved || rejected) {
+                        for (var i = 0; i < handlers.length; ) {
+                            (function() {
+                                var _handlers$i = handlers[i], onSuccess = _handlers$i.onSuccess, onError = _handlers$i.onError, promise = _handlers$i.promise;
+                                i += 1;
+                                var isError = !1, result = void 0, error = void 0;
+                                if (resolved) try {
+                                    result = onSuccess ? onSuccess(_this3.value) : _this3.value;
+                                } catch (err) {
+                                    isError = !0, error = err;
+                                } else if (rejected) if (onError) try {
+                                    result = onError(_this3.error);
+                                } catch (err) {
+                                    isError = !0, error = err;
+                                } else isError = !0, error = _this3.error;
+                                if (result === _this3) throw new Error("Can not return a promise from the the then handler of the same promise");
+                                if (!promise) return "continue";
+                                isError ? promise.reject(error) : (0, _utils.isPromise)(result) ? result.then(function(res) {
+                                    promise.resolve(res);
+                                }, function(err) {
+                                    promise.reject(err);
+                                }) : promise.resolve(result);
+                            })();
+                        }
+                        handlers.length = 0;
+                    }
+                }
+            }, {
+                key: "then",
+                value: function(onSuccess, onError) {
+                    if (onSuccess && "function" != typeof onSuccess && !onSuccess.call) throw new Error("Promise.then expected a function for success handler");
+                    if (onError && "function" != typeof onError && !onError.call) throw new Error("Promise.then expected a function for error handler");
+                    var promise = new ZalgoPromise();
+                    return this.handlers.push({
+                        promise: promise,
+                        onSuccess: onSuccess,
+                        onError: onError
+                    }), this.errorHandled = !0, this.dispatch(), promise;
+                }
+            }, {
+                key: "catch",
+                value: function(onError) {
+                    return this.then(void 0, onError);
+                }
+            }, {
+                key: "finally",
+                value: function(handler) {
+                    return this.then(function(result) {
+                        return ZalgoPromise.try(handler).then(function() {
+                            return result;
+                        });
+                    }, function(err) {
+                        return ZalgoPromise.try(handler).then(function() {
+                            throw err;
+                        });
+                    });
+                }
+            }, {
+                key: "toPromise",
+                value: function() {
+                    if (!window.Promise) throw new Error("Could not find window.Promise");
+                    return window.Promise.resolve(this);
+                }
+            } ], [ {
+                key: "resolve",
+                value: function(value) {
+                    return (0, _utils.isPromise)(value) || value instanceof ZalgoPromise ? value : new ZalgoPromise().resolve(value);
+                }
+            }, {
+                key: "reject",
+                value: function(error) {
+                    return new ZalgoPromise().reject(error);
+                }
+            }, {
+                key: "all",
+                value: function(promises) {
+                    for (var promise = new ZalgoPromise(), count = promises.length, results = [], i = 0; i < promises.length; i++) !function(i) {
+                        var val = promises[i];
+                        ZalgoPromise.resolve(val).then(function(result) {
+                            results[i] = result, 0 === (count -= 1) && promise.resolve(results);
+                        }, function(err) {
+                            promise.reject(err);
+                        });
+                    }(i);
+                    return count || promise.resolve(results), promise;
+                }
+            }, {
+                key: "onPossiblyUnhandledException",
+                value: function(handler) {
+                    return (0, _exceptions.onPossiblyUnhandledException)(handler);
+                }
+            }, {
+                key: "try",
+                value: function(method) {
+                    return ZalgoPromise.resolve().then(method);
+                }
+            }, {
+                key: "delay",
+                value: function(_delay) {
+                    return new ZalgoPromise(function(resolve) {
+                        setTimeout(resolve, _delay);
+                    });
+                }
+            }, {
+                key: "hash",
+                value: function(obj) {
+                    var results = {}, promises = [];
+                    for (var key in obj) !function(key) {
+                        obj.hasOwnProperty(key) && promises.push(ZalgoPromise.resolve(obj[key]).then(function(result) {
+                            results[key] = result;
+                        }));
+                    }(key);
+                    return ZalgoPromise.all(promises).then(function() {
+                        return results;
+                    });
+                }
+            } ]), ZalgoPromise;
+        }();
+        exports.ZalgoPromise = ZalgoPromise, new ZalgoPromise().resolve(void 0);
+    }, function(module, exports, __webpack_require__) {
+        "use strict";
+        function isPromise(item) {
+            try {
+                if (!item) return !1;
+                if (window.Window && item instanceof window.Window) return !1;
+                if (window.constructor && item instanceof window.constructor) return !1;
+                if (toString) {
+                    var name = toString.call(item);
+                    if ("[object Window]" === name || "[object global]" === name || "[object DOMWindow]" === name) return !1;
+                }
+                if (item && item.then instanceof Function) return !0;
+            } catch (err) {
+                return !1;
+            }
+            return !1;
+        }
+        Object.defineProperty(exports, "__esModule", {
+            value: !0
+        }), exports.isPromise = isPromise;
+        var toString = {}.toString;
     }, function(module, exports, __webpack_require__) {
         "use strict";
         function cleanUpWindow(win) {
@@ -1605,7 +1541,7 @@
             value: !0
         }), exports.receiveMessage = receiveMessage, exports.messageListener = messageListener, 
         exports.listenForMessages = listenForMessages;
-        var _src = __webpack_require__(1), _conf = __webpack_require__(0), _lib = __webpack_require__(4), _global = __webpack_require__(3), _types = __webpack_require__(23);
+        var _src = __webpack_require__(1), _conf = __webpack_require__(0), _lib = __webpack_require__(4), _global = __webpack_require__(3), _types = __webpack_require__(24);
         _global.global.receivedMessages = _global.global.receivedMessages || [];
     }, function(module, exports, __webpack_require__) {
         "use strict";
@@ -1626,15 +1562,15 @@
                 for (var key in source) Object.prototype.hasOwnProperty.call(source, key) && (target[key] = source[key]);
             }
             return target;
-        }, _zalgoPromise = __webpack_require__(2), _src = __webpack_require__(1), _conf = __webpack_require__(0), _lib = __webpack_require__(4), _send = __webpack_require__(12), _listeners = __webpack_require__(11);
+        }, _src = __webpack_require__(2), _src2 = __webpack_require__(1), _conf = __webpack_require__(0), _lib = __webpack_require__(4), _send = __webpack_require__(12), _listeners = __webpack_require__(11);
         exports.RECEIVE_MESSAGE_TYPES = (_RECEIVE_MESSAGE_TYPE = {}, _defineProperty(_RECEIVE_MESSAGE_TYPE, _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK, function(source, origin, message) {
             var options = (0, _listeners.getResponseListener)(message.hash);
             if (!options) throw new Error("No handler found for post message ack for message: " + message.name + " from " + origin + " in " + window.location.protocol + "//" + window.location.host + window.location.pathname);
-            if (!(0, _src.matchDomain)(options.domain, origin)) throw new Error("Ack origin " + origin + " does not match domain " + options.domain);
+            if (!(0, _src2.matchDomain)(options.domain, origin)) throw new Error("Ack origin " + origin + " does not match domain " + options.domain);
             options.ack = !0;
         }), _defineProperty(_RECEIVE_MESSAGE_TYPE, _conf.CONSTANTS.POST_MESSAGE_TYPE.REQUEST, function(source, origin, message) {
             function respond(data) {
-                return message.fireAndForget || (0, _src.isWindowClosed)(source) ? _zalgoPromise.ZalgoPromise.resolve() : (0, 
+                return message.fireAndForget || (0, _src2.isWindowClosed)(source) ? _src.ZalgoPromise.resolve() : (0, 
                 _send.sendMessage)(source, _extends({
                     target: message.originalSource,
                     hash: message.hash,
@@ -1646,11 +1582,11 @@
                 win: source,
                 domain: origin
             });
-            return _zalgoPromise.ZalgoPromise.all([ respond({
+            return _src.ZalgoPromise.all([ respond({
                 type: _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK
-            }), _zalgoPromise.ZalgoPromise.try(function() {
+            }), _src.ZalgoPromise.try(function() {
                 if (!options) throw new Error("No handler found for post message: " + message.name + " from " + origin + " in " + window.location.protocol + "//" + window.location.host + window.location.pathname);
-                if (!(0, _src.matchDomain)(options.domain, origin)) throw new Error("Request origin " + origin + " does not match domain " + options.domain);
+                if (!(0, _src2.matchDomain)(options.domain, origin)) throw new Error("Request origin " + origin + " does not match domain " + options.domain);
                 var data = message.data;
                 return options.handler({
                     source: source,
@@ -1678,7 +1614,7 @@
         }), _defineProperty(_RECEIVE_MESSAGE_TYPE, _conf.CONSTANTS.POST_MESSAGE_TYPE.RESPONSE, function(source, origin, message) {
             var options = (0, _listeners.getResponseListener)(message.hash);
             if (!options) throw new Error("No handler found for post message response for message: " + message.name + " from " + origin + " in " + window.location.protocol + "//" + window.location.host + window.location.pathname);
-            if (!(0, _src.matchDomain)(options.domain, origin)) throw new Error("Response origin " + origin + " does not match domain " + options.domain);
+            if (!(0, _src2.matchDomain)(options.domain, origin)) throw new Error("Response origin " + origin + " does not match domain " + options.domain);
             if ((0, _listeners.deleteResponseListener)(message.hash), message.ack === _conf.CONSTANTS.POST_MESSAGE_ACK.ERROR) return options.respond(new Error(message.error));
             if (message.ack === _conf.CONSTANTS.POST_MESSAGE_ACK.SUCCESS) {
                 var data = message.data || message.response;
@@ -1801,7 +1737,7 @@
         exports.serializeMethod = serializeMethod, exports.serializeMethods = serializeMethods, 
         exports.deserializeMethod = deserializeMethod, exports.deserializeError = deserializeError, 
         exports.deserializeMethods = deserializeMethods;
-        var _src = __webpack_require__(5), _src2 = __webpack_require__(1), _zalgoPromise = __webpack_require__(2), _conf = __webpack_require__(0), _util = __webpack_require__(7), _interface = __webpack_require__(8), _log = __webpack_require__(9), _global = __webpack_require__(3);
+        var _src = __webpack_require__(5), _src2 = __webpack_require__(1), _src3 = __webpack_require__(2), _conf = __webpack_require__(0), _util = __webpack_require__(7), _interface = __webpack_require__(8), _log = __webpack_require__(9), _global = __webpack_require__(3);
         _global.global.methods = _global.global.methods || new _src.WeakMap();
         exports.listenForMethods = (0, _util.once)(function() {
             (0, _interface.on)(_conf.CONSTANTS.POST_MESSAGE_NAMES.METHOD, {
@@ -1813,7 +1749,7 @@
                 var meth = methods[data.id];
                 if (!meth) throw new Error("Could not find method with id: " + data.id);
                 if (!(0, _src2.matchDomain)(meth.domain, origin)) throw new Error("Method domain " + meth.domain + " does not match origin " + origin);
-                return _log.log.debug("Call local method", data.name, data.args), _zalgoPromise.ZalgoPromise.try(function() {
+                return _log.log.debug("Call local method", data.name, data.args), _src3.ZalgoPromise.try(function() {
                     return meth.method.apply({
                         source: source,
                         origin: origin,
@@ -1832,16 +1768,16 @@
         "use strict";
         function promiseMap(items, method) {
             for (var results = [], i = 0; i < items.length; i++) !function(i) {
-                results.push(_zalgoPromise.ZalgoPromise.try(function() {
+                results.push(_src.ZalgoPromise.try(function() {
                     return method(items[i]);
                 }));
             }(i);
-            return _zalgoPromise.ZalgoPromise.all(results);
+            return _src.ZalgoPromise.all(results);
         }
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.promiseMap = promiseMap;
-        var _zalgoPromise = __webpack_require__(2);
+        var _src = __webpack_require__(2);
     }, function(module, exports, __webpack_require__) {
         "use strict";
         function initOnReady() {
@@ -1850,7 +1786,7 @@
                 domain: _conf.CONSTANTS.WILDCARD
             }, function(event) {
                 var win = event.source, promise = _global.global.readyPromises.get(win);
-                promise ? promise.resolve(event) : (promise = new _zalgoPromise.ZalgoPromise().resolve(event), 
+                promise ? promise.resolve(event) : (promise = new _src3.ZalgoPromise().resolve(event), 
                 _global.global.readyPromises.set(win, promise));
             });
             var parent = (0, _src2.getAncestor)();
@@ -1863,7 +1799,7 @@
         }
         function onWindowReady(win) {
             var timeout = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 5e3, name = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : "Window", promise = _global.global.readyPromises.get(win);
-            return promise || (promise = new _zalgoPromise.ZalgoPromise(), _global.global.readyPromises.set(win, promise), 
+            return promise || (promise = new _src3.ZalgoPromise(), _global.global.readyPromises.set(win, promise), 
             setTimeout(function() {
                 return promise.reject(new Error(name + " did not load after " + timeout + "ms"));
             }, timeout), promise);
@@ -1871,12 +1807,12 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.initOnReady = initOnReady, exports.onWindowReady = onWindowReady;
-        var _src = __webpack_require__(5), _src2 = __webpack_require__(1), _zalgoPromise = __webpack_require__(2), _conf = __webpack_require__(0), _interface = __webpack_require__(8), _log = __webpack_require__(9), _global = __webpack_require__(3);
+        var _src = __webpack_require__(5), _src2 = __webpack_require__(1), _src3 = __webpack_require__(2), _conf = __webpack_require__(0), _interface = __webpack_require__(8), _log = __webpack_require__(9), _global = __webpack_require__(3);
         _global.global.readyPromises = _global.global.readyPromises || new _src.WeakMap();
     }, function(module, exports, __webpack_require__) {
         "use strict";
         function request(options) {
-            return _zalgoPromise.ZalgoPromise.try(function() {
+            return _src2.ZalgoPromise.try(function() {
                 if (!options.name) throw new Error("Expected options.name");
                 if (_conf.CONFIG.MOCK_MODE) options.window = window; else if ("string" == typeof options.window) {
                     var el = document.getElementById(options.window);
@@ -1892,13 +1828,13 @@
                 if (!options.window) throw new Error("Expected options.window to be a window object, iframe, or iframe element id.");
                 options.domain = options.domain || _conf.CONSTANTS.WILDCARD;
                 var hash = options.name + "_" + (0, _lib.uniqueID)();
-                if ((0, _drivers.addResponseListener)(hash, options), (0, _src2.isWindowClosed)(options.window)) throw new Error("Target window is closed");
+                if ((0, _drivers.addResponseListener)(hash, options), (0, _src3.isWindowClosed)(options.window)) throw new Error("Target window is closed");
                 var hasResult = !1, requestPromises = _global.global.requestPromises.get(options.window);
                 requestPromises || (requestPromises = [], _global.global.requestPromises.set(options.window, requestPromises));
-                var requestPromise = _zalgoPromise.ZalgoPromise.try(function() {
-                    if ((0, _src2.isAncestor)(window, options.window)) return (0, _lib.onWindowReady)(options.window);
+                var requestPromise = _src2.ZalgoPromise.try(function() {
+                    if ((0, _src3.isAncestor)(window, options.window)) return (0, _lib.onWindowReady)(options.window);
                 }).then(function() {
-                    return new _zalgoPromise.ZalgoPromise(function(resolve, reject) {
+                    return new _src2.ZalgoPromise(function(resolve, reject) {
                         if (options.respond = function(err, result) {
                             return err || (hasResult = !0, requestPromises.splice(requestPromises.indexOf(requestPromise, 1))), 
                             err ? reject(err) : resolve(result);
@@ -1911,7 +1847,7 @@
                         }, options.domain).catch(reject), options.fireAndForget) return resolve();
                         var ackTimeout = _conf.CONFIG.ACK_TIMEOUT, resTimeout = options.timeout || _conf.CONFIG.RES_TIMEOUT, interval = (0, 
                         _lib.safeInterval)(function() {
-                            return options.ack && hasResult ? interval.cancel() : (0, _src2.isWindowClosed)(options.window) ? (interval.cancel(), 
+                            return options.ack && hasResult ? interval.cancel() : (0, _src3.isWindowClosed)(options.window) ? (interval.cancel(), 
                             reject(options.ack ? new Error("Window closed for " + options.name + " before response") : new Error("Window closed for " + options.name + " before ack"))) : (ackTimeout -= 100, 
                             resTimeout -= 100, ackTimeout <= 0 && !options.ack ? (interval.cancel(), reject(new Error("No ack for postMessage " + options.name + " in " + _conf.CONFIG.ACK_TIMEOUT + "ms"))) : resTimeout <= 0 && !hasResult ? (interval.cancel(), 
                             reject(new Error("No response for postMessage " + options.name + " in " + (options.timeout || _conf.CONFIG.RES_TIMEOUT) + "ms"))) : void 0);
@@ -1928,8 +1864,8 @@
             request(options);
         }
         function sendToParent(name, data, options) {
-            var win = (0, _src2.getAncestor)();
-            return win ? _send(win, name, data, options) : new _zalgoPromise.ZalgoPromise(function(resolve, reject) {
+            var win = (0, _src3.getAncestor)();
+            return win ? _send(win, name, data, options) : new _src2.ZalgoPromise(function(resolve, reject) {
                 return reject(new Error("Window does not have a parent"));
             });
         }
@@ -1946,7 +1882,7 @@
             value: !0
         }), exports.send = void 0, exports.request = request, exports.sendToParent = sendToParent, 
         exports.client = client;
-        var _src = __webpack_require__(5), _zalgoPromise = __webpack_require__(2), _src2 = __webpack_require__(1), _conf = __webpack_require__(0), _drivers = __webpack_require__(6), _lib = __webpack_require__(4), _global = __webpack_require__(3);
+        var _src = __webpack_require__(5), _src2 = __webpack_require__(2), _src3 = __webpack_require__(1), _conf = __webpack_require__(0), _drivers = __webpack_require__(6), _lib = __webpack_require__(4), _global = __webpack_require__(3);
         _global.global.requestPromises = _global.global.requestPromises || new _src.WeakMap(), 
         exports.send = _send;
     }, function(module, exports, __webpack_require__) {
@@ -1982,7 +1918,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.util = exports.bridge = exports.parent = void 0;
-        var _client = __webpack_require__(29);
+        var _client = __webpack_require__(30);
         Object.keys(_client).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -1991,7 +1927,7 @@
                 }
             });
         });
-        var _server = __webpack_require__(32);
+        var _server = __webpack_require__(33);
         Object.keys(_server).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -2000,7 +1936,7 @@
                 }
             });
         });
-        var _config = __webpack_require__(30);
+        var _config = __webpack_require__(31);
         Object.keys(_config).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -2056,7 +1992,7 @@
             "function" == typeof options && (errorHandler = handler, handler = options, options = {}), 
             options = options || {}, options.name = name, options.handler = handler || options.handler, 
             options.errorHandler = errorHandler || options.errorHandler, options.once = !0;
-            var prom = new _zalgoPromise.ZalgoPromise(function(resolve, reject) {
+            var prom = new _src2.ZalgoPromise(function(resolve, reject) {
                 options.handler = options.handler || function(event) {
                     return resolve(event);
                 }, options.errorHandler = options.errorHandler || reject;
@@ -2074,7 +2010,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.on = void 0, exports.listen = listen, exports.once = once, exports.listener = listener;
-        var _src = __webpack_require__(1), _zalgoPromise = __webpack_require__(2), _lib = __webpack_require__(4), _drivers = __webpack_require__(6), _conf = __webpack_require__(0);
+        var _src = __webpack_require__(1), _src2 = __webpack_require__(2), _lib = __webpack_require__(4), _drivers = __webpack_require__(6), _conf = __webpack_require__(0);
         exports.on = _on;
     } ]);
 });
