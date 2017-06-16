@@ -1665,8 +1665,8 @@
                 });
             }, function(err) {
                 var stack = err.stack, errmessage = err.message, error = void 0;
-                return error = stack ? errmessage && -1 === stack.indexOf(errmessage) ? errmessage + "\n" + stack : stack : errmessage, 
-                respond({
+                return stack ? (error = errmessage && -1 === stack.indexOf(errmessage) ? errmessage + "\n" + stack : stack, 
+                error = error.replace(/^Error: /, "")) : error = errmessage, respond({
                     type: _conf.CONSTANTS.POST_MESSAGE_TYPE.RESPONSE,
                     ack: _conf.CONSTANTS.POST_MESSAGE_ACK.ERROR,
                     error: error
