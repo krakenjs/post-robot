@@ -1,7 +1,7 @@
 
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
 import { getAncestor } from 'cross-domain-utils/src';
-import { ZalgoPromise } from 'zalgo-promise';
+import { ZalgoPromise } from 'zalgo-promise/src';
 
 import { CONSTANTS } from '../conf';
 import { on, send } from '../interface';

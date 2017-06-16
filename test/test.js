@@ -1,5 +1,5 @@
 
-import { ZalgoPromise } from 'zalgo-promise';
+import { ZalgoPromise } from 'zalgo-promise/src';
 
 import { enableIE8Mode } from './common';
 import postRobot from 'src/index';

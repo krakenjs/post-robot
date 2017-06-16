@@ -1,6 +1,6 @@
 
 import { getDomain, isWindowClosed } from 'cross-domain-utils/src';
-import { ZalgoPromise } from 'zalgo-promise';
+import { ZalgoPromise } from 'zalgo-promise/src';
 
 import { CONSTANTS, CONFIG, POST_MESSAGE_NAMES_LIST } from '../../conf';
 import { uniqueID, some, serializeMethods, log, getWindowType, jsonStringify, promiseMap } from '../../lib';

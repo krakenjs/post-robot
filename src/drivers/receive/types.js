@@ -1,5 +1,5 @@
 
-import { ZalgoPromise } from 'zalgo-promise';
+import { ZalgoPromise } from 'zalgo-promise/src';
 import { isWindowClosed, matchDomain } from 'cross-domain-utils/src';
 
 import { CONSTANTS } from '../../conf';
