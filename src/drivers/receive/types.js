@@ -84,6 +84,7 @@ export let RECEIVE_MESSAGE_TYPES = {
                     } else {
                         error = `${errmessage}\n${stack}`;
                     }
+                    error = error.replace(/^Error: /, '');
                 } else {
                     error = errmessage;
                 }
