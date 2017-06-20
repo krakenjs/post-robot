@@ -23,4 +23,4 @@ export function init() {
 init();
 
 export * from './public';
-export { Promise } from './lib';
+export { ZalgoPromise as Promise } from 'zalgo-promise/src';
