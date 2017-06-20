@@ -68,7 +68,8 @@ function buildWebpackConfig({  filename, modulename, minify = false, globals = {
                 compress: { warnings: false },
                 mangle: minify,
                 sourceMap: true
-            })
+            }),
+            new webpack.optimize.ModuleConcatenationPlugin()
         ],
         bail: true
     };
