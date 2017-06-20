@@ -425,8 +425,16 @@
         };
     }, function(module, exports, __webpack_require__) {
         "use strict";
+        Object.defineProperty(exports, "__esModule", {
+            value: !0
+        });
         var _promise = __webpack_require__(19);
-        module.exports = _promise.ZalgoPromise, module.exports.ZalgoPromise = _promise.ZalgoPromise;
+        Object.defineProperty(exports, "ZalgoPromise", {
+            enumerable: !0,
+            get: function() {
+                return _promise.ZalgoPromise;
+            }
+        });
     }, function(module, exports, __webpack_require__) {
         "use strict";
         Object.defineProperty(exports, "__esModule", {
@@ -737,14 +745,14 @@
                 }
             });
         });
-        var _lib = __webpack_require__(4);
+        var _src = __webpack_require__(2);
         Object.defineProperty(exports, "Promise", {
             enumerable: !0,
             get: function() {
-                return _lib.Promise;
+                return _src.ZalgoPromise;
             }
         });
-        var _drivers = __webpack_require__(6), _global = __webpack_require__(3);
+        var _lib = __webpack_require__(4), _drivers = __webpack_require__(6), _global = __webpack_require__(3);
         init();
     }, function(module, exports, __webpack_require__) {
         "use strict";
@@ -1302,31 +1310,27 @@
                 key: "dispatch",
                 value: function() {
                     var _this3 = this, resolved = this.resolved, rejected = this.rejected, handlers = this.handlers;
-                    if (resolved || rejected) {
-                        for (var i = 0; i < handlers.length; ) {
-                            (function() {
-                                var _handlers$i = handlers[i], onSuccess = _handlers$i.onSuccess, onError = _handlers$i.onError, promise = _handlers$i.promise;
-                                i += 1;
-                                var isError = !1, result = void 0, error = void 0;
-                                if (resolved) try {
-                                    result = onSuccess ? onSuccess(_this3.value) : _this3.value;
-                                } catch (err) {
-                                    isError = !0, error = err;
-                                } else if (rejected) if (onError) try {
+                    if (resolved || rejected) for (;handlers.length; ) {
+                        (function() {
+                            var _handlers$shift = handlers.shift(), onSuccess = _handlers$shift.onSuccess, onError = _handlers$shift.onError, promise = _handlers$shift.promise, result = void 0;
+                            if (resolved) try {
+                                result = onSuccess ? onSuccess(_this3.value) : _this3.value;
+                            } catch (err) {
+                                return promise.reject(err), "continue";
+                            } else if (rejected) {
+                                if (!onError) return promise.reject(_this3.error), "continue";
+                                try {
                                     result = onError(_this3.error);
                                 } catch (err) {
-                                    isError = !0, error = err;
-                                } else isError = !0, error = _this3.error;
-                                if (result === _this3) throw new Error("Can not return a promise from the the then handler of the same promise");
-                                if (!promise) return "continue";
-                                isError ? promise.reject(error) : (0, _utils.isPromise)(result) ? result.then(function(res) {
-                                    promise.resolve(res);
-                                }, function(err) {
-                                    promise.reject(err);
-                                }) : promise.resolve(result);
-                            })();
-                        }
-                        handlers.length = 0;
+                                    return promise.reject(err), "continue";
+                                }
+                            }
+                            (0, _utils.isPromise)(result) ? result.then(function(res) {
+                                promise.resolve(res);
+                            }, function(err) {
+                                promise.reject(err);
+                            }) : promise.resolve(result);
+                        })();
                     }
                 }
             }, {
@@ -1378,15 +1382,16 @@
             }, {
                 key: "all",
                 value: function(promises) {
-                    for (var promise = new ZalgoPromise(), count = promises.length, results = [], i = 0; i < promises.length; i++) !function(i) {
-                        var val = promises[i];
-                        ZalgoPromise.resolve(val).then(function(result) {
+                    var promise = new ZalgoPromise(), count = promises.length, results = [];
+                    if (!count) return promise.resolve(results), promise;
+                    for (var i = 0; i < promises.length; i++) !function(i) {
+                        ZalgoPromise.resolve(promises[i]).then(function(result) {
                             results[i] = result, 0 === (count -= 1) && promise.resolve(results);
                         }, function(err) {
                             promise.reject(err);
                         });
                     }(i);
-                    return count || promise.resolve(results), promise;
+                    return promise;
                 }
             }, {
                 key: "onPossiblyUnhandledException",

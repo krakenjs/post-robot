@@ -428,6 +428,18 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
+        var _promise = __webpack_require__(22);
+        Object.defineProperty(exports, "ZalgoPromise", {
+            enumerable: !0,
+            get: function() {
+                return _promise.ZalgoPromise;
+            }
+        });
+    }, function(module, exports, __webpack_require__) {
+        "use strict";
+        Object.defineProperty(exports, "__esModule", {
+            value: !0
+        });
         var _promise = __webpack_require__(36);
         Object.keys(_promise).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
@@ -473,10 +485,6 @@
                 }
             });
         });
-    }, function(module, exports, __webpack_require__) {
-        "use strict";
-        var _promise = __webpack_require__(22);
-        module.exports = _promise.ZalgoPromise, module.exports.ZalgoPromise = _promise.ZalgoPromise;
     }, function(module, exports, __webpack_require__) {
         "use strict";
         Object.defineProperty(exports, "__esModule", {
@@ -562,14 +570,14 @@
                 }
             });
         });
-        var _lib = __webpack_require__(2);
+        var _src = __webpack_require__(2);
         Object.defineProperty(exports, "Promise", {
             enumerable: !0,
             get: function() {
-                return _lib.Promise;
+                return _src.ZalgoPromise;
             }
         });
-        var _drivers = __webpack_require__(6), _global = __webpack_require__(4);
+        var _lib = __webpack_require__(3), _drivers = __webpack_require__(6), _global = __webpack_require__(4);
         init();
     }, function(module, exports, __webpack_require__) {
         "use strict";
@@ -810,7 +818,7 @@
         exports.registerRemoteWindow = registerRemoteWindow, exports.findRemoteWindow = findRemoteWindow, 
         exports.registerRemoteSendMessage = registerRemoteSendMessage, exports.rejectRemoteSendMessage = rejectRemoteSendMessage, 
         exports.sendBridgeMessage = sendBridgeMessage;
-        var _src = __webpack_require__(5), _src2 = __webpack_require__(3), _src3 = __webpack_require__(1), _conf = __webpack_require__(0), _lib = __webpack_require__(2), _global = __webpack_require__(4), _drivers = __webpack_require__(6);
+        var _src = __webpack_require__(5), _src2 = __webpack_require__(2), _src3 = __webpack_require__(1), _conf = __webpack_require__(0), _lib = __webpack_require__(3), _global = __webpack_require__(4), _drivers = __webpack_require__(6);
         exports.documentBodyReady = new _src2.ZalgoPromise(function(resolve) {
             if (window.document && window.document.body) return resolve(window.document.body);
             var interval = setInterval(function() {
@@ -1102,7 +1110,7 @@
         }), exports.resetListeners = resetListeners, exports.addResponseListener = addResponseListener, 
         exports.getResponseListener = getResponseListener, exports.deleteResponseListener = deleteResponseListener, 
         exports.getRequestListener = getRequestListener, exports.addRequestListener = addRequestListener;
-        var _src = __webpack_require__(5), _src2 = __webpack_require__(1), _global = __webpack_require__(4), _lib = __webpack_require__(2), _conf = __webpack_require__(0);
+        var _src = __webpack_require__(5), _src2 = __webpack_require__(1), _global = __webpack_require__(4), _lib = __webpack_require__(3), _conf = __webpack_require__(0);
         _global.global.responseListeners = _global.global.responseListeners || {}, _global.global.requestListeners = _global.global.requestListeners || {}, 
         _global.global.WINDOW_WILDCARD = _global.global.WINDOW_WILDCARD || new function() {}();
         var __DOMAIN_REGEX__ = "__domain_regex__";
@@ -1170,7 +1178,7 @@
             return target;
         };
         exports.buildMessage = buildMessage, exports.sendMessage = sendMessage;
-        var _src = __webpack_require__(1), _src2 = __webpack_require__(3), _conf = __webpack_require__(0), _lib = __webpack_require__(2), _strategies = __webpack_require__(33);
+        var _src = __webpack_require__(1), _src2 = __webpack_require__(2), _conf = __webpack_require__(0), _lib = __webpack_require__(3), _strategies = __webpack_require__(33);
     }, function(module, exports, __webpack_require__) {
         "use strict";
         Object.defineProperty(exports, "__esModule", {
@@ -1432,31 +1440,27 @@
                 key: "dispatch",
                 value: function() {
                     var _this3 = this, resolved = this.resolved, rejected = this.rejected, handlers = this.handlers;
-                    if (resolved || rejected) {
-                        for (var i = 0; i < handlers.length; ) {
-                            (function() {
-                                var _handlers$i = handlers[i], onSuccess = _handlers$i.onSuccess, onError = _handlers$i.onError, promise = _handlers$i.promise;
-                                i += 1;
-                                var isError = !1, result = void 0, error = void 0;
-                                if (resolved) try {
-                                    result = onSuccess ? onSuccess(_this3.value) : _this3.value;
-                                } catch (err) {
-                                    isError = !0, error = err;
-                                } else if (rejected) if (onError) try {
+                    if (resolved || rejected) for (;handlers.length; ) {
+                        (function() {
+                            var _handlers$shift = handlers.shift(), onSuccess = _handlers$shift.onSuccess, onError = _handlers$shift.onError, promise = _handlers$shift.promise, result = void 0;
+                            if (resolved) try {
+                                result = onSuccess ? onSuccess(_this3.value) : _this3.value;
+                            } catch (err) {
+                                return promise.reject(err), "continue";
+                            } else if (rejected) {
+                                if (!onError) return promise.reject(_this3.error), "continue";
+                                try {
                                     result = onError(_this3.error);
                                 } catch (err) {
-                                    isError = !0, error = err;
-                                } else isError = !0, error = _this3.error;
-                                if (result === _this3) throw new Error("Can not return a promise from the the then handler of the same promise");
-                                if (!promise) return "continue";
-                                isError ? promise.reject(error) : (0, _utils.isPromise)(result) ? result.then(function(res) {
-                                    promise.resolve(res);
-                                }, function(err) {
-                                    promise.reject(err);
-                                }) : promise.resolve(result);
-                            })();
-                        }
-                        handlers.length = 0;
+                                    return promise.reject(err), "continue";
+                                }
+                            }
+                            (0, _utils.isPromise)(result) ? result.then(function(res) {
+                                promise.resolve(res);
+                            }, function(err) {
+                                promise.reject(err);
+                            }) : promise.resolve(result);
+                        })();
                     }
                 }
             }, {
@@ -1508,15 +1512,16 @@
             }, {
                 key: "all",
                 value: function(promises) {
-                    for (var promise = new ZalgoPromise(), count = promises.length, results = [], i = 0; i < promises.length; i++) !function(i) {
-                        var val = promises[i];
-                        ZalgoPromise.resolve(val).then(function(result) {
+                    var promise = new ZalgoPromise(), count = promises.length, results = [];
+                    if (!count) return promise.resolve(results), promise;
+                    for (var i = 0; i < promises.length; i++) !function(i) {
+                        ZalgoPromise.resolve(promises[i]).then(function(result) {
                             results[i] = result, 0 === (count -= 1) && promise.resolve(results);
                         }, function(err) {
                             promise.reject(err);
                         });
                     }(i);
-                    return count || promise.resolve(results), promise;
+                    return promise;
                 }
             }, {
                 key: "onPossiblyUnhandledException",
@@ -1607,7 +1612,7 @@
         function getTunnelWindow(id) {
             return _global.global.tunnelWindows[id];
         }
-        var _conf = __webpack_require__(0), _src = __webpack_require__(1), _lib = __webpack_require__(2), _global = __webpack_require__(4), _interface = __webpack_require__(7);
+        var _conf = __webpack_require__(0), _src = __webpack_require__(1), _lib = __webpack_require__(3), _global = __webpack_require__(4), _interface = __webpack_require__(7);
         _global.global.tunnelWindows = _global.global.tunnelWindows || {}, _global.global.tunnelWindowId = 0, 
         _global.global.openTunnelToParent = function(data) {
             var parentWindow = (0, _src.getParent)(window);
@@ -1673,7 +1678,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.openTunnelToOpener = openTunnelToOpener;
-        var _src = __webpack_require__(3), _src2 = __webpack_require__(1), _conf = __webpack_require__(0), _lib = __webpack_require__(2), _drivers = __webpack_require__(6), _common = __webpack_require__(9), awaitRemoteBridgeForWindow = (0, 
+        var _src = __webpack_require__(2), _src2 = __webpack_require__(1), _conf = __webpack_require__(0), _lib = __webpack_require__(3), _drivers = __webpack_require__(6), _common = __webpack_require__(9), awaitRemoteBridgeForWindow = (0, 
         _lib.weakMapMemoize)(function(win) {
             return _src.ZalgoPromise.try(function() {
                 for (var _iterator = (0, _src2.getFrames)(win), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
@@ -1815,7 +1820,7 @@
             };
         }();
         exports.openBridge = openBridge, exports.linkUrl = linkUrl;
-        var _src = __webpack_require__(5), _src2 = __webpack_require__(3), _src3 = __webpack_require__(1), _conf = __webpack_require__(0), _lib = __webpack_require__(2), _global = __webpack_require__(4), _interface = __webpack_require__(7), _drivers = __webpack_require__(6), _common = __webpack_require__(9);
+        var _src = __webpack_require__(5), _src2 = __webpack_require__(2), _src3 = __webpack_require__(1), _conf = __webpack_require__(0), _lib = __webpack_require__(3), _global = __webpack_require__(4), _interface = __webpack_require__(7), _drivers = __webpack_require__(6), _common = __webpack_require__(9);
         _global.global.bridges = _global.global.bridges || {}, _global.global.popupWindowsByWin = _global.global.popupWindowsByWin || new _src.WeakMap(), 
         _global.global.popupWindowsByName = _global.global.popupWindowsByName || {};
         var windowOpen = window.open;
@@ -1963,7 +1968,7 @@
             value: !0
         }), exports.receiveMessage = receiveMessage, exports.messageListener = messageListener, 
         exports.listenForMessages = listenForMessages;
-        var _src = __webpack_require__(1), _conf = __webpack_require__(0), _lib = __webpack_require__(2), _global = __webpack_require__(4), _types = __webpack_require__(32);
+        var _src = __webpack_require__(1), _conf = __webpack_require__(0), _lib = __webpack_require__(3), _global = __webpack_require__(4), _types = __webpack_require__(32);
         _global.global.receivedMessages = _global.global.receivedMessages || [];
     }, function(module, exports, __webpack_require__) {
         "use strict";
@@ -1984,7 +1989,7 @@
                 for (var key in source) Object.prototype.hasOwnProperty.call(source, key) && (target[key] = source[key]);
             }
             return target;
-        }, _src = __webpack_require__(3), _src2 = __webpack_require__(1), _conf = __webpack_require__(0), _lib = __webpack_require__(2), _send = __webpack_require__(15), _listeners = __webpack_require__(14);
+        }, _src = __webpack_require__(2), _src2 = __webpack_require__(1), _conf = __webpack_require__(0), _lib = __webpack_require__(3), _send = __webpack_require__(15), _listeners = __webpack_require__(14);
         exports.RECEIVE_MESSAGE_TYPES = (_RECEIVE_MESSAGE_TYPE = {}, _defineProperty(_RECEIVE_MESSAGE_TYPE, _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK, function(source, origin, message) {
             var options = (0, _listeners.getResponseListener)(message.hash);
             if (!options) throw new Error("No handler found for post message ack for message: " + message.name + " from " + origin + " in " + window.location.protocol + "//" + window.location.host + window.location.pathname);
@@ -2180,7 +2185,7 @@
         exports.serializeMethod = serializeMethod, exports.serializeMethods = serializeMethods, 
         exports.deserializeMethod = deserializeMethod, exports.deserializeError = deserializeError, 
         exports.deserializeMethods = deserializeMethods;
-        var _src = __webpack_require__(5), _src2 = __webpack_require__(1), _src3 = __webpack_require__(3), _conf = __webpack_require__(0), _util = __webpack_require__(8), _interface = __webpack_require__(7), _log = __webpack_require__(11), _global = __webpack_require__(4);
+        var _src = __webpack_require__(5), _src2 = __webpack_require__(1), _src3 = __webpack_require__(2), _conf = __webpack_require__(0), _util = __webpack_require__(8), _interface = __webpack_require__(7), _log = __webpack_require__(11), _global = __webpack_require__(4);
         _global.global.methods = _global.global.methods || new _src.WeakMap();
         exports.listenForMethods = (0, _util.once)(function() {
             (0, _interface.on)(_conf.CONSTANTS.POST_MESSAGE_NAMES.METHOD, {
@@ -2220,7 +2225,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.promiseMap = promiseMap;
-        var _src = __webpack_require__(3);
+        var _src = __webpack_require__(2);
     }, function(module, exports, __webpack_require__) {
         "use strict";
         function initOnReady() {
@@ -2250,7 +2255,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.initOnReady = initOnReady, exports.onWindowReady = onWindowReady;
-        var _src = __webpack_require__(5), _src2 = __webpack_require__(1), _src3 = __webpack_require__(3), _conf = __webpack_require__(0), _interface = __webpack_require__(7), _log = __webpack_require__(11), _global = __webpack_require__(4);
+        var _src = __webpack_require__(5), _src2 = __webpack_require__(1), _src3 = __webpack_require__(2), _conf = __webpack_require__(0), _interface = __webpack_require__(7), _log = __webpack_require__(11), _global = __webpack_require__(4);
         _global.global.readyPromises = _global.global.readyPromises || new _src.WeakMap();
     }, function(module, exports, __webpack_require__) {
         "use strict";
@@ -2325,7 +2330,7 @@
             value: !0
         }), exports.send = void 0, exports.request = request, exports.sendToParent = sendToParent, 
         exports.client = client;
-        var _src = __webpack_require__(5), _src2 = __webpack_require__(3), _src3 = __webpack_require__(1), _conf = __webpack_require__(0), _drivers = __webpack_require__(6), _lib = __webpack_require__(2), _global = __webpack_require__(4);
+        var _src = __webpack_require__(5), _src2 = __webpack_require__(2), _src3 = __webpack_require__(1), _conf = __webpack_require__(0), _drivers = __webpack_require__(6), _lib = __webpack_require__(3), _global = __webpack_require__(4);
         _global.global.requestPromises = _global.global.requestPromises || new _src.WeakMap(), 
         exports.send = _send;
     }, function(module, exports, __webpack_require__) {
@@ -2454,7 +2459,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.on = void 0, exports.listen = listen, exports.once = once, exports.listener = listener;
-        var _src = __webpack_require__(1), _src2 = __webpack_require__(3), _lib = __webpack_require__(2), _drivers = __webpack_require__(6), _conf = __webpack_require__(0);
+        var _src = __webpack_require__(1), _src2 = __webpack_require__(2), _lib = __webpack_require__(3), _drivers = __webpack_require__(6), _conf = __webpack_require__(0);
         exports.on = _on;
     } ]);
 });
