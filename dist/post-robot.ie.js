@@ -406,6 +406,10 @@
                 return matchDomain(subpattern, origin);
             }));
         }
+        function getDomainFromUrl(url) {
+            var domain = void 0;
+            return url.match(/^(https?|mock|file):\/\//) ? (domain = url, domain = domain.split("/").slice(0, 3).join("/")) : getDomain();
+        }
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.getActualDomain = getActualDomain, exports.getDomain = getDomain, exports.isActuallySameDomain = isActuallySameDomain, 
@@ -417,7 +421,7 @@
         exports.findFrameByName = findFrameByName, exports.isParent = isParent, exports.isOpener = isOpener, 
         exports.getAncestor = getAncestor, exports.getAncestors = getAncestors, exports.isAncestor = isAncestor, 
         exports.isPopup = isPopup, exports.isIframe = isIframe, exports.isFullpage = isFullpage, 
-        exports.isSameTopWindow = isSameTopWindow, exports.matchDomain = matchDomain;
+        exports.isSameTopWindow = isSameTopWindow, exports.matchDomain = matchDomain, exports.getDomainFromUrl = getDomainFromUrl;
         var _util = __webpack_require__(20), CONSTANTS = {
             MOCK_PROTOCOL: "mock:",
             FILE_PROTOCOL: "file:",
@@ -435,6 +439,13 @@
                 return _promise.ZalgoPromise;
             }
         });
+    }, function(module, exports, __webpack_require__) {
+        "use strict";
+        Object.defineProperty(exports, "__esModule", {
+            value: !0
+        }), exports.global = void 0;
+        var _conf = __webpack_require__(0);
+        (exports.global = window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT] = window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT] || {}).registerSelf = function() {};
     }, function(module, exports, __webpack_require__) {
         "use strict";
         Object.defineProperty(exports, "__esModule", {
@@ -485,13 +496,6 @@
                 }
             });
         });
-    }, function(module, exports, __webpack_require__) {
-        "use strict";
-        Object.defineProperty(exports, "__esModule", {
-            value: !0
-        }), exports.global = void 0;
-        var _conf = __webpack_require__(0);
-        (exports.global = window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT] = window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT] || {}).registerSelf = function() {};
     }, function(module, exports, __webpack_require__) {
         "use strict";
         Object.defineProperty(exports, "__esModule", {
@@ -577,7 +581,7 @@
                 return _src.ZalgoPromise;
             }
         });
-        var _lib = __webpack_require__(3), _drivers = __webpack_require__(6), _global = __webpack_require__(4);
+        var _lib = __webpack_require__(4), _drivers = __webpack_require__(6), _global = __webpack_require__(3);
         init();
     }, function(module, exports, __webpack_require__) {
         "use strict";
@@ -589,76 +593,19 @@
             };
         }
         function noop() {}
-        function safeHasProp(obj, name) {
-            try {
-                return !!obj[name];
-            } catch (err) {
-                return !1;
-            }
-        }
-        function safeGetProp(obj, name) {
-            try {
-                return obj[name];
-            } catch (err) {
-                return;
-            }
-        }
-        function listen(win, event, handler) {
-            return win.addEventListener ? win.addEventListener(event, handler) : win.attachEvent("on" + event, handler), 
+        function addEventListener(obj, event, handler) {
+            return obj.addEventListener ? obj.addEventListener(event, handler) : obj.attachEvent("on" + event, handler), 
             {
                 cancel: function() {
-                    win.removeEventListener ? win.removeEventListener(event, handler) : win.detachEvent("on" + event, handler);
+                    obj.removeEventListener ? obj.removeEventListener(event, handler) : obj.detachEvent("on" + event, handler);
                 }
             };
-        }
-        function apply(method, context, args) {
-            return "function" == typeof method.apply ? method.apply(context, args) : method(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9]);
-        }
-        function find(collection, method, def) {
-            if (!collection) return def;
-            for (var i = 0; i < collection.length; i++) if (method(collection[i])) return collection[i];
-            return def;
-        }
-        function map(collection, method) {
-            for (var results = [], i = 0; i < collection.length; i++) results.push(method(collection[i]));
-            return results;
-        }
-        function some(collection, method) {
-            method = method || Boolean;
-            for (var i = 0; i < collection.length; i++) if (method(collection[i])) return !0;
-            return !1;
-        }
-        function keys(mapping) {
-            var result = [];
-            for (var key in mapping) mapping.hasOwnProperty(key) && result.push(key);
-            return result;
-        }
-        function values(mapping) {
-            var result = [];
-            for (var key in mapping) mapping.hasOwnProperty(key) && result.push(mapping[key]);
-            return result;
-        }
-        function getByValue(mapping, value) {
-            for (var key in mapping) if (mapping.hasOwnProperty(key) && mapping[key] === value) return key;
         }
         function uniqueID() {
             var chars = "0123456789abcdef";
             return "xxxxxxxxxx".replace(/./g, function() {
                 return chars.charAt(Math.floor(Math.random() * chars.length));
             });
-        }
-        function memoize(method) {
-            var results = {};
-            return function() {
-                var args = JSON.stringify(Array.prototype.slice.call(arguments));
-                return results.hasOwnProperty(args) || (results[args] = method.apply(this, arguments)), 
-                results[args];
-            };
-        }
-        function extend(obj, source) {
-            if (!source) return obj;
-            for (var key in source) source.hasOwnProperty(key) && (obj[key] = source[key]);
-            return obj;
         }
         function each(obj, callback) {
             if (Array.isArray(obj)) for (var i = 0; i < obj.length; i++) callback(obj[i], i); else if ("object" === (void 0 === obj ? "undefined" : _typeof(obj)) && null !== obj) for (var key in obj) obj.hasOwnProperty(key) && callback(obj[key], key);
@@ -682,25 +629,6 @@
                     clearTimeout(timeout);
                 }
             };
-        }
-        function intervalTimeout(time, interval, method) {
-            var _safeInterval = safeInterval(function() {
-                time -= interval, time = time <= 0 ? 0 : time, 0 === time && _safeInterval.cancel(), 
-                method(time);
-            }, interval);
-            return safeInterval;
-        }
-        function getDomainFromUrl(url) {
-            var domain = void 0;
-            return url.match(/^(https?|mock|file):\/\//) ? (domain = url, domain = domain.split("/").slice(0, 3).join("/")) : (0, 
-            _src2.getDomain)();
-        }
-        function safeGet(obj, prop) {
-            var result = void 0;
-            try {
-                result = obj[prop];
-            } catch (err) {}
-            return result;
         }
         function isRegex(item) {
             return "[object RegExp]" === Object.prototype.toString.call(item);
@@ -745,13 +673,9 @@
         } : function(obj) {
             return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
         };
-        exports.once = once, exports.noop = noop, exports.safeHasProp = safeHasProp, exports.safeGetProp = safeGetProp, 
-        exports.listen = listen, exports.apply = apply, exports.find = find, exports.map = map, 
-        exports.some = some, exports.keys = keys, exports.values = values, exports.getByValue = getByValue, 
-        exports.uniqueID = uniqueID, exports.memoize = memoize, exports.extend = extend, 
-        exports.each = each, exports.replaceObject = replaceObject, exports.safeInterval = safeInterval, 
-        exports.intervalTimeout = intervalTimeout, exports.getDomainFromUrl = getDomainFromUrl, 
-        exports.safeGet = safeGet, exports.isRegex = isRegex, exports.weakMapMemoize = weakMapMemoize, 
+        exports.once = once, exports.noop = noop, exports.addEventListener = addEventListener, 
+        exports.uniqueID = uniqueID, exports.each = each, exports.replaceObject = replaceObject, 
+        exports.safeInterval = safeInterval, exports.isRegex = isRegex, exports.weakMapMemoize = weakMapMemoize, 
         exports.getWindowType = getWindowType, exports.jsonStringify = jsonStringify, exports.jsonParse = jsonParse;
         var _src = __webpack_require__(5), _src2 = __webpack_require__(1), _conf = __webpack_require__(0);
     }, function(module, exports, __webpack_require__) {
@@ -763,14 +687,14 @@
             return (!win || !(0, _src3.isSameTopWindow)(window, win)) && (!win || !(0, _src3.isSameDomain)(win));
         }
         function needsBridgeForDomain(domain) {
-            return !domain || (0, _src3.getDomain)() !== (0, _lib.getDomainFromUrl)(domain);
+            return !domain || (0, _src3.getDomain)() !== (0, _src3.getDomainFromUrl)(domain);
         }
         function needsBridge(_ref) {
             var win = _ref.win, domain = _ref.domain;
             return needsBridgeForBrowser() && needsBridgeForWin(win) && needsBridgeForDomain(domain);
         }
         function getBridgeName(domain) {
-            domain = domain || (0, _lib.getDomainFromUrl)(domain);
+            domain = domain || (0, _src3.getDomainFromUrl)(domain);
             var sanitizedDomain = domain.replace(/[^a-zA-Z0-9]+/g, "_");
             return _conf.CONSTANTS.BRIDGE_NAME_PREFIX + "_" + sanitizedDomain;
         }
@@ -818,7 +742,7 @@
         exports.registerRemoteWindow = registerRemoteWindow, exports.findRemoteWindow = findRemoteWindow, 
         exports.registerRemoteSendMessage = registerRemoteSendMessage, exports.rejectRemoteSendMessage = rejectRemoteSendMessage, 
         exports.sendBridgeMessage = sendBridgeMessage;
-        var _src = __webpack_require__(5), _src2 = __webpack_require__(2), _src3 = __webpack_require__(1), _conf = __webpack_require__(0), _lib = __webpack_require__(3), _global = __webpack_require__(4), _drivers = __webpack_require__(6);
+        var _src = __webpack_require__(5), _src2 = __webpack_require__(2), _src3 = __webpack_require__(1), _conf = __webpack_require__(0), _global = __webpack_require__(3), _drivers = __webpack_require__(6);
         exports.documentBodyReady = new _src2.ZalgoPromise(function(resolve) {
             if (window.document && window.document.body) return resolve(window.document.body);
             var interval = setInterval(function() {
@@ -896,8 +820,7 @@
                     container || (container = document.createElement("div"), container.id = "postRobotLogs", 
                     container.style.cssText = "width: 800px; font-family: monospace; white-space: pre-wrap;", 
                     document.body.appendChild(container));
-                    var el = document.createElement("div"), date = new Date().toString().split(" ")[4], payload = (0, 
-                    _util.map)(args, function(item) {
+                    var el = document.createElement("div"), date = new Date().toString().split(" ")[4], payload = Array.prototype.slice.call(args).map(function(item) {
                         if ("string" == typeof item) return item;
                         if (!item) return Object.prototype.toString.call(item);
                         var json = void 0;
@@ -1110,7 +1033,7 @@
         }), exports.resetListeners = resetListeners, exports.addResponseListener = addResponseListener, 
         exports.getResponseListener = getResponseListener, exports.deleteResponseListener = deleteResponseListener, 
         exports.getRequestListener = getRequestListener, exports.addRequestListener = addRequestListener;
-        var _src = __webpack_require__(5), _src2 = __webpack_require__(1), _global = __webpack_require__(4), _lib = __webpack_require__(3), _conf = __webpack_require__(0);
+        var _src = __webpack_require__(5), _src2 = __webpack_require__(1), _global = __webpack_require__(3), _lib = __webpack_require__(4), _conf = __webpack_require__(0);
         _global.global.responseListeners = _global.global.responseListeners || {}, _global.global.requestListeners = _global.global.requestListeners || {}, 
         _global.global.WINDOW_WILDCARD = _global.global.WINDOW_WILDCARD || new function() {}();
         var __DOMAIN_REGEX__ = "__domain_regex__";
@@ -1162,7 +1085,7 @@
                         !1;
                     });
                 }).then(function(results) {
-                    var success = (0, _lib.some)(results), status = message.type + " " + message.name + " " + (success ? "success" : "error") + ":\n  - " + messages.join("\n  - ") + "\n";
+                    var success = results.some(Boolean), status = message.type + " " + message.name + " " + (success ? "success" : "error") + ":\n  - " + messages.join("\n  - ") + "\n";
                     if (_lib.log.debug(status), !success) throw new Error(status);
                 });
             });
@@ -1178,7 +1101,7 @@
             return target;
         };
         exports.buildMessage = buildMessage, exports.sendMessage = sendMessage;
-        var _src = __webpack_require__(1), _src2 = __webpack_require__(2), _conf = __webpack_require__(0), _lib = __webpack_require__(3), _strategies = __webpack_require__(33);
+        var _src = __webpack_require__(1), _src2 = __webpack_require__(2), _conf = __webpack_require__(0), _lib = __webpack_require__(4), _strategies = __webpack_require__(33);
     }, function(module, exports, __webpack_require__) {
         "use strict";
         Object.defineProperty(exports, "__esModule", {
@@ -1612,7 +1535,7 @@
         function getTunnelWindow(id) {
             return _global.global.tunnelWindows[id];
         }
-        var _conf = __webpack_require__(0), _src = __webpack_require__(1), _lib = __webpack_require__(3), _global = __webpack_require__(4), _interface = __webpack_require__(7);
+        var _conf = __webpack_require__(0), _src = __webpack_require__(1), _lib = __webpack_require__(4), _global = __webpack_require__(3), _interface = __webpack_require__(7);
         _global.global.tunnelWindows = _global.global.tunnelWindows || {}, _global.global.tunnelWindowId = 0, 
         _global.global.openTunnelToParent = function(data) {
             var parentWindow = (0, _src.getParent)(window);
@@ -1678,7 +1601,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.openTunnelToOpener = openTunnelToOpener;
-        var _src = __webpack_require__(2), _src2 = __webpack_require__(1), _conf = __webpack_require__(0), _lib = __webpack_require__(3), _drivers = __webpack_require__(6), _common = __webpack_require__(9), awaitRemoteBridgeForWindow = (0, 
+        var _src = __webpack_require__(2), _src2 = __webpack_require__(1), _conf = __webpack_require__(0), _lib = __webpack_require__(4), _drivers = __webpack_require__(6), _common = __webpack_require__(9), awaitRemoteBridgeForWindow = (0, 
         _lib.weakMapMemoize)(function(win) {
             return _src.ZalgoPromise.try(function() {
                 for (var _iterator = (0, _src2.getFrames)(win), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
@@ -1767,7 +1690,7 @@
             iframe.src = url, iframe;
         }
         function openBridge(url, domain) {
-            return domain = domain || (0, _lib.getDomainFromUrl)(url), _global.global.bridges[domain] ? _global.global.bridges[domain] : (_global.global.bridges[domain] = _src2.ZalgoPromise.try(function() {
+            return domain = domain || (0, _src3.getDomainFromUrl)(url), _global.global.bridges[domain] ? _global.global.bridges[domain] : (_global.global.bridges[domain] = _src2.ZalgoPromise.try(function() {
                 if ((0, _src3.getDomain)() === domain) throw new Error("Can not open bridge on the same domain as current domain: " + domain);
                 var name = (0, _common.getBridgeName)(domain);
                 if ((0, _src3.getFrameByName)(window, name)) throw new Error("Frame with name " + name + " already exists on page");
@@ -1791,7 +1714,7 @@
         }
         function linkUrl(win, url) {
             var winOptions = _global.global.popupWindowsByWin.get(win);
-            winOptions && (winOptions.domain = (0, _lib.getDomainFromUrl)(url), (0, _common.registerRemoteWindow)(win));
+            winOptions && (winOptions.domain = (0, _src3.getDomainFromUrl)(url), (0, _common.registerRemoteWindow)(win));
         }
         Object.defineProperty(exports, "__esModule", {
             value: !0
@@ -1820,7 +1743,7 @@
             };
         }();
         exports.openBridge = openBridge, exports.linkUrl = linkUrl;
-        var _src = __webpack_require__(5), _src2 = __webpack_require__(2), _src3 = __webpack_require__(1), _conf = __webpack_require__(0), _lib = __webpack_require__(3), _global = __webpack_require__(4), _interface = __webpack_require__(7), _drivers = __webpack_require__(6), _common = __webpack_require__(9);
+        var _src = __webpack_require__(5), _src2 = __webpack_require__(2), _src3 = __webpack_require__(1), _conf = __webpack_require__(0), _lib = __webpack_require__(4), _global = __webpack_require__(3), _interface = __webpack_require__(7), _drivers = __webpack_require__(6), _common = __webpack_require__(9);
         _global.global.bridges = _global.global.bridges || {}, _global.global.popupWindowsByWin = _global.global.popupWindowsByWin || new _src.WeakMap(), 
         _global.global.popupWindowsByName = _global.global.popupWindowsByName || {};
         var windowOpen = window.open;
@@ -1830,7 +1753,7 @@
                 var _url$split = url.split("|"), _url$split2 = _slicedToArray(_url$split, 2);
                 domain = _url$split2[0], url = _url$split2[1];
             }
-            domain && (domain = (0, _lib.getDomainFromUrl)(domain));
+            domain && (domain = (0, _src3.getDomainFromUrl)(domain));
             var win = windowOpen.call(this, url, name, options, last);
             if (!win) return win;
             url && (0, _common.registerRemoteWindow)(win);
@@ -1877,7 +1800,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.cleanUpWindow = cleanUpWindow;
-        var _global = __webpack_require__(4);
+        var _global = __webpack_require__(3);
     }, function(module, exports, __webpack_require__) {
         "use strict";
         function emulateIERestrictions(sourceWindow, targetWindow) {
@@ -1962,13 +1885,13 @@
             receiveMessage(event);
         }
         function listenForMessages() {
-            (0, _lib.listen)(window, "message", messageListener);
+            (0, _lib.addEventListener)(window, "message", messageListener);
         }
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.receiveMessage = receiveMessage, exports.messageListener = messageListener, 
         exports.listenForMessages = listenForMessages;
-        var _src = __webpack_require__(1), _conf = __webpack_require__(0), _lib = __webpack_require__(3), _global = __webpack_require__(4), _types = __webpack_require__(32);
+        var _src = __webpack_require__(1), _conf = __webpack_require__(0), _lib = __webpack_require__(4), _global = __webpack_require__(3), _types = __webpack_require__(32);
         _global.global.receivedMessages = _global.global.receivedMessages || [];
     }, function(module, exports, __webpack_require__) {
         "use strict";
@@ -1989,7 +1912,7 @@
                 for (var key in source) Object.prototype.hasOwnProperty.call(source, key) && (target[key] = source[key]);
             }
             return target;
-        }, _src = __webpack_require__(2), _src2 = __webpack_require__(1), _conf = __webpack_require__(0), _lib = __webpack_require__(3), _send = __webpack_require__(15), _listeners = __webpack_require__(14);
+        }, _src = __webpack_require__(2), _src2 = __webpack_require__(1), _conf = __webpack_require__(0), _lib = __webpack_require__(4), _send = __webpack_require__(15), _listeners = __webpack_require__(14);
         exports.RECEIVE_MESSAGE_TYPES = (_RECEIVE_MESSAGE_TYPE = {}, _defineProperty(_RECEIVE_MESSAGE_TYPE, _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK, function(source, origin, message) {
             var options = (0, _listeners.getResponseListener)(message.hash);
             if (!options) throw new Error("No handler found for post message ack for message: " + message.name + " from " + origin + " in " + window.location.protocol + "//" + window.location.host + window.location.pathname);
@@ -2185,7 +2108,7 @@
         exports.serializeMethod = serializeMethod, exports.serializeMethods = serializeMethods, 
         exports.deserializeMethod = deserializeMethod, exports.deserializeError = deserializeError, 
         exports.deserializeMethods = deserializeMethods;
-        var _src = __webpack_require__(5), _src2 = __webpack_require__(1), _src3 = __webpack_require__(2), _conf = __webpack_require__(0), _util = __webpack_require__(8), _interface = __webpack_require__(7), _log = __webpack_require__(11), _global = __webpack_require__(4);
+        var _src = __webpack_require__(5), _src2 = __webpack_require__(1), _src3 = __webpack_require__(2), _conf = __webpack_require__(0), _util = __webpack_require__(8), _interface = __webpack_require__(7), _log = __webpack_require__(11), _global = __webpack_require__(3);
         _global.global.methods = _global.global.methods || new _src.WeakMap();
         exports.listenForMethods = (0, _util.once)(function() {
             (0, _interface.on)(_conf.CONSTANTS.POST_MESSAGE_NAMES.METHOD, {
@@ -2255,7 +2178,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.initOnReady = initOnReady, exports.onWindowReady = onWindowReady;
-        var _src = __webpack_require__(5), _src2 = __webpack_require__(1), _src3 = __webpack_require__(2), _conf = __webpack_require__(0), _interface = __webpack_require__(7), _log = __webpack_require__(11), _global = __webpack_require__(4);
+        var _src = __webpack_require__(5), _src2 = __webpack_require__(1), _src3 = __webpack_require__(2), _conf = __webpack_require__(0), _interface = __webpack_require__(7), _log = __webpack_require__(11), _global = __webpack_require__(3);
         _global.global.readyPromises = _global.global.readyPromises || new _src.WeakMap();
     }, function(module, exports, __webpack_require__) {
         "use strict";
@@ -2330,7 +2253,7 @@
             value: !0
         }), exports.send = void 0, exports.request = request, exports.sendToParent = sendToParent, 
         exports.client = client;
-        var _src = __webpack_require__(5), _src2 = __webpack_require__(2), _src3 = __webpack_require__(1), _conf = __webpack_require__(0), _drivers = __webpack_require__(6), _lib = __webpack_require__(3), _global = __webpack_require__(4);
+        var _src = __webpack_require__(5), _src2 = __webpack_require__(2), _src3 = __webpack_require__(1), _conf = __webpack_require__(0), _drivers = __webpack_require__(6), _lib = __webpack_require__(4), _global = __webpack_require__(3);
         _global.global.requestPromises = _global.global.requestPromises || new _src.WeakMap(), 
         exports.send = _send;
     }, function(module, exports, __webpack_require__) {
@@ -2446,7 +2369,7 @@
                     return resolve(event);
                 }, options.errorHandler = options.errorHandler || reject;
             }), myListener = listen(options);
-            return (0, _lib.extend)(prom, myListener), prom;
+            return prom.cancel = myListener.cancel, prom;
         }
         function listener() {
             var options = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {};
@@ -2459,7 +2382,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.on = void 0, exports.listen = listen, exports.once = once, exports.listener = listener;
-        var _src = __webpack_require__(1), _src2 = __webpack_require__(2), _lib = __webpack_require__(3), _drivers = __webpack_require__(6), _conf = __webpack_require__(0);
+        var _src = __webpack_require__(1), _src2 = __webpack_require__(2), _lib = __webpack_require__(4), _drivers = __webpack_require__(6), _conf = __webpack_require__(0);
         exports.on = _on;
     } ]);
 });

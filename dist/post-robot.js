@@ -406,6 +406,10 @@
                 return matchDomain(subpattern, origin);
             }));
         }
+        function getDomainFromUrl(url) {
+            var domain = void 0;
+            return url.match(/^(https?|mock|file):\/\//) ? (domain = url, domain = domain.split("/").slice(0, 3).join("/")) : getDomain();
+        }
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.getActualDomain = getActualDomain, exports.getDomain = getDomain, exports.isActuallySameDomain = isActuallySameDomain, 
@@ -417,7 +421,7 @@
         exports.findFrameByName = findFrameByName, exports.isParent = isParent, exports.isOpener = isOpener, 
         exports.getAncestor = getAncestor, exports.getAncestors = getAncestors, exports.isAncestor = isAncestor, 
         exports.isPopup = isPopup, exports.isIframe = isIframe, exports.isFullpage = isFullpage, 
-        exports.isSameTopWindow = isSameTopWindow, exports.matchDomain = matchDomain;
+        exports.isSameTopWindow = isSameTopWindow, exports.matchDomain = matchDomain, exports.getDomainFromUrl = getDomainFromUrl;
         var _util = __webpack_require__(17), CONSTANTS = {
             MOCK_PROTOCOL: "mock:",
             FILE_PROTOCOL: "file:",
@@ -555,76 +559,19 @@
             };
         }
         function noop() {}
-        function safeHasProp(obj, name) {
-            try {
-                return !!obj[name];
-            } catch (err) {
-                return !1;
-            }
-        }
-        function safeGetProp(obj, name) {
-            try {
-                return obj[name];
-            } catch (err) {
-                return;
-            }
-        }
-        function listen(win, event, handler) {
-            return win.addEventListener ? win.addEventListener(event, handler) : win.attachEvent("on" + event, handler), 
+        function addEventListener(obj, event, handler) {
+            return obj.addEventListener ? obj.addEventListener(event, handler) : obj.attachEvent("on" + event, handler), 
             {
                 cancel: function() {
-                    win.removeEventListener ? win.removeEventListener(event, handler) : win.detachEvent("on" + event, handler);
+                    obj.removeEventListener ? obj.removeEventListener(event, handler) : obj.detachEvent("on" + event, handler);
                 }
             };
-        }
-        function apply(method, context, args) {
-            return "function" == typeof method.apply ? method.apply(context, args) : method(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9]);
-        }
-        function find(collection, method, def) {
-            if (!collection) return def;
-            for (var i = 0; i < collection.length; i++) if (method(collection[i])) return collection[i];
-            return def;
-        }
-        function map(collection, method) {
-            for (var results = [], i = 0; i < collection.length; i++) results.push(method(collection[i]));
-            return results;
-        }
-        function some(collection, method) {
-            method = method || Boolean;
-            for (var i = 0; i < collection.length; i++) if (method(collection[i])) return !0;
-            return !1;
-        }
-        function keys(mapping) {
-            var result = [];
-            for (var key in mapping) mapping.hasOwnProperty(key) && result.push(key);
-            return result;
-        }
-        function values(mapping) {
-            var result = [];
-            for (var key in mapping) mapping.hasOwnProperty(key) && result.push(mapping[key]);
-            return result;
-        }
-        function getByValue(mapping, value) {
-            for (var key in mapping) if (mapping.hasOwnProperty(key) && mapping[key] === value) return key;
         }
         function uniqueID() {
             var chars = "0123456789abcdef";
             return "xxxxxxxxxx".replace(/./g, function() {
                 return chars.charAt(Math.floor(Math.random() * chars.length));
             });
-        }
-        function memoize(method) {
-            var results = {};
-            return function() {
-                var args = JSON.stringify(Array.prototype.slice.call(arguments));
-                return results.hasOwnProperty(args) || (results[args] = method.apply(this, arguments)), 
-                results[args];
-            };
-        }
-        function extend(obj, source) {
-            if (!source) return obj;
-            for (var key in source) source.hasOwnProperty(key) && (obj[key] = source[key]);
-            return obj;
         }
         function each(obj, callback) {
             if (Array.isArray(obj)) for (var i = 0; i < obj.length; i++) callback(obj[i], i); else if ("object" === (void 0 === obj ? "undefined" : _typeof(obj)) && null !== obj) for (var key in obj) obj.hasOwnProperty(key) && callback(obj[key], key);
@@ -648,25 +595,6 @@
                     clearTimeout(timeout);
                 }
             };
-        }
-        function intervalTimeout(time, interval, method) {
-            var _safeInterval = safeInterval(function() {
-                time -= interval, time = time <= 0 ? 0 : time, 0 === time && _safeInterval.cancel(), 
-                method(time);
-            }, interval);
-            return safeInterval;
-        }
-        function getDomainFromUrl(url) {
-            var domain = void 0;
-            return url.match(/^(https?|mock|file):\/\//) ? (domain = url, domain = domain.split("/").slice(0, 3).join("/")) : (0, 
-            _src2.getDomain)();
-        }
-        function safeGet(obj, prop) {
-            var result = void 0;
-            try {
-                result = obj[prop];
-            } catch (err) {}
-            return result;
         }
         function isRegex(item) {
             return "[object RegExp]" === Object.prototype.toString.call(item);
@@ -711,13 +639,9 @@
         } : function(obj) {
             return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
         };
-        exports.once = once, exports.noop = noop, exports.safeHasProp = safeHasProp, exports.safeGetProp = safeGetProp, 
-        exports.listen = listen, exports.apply = apply, exports.find = find, exports.map = map, 
-        exports.some = some, exports.keys = keys, exports.values = values, exports.getByValue = getByValue, 
-        exports.uniqueID = uniqueID, exports.memoize = memoize, exports.extend = extend, 
-        exports.each = each, exports.replaceObject = replaceObject, exports.safeInterval = safeInterval, 
-        exports.intervalTimeout = intervalTimeout, exports.getDomainFromUrl = getDomainFromUrl, 
-        exports.safeGet = safeGet, exports.isRegex = isRegex, exports.weakMapMemoize = weakMapMemoize, 
+        exports.once = once, exports.noop = noop, exports.addEventListener = addEventListener, 
+        exports.uniqueID = uniqueID, exports.each = each, exports.replaceObject = replaceObject, 
+        exports.safeInterval = safeInterval, exports.isRegex = isRegex, exports.weakMapMemoize = weakMapMemoize, 
         exports.getWindowType = getWindowType, exports.jsonStringify = jsonStringify, exports.jsonParse = jsonParse;
         var _src = __webpack_require__(5), _src2 = __webpack_require__(1), _conf = __webpack_require__(0);
     }, function(module, exports, __webpack_require__) {
@@ -780,8 +704,7 @@
                     container || (container = document.createElement("div"), container.id = "postRobotLogs", 
                     container.style.cssText = "width: 800px; font-family: monospace; white-space: pre-wrap;", 
                     document.body.appendChild(container));
-                    var el = document.createElement("div"), date = new Date().toString().split(" ")[4], payload = (0, 
-                    _util.map)(args, function(item) {
+                    var el = document.createElement("div"), date = new Date().toString().split(" ")[4], payload = Array.prototype.slice.call(args).map(function(item) {
                         if ("string" == typeof item) return item;
                         if (!item) return Object.prototype.toString.call(item);
                         var json = void 0;
@@ -1032,7 +955,7 @@
                         !1;
                     });
                 }).then(function(results) {
-                    var success = (0, _lib.some)(results), status = message.type + " " + message.name + " " + (success ? "success" : "error") + ":\n  - " + messages.join("\n  - ") + "\n";
+                    var success = results.some(Boolean), status = message.type + " " + message.name + " " + (success ? "success" : "error") + ":\n  - " + messages.join("\n  - ") + "\n";
                     if (_lib.log.debug(status), !success) throw new Error(status);
                 });
             });
@@ -1540,7 +1463,7 @@
             }, receiveMessage(event);
         }
         function listenForMessages() {
-            (0, _lib.listen)(window, "message", messageListener);
+            (0, _lib.addEventListener)(window, "message", messageListener);
         }
         Object.defineProperty(exports, "__esModule", {
             value: !0
@@ -2002,7 +1925,7 @@
                     return resolve(event);
                 }, options.errorHandler = options.errorHandler || reject;
             }), myListener = listen(options);
-            return (0, _lib.extend)(prom, myListener), prom;
+            return prom.cancel = myListener.cancel, prom;
         }
         function listener() {
             var options = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {};
