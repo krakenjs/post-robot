@@ -1,5 +1,5 @@
 
-import { map, getWindowType, jsonStringify } from './util';
+import { getWindowType, jsonStringify } from './util';
 import { CONFIG } from '../conf';
 
 const LOG_LEVELS = ['debug', 'info', 'warn', 'error'];
@@ -42,7 +42,7 @@ export let log = {
 
             let date = (new Date()).toString().split(' ')[4];
 
-            let payload = map(args, item => {
+            let payload = Array.prototype.slice.call(args).map(item => {
                 if (typeof item === 'string') {
                     return item;
                 }

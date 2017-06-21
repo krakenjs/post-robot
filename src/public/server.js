@@ -2,7 +2,7 @@
 import { isWindowClosed } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 
-import { noop, once as onceFunction, extend, safeInterval } from '../lib';
+import { noop, once as onceFunction, safeInterval } from '../lib';
 import { addRequestListener } from '../drivers';
 import { CONSTANTS } from '../conf';
 
@@ -92,8 +92,7 @@ export function once(name, options, handler, errorHandler) {
     });
 
     let myListener = listen(options);
-
-    extend(prom, myListener);
+    prom.cancel = myListener.cancel;
 
     return prom;
 }

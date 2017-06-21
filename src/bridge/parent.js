@@ -1,10 +1,10 @@
 
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { getDomain, getFrameByName, isWindowClosed } from 'cross-domain-utils/src';
+import { getDomain, getFrameByName, isWindowClosed, getDomainFromUrl } from 'cross-domain-utils/src';
 
 import { CONFIG, CONSTANTS } from '../conf';
-import { getDomainFromUrl, log, onWindowReady } from '../lib';
+import { log, onWindowReady } from '../lib';
 import { global } from '../global';
 import { on } from '../interface';
 import { receiveMessage } from '../drivers';

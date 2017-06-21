@@ -2,7 +2,7 @@
 import { isWindowClosed } from 'cross-domain-utils/src';
 
 import { CONSTANTS, POST_MESSAGE_NAMES_LIST } from '../../conf';
-import { deserializeMethods, log, jsonParse, listen } from '../../lib';
+import { deserializeMethods, log, jsonParse, addEventListener } from '../../lib';
 import { global } from '../../global';
 
 import { RECEIVE_MESSAGE_TYPES } from './types';
@@ -120,5 +120,5 @@ export function messageListener(event) {
 }
 
 export function listenForMessages() {
-    listen(window, 'message', messageListener);
+    addEventListener(window, 'message', messageListener);
 }

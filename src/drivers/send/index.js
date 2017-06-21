@@ -3,7 +3,7 @@ import { getDomain, isWindowClosed } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 
 import { CONSTANTS, CONFIG, POST_MESSAGE_NAMES_LIST } from '../../conf';
-import { uniqueID, some, serializeMethods, log, getWindowType, jsonStringify, promiseMap } from '../../lib';
+import { uniqueID, serializeMethods, log, getWindowType, jsonStringify, promiseMap } from '../../lib';
 
 import { SEND_MESSAGE_STRATEGIES } from './strategies';
 
@@ -89,7 +89,7 @@ export function sendMessage(win, message, domain) {
 
         }).then(results => {
 
-            let success = some(results);
+            let success = results.some(Boolean);
             let status = `${message.type} ${message.name} ${success ? 'success' : 'error'}:\n  - ${messages.join('\n  - ')}\n`;
 
             log.debug(status);

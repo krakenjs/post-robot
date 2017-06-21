@@ -1,10 +1,9 @@
 
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { getDomain, isSameDomain, isOpener, isSameTopWindow, matchDomain, getUserAgent } from 'cross-domain-utils/src';
+import { getDomain, isSameDomain, isOpener, isSameTopWindow, matchDomain, getUserAgent, getDomainFromUrl } from 'cross-domain-utils/src';
 
 import { CONFIG, CONSTANTS } from '../conf';
-import { getDomainFromUrl } from '../lib';
 import { global } from '../global';
 import { receiveMessage } from '../drivers';
 
