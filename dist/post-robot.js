@@ -460,7 +460,7 @@
                 }
             });
         });
-        var _util = __webpack_require__(7);
+        var _util = __webpack_require__(9);
         Object.keys(_util).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -469,7 +469,7 @@
                 }
             });
         });
-        var _log = __webpack_require__(9);
+        var _log = __webpack_require__(8);
         Object.keys(_log).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -549,6 +549,115 @@
                 }
             });
         });
+    }, function(module, exports, __webpack_require__) {
+        "use strict";
+        function init() {
+            _global.global.initialized || ((0, _drivers.listenForMessages)(), (0, _lib.initOnReady)(), 
+            (0, _lib.listenForMethods)()), _global.global.initialized = !0;
+        }
+        Object.defineProperty(exports, "__esModule", {
+            value: !0
+        }), exports.Promise = exports.cleanUpWindow = void 0;
+        var _clean = __webpack_require__(21);
+        Object.defineProperty(exports, "cleanUpWindow", {
+            enumerable: !0,
+            get: function() {
+                return _clean.cleanUpWindow;
+            }
+        }), exports.init = init;
+        var _public = __webpack_require__(32);
+        Object.keys(_public).forEach(function(key) {
+            "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
+                enumerable: !0,
+                get: function() {
+                    return _public[key];
+                }
+            });
+        });
+        var _src = __webpack_require__(2);
+        Object.defineProperty(exports, "Promise", {
+            enumerable: !0,
+            get: function() {
+                return _src.ZalgoPromise;
+            }
+        });
+        var _lib = __webpack_require__(4), _drivers = __webpack_require__(6), _global = __webpack_require__(3);
+        init();
+    }, function(module, exports, __webpack_require__) {
+        "use strict";
+        Object.defineProperty(exports, "__esModule", {
+            value: !0
+        }), exports.log = void 0;
+        var _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
+            return typeof obj;
+        } : function(obj) {
+            return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+        }, _util = __webpack_require__(9), _conf = __webpack_require__(0), LOG_LEVELS = [ "debug", "info", "warn", "error" ];
+        Function.prototype.bind && window.console && "object" === _typeof(console.log) && [ "log", "info", "warn", "error" ].forEach(function(method) {
+            console[method] = this.bind(console[method], console);
+        }, Function.prototype.call);
+        var log = exports.log = {
+            clearLogs: function() {
+                if (window.console && window.console.clear && window.console.clear(), _conf.CONFIG.LOG_TO_PAGE) {
+                    var container = document.getElementById("postRobotLogs");
+                    container && container.parentNode.removeChild(container);
+                }
+            },
+            writeToPage: function(level, args) {
+                setTimeout(function() {
+                    var container = document.getElementById("postRobotLogs");
+                    container || (container = document.createElement("div"), container.id = "postRobotLogs", 
+                    container.style.cssText = "width: 800px; font-family: monospace; white-space: pre-wrap;", 
+                    document.body.appendChild(container));
+                    var el = document.createElement("div"), date = new Date().toString().split(" ")[4], payload = Array.prototype.slice.call(args).map(function(item) {
+                        if ("string" == typeof item) return item;
+                        if (!item) return Object.prototype.toString.call(item);
+                        var json = void 0;
+                        try {
+                            json = (0, _util.jsonStringify)(item, 0, 2);
+                        } catch (e) {
+                            json = "[object]";
+                        }
+                        return "\n\n" + json + "\n\n";
+                    }).join(" "), msg = date + " " + level + " " + payload;
+                    el.innerHTML = msg;
+                    var color = {
+                        log: "#ddd",
+                        warn: "orange",
+                        error: "red",
+                        info: "blue",
+                        debug: "#aaa"
+                    }[level];
+                    el.style.cssText = "margin-top: 10px; color: " + color + ";", container.childNodes.length ? container.insertBefore(el, container.childNodes[0]) : container.appendChild(el);
+                });
+            },
+            logLevel: function(level, args) {
+                setTimeout(function() {
+                    try {
+                        var logLevel = window.LOG_LEVEL || _conf.CONFIG.LOG_LEVEL;
+                        if (LOG_LEVELS.indexOf(level) < LOG_LEVELS.indexOf(logLevel)) return;
+                        if (args = Array.prototype.slice.call(args), args.unshift("" + window.location.host + window.location.pathname), 
+                        args.unshift("::"), args.unshift("" + (0, _util.getWindowType)().toLowerCase()), 
+                        args.unshift("[post-robot]"), _conf.CONFIG.LOG_TO_PAGE && log.writeToPage(level, args), 
+                        !window.console) return;
+                        if (window.console[level] || (level = "log"), !window.console[level]) return;
+                        window.console[level].apply(window.console, args);
+                    } catch (err) {}
+                }, 1);
+            },
+            debug: function() {
+                log.logLevel("debug", arguments);
+            },
+            info: function() {
+                log.logLevel("info", arguments);
+            },
+            warn: function() {
+                log.logLevel("warn", arguments);
+            },
+            error: function() {
+                log.logLevel("error", arguments);
+            }
+        };
     }, function(module, exports, __webpack_require__) {
         "use strict";
         function once(method) {
@@ -644,115 +753,6 @@
         exports.safeInterval = safeInterval, exports.isRegex = isRegex, exports.weakMapMemoize = weakMapMemoize, 
         exports.getWindowType = getWindowType, exports.jsonStringify = jsonStringify, exports.jsonParse = jsonParse;
         var _src = __webpack_require__(5), _src2 = __webpack_require__(1), _conf = __webpack_require__(0);
-    }, function(module, exports, __webpack_require__) {
-        "use strict";
-        function init() {
-            _global.global.initialized || ((0, _drivers.listenForMessages)(), (0, _lib.initOnReady)(), 
-            (0, _lib.listenForMethods)()), _global.global.initialized = !0;
-        }
-        Object.defineProperty(exports, "__esModule", {
-            value: !0
-        }), exports.Promise = exports.cleanUpWindow = void 0;
-        var _clean = __webpack_require__(21);
-        Object.defineProperty(exports, "cleanUpWindow", {
-            enumerable: !0,
-            get: function() {
-                return _clean.cleanUpWindow;
-            }
-        }), exports.init = init;
-        var _public = __webpack_require__(32);
-        Object.keys(_public).forEach(function(key) {
-            "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
-                enumerable: !0,
-                get: function() {
-                    return _public[key];
-                }
-            });
-        });
-        var _src = __webpack_require__(2);
-        Object.defineProperty(exports, "Promise", {
-            enumerable: !0,
-            get: function() {
-                return _src.ZalgoPromise;
-            }
-        });
-        var _lib = __webpack_require__(4), _drivers = __webpack_require__(6), _global = __webpack_require__(3);
-        init();
-    }, function(module, exports, __webpack_require__) {
-        "use strict";
-        Object.defineProperty(exports, "__esModule", {
-            value: !0
-        }), exports.log = void 0;
-        var _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
-            return typeof obj;
-        } : function(obj) {
-            return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-        }, _util = __webpack_require__(7), _conf = __webpack_require__(0), LOG_LEVELS = [ "debug", "info", "warn", "error" ];
-        Function.prototype.bind && window.console && "object" === _typeof(console.log) && [ "log", "info", "warn", "error" ].forEach(function(method) {
-            console[method] = this.bind(console[method], console);
-        }, Function.prototype.call);
-        var log = exports.log = {
-            clearLogs: function() {
-                if (window.console && window.console.clear && window.console.clear(), _conf.CONFIG.LOG_TO_PAGE) {
-                    var container = document.getElementById("postRobotLogs");
-                    container && container.parentNode.removeChild(container);
-                }
-            },
-            writeToPage: function(level, args) {
-                setTimeout(function() {
-                    var container = document.getElementById("postRobotLogs");
-                    container || (container = document.createElement("div"), container.id = "postRobotLogs", 
-                    container.style.cssText = "width: 800px; font-family: monospace; white-space: pre-wrap;", 
-                    document.body.appendChild(container));
-                    var el = document.createElement("div"), date = new Date().toString().split(" ")[4], payload = Array.prototype.slice.call(args).map(function(item) {
-                        if ("string" == typeof item) return item;
-                        if (!item) return Object.prototype.toString.call(item);
-                        var json = void 0;
-                        try {
-                            json = (0, _util.jsonStringify)(item, 0, 2);
-                        } catch (e) {
-                            json = "[object]";
-                        }
-                        return "\n\n" + json + "\n\n";
-                    }).join(" "), msg = date + " " + level + " " + payload;
-                    el.innerHTML = msg;
-                    var color = {
-                        log: "#ddd",
-                        warn: "orange",
-                        error: "red",
-                        info: "blue",
-                        debug: "#aaa"
-                    }[level];
-                    el.style.cssText = "margin-top: 10px; color: " + color + ";", container.childNodes.length ? container.insertBefore(el, container.childNodes[0]) : container.appendChild(el);
-                });
-            },
-            logLevel: function(level, args) {
-                setTimeout(function() {
-                    try {
-                        var logLevel = window.LOG_LEVEL || _conf.CONFIG.LOG_LEVEL;
-                        if (LOG_LEVELS.indexOf(level) < LOG_LEVELS.indexOf(logLevel)) return;
-                        if (args = Array.prototype.slice.call(args), args.unshift("" + window.location.host + window.location.pathname), 
-                        args.unshift("::"), args.unshift("" + (0, _util.getWindowType)().toLowerCase()), 
-                        args.unshift("[post-robot]"), _conf.CONFIG.LOG_TO_PAGE && log.writeToPage(level, args), 
-                        !window.console) return;
-                        if (window.console[level] || (level = "log"), !window.console[level]) return;
-                        window.console[level].apply(window.console, args);
-                    } catch (err) {}
-                }, 1);
-            },
-            debug: function() {
-                log.logLevel("debug", arguments);
-            },
-            info: function() {
-                log.logLevel("info", arguments);
-            },
-            warn: function() {
-                log.logLevel("warn", arguments);
-            },
-            error: function() {
-                log.logLevel("error", arguments);
-            }
-        };
     }, function(module, exports, __webpack_require__) {
         "use strict";
         Object.defineProperty(exports, "__esModule", {
@@ -1578,7 +1578,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
-        var _interface = __webpack_require__(8);
+        var _interface = __webpack_require__(7);
         Object.keys(_interface).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -1665,7 +1665,7 @@
         exports.serializeMethod = serializeMethod, exports.serializeMethods = serializeMethods, 
         exports.deserializeMethod = deserializeMethod, exports.deserializeError = deserializeError, 
         exports.deserializeMethods = deserializeMethods;
-        var _src = __webpack_require__(5), _src2 = __webpack_require__(1), _src3 = __webpack_require__(2), _conf = __webpack_require__(0), _util = __webpack_require__(7), _interface = __webpack_require__(8), _log = __webpack_require__(9), _global = __webpack_require__(3);
+        var _src = __webpack_require__(5), _src2 = __webpack_require__(1), _src3 = __webpack_require__(2), _conf = __webpack_require__(0), _util = __webpack_require__(9), _interface = __webpack_require__(7), _log = __webpack_require__(8), _global = __webpack_require__(3);
         _global.global.methods = _global.global.methods || new _src.WeakMap();
         exports.listenForMethods = (0, _util.once)(function() {
             (0, _interface.on)(_conf.CONSTANTS.POST_MESSAGE_NAMES.METHOD, {
@@ -1735,7 +1735,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.initOnReady = initOnReady, exports.onWindowReady = onWindowReady;
-        var _src = __webpack_require__(5), _src2 = __webpack_require__(1), _src3 = __webpack_require__(2), _conf = __webpack_require__(0), _interface = __webpack_require__(8), _log = __webpack_require__(9), _global = __webpack_require__(3);
+        var _src = __webpack_require__(5), _src2 = __webpack_require__(1), _src3 = __webpack_require__(2), _conf = __webpack_require__(0), _interface = __webpack_require__(7), _log = __webpack_require__(8), _global = __webpack_require__(3);
         _global.global.readyPromises = _global.global.readyPromises || new _src.WeakMap();
     }, function(module, exports, __webpack_require__) {
         "use strict";
@@ -1845,7 +1845,7 @@
         "use strict";
         Object.defineProperty(exports, "__esModule", {
             value: !0
-        }), exports.util = exports.bridge = exports.parent = void 0;
+        }), exports.bridge = exports.parent = void 0;
         var _client = __webpack_require__(30);
         Object.keys(_client).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
@@ -1872,13 +1872,6 @@
                     return _config[key];
                 }
             });
-        });
-        var _util = __webpack_require__(7);
-        Object.defineProperty(exports, "util", {
-            enumerable: !0,
-            get: function() {
-                return _util.util;
-            }
         });
         var _src = __webpack_require__(1);
         exports.parent = (0, _src.getAncestor)(), exports.bridge = void 0;
