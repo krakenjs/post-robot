@@ -12,5 +12,3 @@ export let bridge;
 if (__IE_POPUP_SUPPORT__) {
     bridge = require('../bridge/interface');
 }
-
-export { util } from '../lib/util';
