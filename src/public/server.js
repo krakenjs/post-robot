@@ -67,7 +67,7 @@ export function listen(options : ServerOptionsType) : { cancel : () => void } {
     };
 }
 
-export function on(name : string, options : ServerOptionsType, handler : HandlerType) : { cancel : () => void } {
+export function on(name : string, options : ServerOptionsType | HandlerType, handler : ?HandlerType) : { cancel : () => void } {
 
     if (typeof options === 'function') {
         handler = options;
