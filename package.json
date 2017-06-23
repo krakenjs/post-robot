@@ -28,7 +28,8 @@
   ],
   "files": [
     "dist/",
-    "src/"
+    "src/",
+    "postinstall.js"
   ],
   "readmeFilename": "README.md",
   "devDependencies": {
