@@ -1,3 +1,4 @@
+/* @flow */
 
 export let openBridge;
 export let linkUrl;
@@ -7,7 +8,6 @@ export let needsBridgeForBrowser;
 export let needsBridgeForWin;
 export let needsBridgeForDomain;
 export let openTunnelToOpener;
-export let destroyBridges;
 
 if (__IE_POPUP_SUPPORT__) {
 
@@ -21,5 +21,4 @@ if (__IE_POPUP_SUPPORT__) {
     needsBridgeForWin = bridge.needsBridgeForWin;
     needsBridgeForDomain = bridge.needsBridgeForDomain;
     openTunnelToOpener = bridge.openTunnelToOpener;
-    destroyBridges = bridge.destroyBridges;
 }

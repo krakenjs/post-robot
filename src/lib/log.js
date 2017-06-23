@@ -1,3 +1,4 @@
+/* @flow */
 
 import { getWindowType, jsonStringify } from './util';
 import { CONFIG } from '../conf';
@@ -6,6 +7,7 @@ const LOG_LEVELS = ['debug', 'info', 'warn', 'error'];
 
 if (Function.prototype.bind && window.console && typeof console.log === 'object') {
     [ 'log', 'info', 'warn', 'error' ].forEach(function(method) {
+        // $FlowFixMe
         console[method] = this.bind(console[method], console);
     }, Function.prototype.call);
 }
@@ -21,13 +23,13 @@ export let log = {
         if (CONFIG.LOG_TO_PAGE) {
             let container = document.getElementById('postRobotLogs');
 
-            if (container) {
+            if (container && container.parentNode) {
                 container.parentNode.removeChild(container);
             }
         }
     },
 
-    writeToPage(level, args) {
+    writeToPage(level : string, args : Array<mixed>) {
         setTimeout(() => {
             let container = document.getElementById('postRobotLogs');
 
@@ -35,7 +37,9 @@ export let log = {
                 container = document.createElement('div');
                 container.id = 'postRobotLogs';
                 container.style.cssText = 'width: 800px; font-family: monospace; white-space: pre-wrap;';
-                document.body.appendChild(container);
+                if (document.body) {
+                    document.body.appendChild(container);
+                }
             }
 
             let el = document.createElement('div');
@@ -51,7 +55,7 @@ export let log = {
                 }
                 let json;
                 try {
-                    json = jsonStringify(item, 0, 2);
+                    json = jsonStringify(item, null, 2);
                 } catch (e) {
                     json = '[object]';
                 }
@@ -82,7 +86,7 @@ export let log = {
         });
     },
 
-    logLevel(level, args) {
+    logLevel(level : string, args : Array<mixed>) {
         setTimeout(() => {
             try {
                 let logLevel = window.LOG_LEVEL || CONFIG.LOG_LEVEL;
@@ -122,19 +126,19 @@ export let log = {
         }, 1);
     },
 
-    debug() {
-        log.logLevel('debug', arguments);
+    debug(...args : Array<mixed>) {
+        log.logLevel('debug', args);
     },
 
-    info() {
-        log.logLevel('info', arguments);
+    info(...args : Array<mixed>) {
+        log.logLevel('info', args);
     },
 
-    warn() {
-        log.logLevel('warn', arguments);
+    warn(...args : Array<mixed>) {
+        log.logLevel('warn', args);
     },
 
-    error() {
-        log.logLevel('error', arguments);
+    error(...args : Array<mixed>) {
+        log.logLevel('error', args);
     }
 };

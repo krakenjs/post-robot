@@ -61,10 +61,12 @@ module.exports = function(config) {
                                 'transform-flow-strip-types',
                                 'transform-object-rest-spread',
                                 'syntax-object-rest-spread',
+                                'transform-class-properties',
                                 'transform-es3-property-literals',
                                 'transform-es3-member-expression-literals',
                                 ['transform-es2015-for-of', {loose: true}],
                                 [ '__coverage__', { only: `${__dirname}/src` } ]
+                                // [ 'flow-runtime', { assert: true, annotate: true } ]
                             ]
                         }
                     }

@@ -1,3 +1,4 @@
+/* @flow */
 
 import { isWindowClosed } from 'cross-domain-utils/src';
 
@@ -9,37 +10,49 @@ import { RECEIVE_MESSAGE_TYPES } from './types';
 
 global.receivedMessages = global.receivedMessages || [];
 
-function parseMessage(message) {
+type MessageEvent = {
+    source : any,
+    origin : string,
+    data : string
+};
+
+function parseMessage(message : string) : ?Object {
+
+    let parsedMessage;
 
     try {
-        message = jsonParse(message);
+        parsedMessage = jsonParse(message);
     } catch (err) {
         return;
     }
 
-    if (!message) {
+    if (!parsedMessage) {
         return;
     }
 
-    message = message[CONSTANTS.WINDOW_PROPS.POSTROBOT];
-
-    if (!message) {
+    if (typeof parsedMessage !== 'object' || parsedMessage === null) {
         return;
     }
 
-    if (!message.type) {
+    parsedMessage = parsedMessage[CONSTANTS.WINDOW_PROPS.POSTROBOT];
+
+    if (!parsedMessage || typeof parsedMessage !== 'object' || parsedMessage === null) {
         return;
     }
 
-    if (!RECEIVE_MESSAGE_TYPES[message.type]) {
+    if (!parsedMessage.type || typeof parsedMessage.type !== 'string') {
         return;
     }
 
-    return message;
+    if (!RECEIVE_MESSAGE_TYPES[parsedMessage.type]) {
+        return;
+    }
+
+    return parsedMessage;
 }
 
 
-export function receiveMessage(event) {
+export function receiveMessage(event : MessageEvent) {
 
     if (!window || window.closed) {
         throw new Error(`Message recieved in closed window`);
@@ -59,6 +72,10 @@ export function receiveMessage(event) {
 
     if (!message) {
         return;
+    }
+
+    if (!message.sourceDomain || typeof message.sourceDomain !== 'string') {
+        throw new Error(`Expected message to have sourceDomain`);
     }
 
     if (message.sourceDomain.indexOf(CONSTANTS.MOCK_PROTOCOL) === 0 || message.sourceDomain.indexOf(CONSTANTS.FILE_PROTOCOL) === 0) {
@@ -84,7 +101,8 @@ export function receiveMessage(event) {
     log.logLevel(level, [ '\n\n\t', '#receive', message.type.replace(/^postrobot_message_/, ''), '::', message.name, '::', origin, '\n\n', message ]);
 
     if (isWindowClosed(source)) {
-        return log.debug(`Source window is closed - can not send ${message.type} ${message.name}`);
+        log.debug(`Source window is closed - can not send ${message.type} ${message.name}`);
+        return;
     }
 
     if (message.data) {
@@ -94,7 +112,7 @@ export function receiveMessage(event) {
     RECEIVE_MESSAGE_TYPES[message.type](source, origin, message);
 }
 
-export function messageListener(event) {
+export function messageListener(event : { source : any, origin : string, data : string, sourceElement : any, originalEvent? : { origin : string } }) {
 
     try {
         event.source // eslint-disable-line
@@ -102,21 +120,22 @@ export function messageListener(event) {
         return;
     }
 
-    event = {
+    // $FlowFixMe
+    let messageEvent : MessageEvent = {
         source: event.source || event.sourceElement,
-        origin: event.origin || event.originalEvent.origin,
-        data: event.data
+        origin: event.origin || (event.originalEvent && event.originalEvent.origin),
+        data:   event.data
     };
 
     if (__IE_POPUP_SUPPORT__) {
         try {
-            require('../../compat').emulateIERestrictions(event.source, window);
+            require('../../compat').emulateIERestrictions(messageEvent.source, window);
         } catch (err) {
             return;
         }
     }
 
-    receiveMessage(event);
+    receiveMessage(messageEvent);
 }
 
 export function listenForMessages() {

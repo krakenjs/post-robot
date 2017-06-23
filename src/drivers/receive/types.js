@@ -1,16 +1,17 @@
+/* @flow */
 
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { isWindowClosed, matchDomain } from 'cross-domain-utils/src';
 
 import { CONSTANTS } from '../../conf';
-import { log } from '../../lib';
+import { log, stringifyError, noop } from '../../lib';
 
 import { sendMessage } from '../send';
 import { getRequestListener, getResponseListener, deleteResponseListener } from '../listeners';
 
 export let RECEIVE_MESSAGE_TYPES = {
 
-    [ CONSTANTS.POST_MESSAGE_TYPE.ACK ]: (source, origin, message) => {
+    [ CONSTANTS.POST_MESSAGE_TYPE.ACK ](source : any, origin : string, message : Object) {
 
         let options = getResponseListener(message.hash);
 
@@ -25,11 +26,11 @@ export let RECEIVE_MESSAGE_TYPES = {
         options.ack = true;
     },
 
-    [ CONSTANTS.POST_MESSAGE_TYPE.REQUEST ]: (source, origin, message) => {
+    [ CONSTANTS.POST_MESSAGE_TYPE.REQUEST ](source : any, origin : string, message : Object) : ZalgoPromise<void> {
 
         let options = getRequestListener({ name: message.name, win: source, domain: origin });
 
-        function respond(data) {
+        function respond(data) : ZalgoPromise<void> {
 
             if (message.fireAndForget || isWindowClosed(source)) {
                 return ZalgoPromise.resolve();
@@ -96,17 +97,17 @@ export let RECEIVE_MESSAGE_TYPES = {
                 });
             })
 
-        ]).catch(err => {
+        ]).then(noop).catch(err => {
 
             if (options && options.handleError) {
                 return options.handleError(err);
             } else {
-                log.error(err.stack || err.toString());
+                log.error(stringifyError(err));
             }
         });
     },
 
-    [ CONSTANTS.POST_MESSAGE_TYPE.RESPONSE ]: (source, origin, message) => {
+    [ CONSTANTS.POST_MESSAGE_TYPE.RESPONSE ](source : any, origin : string, message : Object) : void | ZalgoPromise<void> {
 
         let options = getResponseListener(message.hash);
 
@@ -121,7 +122,7 @@ export let RECEIVE_MESSAGE_TYPES = {
         deleteResponseListener(message.hash);
 
         if (message.ack === CONSTANTS.POST_MESSAGE_ACK.ERROR) {
-            return options.respond(new Error(message.error));
+            return options.respond(new Error(message.error), null);
         } else if (message.ack === CONSTANTS.POST_MESSAGE_ACK.SUCCESS) {
             let data = message.data || message.response;
 

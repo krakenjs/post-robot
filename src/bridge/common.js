@@ -1,3 +1,4 @@
+/* @flow */
 
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
@@ -7,7 +8,7 @@ import { CONFIG, CONSTANTS } from '../conf';
 import { global } from '../global';
 import { receiveMessage } from '../drivers';
 
-export function needsBridgeForBrowser() {
+export function needsBridgeForBrowser() : boolean {
 
     if (getUserAgent(window).match(/MSIE|trident|edge/i)) {
         return true;
@@ -20,7 +21,7 @@ export function needsBridgeForBrowser() {
     return false;
 }
 
-export function needsBridgeForWin(win) {
+export function needsBridgeForWin(win : any) : boolean {
 
     if (win && isSameTopWindow(window, win)) {
         return false;
@@ -33,7 +34,7 @@ export function needsBridgeForWin(win) {
     return true;
 }
 
-export function needsBridgeForDomain(domain) {
+export function needsBridgeForDomain(domain : ?string) : boolean {
 
     if (domain && getDomain() === getDomainFromUrl(domain)) {
         return false;
@@ -42,11 +43,11 @@ export function needsBridgeForDomain(domain) {
     return true;
 }
 
-export function needsBridge({ win, domain }) {
+export function needsBridge({ win, domain } : { win : any, domain? : string }) : boolean {
     return needsBridgeForBrowser() && needsBridgeForWin(win) && needsBridgeForDomain(domain);
 }
 
-export function getBridgeName(domain) {
+export function getBridgeName(domain : string) : string {
 
     domain = domain || getDomainFromUrl(domain);
 
@@ -57,8 +58,8 @@ export function getBridgeName(domain) {
     return id;
 }
 
-export function isBridge() {
-    return window.name && window.name === getBridgeName(getDomain());
+export function isBridge() : boolean {
+    return Boolean(window.name && window.name === getBridgeName(getDomain()));
 }
 
 export let documentBodyReady = new ZalgoPromise(resolve => {
@@ -77,15 +78,15 @@ export let documentBodyReady = new ZalgoPromise(resolve => {
 
 global.remoteWindows = global.remoteWindows || new WeakMap();
 
-export function registerRemoteWindow(win, timeout = CONFIG.BRIDGE_TIMEOUT) {
+export function registerRemoteWindow(win : any, timeout : number = CONFIG.BRIDGE_TIMEOUT) {
     global.remoteWindows.set(win, { sendMessagePromise: new ZalgoPromise() });
 }
 
-export function findRemoteWindow(win) {
+export function findRemoteWindow(win : any) : { sendMessagePromise : ZalgoPromise<(remoteWin : any, message : string, remoteDomain : string) => void> } {
     return global.remoteWindows.get(win);
 }
 
-export function registerRemoteSendMessage(win, domain, sendMessage) {
+export function registerRemoteSendMessage(win : any, domain : string, sendMessage : (message : string) => void) {
 
     let remoteWindow = findRemoteWindow(win);
 
@@ -93,7 +94,7 @@ export function registerRemoteSendMessage(win, domain, sendMessage) {
         throw new Error(`Window not found to register sendMessage to`);
     }
 
-    let sendMessageWrapper = (remoteWin, message, remoteDomain) => {
+    let sendMessageWrapper = (remoteWin : any, message : string, remoteDomain : string) => {
 
         if (remoteWin !== win) {
             throw new Error(`Remote window does not match window`);
@@ -110,7 +111,7 @@ export function registerRemoteSendMessage(win, domain, sendMessage) {
     remoteWindow.sendMessagePromise = ZalgoPromise.resolve(sendMessageWrapper);
 }
 
-export function rejectRemoteSendMessage(win, err) {
+export function rejectRemoteSendMessage(win : any, err : Error) {
 
     let remoteWindow = findRemoteWindow(win);
 
@@ -121,7 +122,7 @@ export function rejectRemoteSendMessage(win, err) {
     remoteWindow.sendMessagePromise.asyncReject(err);
 }
 
-export function sendBridgeMessage(win, message, domain) {
+export function sendBridgeMessage(win : any, message : string, domain : string) : ZalgoPromise<void> {
 
     let messagingChild  = isOpener(window, win);
     let messagingParent = isOpener(win, window);
@@ -141,6 +142,6 @@ export function sendBridgeMessage(win, message, domain) {
     });
 }
 
-global.receiveMessage = function(event) {
-    return receiveMessage(event);
+global.receiveMessage = function(event : { source : any, origin : string, data : string }) {
+    receiveMessage(event);
 };

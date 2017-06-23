@@ -1,7 +1,8 @@
+/* @flow */
 
 import { global } from './global';
 
-export function cleanUpWindow(win) {
+export function cleanUpWindow(win : any) {
 
     // global.tunnelWindows
     // global.bridges

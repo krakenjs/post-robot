@@ -1,27 +1,46 @@
+/* @flow */
 
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
 import { isPopup, isIframe } from 'cross-domain-utils/src';
 import { CONSTANTS } from '../conf';
 
 
-export function once(method) {
+export function stringifyError(err : mixed) : string {
+
+    if (!err) {
+        return `<unknown error: ${Object.prototype.toString.call(err)}>`;
+    }
+
+    if (err instanceof Error) {
+        return err.stack;
+    }
+
+    if (typeof err.toString === 'function') {
+        return err.toString();
+    }
+
+    return Object.prototype.toString.call(err);
+}
+
+
+export let once = <T>(method : Function) : ((...args : Array<any>) => T | void) => {
     if (!method) {
         return method;
     }
     let called = false;
-    return function onceWrapper() {
+    return function onceWrapper() : T | void {
         if (!called) {
             called = true;
             return method.apply(this, arguments);
         }
     };
-}
+};
 
-export function noop() {
+export function noop(...args : Array<mixed>) {
     // pass
 }
 
-export function addEventListener(obj, event, handler) {
+export function addEventListener(obj : Object, event : string, handler : Function) : { cancel : () => void } {
     if (obj.addEventListener) {
         obj.addEventListener(event, handler);
     } else {
@@ -39,7 +58,7 @@ export function addEventListener(obj, event, handler) {
     };
 }
 
-export function uniqueID() {
+export function uniqueID() : string {
 
     let chars = '0123456789abcdef';
 
@@ -48,45 +67,67 @@ export function uniqueID() {
     });
 }
 
-export function each(obj, callback) {
-    if (Array.isArray(obj)) {
-        for (let i = 0; i < obj.length; i++) {
-            callback(obj[i], i);
-        }
-    } else if (typeof obj === 'object' && obj !== null) {
-        for (let key in obj) {
-            if (obj.hasOwnProperty(key)) {
-                callback(obj[key], key);
-            }
+type MixedArrayType = Array<mixed>;
+
+export function eachArray(item : MixedArrayType, callback : (item : mixed, key : number) => mixed) {
+    for (let i = 0; i < item.length; i++) {
+        callback(item[i], i);
+    }
+}
+
+export function eachObject(item : Object, callback : (item : mixed, key : string) => mixed) {
+    for (let key in item) {
+        if (item.hasOwnProperty(key)) {
+            callback(item[key], key);
         }
     }
 }
 
-export function replaceObject(obj, callback, depth = 1) {
+export function each<T : Object | MixedArrayType>(item : T, callback : (item : mixed, key : number | string) => mixed) {
+    if (Array.isArray(item)) {
+        eachArray(item, callback);
+    } else if (typeof item === 'object' && item !== null) {
+        eachObject(item, callback);
+    }
+}
+
+export function replaceObject<T : Object | MixedArrayType>(item : T, callback : (item : mixed, key : number | string) => mixed, depth : number = 1) : T {
 
     if (depth >= 100) {
         throw new Error(`Self-referential object passed, or object contained too many layers`);
     }
 
-    let newobj = Array.isArray(obj) ? [] : {};
+    let newobj;
 
-    each(obj, (item, key) => {
+    if (typeof item === 'object' && item !== null && !Array.isArray(item)) {
+        newobj = {};
+    } else if (Array.isArray(item)) {
+        newobj = [];
+    } else {
+        throw new Error(`Invalid type: ${typeof item}`);
+    }
 
-        let result = callback(item, key);
+    each(item, (childItem, key) => {
 
-        if (result !== undefined) {
+        let result = callback(childItem, key);
+
+        if (typeof result !== 'undefined') {
+            // $FlowFixMe
             newobj[key] = result;
-        } else if (typeof item === 'object' && item !== null) {
-            newobj[key] = replaceObject(item, callback, depth + 1);
+        } else if (typeof childItem === 'object' && childItem !== null) {
+            // $FlowFixMe
+            newobj[key] = replaceObject(childItem, callback, depth + 1);
         } else {
-            newobj[key] = item;
+            // $FlowFixMe
+            newobj[key] = childItem;
         }
     });
 
+    // $FlowFixMe
     return newobj;
 }
 
-export function safeInterval(method, time) {
+export function safeInterval(method : Function, time : number) : { cancel : () => void } {
     let timeout;
 
     function runInterval() {
@@ -103,15 +144,19 @@ export function safeInterval(method, time) {
     };
 }
 
-export function isRegex(item) {
+export function isRegex(item : mixed) : boolean {
     return Object.prototype.toString.call(item) === '[object RegExp]';
 }
 
-export function weakMapMemoize(method) {
+
+
+type FunctionProxy<T : Function> = (method : T) => T;
+
+export let weakMapMemoize : FunctionProxy<*> = <R : mixed>(method : (arg : any) => R) : ((...args : Array<any>) => R) => {
 
     let weakmap = new WeakMap();
 
-    return function(arg) {
+    return function(arg : any) : R {
         let result = weakmap.get(arg);
 
         if (typeof result !== 'undefined') {
@@ -126,9 +171,9 @@ export function weakMapMemoize(method) {
 
         return result;
     };
-}
+};
 
-export function getWindowType() {
+export function getWindowType() : string {
     if (isPopup()) {
         return CONSTANTS.WINDOW_TYPES.POPUP;
     }
@@ -138,14 +183,16 @@ export function getWindowType() {
     return CONSTANTS.WINDOW_TYPES.FULLPAGE;
 }
 
-export function jsonStringify() {
+export function jsonStringify<T : mixed>(obj : T, replacer : ?Function, indent : number | void) : string {
 
     let objectToJSON;
     let arrayToJSON;
 
     try {
         if (JSON.stringify({}) !== '{}') {
+            // $FlowFixMe
             objectToJSON = Object.prototype.toJSON;
+             // $FlowFixMe
             delete Object.prototype.toJSON;
         }
 
@@ -154,7 +201,9 @@ export function jsonStringify() {
         }
 
         if (JSON.stringify([]) !== '[]') {
+             // $FlowFixMe
             arrayToJSON  = Array.prototype.toJSON;
+             // $FlowFixMe
             delete Array.prototype.toJSON;
         }
 
@@ -166,14 +215,16 @@ export function jsonStringify() {
         throw new Error(`Can not repair JSON.stringify: ${err.message}`);
     }
 
-    let result = JSON.stringify.apply(this, arguments);
+    let result = JSON.stringify.call(this, obj, replacer, indent);
 
     try {
         if (objectToJSON) {
+             // $FlowFixMe
             Object.prototype.toJSON = objectToJSON; // eslint-disable-line
         }
 
         if (arrayToJSON) {
+             // $FlowFixMe
             Array.prototype.toJSON = arrayToJSON; // eslint-disable-line
         }
 
@@ -185,6 +236,6 @@ export function jsonStringify() {
     return result;
 }
 
-export function jsonParse() {
-    return JSON.parse.apply(this, arguments);
+export function jsonParse(item : string) : mixed {
+    return JSON.parse(item);
 }

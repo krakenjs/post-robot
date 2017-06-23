@@ -1,3 +1,4 @@
+/* @flow */
 
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
@@ -5,12 +6,28 @@ import { getAncestor, isAncestor, isWindowClosed } from 'cross-domain-utils/src'
 
 import { CONFIG, CONSTANTS } from '../conf';
 import { sendMessage, addResponseListener, deleteResponseListener } from '../drivers';
+import { type ResponseListenerType } from '../drivers';
 import { uniqueID, safeInterval, onWindowReady } from '../lib';
 import { global } from '../global';
 
 global.requestPromises = global.requestPromises || new WeakMap();
 
-export function request(options) {
+type RequestOptionsType = {
+    window? : ?(any | string | HTMLElement),
+    domain? : ?string,
+    name? : ?string,
+    data? : ?Object,
+    fireAndForget? : ?boolean,
+    timeout? : ?number
+};
+
+type ResponseMessageEvent = {
+    source : any,
+    origin : string,
+    data : Object
+};
+
+export function request(options : RequestOptionsType) : ZalgoPromise<ResponseMessageEvent> {
 
     let prom = ZalgoPromise.try(() => {
 
@@ -18,89 +35,100 @@ export function request(options) {
             throw new Error('Expected options.name');
         }
 
-        if (CONFIG.MOCK_MODE) {
-            options.window = window;
+        let name = options.name;
+        let win = options.window;
+        let domain : string;
 
-        } else if (typeof options.window === 'string') {
-            let el = document.getElementById(options.window);
+        if (typeof win === 'string') {
+            let el = document.getElementById(win);
 
             if (!el) {
-                throw new Error(`Expected options.window ${options.window} to be a valid element id`);
+                throw new Error(`Expected options.window ${Object.prototype.toString.call(win)} to be a valid element id`);
             }
 
             if (el.tagName.toLowerCase() !== 'iframe') {
-                throw new Error(`Expected options.window ${options.window} to be an iframe`);
+                throw new Error(`Expected options.window ${Object.prototype.toString.call(win)} to be an iframe`);
             }
 
             if (!el.contentWindow) {
                 throw new Error('Iframe must have contentWindow.  Make sure it has a src attribute and is in the DOM.');
             }
 
-            options.window = el.contentWindow;
+            win = el.contentWindow;
 
+        } else if (win instanceof HTMLElement) {
 
-        } else if (options.window instanceof HTMLElement) {
-
-            if (options.window.tagName.toLowerCase() !== 'iframe') {
-                throw new Error(`Expected options.window ${options.window} to be an iframe`);
+            if (win.tagName.toLowerCase() !== 'iframe') {
+                throw new Error(`Expected options.window ${Object.prototype.toString.call(win)} to be an iframe`);
             }
 
-            if (!options.window.contentWindow) {
+            if (win && !win.contentWindow) {
                 throw new Error('Iframe must have contentWindow.  Make sure it has a src attribute and is in the DOM.');
             }
 
-            options.window = options.window.contentWindow;
+            if (win && win.contentWindow) {
+                win = win.contentWindow;
+            }
         }
 
-        if (!options.window) {
+        if (!win) {
             throw new Error('Expected options.window to be a window object, iframe, or iframe element id.');
         }
 
-        options.domain = options.domain || CONSTANTS.WILDCARD;
+        domain = options.domain || CONSTANTS.WILDCARD;
 
         let hash = `${options.name}_${uniqueID()}`;
-        addResponseListener(hash, options);
 
-        if (isWindowClosed(options.window)) {
+        if (isWindowClosed(win)) {
             throw new Error('Target window is closed');
         }
 
         let hasResult = false;
 
-        let requestPromises = global.requestPromises.get(options.window);
+        let requestPromises = global.requestPromises.get(win);
 
         if (!requestPromises) {
             requestPromises = [];
-            global.requestPromises.set(options.window, requestPromises);
+            global.requestPromises.set(win, requestPromises);
         }
 
         let requestPromise = ZalgoPromise.try(() => {
 
-            if (isAncestor(window, options.window)) {
-                return onWindowReady(options.window);
+            if (isAncestor(window, win)) {
+                return onWindowReady(win);
             }
 
         }).then(() => {
 
             return new ZalgoPromise((resolve, reject) => {
 
-                options.respond = (err, result) => {
+                let responseListener : ResponseListenerType = {
+                    name,
+                    window: win,
+                    domain,
+                    respond(err, result) {
+                        if (!err) {
+                            hasResult = true;
+                            requestPromises.splice(requestPromises.indexOf(requestPromise, 1));
+                        }
 
-                    if (!err) {
-                        hasResult = true;
-                        requestPromises.splice(requestPromises.indexOf(requestPromise, 1));
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(result);
+                        }
                     }
-
-                    return err ? reject(err) : resolve(result);
                 };
 
-                sendMessage(options.window, {
-                    hash,
+                addResponseListener(hash, responseListener);
+
+                sendMessage(win, {
                     type: CONSTANTS.POST_MESSAGE_TYPE.REQUEST,
-                    name: options.name,
+                    hash,
+                    name,
                     data: options.data,
                     fireAndForget: options.fireAndForget
-                }, options.domain).catch(reject);
+                }, domain).catch(reject);
 
                 if (options.fireAndForget) {
                     return resolve();
@@ -115,14 +143,14 @@ export function request(options) {
                         return interval.cancel();
                     }
 
-                    if (isWindowClosed(options.window)) {
+                    if (isWindowClosed(win)) {
                         interval.cancel();
 
                         if (!options.ack) {
-                            return reject(new Error(`Window closed for ${options.name} before ack`));
+                            return reject(new Error(`Window closed for ${name} before ack`));
                         }
 
-                        return reject(new Error(`Window closed for ${options.name} before response`));
+                        return reject(new Error(`Window closed for ${name} before response`));
                     }
 
                     ackTimeout -= 100;
@@ -130,12 +158,12 @@ export function request(options) {
 
                     if (ackTimeout <= 0 && !options.ack) {
                         interval.cancel();
-                        return reject(new Error(`No ack for postMessage ${options.name} in ${CONFIG.ACK_TIMEOUT}ms`));
+                        return reject(new Error(`No ack for postMessage ${name} in ${CONFIG.ACK_TIMEOUT}ms`));
                     }
 
                     if (resTimeout <= 0 && !hasResult) {
                         interval.cancel();
-                        return reject(new Error(`No response for postMessage ${options.name} in ${options.timeout || CONFIG.RES_TIMEOUT}ms`));
+                        return reject(new Error(`No response for postMessage ${name} in ${options.timeout || CONFIG.RES_TIMEOUT}ms`));
                     }
 
                 }, 100);
@@ -154,7 +182,7 @@ export function request(options) {
     return prom;
 }
 
-export function send(window, name, data, options) {
+export function send(window : any, name : string, data : ?Object, options : ?RequestOptionsType) : ZalgoPromise<ResponseMessageEvent> {
 
     options = options || {};
     options.window = window;
@@ -164,7 +192,7 @@ export function send(window, name, data, options) {
     return request(options);
 }
 
-export function sendToParent(name, data, options) {
+export function sendToParent(name : string, data : ?Object, options : ?RequestOptionsType) : ZalgoPromise<ResponseMessageEvent> {
 
     let win = getAncestor();
 
@@ -175,14 +203,14 @@ export function sendToParent(name, data, options) {
     return send(win, name, data, options);
 }
 
-export function client(options = {}) {
+export function client(options : RequestOptionsType = {}) : ({ send : (name : string, data : ?Object) => ZalgoPromise<ResponseMessageEvent> }) {
 
     if (!options.window) {
         throw new Error(`Expected options.window`);
     }
 
     return {
-        send(name, data) {
+        send(name : string, data : ?Object) : ZalgoPromise<ResponseMessageEvent> {
             return send(options.window, name, data, options);
         }
     };

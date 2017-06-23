@@ -1,3 +1,6 @@
+/* @flow */
+
+import { type ZalgoPromise } from 'zalgo-promise/src';
 
 import { CONSTANTS } from '../conf';
 import { getParent, isWindowClosed } from 'cross-domain-utils/src';
@@ -53,18 +56,25 @@ function cleanTunnelWindows() {
     }
 }
 
-function addTunnelWindow(data) {
+type TunnelWindowDataType = {
+    name : string,
+    source : any,
+    canary : () => void,
+    sendMessage : (message : string) => void
+};
+
+function addTunnelWindow({ name, source, canary, sendMessage } : TunnelWindowDataType) : number {
     cleanTunnelWindows();
     global.tunnelWindowId += 1;
-    global.tunnelWindows[global.tunnelWindowId] = data;
+    global.tunnelWindows[global.tunnelWindowId] = { name, source, canary, sendMessage };
     return global.tunnelWindowId;
 }
 
-function getTunnelWindow(id) {
+function getTunnelWindow(id : number) : TunnelWindowDataType {
     return global.tunnelWindows[id];
 }
 
-global.openTunnelToParent = function openTunnelToParent(data) {
+global.openTunnelToParent = function openTunnelToParent({ name, source, canary, sendMessage } : TunnelWindowDataType) : ZalgoPromise<{ source : any, origin : string, data : Object }> {
 
     let parentWindow = getParent(window);
 
@@ -72,11 +82,11 @@ global.openTunnelToParent = function openTunnelToParent(data) {
         throw new Error(`No parent window found to open tunnel to`);
     }
 
-    let id = addTunnelWindow(data);
+    let id = addTunnelWindow({ name, source, canary, sendMessage });
 
     return send(parentWindow, CONSTANTS.POST_MESSAGE_NAMES.OPEN_TUNNEL, {
 
-        name: data.name,
+        name,
 
         sendMessage() {
 

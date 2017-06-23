@@ -1,9 +1,10 @@
+/* @flow */
 
 import { isSameTopWindow } from 'cross-domain-utils/src';
 
 import { CONFIG } from '../conf';
 
-export function emulateIERestrictions(sourceWindow, targetWindow) {
+export function emulateIERestrictions(sourceWindow : any, targetWindow : any) {
     if (!CONFIG.ALLOW_POSTMESSAGE_POPUP) {
 
         if (isSameTopWindow(sourceWindow, targetWindow) === false) {

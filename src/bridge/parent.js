@@ -1,3 +1,4 @@
+/* @flow */
 
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
@@ -68,7 +69,7 @@ function listenForRegister(source, domain) {
     });
 }
 
-function openBridgeFrame(name, url) {
+function openBridgeFrame(name : string, url : string) : any {
 
     log.debug(`Opening bridge:`, name, url);
 
@@ -93,7 +94,7 @@ function openBridgeFrame(name, url) {
     return iframe;
 }
 
-export function openBridge(url, domain) {
+export function openBridge(url : string, domain : string) : ZalgoPromise<any> {
 
     domain = domain || getDomainFromUrl(url);
 
@@ -152,7 +153,7 @@ export function openBridge(url, domain) {
 
 let windowOpen = window.open;
 
-window.open = function(url, name, options, last) {
+window.open = function(url : string, name : string, options : string, last : mixed) : mixed {
 
     let domain = url;
 
@@ -195,7 +196,7 @@ window.open = function(url, name, options, last) {
     return win;
 };
 
-export function linkUrl(win, url) {
+export function linkUrl(win : any, url : string) {
 
     let winOptions = global.popupWindowsByWin.get(win);
 

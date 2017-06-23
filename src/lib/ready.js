@@ -1,3 +1,4 @@
+/* @flow */
 
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
 import { getAncestor } from 'cross-domain-utils/src';
@@ -7,12 +8,13 @@ import { CONSTANTS } from '../conf';
 import { on, send } from '../interface';
 import { log } from './log';
 import { global } from '../global';
+import { stringifyError } from './util';
 
 global.readyPromises = global.readyPromises || new WeakMap();
 
 export function initOnReady() {
 
-    on(CONSTANTS.POST_MESSAGE_NAMES.READY, { window: CONSTANTS.WILDCARD, domain: CONSTANTS.WILDCARD }, event => {
+    on(CONSTANTS.POST_MESSAGE_NAMES.READY, { window: CONSTANTS.WILDCARD, domain: CONSTANTS.WILDCARD }, (event : { source : mixed, origin : string, data : Object }) => {
 
         let win = event.source;
         let promise = global.readyPromises.get(win);
@@ -29,12 +31,12 @@ export function initOnReady() {
 
     if (parent) {
         send(parent, CONSTANTS.POST_MESSAGE_NAMES.READY, {}, { domain: CONSTANTS.WILDCARD, timeout: Infinity }).catch(err => {
-            log.debug(err.stack || err.toString());
+            log.debug(stringifyError(err));
         });
     }
 }
 
-export function onWindowReady(win, timeout = 5000, name = 'Window') {
+export function onWindowReady(win : mixed, timeout : number = 5000, name : string = 'Window') : ZalgoPromise<{ source : mixed, origin : string, data : Object }> {
 
     let promise = global.readyPromises.get(win);
 

@@ -1,3 +1,4 @@
+/* @flow */
 
 import { getAncestor } from 'cross-domain-utils/src';
 

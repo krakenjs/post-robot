@@ -1,3 +1,4 @@
+/* @flow */
 
 import { initOnReady, listenForMethods } from './lib';
 import { listenForMessages } from './drivers';

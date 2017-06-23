@@ -1,10 +1,11 @@
+/* @flow */
 
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
 import { matchDomain } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 
 import { CONSTANTS } from '../conf';
-import { once, uniqueID, replaceObject } from './util';
+import { once, uniqueID, replaceObject, stringifyError } from './util';
 import { on, send } from '../interface';
 import { log } from './log';
 import { global } from '../global';
@@ -12,7 +13,7 @@ import { global } from '../global';
 global.methods = global.methods || new WeakMap();
 
 export let listenForMethods = once(() => {
-    on(CONSTANTS.POST_MESSAGE_NAMES.METHOD, { window: CONSTANTS.WILDCARD, origin: CONSTANTS.WILDCARD }, ({ source, origin, data }) => {
+    on(CONSTANTS.POST_MESSAGE_NAMES.METHOD, { window: CONSTANTS.WILDCARD, origin: CONSTANTS.WILDCARD }, ({ source, origin, data } : { source : any, origin : string, data : Object }) => {
 
         let methods = global.methods.get(source);
 
@@ -46,11 +47,17 @@ export let listenForMethods = once(() => {
     });
 });
 
-function isSerialized(item, type) {
+function isSerialized(item : mixed, type : string) : boolean {
     return typeof item === 'object' && item !== null && item.__type__ === type;
 }
 
-export function serializeMethod(destination, domain, method, name) {
+type SerializedMethod = {
+    __type__ : string,
+    __id__ : string,
+    __name__ : string
+};
+
+export function serializeMethod(destination : any, domain : string, method : Function, name : string) : SerializedMethod {
 
     let id = uniqueID();
 
@@ -70,18 +77,23 @@ export function serializeMethod(destination, domain, method, name) {
     };
 }
 
-function serializeError(err) {
+type SerializedError = {
+    __type__ : string,
+    __message__ : string
+};
+
+function serializeError(err : mixed) : SerializedError {
     return {
         __type__: CONSTANTS.SERIALIZATION_TYPES.ERROR,
-        __message__: err.stack || err.message || err.toString()
+        __message__: stringifyError(err)
     };
 }
 
-export function serializeMethods(destination, domain, obj) {
+export function serializeMethods(destination : any, domain : string, obj : Object) : Object {
 
     return replaceObject({ obj }, (item, key) => {
         if (typeof item === 'function') {
-            return serializeMethod(destination, domain, item, key);
+            return serializeMethod(destination, domain, item, key.toString());
         }
 
         if (item instanceof Error) {
@@ -90,9 +102,9 @@ export function serializeMethods(destination, domain, obj) {
     }).obj;
 }
 
-export function deserializeMethod(source, origin, obj) {
+export function deserializeMethod(source : any, origin : string, obj : Object) : Object {
 
-    function wrapper() {
+    function wrapper() : ZalgoPromise<mixed> {
         let args = Array.prototype.slice.call(arguments);
         log.debug('Call foreign method', obj.__name__, args);
         return send(source, CONSTANTS.POST_MESSAGE_NAMES.METHOD, {
@@ -105,7 +117,7 @@ export function deserializeMethod(source, origin, obj) {
             log.debug('Got foreign method result', obj.__name__, data.result);
             return data.result;
         }, err => {
-            log.debug('Got foreign method error', err.stack || err.toString());
+            log.debug('Got foreign method error', stringifyError(err));
             throw err;
         });
     }
@@ -119,19 +131,19 @@ export function deserializeMethod(source, origin, obj) {
     return wrapper;
 }
 
-export function deserializeError(source, origin, obj) {
+export function deserializeError(source : any, origin : string, obj : Object) : Error {
     return new Error(obj.__message__);
 }
 
-export function deserializeMethods(source, origin, obj) {
+export function deserializeMethods(source : any, origin : string, obj : Object) : Object {
 
     return replaceObject({ obj }, (item, key) => {
 
-        if (isSerialized(item, CONSTANTS.SERIALIZATION_TYPES.METHOD)) {
+        if (typeof item === 'object' && item !== null && isSerialized(item, CONSTANTS.SERIALIZATION_TYPES.METHOD)) {
             return deserializeMethod(source, origin, item);
         }
 
-        if (isSerialized(item, CONSTANTS.SERIALIZATION_TYPES.ERROR)) {
+        if (typeof item === 'object' && item !== null && isSerialized(item, CONSTANTS.SERIALIZATION_TYPES.ERROR)) {
             return deserializeError(source, origin, item);
         }
 

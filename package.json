@@ -4,6 +4,7 @@
   "description": "Simple postMessage based server.",
   "main": "index.js",
   "scripts": {
+    "postinstall": "node postinstall.js",
     "test": "gulp karma"
   },
   "repository": {
@@ -36,7 +37,9 @@
     "babel-loader": "^6.2.4",
     "babel-plugin-__coverage__": "^11.0.0",
     "babel-plugin-add-module-exports": "^0.1.4",
+    "babel-plugin-flow-runtime": "^0.11.1",
     "babel-plugin-syntax-object-rest-spread": "^6.5.0",
+    "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-plugin-transform-es2015-for-of": "^6.8.0",
     "babel-plugin-transform-es3-member-expression-literals": "^6.5.0",
     "babel-plugin-transform-es3-property-literals": "^6.5.0",
@@ -47,8 +50,12 @@
     "chai": "^3.5.0",
     "es6-symbol": "^3.0.2",
     "eslint": "^2",
+    "eslint-plugin-flowtype": "^2.34.0",
+    "flow-bin": "^0.48.0",
+    "flow-runtime": "^0.12.0",
     "gulp": "^3.9.1",
     "gulp-eslint": "^2.0.0",
+    "gulp-flowtype": "^1.0.0",
     "gulp-karma": "0.0.5",
     "istanbul-instrumenter-loader": "^0.2.0",
     "karma": "^0.13.22",

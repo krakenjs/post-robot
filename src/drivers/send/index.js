@@ -1,3 +1,4 @@
+/* @flow */
 
 import { getDomain, isWindowClosed } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
@@ -8,7 +9,7 @@ import { uniqueID, serializeMethods, log, getWindowType, jsonStringify, promiseM
 import { SEND_MESSAGE_STRATEGIES } from './strategies';
 
 
-export function buildMessage(win, message, options = {}) {
+function buildMessage(win : any, message : Object, options = {}) : Object {
 
     let id   = uniqueID();
     let type = getWindowType();
@@ -24,7 +25,7 @@ export function buildMessage(win, message, options = {}) {
 }
 
 
-export function sendMessage(win, message, domain) {
+export function sendMessage(win : any, message : Object, domain : string) : ZalgoPromise<void> {
     return ZalgoPromise.try(() => {
 
         message = buildMessage(win, message, {
@@ -44,15 +45,6 @@ export function sendMessage(win, message, domain) {
 
         log.logLevel(level, [ '\n\n\t', '#send', message.type.replace(/^postrobot_message_/, ''), '::', message.name, '::', domain || CONSTANTS.WILDCARD, '\n\n', message ]);
 
-        if (CONFIG.MOCK_MODE) {
-            delete message.target;
-            return window[CONSTANTS.WINDOW_PROPS.POSTROBOT].postMessage({
-                origin: getDomain(window),
-                source: window,
-                data: jsonStringify(message, 0, 2)
-            });
-        }
-
         if (win === window) {
             throw new Error('Attemping to send message to self');
         }
@@ -67,7 +59,7 @@ export function sendMessage(win, message, domain) {
 
         let serializedMessage = jsonStringify({
             [ CONSTANTS.WINDOW_PROPS.POSTROBOT ]: message
-        }, 0, 2);
+        }, null, 2);
 
         return promiseMap(Object.keys(SEND_MESSAGE_STRATEGIES), strategyName => {
 

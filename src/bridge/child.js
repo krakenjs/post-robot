@@ -1,3 +1,4 @@
+/* @flow */
 
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { isSameDomain, getOpener, getFrames, getDomain, getFrameByName } from 'cross-domain-utils/src';
@@ -7,7 +8,7 @@ import { receiveMessage } from '../drivers';
 
 import { needsBridge, registerRemoteWindow, rejectRemoteSendMessage, registerRemoteSendMessage, getBridgeName } from './common';
 
-let awaitRemoteBridgeForWindow = weakMapMemoize(win => {
+let awaitRemoteBridgeForWindow = weakMapMemoize((win : any) : ZalgoPromise<?any> => {
     return ZalgoPromise.try(() => {
         for (let frame of getFrames(win)) {
             try {
@@ -56,7 +57,7 @@ let awaitRemoteBridgeForWindow = weakMapMemoize(win => {
     });
 });
 
-export function openTunnelToOpener() {
+export function openTunnelToOpener() : ZalgoPromise<void> {
     return ZalgoPromise.try(() => {
 
         let opener = getOpener(window);

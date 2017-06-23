@@ -2,13 +2,14 @@
 var gulp = require('gulp');
 var eslint = require('gulp-eslint');
 var webpack = require('webpack');
+let gulpFlowtype = require('gulp-flowtype');
 var gulpWebpack = require('webpack-stream');
 var Server = require('karma').Server;
 var argv = require('yargs').argv;
 var UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 var yargs = require('yargs');
 
-gulp.task('test', ['lint', 'karma']);
+gulp.task('test', ['lint', 'typecheck', 'karma']);
 gulp.task('build', ['lint', 'karma', 'webpack', 'webpack-min']);
 
 var MODULE_NAME = 'postRobot';
@@ -118,6 +119,13 @@ gulp.task('webpack-min-ie', function() {
             }
         }), webpack))
         .pipe(gulp.dest('dist'));
+});
+
+gulp.task('typecheck', [ 'lint' ], function() {
+    return gulp.src([ 'src/**/*.js', 'test/**/*.js' ])
+        .pipe(gulpFlowtype({
+            abort: true
+        }))
 });
 
 

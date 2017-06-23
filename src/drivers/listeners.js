@@ -1,4 +1,6 @@
+/* @flow */
 
+import { type ZalgoPromise } from 'zalgo-promise/src';
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
 import { matchDomain } from 'cross-domain-utils/src';
 
@@ -17,21 +19,35 @@ global.WINDOW_WILDCARD   = global.WINDOW_WILDCARD   || new (function WindowWildc
 
 const __DOMAIN_REGEX__ = '__domain_regex__';
 
-export function addResponseListener(hash, listener) {
+export type RequestListenerType = {
+    handler : ({ source : any, origin : string, data : Object }) => mixed | ZalgoPromise<mixed>,
+    handleError : (err : mixed) => void,
+    window : ?any,
+    name : string,
+    domain : string
+};
+
+export type ResponseListenerType = {
+    name : string,
+    window : any,
+    domain : string,
+    respond : (err : ?mixed, result : ?Object) => void,
+    ack? : ?boolean
+};
+
+export function addResponseListener(hash : string, listener : ResponseListenerType) {
     global.responseListeners[hash] = listener;
 }
 
-export function getResponseListener(hash) {
+export function getResponseListener(hash : string) : ResponseListenerType {
     return global.responseListeners[hash];
 }
 
-export function deleteResponseListener(hash) {
+export function deleteResponseListener(hash : string) {
     delete global.responseListeners[hash];
 }
 
-export function getRequestListener(qualifiers) {
-
-    let { name, win, domain } = qualifiers;
+export function getRequestListener({ name, win, domain } : { name : string, win : ?any, domain : ?string }) : ?RequestListenerType {
 
     if (win === CONSTANTS.WILDCARD) {
         win = null;
@@ -82,29 +98,47 @@ export function getRequestListener(qualifiers) {
     }
 }
 
-export function addRequestListener(qualifiers, listener) {
-
-    let { name, win, domain } = qualifiers;
+export function addRequestListener({ name, win, domain } : { name : string, win : ?any, domain : ?string }, listener : RequestListenerType) : { cancel : () => void } {
 
     if (!name || typeof name !== 'string') {
         throw new Error(`Name required to add request listener`);
     }
 
+    console.warn('adding request listener:', name);
+
     if (Array.isArray(win)) {
+        let listenersCollection = [];
+
         for (let item of win) {
-            addRequestListener({ name, domain, win: item }, listener);
+            listenersCollection.push(addRequestListener({ name, domain, win: item }, listener));
         }
-        return;
+
+        return {
+            cancel() {
+                for (let cancelListener of listenersCollection) {
+                    cancelListener.cancel();
+                }
+            }
+        };
     }
 
     if (Array.isArray(domain)) {
+        let listenersCollection = [];
+
         for (let item of domain) {
-            addRequestListener({ name, win, domain: item }, listener);
+            listenersCollection.push(addRequestListener({ name, win, domain: item }, listener));
         }
-        return;
+
+        return {
+            cancel() {
+                for (let cancelListener of listenersCollection) {
+                    cancelListener.cancel();
+                }
+            }
+        };
     }
 
-    let existingListener = getRequestListener(qualifiers);
+    let existingListener = getRequestListener({ name, win, domain });
 
     if (!win || win === CONSTANTS.WILDCARD) {
         win = global.WINDOW_WILDCARD;
@@ -161,9 +195,13 @@ export function addRequestListener(qualifiers, listener) {
 
     return {
         cancel() {
+            if (!winListeners) {
+                return;
+            }
+
             delete winListeners[strDomain];
 
-            if (Object.keys(winListeners).length === 0) {
+            if (win && Object.keys(winListeners).length === 0) {
                 nameListeners.delete(win);
             }
 

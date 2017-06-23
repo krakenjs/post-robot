@@ -1,48 +1,61 @@
+/* @flow */
 
 import { isWindowClosed } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 
-import { noop, once as onceFunction, safeInterval } from '../lib';
+import { once as onceFunction, safeInterval } from '../lib';
 import { addRequestListener } from '../drivers';
+import { type RequestListenerType } from '../drivers';
 import { CONSTANTS } from '../conf';
 
-export function listen(options) {
+type ErrorHandlerType = (err : mixed) => void;
+type HandlerType = ({ source : any, origin : string, data : Object }) => (void | mixed | ZalgoPromise<mixed>);
+
+type ServerOptionsType = {
+    handler? : ?HandlerType,
+    errorHandler? : ?ErrorHandlerType,
+    window? : ?any,
+    name? : ?string,
+    domain? : ?string,
+    once? : ?boolean,
+    errorOnClose? : ?boolean
+};
+
+export function listen(options : ServerOptionsType) : { cancel : () => void } {
 
     if (!options.name) {
         throw new Error('Expected options.name');
     }
 
-    options.handler = options.handler || noop;
-
-    options.errorHandler = options.errorHandler || function(err) {
-        throw err;
-    };
-
-    if (options.source) {
-        options.window = options.source;
+    if (!options.handler) {
+        throw new Error('Expected options.handler');
     }
 
-    options.domain = options.domain || CONSTANTS.WILDCARD;
+    let listenerOptions : RequestListenerType = {
+        handler: options.handler,
+        handleError: options.errorHandler || (err => {
+            throw err;
+        }),
+        window: options.window,
+        domain: options.domain || CONSTANTS.WILDCARD,
+        name: options.name
+    };
 
-    let requestListener = addRequestListener({ name: options.name, win: options.window, domain: options.domain }, options);
+    let requestListener = addRequestListener({ name: listenerOptions.name, win: listenerOptions.window, domain: listenerOptions.domain }, listenerOptions);
 
     if (options.once) {
-        let handler = options.handler;
-        options.handler = onceFunction(function() {
+        let handler = listenerOptions.handler;
+        listenerOptions.handler = onceFunction(function() : mixed | ZalgoPromise<mixed> {
             requestListener.cancel();
             return handler.apply(this, arguments);
         });
     }
 
-    options.handleError = err => {
-        options.errorHandler(err);
-    };
-
-    if (options.window && options.errorOnClose) {
+    if (listenerOptions.window && options.errorOnClose) {
         let interval = safeInterval(() => {
-            if (isWindowClosed(options.window)) {
+            if (isWindowClosed(listenerOptions.window)) {
                 interval.cancel();
-                options.handleError(new Error('Post message target window is closed'));
+                listenerOptions.handleError(new Error('Post message target window is closed'));
             }
         }, 50);
     }
@@ -54,10 +67,9 @@ export function listen(options) {
     };
 }
 
-export function on(name, options, handler, errorHandler) {
+export function on(name : string, options : ServerOptionsType, handler : HandlerType) : { cancel : () => void } {
 
     if (typeof options === 'function') {
-        errorHandler = handler;
         handler = options;
         options = {};
     }
@@ -66,15 +78,13 @@ export function on(name, options, handler, errorHandler) {
 
     options.name = name;
     options.handler = handler || options.handler;
-    options.errorHandler = errorHandler || options.errorHandler;
 
     return listen(options);
 }
 
-export function once(name, options, handler, errorHandler) {
+export function once(name : string, options : ServerOptionsType, handler : HandlerType) : ZalgoPromise<{ source : mixed, origin : string, data : Object }> {
 
     if (typeof options === 'function') {
-        errorHandler = handler;
         handler = options;
         options = {};
     }
@@ -83,7 +93,6 @@ export function once(name, options, handler, errorHandler) {
 
     options.name = name;
     options.handler = handler || options.handler;
-    options.errorHandler = errorHandler || options.errorHandler;
     options.once = true;
 
     let prom = new ZalgoPromise((resolve, reject) => {
@@ -97,11 +106,11 @@ export function once(name, options, handler, errorHandler) {
     return prom;
 }
 
-export function listener(options = {}) {
+export function listener(options : ServerOptionsType = {}) : { on : (name : string, handler : HandlerType) => { cancel : () => void } } {
 
     return {
-        on(name, handler, errorHandler) {
-            return on(name, options, handler, errorHandler);
+        on(name : string, handler : HandlerType) : { cancel : () => void } {
+            return on(name, options, handler);
         }
     };
 }
