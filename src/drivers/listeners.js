@@ -103,9 +103,7 @@ export function addRequestListener({ name, win, domain } : { name : string, win 
     if (!name || typeof name !== 'string') {
         throw new Error(`Name required to add request listener`);
     }
-
-    console.warn('adding request listener:', name);
-
+    
     if (Array.isArray(win)) {
         let listenersCollection = [];
 
