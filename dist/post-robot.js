@@ -1842,9 +1842,10 @@
                         }, domain).catch(reject), options.fireAndForget) return resolve();
                         var ackTimeout = _conf.CONFIG.ACK_TIMEOUT, resTimeout = options.timeout || _conf.CONFIG.RES_TIMEOUT, interval = (0, 
                         _lib.safeInterval)(function() {
-                            return options.ack && hasResult ? interval.cancel() : (0, _src3.isWindowClosed)(win) ? (interval.cancel(), 
-                            reject(options.ack ? new Error("Window closed for " + name + " before response") : new Error("Window closed for " + name + " before ack"))) : (ackTimeout -= 100, 
-                            resTimeout -= 100, ackTimeout <= 0 && !options.ack ? (interval.cancel(), reject(new Error("No ack for postMessage " + name + " in " + _conf.CONFIG.ACK_TIMEOUT + "ms"))) : resTimeout <= 0 && !hasResult ? (interval.cancel(), 
+                            return responseListener.ack && hasResult ? interval.cancel() : (0, _src3.isWindowClosed)(win) ? (interval.cancel(), 
+                            reject(responseListener.ack ? new Error("Window closed for " + name + " before response") : new Error("Window closed for " + name + " before ack"))) : (ackTimeout -= 100, 
+                            resTimeout -= 100, ackTimeout <= 0 && !responseListener.ack ? (interval.cancel(), 
+                            reject(new Error("No ack for postMessage " + name + " in " + _conf.CONFIG.ACK_TIMEOUT + "ms"))) : resTimeout <= 0 && !hasResult ? (interval.cancel(), 
                             reject(new Error("No response for postMessage " + name + " in " + (options.timeout || _conf.CONFIG.RES_TIMEOUT) + "ms"))) : void 0);
                         }, 100);
                     });
