@@ -139,14 +139,14 @@ export function request(options : RequestOptionsType) : ZalgoPromise<ResponseMes
 
                 let interval = safeInterval(() => {
 
-                    if (options.ack && hasResult) {
+                    if (responseListener.ack && hasResult) {
                         return interval.cancel();
                     }
 
                     if (isWindowClosed(win)) {
                         interval.cancel();
 
-                        if (!options.ack) {
+                        if (!responseListener.ack) {
                             return reject(new Error(`Window closed for ${name} before ack`));
                         }
 
@@ -156,7 +156,7 @@ export function request(options : RequestOptionsType) : ZalgoPromise<ResponseMes
                     ackTimeout -= 100;
                     resTimeout -= 100;
 
-                    if (ackTimeout <= 0 && !options.ack) {
+                    if (ackTimeout <= 0 && !responseListener.ack) {
                         interval.cancel();
                         return reject(new Error(`No ack for postMessage ${name} in ${CONFIG.ACK_TIMEOUT}ms`));
                     }
