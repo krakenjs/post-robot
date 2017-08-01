@@ -11,7 +11,7 @@ export let CONFIG : Object = {
     BRIDGE_TIMEOUT: 5000,
 
     ACK_TIMEOUT: 1000,
-    RES_TIMEOUT: __TEST__ ? 2000 : 10000,
+    RES_TIMEOUT: __TEST__ ? 2000 : Infinity,
 
     LOG_TO_PAGE: false,
 

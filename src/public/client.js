@@ -7,7 +7,7 @@ import { getAncestor, isAncestor, isWindowClosed } from 'cross-domain-utils/src'
 import { CONFIG, CONSTANTS } from '../conf';
 import { sendMessage, addResponseListener, deleteResponseListener } from '../drivers';
 import { type ResponseListenerType } from '../drivers';
-import { uniqueID, safeInterval, onWindowReady } from '../lib';
+import { uniqueID, onWindowReady } from '../lib';
 import { global } from '../global';
 
 global.requestPromises = global.requestPromises || new WeakMap();
@@ -137,14 +137,15 @@ export function request(options : RequestOptionsType) : ZalgoPromise<ResponseMes
                 let ackTimeout = CONFIG.ACK_TIMEOUT;
                 let resTimeout = options.timeout || CONFIG.RES_TIMEOUT;
 
-                let interval = safeInterval(() => {
+                let cycleTime = 100;
 
-                    if (responseListener.ack && hasResult) {
-                        return interval.cancel();
+                let cycle = () => {
+
+                    if (hasResult) {
+                        return;
                     }
 
                     if (isWindowClosed(win)) {
-                        interval.cancel();
 
                         if (!responseListener.ack) {
                             return reject(new Error(`Window closed for ${name} before ack`));
@@ -153,20 +154,30 @@ export function request(options : RequestOptionsType) : ZalgoPromise<ResponseMes
                         return reject(new Error(`Window closed for ${name} before response`));
                     }
 
-                    ackTimeout -= 100;
-                    resTimeout -= 100;
+                    ackTimeout -= cycleTime;
+                    resTimeout -= cycleTime;
 
-                    if (ackTimeout <= 0 && !responseListener.ack) {
-                        interval.cancel();
+                    let hasAck = responseListener.ack;
+
+                    if (hasAck) {
+
+                        if (resTimeout === Infinity) {
+                            return;
+                        }
+
+                        cycleTime = Math.min(resTimeout, 2000);
+
+                    } else if (ackTimeout <= 0) {
                         return reject(new Error(`No ack for postMessage ${name} in ${CONFIG.ACK_TIMEOUT}ms`));
-                    }
 
-                    if (resTimeout <= 0 && !hasResult) {
-                        interval.cancel();
+                    } else if (resTimeout <= 0) {
                         return reject(new Error(`No response for postMessage ${name} in ${options.timeout || CONFIG.RES_TIMEOUT}ms`));
                     }
 
-                }, 100);
+                    setTimeout(cycle, cycleTime);
+                };
+
+                setTimeout(cycle, cycleTime);
             });
         });
 
