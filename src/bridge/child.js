@@ -43,12 +43,12 @@ let awaitRemoteBridgeForWindow = weakMapMemoize((win : any) : ZalgoPromise<?any>
                         clearTimeout(timeout);
                         return resolve(frame);
                     }
-
-                    setTimeout(() => {
-                        clearInterval(interval);
-                        return resolve();
-                    }, 2000);
                 }, 100);
+
+                timeout = setTimeout(() => {
+                    clearInterval(interval);
+                    return resolve();
+                }, 2000);
             });
 
         } catch (err) {
