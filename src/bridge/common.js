@@ -23,28 +23,43 @@ export function needsBridgeForBrowser() : boolean {
 
 export function needsBridgeForWin(win : any) : boolean {
 
-    if (win && isSameTopWindow(window, win)) {
-        return false;
+    if (!isSameTopWindow(window, win)) {
+        return true;
     }
 
-    if (win && isSameDomain(win)) {
-        return false;
-    }
-
-    return true;
+    return false;
 }
 
-export function needsBridgeForDomain(domain : ?string) : boolean {
+export function needsBridgeForDomain(domain : ?string, win : any) : boolean {
 
-    if (domain && getDomain() === getDomainFromUrl(domain)) {
-        return false;
+    if (domain) {
+        if (getDomain() !== getDomainFromUrl(domain)) {
+            return true;
+        }
+    } else if (win) {
+        if (!isSameDomain(win))  {
+            return true;
+        }
     }
 
-    return true;
+    return false;
 }
 
 export function needsBridge({ win, domain } : { win : any, domain? : string }) : boolean {
-    return needsBridgeForBrowser() && needsBridgeForWin(win) && needsBridgeForDomain(domain);
+
+    if (!needsBridgeForBrowser()) {
+        return false;
+    }
+
+    if (domain && !needsBridgeForDomain(domain, win)) {
+        return false;
+    }
+
+    if (win && !needsBridgeForWin(win)) {
+        return false;
+    }
+
+    return true;
 }
 
 export function getBridgeName(domain : string) : string {
