@@ -752,14 +752,17 @@
             return !!(0, _src3.getUserAgent)(window).match(/MSIE|trident|edge/i) || !_conf.CONFIG.ALLOW_POSTMESSAGE_POPUP;
         }
         function needsBridgeForWin(win) {
-            return (!win || !(0, _src3.isSameTopWindow)(window, win)) && (!win || !(0, _src3.isSameDomain)(win));
+            return !(0, _src3.isSameTopWindow)(window, win);
         }
-        function needsBridgeForDomain(domain) {
-            return !domain || (0, _src3.getDomain)() !== (0, _src3.getDomainFromUrl)(domain);
+        function needsBridgeForDomain(domain, win) {
+            if (domain) {
+                if ((0, _src3.getDomain)() !== (0, _src3.getDomainFromUrl)(domain)) return !0;
+            } else if (win && !(0, _src3.isSameDomain)(win)) return !0;
+            return !1;
         }
         function needsBridge(_ref) {
             var win = _ref.win, domain = _ref.domain;
-            return needsBridgeForBrowser() && needsBridgeForWin(win) && needsBridgeForDomain(domain);
+            return !!needsBridgeForBrowser() && (!(domain && !needsBridgeForDomain(domain, win)) && !(win && !needsBridgeForWin(win)));
         }
         function getBridgeName(domain) {
             domain = domain || (0, _src3.getDomainFromUrl)(domain);
