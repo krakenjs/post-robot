@@ -38,7 +38,7 @@ let awaitRemoteBridgeForWindow = weakMapMemoize((win : any) : ZalgoPromise<?any>
                 let timeout;
 
                 interval = setInterval(() => {
-                    if (isSameDomain(frame) && frame[CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
+                    if (frame && isSameDomain(frame) && frame[CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
                         clearInterval(interval);
                         clearTimeout(timeout);
                         return resolve(frame);
