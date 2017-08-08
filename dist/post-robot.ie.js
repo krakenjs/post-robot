@@ -31,13 +31,13 @@
             return __webpack_require__.d(getter, "a", getter), getter;
         }, __webpack_require__.o = function(object, property) {
             return Object.prototype.hasOwnProperty.call(object, property);
-        }, __webpack_require__.p = "", __webpack_require__(__webpack_require__.s = 34);
+        }, __webpack_require__.p = "", __webpack_require__(__webpack_require__.s = 33);
     }([ function(module, exports, __webpack_require__) {
         "use strict";
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
-        var _config = __webpack_require__(30);
+        var _config = __webpack_require__(29);
         Object.keys(_config).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -248,10 +248,11 @@
         function isTop(win) {
             return win === getTop(win);
         }
-        function linkFrameWindow(frame) {
-            if (frame && frame.contentWindow) try {
-                iframeWindows.set(frame.contentWindow, frame);
-            } catch (err) {}
+        function isFrameWindowClosed(frame) {
+            if (!frame.contentWindow) return !0;
+            if (!frame.parentNode) return !0;
+            var doc = frame.ownerDocument;
+            return !(!doc || !doc.body || doc.body.contains(frame));
         }
         function isWindowClosed(win) {
             var allowMock = !(arguments.length > 1 && void 0 !== arguments[1]) || arguments[1];
@@ -277,30 +278,37 @@
                 if (!win.parent || !win.top) return !0;
             } catch (err) {}
             try {
-                if (iframeWindows.has(win)) {
-                    var frame = iframeWindows.get(win);
-                    if (frame) {
-                        if (!frame.contentWindow) return !0;
-                        if (!frame.parentNode) return !0;
-                        var doc = frame.ownerDocument;
-                        if (doc && doc.body && !doc.body.contains(frame)) return !0;
-                    }
+                var index = iframeWindows.indexOf(win);
+                if (-1 !== index) {
+                    var frame = iframeFrames[index];
+                    if (frame && isFrameWindowClosed(frame)) return !0;
                 }
             } catch (err) {}
             return !1;
+        }
+        function cleanIframes() {
+            for (var i = 0; i < iframeFrames.length; i++) isFrameWindowClosed(iframeFrames[i]) && (iframeFrames.splice(i, 1), 
+            iframeWindows.splice(i, 1));
+            for (var _i7 = 0; _i7 < iframeWindows.length; _i7++) isWindowClosed(iframeWindows[_i7]) && (iframeFrames.splice(_i7, 1), 
+            iframeWindows.splice(_i7, 1));
+        }
+        function linkFrameWindow(frame) {
+            if (cleanIframes(), frame && frame.contentWindow) try {
+                iframeWindows.push(frame.contentWindow), iframeFrames.push(frame);
+            } catch (err) {}
         }
         function getUserAgent(win) {
             return win = win || window, win.navigator.mockUserAgent || win.navigator.userAgent;
         }
         function getFrameByName(win, name) {
-            for (var winFrames = getFrames(win), _iterator6 = winFrames, _isArray6 = Array.isArray(_iterator6), _i7 = 0, _iterator6 = _isArray6 ? _iterator6 : _iterator6[Symbol.iterator](); ;) {
+            for (var winFrames = getFrames(win), _iterator6 = winFrames, _isArray6 = Array.isArray(_iterator6), _i8 = 0, _iterator6 = _isArray6 ? _iterator6 : _iterator6[Symbol.iterator](); ;) {
                 var _ref6;
                 if (_isArray6) {
-                    if (_i7 >= _iterator6.length) break;
-                    _ref6 = _iterator6[_i7++];
+                    if (_i8 >= _iterator6.length) break;
+                    _ref6 = _iterator6[_i8++];
                 } else {
-                    if (_i7 = _iterator6.next(), _i7.done) break;
-                    _ref6 = _i7.value;
+                    if (_i8 = _iterator6.next(), _i8.done) break;
+                    _ref6 = _i8.value;
                 }
                 var childFrame = _ref6;
                 try {
@@ -317,14 +325,14 @@
         function findChildFrameByName(win, name) {
             var frame = getFrameByName(win, name);
             if (frame) return frame;
-            for (var _iterator7 = getFrames(win), _isArray7 = Array.isArray(_iterator7), _i8 = 0, _iterator7 = _isArray7 ? _iterator7 : _iterator7[Symbol.iterator](); ;) {
+            for (var _iterator7 = getFrames(win), _isArray7 = Array.isArray(_iterator7), _i9 = 0, _iterator7 = _isArray7 ? _iterator7 : _iterator7[Symbol.iterator](); ;) {
                 var _ref7;
                 if (_isArray7) {
-                    if (_i8 >= _iterator7.length) break;
-                    _ref7 = _iterator7[_i8++];
+                    if (_i9 >= _iterator7.length) break;
+                    _ref7 = _iterator7[_i9++];
                 } else {
-                    if (_i8 = _iterator7.next(), _i8.done) break;
-                    _ref7 = _i8.value;
+                    if (_i9 = _iterator7.next(), _i9.done) break;
+                    _ref7 = _i9.value;
                 }
                 var childFrame = _ref7, namedFrame = findChildFrameByName(childFrame, name);
                 if (namedFrame) return namedFrame;
@@ -336,14 +344,14 @@
         function isParent(win, frame) {
             var frameParent = getParent(frame);
             if (frameParent) return frameParent === win;
-            for (var _iterator8 = getFrames(win), _isArray8 = Array.isArray(_iterator8), _i9 = 0, _iterator8 = _isArray8 ? _iterator8 : _iterator8[Symbol.iterator](); ;) {
+            for (var _iterator8 = getFrames(win), _isArray8 = Array.isArray(_iterator8), _i10 = 0, _iterator8 = _isArray8 ? _iterator8 : _iterator8[Symbol.iterator](); ;) {
                 var _ref8;
                 if (_isArray8) {
-                    if (_i9 >= _iterator8.length) break;
-                    _ref8 = _iterator8[_i9++];
+                    if (_i10 >= _iterator8.length) break;
+                    _ref8 = _iterator8[_i10++];
                 } else {
-                    if (_i9 = _iterator8.next(), _i9.done) break;
-                    _ref8 = _i9.value;
+                    if (_i10 = _iterator8.next(), _i10.done) break;
+                    _ref8 = _i10.value;
                 }
                 if (_ref8 === frame) return !0;
             }
@@ -368,14 +376,14 @@
             if (actualParent) return actualParent === parent;
             if (child === parent) return !1;
             if (getTop(child) === child) return !1;
-            for (var _iterator9 = getFrames(parent), _isArray9 = Array.isArray(_iterator9), _i10 = 0, _iterator9 = _isArray9 ? _iterator9 : _iterator9[Symbol.iterator](); ;) {
+            for (var _iterator9 = getFrames(parent), _isArray9 = Array.isArray(_iterator9), _i11 = 0, _iterator9 = _isArray9 ? _iterator9 : _iterator9[Symbol.iterator](); ;) {
                 var _ref9;
                 if (_isArray9) {
-                    if (_i10 >= _iterator9.length) break;
-                    _ref9 = _iterator9[_i10++];
+                    if (_i11 >= _iterator9.length) break;
+                    _ref9 = _iterator9[_i11++];
                 } else {
-                    if (_i10 = _iterator9.next(), _i10.done) break;
-                    _ref9 = _i10.value;
+                    if (_i11 = _iterator9.next(), _i11.done) break;
+                    _ref9 = _i11.value;
                 }
                 if (_ref9 === child) return !0;
             }
@@ -391,23 +399,23 @@
             return Boolean(!isIframe() && !isPopup());
         }
         function anyMatch(collection1, collection2) {
-            for (var _iterator10 = collection1, _isArray10 = Array.isArray(_iterator10), _i11 = 0, _iterator10 = _isArray10 ? _iterator10 : _iterator10[Symbol.iterator](); ;) {
+            for (var _iterator10 = collection1, _isArray10 = Array.isArray(_iterator10), _i12 = 0, _iterator10 = _isArray10 ? _iterator10 : _iterator10[Symbol.iterator](); ;) {
                 var _ref10;
                 if (_isArray10) {
-                    if (_i11 >= _iterator10.length) break;
-                    _ref10 = _iterator10[_i11++];
+                    if (_i12 >= _iterator10.length) break;
+                    _ref10 = _iterator10[_i12++];
                 } else {
-                    if (_i11 = _iterator10.next(), _i11.done) break;
-                    _ref10 = _i11.value;
+                    if (_i12 = _iterator10.next(), _i12.done) break;
+                    _ref10 = _i12.value;
                 }
-                for (var item1 = _ref10, _iterator11 = collection2, _isArray11 = Array.isArray(_iterator11), _i12 = 0, _iterator11 = _isArray11 ? _iterator11 : _iterator11[Symbol.iterator](); ;) {
+                for (var item1 = _ref10, _iterator11 = collection2, _isArray11 = Array.isArray(_iterator11), _i13 = 0, _iterator11 = _isArray11 ? _iterator11 : _iterator11[Symbol.iterator](); ;) {
                     var _ref11;
                     if (_isArray11) {
-                        if (_i12 >= _iterator11.length) break;
-                        _ref11 = _iterator11[_i12++];
+                        if (_i13 >= _iterator11.length) break;
+                        _ref11 = _iterator11[_i13++];
                     } else {
-                        if (_i12 = _iterator11.next(), _i12.done) break;
-                        _ref11 = _i12.value;
+                        if (_i13 = _iterator11.next(), _i13.done) break;
+                        _ref11 = _i13.value;
                     }
                     if (item1 === _ref11) return !0;
                 }
@@ -450,16 +458,22 @@
             var domain = void 0;
             return url.match(/^(https?|mock|file):\/\//) ? (domain = url, domain = domain.split("/").slice(0, 3).join("/")) : getDomain();
         }
-        function onCloseWindow(win) {
-            var delay = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 1e3, promises = closeWindowPromises.get(win) || {};
-            if (promises[delay]) return promises[delay];
-            var promise = new _src2.ZalgoPromise(function(resolve) {
-                !function check() {
-                    if (isWindowClosed(win)) return resolve();
-                    setTimeout(check, delay);
-                }();
-            });
-            return promises[delay] = promise, closeWindowPromises.set(win, promises), promise;
+        function onCloseWindow(win, callback) {
+            var delay = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : 1e3, maxtime = arguments.length > 3 && void 0 !== arguments[3] ? arguments[3] : 1 / 0, timeout = void 0;
+            return function check() {
+                if (isWindowClosed(win)) return timeout && clearTimeout(timeout), callback();
+                maxtime <= 0 ? clearTimeout(timeout) : (maxtime -= delay, timeout = setTimeout(check, delay));
+            }(), {
+                cancel: function() {
+                    timeout && clearTimeout(timeout);
+                }
+            };
+        }
+        function isWindow(obj) {
+            try {
+                if (obj && obj.self === obj) return !0;
+            } catch (err) {}
+            return !1;
         }
         Object.defineProperty(exports, "__esModule", {
             value: !0
@@ -468,26 +482,27 @@
         exports.getParent = getParent, exports.getOpener = getOpener, exports.getParents = getParents, 
         exports.isAncestorParent = isAncestorParent, exports.getFrames = getFrames, exports.getAllChildFrames = getAllChildFrames, 
         exports.getAllFramesInWindow = getAllFramesInWindow, exports.getTop = getTop, exports.isTop = isTop, 
-        exports.linkFrameWindow = linkFrameWindow, exports.isWindowClosed = isWindowClosed, 
-        exports.getUserAgent = getUserAgent, exports.getFrameByName = getFrameByName, exports.findChildFrameByName = findChildFrameByName, 
+        exports.isFrameWindowClosed = isFrameWindowClosed, exports.isWindowClosed = isWindowClosed, 
+        exports.linkFrameWindow = linkFrameWindow, exports.getUserAgent = getUserAgent, 
+        exports.getFrameByName = getFrameByName, exports.findChildFrameByName = findChildFrameByName, 
         exports.findFrameByName = findFrameByName, exports.isParent = isParent, exports.isOpener = isOpener, 
         exports.getAncestor = getAncestor, exports.getAncestors = getAncestors, exports.isAncestor = isAncestor, 
         exports.isPopup = isPopup, exports.isIframe = isIframe, exports.isFullpage = isFullpage, 
         exports.getDistanceFromTop = getDistanceFromTop, exports.getNthParent = getNthParent, 
         exports.getNthParentFromTop = getNthParentFromTop, exports.isSameTopWindow = isSameTopWindow, 
         exports.matchDomain = matchDomain, exports.getDomainFromUrl = getDomainFromUrl, 
-        exports.onCloseWindow = onCloseWindow;
-        var _src = __webpack_require__(5), _src2 = __webpack_require__(2), _util = __webpack_require__(20), CONSTANTS = {
+        exports.onCloseWindow = onCloseWindow, exports.isWindow = isWindow;
+        var _util = __webpack_require__(19), CONSTANTS = {
             MOCK_PROTOCOL: "mock:",
             FILE_PROTOCOL: "file:",
             WILDCARD: "*"
-        }, iframeWindows = new _src.WeakMap(), closeWindowPromises = new _src.WeakMap();
+        }, iframeWindows = [], iframeFrames = [];
     }, function(module, exports, __webpack_require__) {
         "use strict";
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
-        var _promise = __webpack_require__(22);
+        var _promise = __webpack_require__(21);
         Object.defineProperty(exports, "ZalgoPromise", {
             enumerable: !0,
             get: function() {
@@ -506,7 +521,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
-        var _promise = __webpack_require__(36);
+        var _promise = __webpack_require__(35);
         Object.keys(_promise).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -533,7 +548,7 @@
                 }
             });
         });
-        var _methods = __webpack_require__(35);
+        var _methods = __webpack_require__(34);
         Object.keys(_methods).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -542,7 +557,7 @@
                 }
             });
         });
-        var _ready = __webpack_require__(37);
+        var _ready = __webpack_require__(36);
         Object.keys(_ready).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -577,7 +592,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
-        var _receive = __webpack_require__(31);
+        var _receive = __webpack_require__(30);
         Object.keys(_receive).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -613,14 +628,14 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.Promise = exports.cleanUpWindow = void 0;
-        var _clean = __webpack_require__(28);
+        var _clean = __webpack_require__(27);
         Object.defineProperty(exports, "cleanUpWindow", {
             enumerable: !0,
             get: function() {
                 return _clean.cleanUpWindow;
             }
         }), exports.init = init;
-        var _public = __webpack_require__(40);
+        var _public = __webpack_require__(39);
         Object.keys(_public).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -829,7 +844,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
-        var _bridge = __webpack_require__(24);
+        var _bridge = __webpack_require__(23);
         Object.keys(_bridge).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -838,7 +853,7 @@
                 }
             });
         });
-        var _child = __webpack_require__(25);
+        var _child = __webpack_require__(24);
         Object.keys(_child).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -856,7 +871,7 @@
                 }
             });
         });
-        var _parent = __webpack_require__(27);
+        var _parent = __webpack_require__(26);
         Object.keys(_parent).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -949,7 +964,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
-        var _ie = __webpack_require__(29);
+        var _ie = __webpack_require__(28);
         Object.keys(_ie).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -1208,13 +1223,13 @@
             return target;
         };
         exports.sendMessage = sendMessage;
-        var _src = __webpack_require__(1), _src2 = __webpack_require__(2), _conf = __webpack_require__(0), _lib = __webpack_require__(4), _strategies = __webpack_require__(33);
+        var _src = __webpack_require__(1), _src2 = __webpack_require__(2), _conf = __webpack_require__(0), _lib = __webpack_require__(4), _strategies = __webpack_require__(32);
     }, function(module, exports, __webpack_require__) {
         "use strict";
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
-        var _weakmap = __webpack_require__(19);
+        var _weakmap = __webpack_require__(18);
         Object.defineProperty(exports, "WeakMap", {
             enumerable: !0,
             get: function() {
@@ -1239,25 +1254,6 @@
         }), exports.hasNativeWeakMap = hasNativeWeakMap;
     }, function(module, exports, __webpack_require__) {
         "use strict";
-        function isWindow(obj) {
-            try {
-                if (obj && obj.self === obj) return !0;
-            } catch (err) {}
-            return !1;
-        }
-        function isClosedWindow(obj) {
-            try {
-                if (obj && obj !== window && obj.closed) return !0;
-            } catch (err) {
-                return !err || "Call was rejected by callee.\r\n" !== err.message;
-            }
-            return !1;
-        }
-        Object.defineProperty(exports, "__esModule", {
-            value: !0
-        }), exports.isWindow = isWindow, exports.isClosedWindow = isClosedWindow;
-    }, function(module, exports, __webpack_require__) {
-        "use strict";
         function _classCallCheck(instance, Constructor) {
             if (!(instance instanceof Constructor)) throw new TypeError("Cannot call a class as a function");
         }
@@ -1276,7 +1272,7 @@
                 return protoProps && defineProperties(Constructor.prototype, protoProps), staticProps && defineProperties(Constructor, staticProps), 
                 Constructor;
             };
-        }(), _util = __webpack_require__(18), _native = __webpack_require__(17), defineProperty = Object.defineProperty, counter = Date.now() % 1e9;
+        }(), _src = __webpack_require__(1), _native = __webpack_require__(17), defineProperty = Object.defineProperty, counter = Date.now() % 1e9;
         exports.CrossDomainSafeWeakMap = function() {
             function CrossDomainSafeWeakMap() {
                 if (_classCallCheck(this, CrossDomainSafeWeakMap), counter += 1, this.name = "__weakmap_" + (1e9 * Math.random() >>> 0) + "__" + counter, 
@@ -1290,13 +1286,24 @@
                 value: function() {
                     for (var weakmap = this.weakmap, keys = this.keys, i = 0; i < keys.length; i++) {
                         var value = keys[i];
-                        if ((0, _util.isClosedWindow)(value)) {
+                        if ((0, _src.isWindowClosed)(value)) {
                             if (weakmap) try {
                                 weakmap.delete(value);
                             } catch (err) {}
                             keys.splice(i, 1), this.values.splice(i, 1), i -= 1;
                         }
                     }
+                }
+            }, {
+                key: "isSafeToReadWrite",
+                value: function(key) {
+                    if ((0, _src.isWindow)(key)) return !1;
+                    try {
+                        key && key.self, key && key[this.name];
+                    } catch (err) {
+                        return !1;
+                    }
+                    return !0;
                 }
             }, {
                 key: "set",
@@ -1308,16 +1315,16 @@
                     } catch (err) {
                         delete this.weakmap;
                     }
-                    if ((0, _util.isWindow)(key)) {
-                        this._cleanupClosedWindows();
-                        var keys = this.keys, values = this.values, index = keys.indexOf(key);
-                        -1 === index ? (keys.push(key), values.push(value)) : values[index] = value;
-                    } else {
+                    if (this.isSafeToReadWrite(key)) {
                         var name = this.name, entry = key[name];
                         entry && entry[0] === key ? entry[1] = value : defineProperty(key, name, {
                             value: [ key, value ],
                             writable: !0
                         });
+                    } else {
+                        this._cleanupClosedWindows();
+                        var keys = this.keys, values = this.values, index = keys.indexOf(key);
+                        -1 === index ? (keys.push(key), values.push(value)) : values[index] = value;
                     }
                 }
             }, {
@@ -1330,7 +1337,7 @@
                     } catch (err) {
                         delete this.weakmap;
                     }
-                    if ((0, _util.isWindow)(key)) {
+                    if (!this.isSafeToReadWrite(key)) {
                         var keys = this.keys, index = keys.indexOf(key);
                         if (-1 === index) return;
                         return this.values[index];
@@ -1348,13 +1355,13 @@
                     } catch (err) {
                         delete this.weakmap;
                     }
-                    if ((0, _util.isWindow)(key)) {
+                    if (this.isSafeToReadWrite(key)) {
+                        var entry = key[this.name];
+                        entry && entry[0] === key && (entry[0] = entry[1] = void 0);
+                    } else {
                         this._cleanupClosedWindows();
                         var keys = this.keys, index = keys.indexOf(key);
                         -1 !== index && (keys.splice(index, 1), this.values.splice(index, 1));
-                    } else {
-                        var entry = key[this.name];
-                        entry && entry[0] === key && (entry[0] = entry[1] = void 0);
                     }
                 }
             }, {
@@ -1367,9 +1374,11 @@
                     } catch (err) {
                         delete this.weakmap;
                     }
-                    if ((0, _util.isWindow)(key)) return this._cleanupClosedWindows(), -1 !== this.keys.indexOf(key);
-                    var entry = key[this.name];
-                    return !(!entry || entry[0] !== key);
+                    if (this.isSafeToReadWrite(key)) {
+                        var entry = key[this.name];
+                        return !(!entry || entry[0] !== key);
+                    }
+                    return this._cleanupClosedWindows(), -1 !== this.keys.indexOf(key);
                 }
             } ]), CrossDomainSafeWeakMap;
         }();
@@ -1422,7 +1431,7 @@
                 return protoProps && defineProperties(Constructor.prototype, protoProps), staticProps && defineProperties(Constructor, staticProps), 
                 Constructor;
             };
-        }(), _utils = __webpack_require__(23), _exceptions = __webpack_require__(21), ZalgoPromise = function() {
+        }(), _utils = __webpack_require__(22), _exceptions = __webpack_require__(20), ZalgoPromise = function() {
             function ZalgoPromise(handler) {
                 var _this = this;
                 if (_classCallCheck(this, ZalgoPromise), this.resolved = !1, this.rejected = !1, 
@@ -1756,7 +1765,7 @@
                     return (0, _src2.isSameDomain)(frame) && frame[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT] ? frame : new _src.ZalgoPromise(function(resolve) {
                         var interval = void 0, timeout = void 0;
                         interval = setInterval(function() {
-                            if ((0, _src2.isSameDomain)(frame) && frame[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT]) return clearInterval(interval), 
+                            if (frame && (0, _src2.isSameDomain)(frame) && frame[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT]) return clearInterval(interval), 
                             clearTimeout(timeout), resolve(frame);
                         }, 100), timeout = setTimeout(function() {
                             return clearInterval(interval), resolve();
@@ -2028,7 +2037,7 @@
         };
         exports.receiveMessage = receiveMessage, exports.messageListener = messageListener, 
         exports.listenForMessages = listenForMessages;
-        var _src = __webpack_require__(1), _conf = __webpack_require__(0), _lib = __webpack_require__(4), _global = __webpack_require__(3), _types = __webpack_require__(32);
+        var _src = __webpack_require__(1), _conf = __webpack_require__(0), _lib = __webpack_require__(4), _global = __webpack_require__(3), _types = __webpack_require__(31);
         _global.global.receivedMessages = _global.global.receivedMessages || [];
     }, function(module, exports, __webpack_require__) {
         "use strict";
@@ -2435,7 +2444,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.bridge = exports.parent = void 0;
-        var _client = __webpack_require__(38);
+        var _client = __webpack_require__(37);
         Object.keys(_client).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -2444,7 +2453,7 @@
                 }
             });
         });
-        var _server = __webpack_require__(41);
+        var _server = __webpack_require__(40);
         Object.keys(_server).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -2453,7 +2462,7 @@
                 }
             });
         });
-        var _config = __webpack_require__(39);
+        var _config = __webpack_require__(38);
         Object.keys(_config).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -2464,7 +2473,7 @@
         });
         var _src = __webpack_require__(1);
         exports.parent = (0, _src.getAncestor)(), exports.bridge = void 0;
-        exports.bridge = __webpack_require__(26);
+        exports.bridge = __webpack_require__(25);
     }, function(module, exports, __webpack_require__) {
         "use strict";
         function listen(options) {
