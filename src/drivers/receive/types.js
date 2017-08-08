@@ -74,21 +74,7 @@ export let RECEIVE_MESSAGE_TYPES = {
 
             }, err => {
 
-                let stack = err.stack;
-                let errmessage = err.message;
-
-                let error;
-
-                if (stack) {
-                    if (!errmessage || stack.indexOf(errmessage) !== -1) {
-                        error = stack;
-                    } else {
-                        error = `${errmessage}\n${stack}`;
-                    }
-                    error = error.replace(/^Error: /, '');
-                } else {
-                    error = errmessage;
-                }
+                let error = stringifyError(err).replace(/^Error: /, '');
 
                 return respond({
                     type: CONSTANTS.POST_MESSAGE_TYPE.RESPONSE,

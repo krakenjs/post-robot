@@ -4,7 +4,7 @@ import { getDomain, isWindowClosed } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 
 import { CONSTANTS, CONFIG, POST_MESSAGE_NAMES_LIST } from '../../conf';
-import { uniqueID, serializeMethods, log, getWindowType, jsonStringify, promiseMap } from '../../lib';
+import { uniqueID, serializeMethods, log, getWindowType, jsonStringify, stringifyError } from '../../lib';
 
 import { SEND_MESSAGE_STRATEGIES } from './strategies';
 
@@ -61,7 +61,7 @@ export function sendMessage(win : any, message : Object, domain : string) : Zalg
             [ CONSTANTS.WINDOW_PROPS.POSTROBOT ]: message
         }, null, 2);
 
-        return promiseMap(Object.keys(SEND_MESSAGE_STRATEGIES), strategyName => {
+        return ZalgoPromise.map(Object.keys(SEND_MESSAGE_STRATEGIES), strategyName => {
 
             return ZalgoPromise.try(() => {
 
@@ -75,7 +75,7 @@ export function sendMessage(win : any, message : Object, domain : string) : Zalg
                 messages.push(`${strategyName}: success`);
                 return true;
             }, err => {
-                messages.push(`${strategyName}: ${err.stack || err.toString()}\n`);
+                messages.push(`${strategyName}: ${stringifyError(err)}\n`);
                 return false;
             });
 

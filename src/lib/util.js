@@ -11,8 +11,25 @@ export function stringifyError(err : mixed) : string {
         return `<unknown error: ${Object.prototype.toString.call(err)}>`;
     }
 
+    if (typeof err === 'string') {
+        return err;
+    }
+
     if (err instanceof Error) {
-        return err.stack;
+        let stack = err && err.stack;
+        let message = err && err.message;
+
+        if (stack && message) {
+            if (stack.indexOf(message) !== -1) {
+                return stack;
+            } else {
+                return `${message}\n${stack}`;
+            }
+        } else if (stack) {
+            return stack;
+        } else if (message) {
+            return message;
+        }
     }
 
     if (typeof err.toString === 'function') {
