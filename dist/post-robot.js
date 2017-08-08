@@ -521,15 +521,6 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         });
-        var _promise = __webpack_require__(27);
-        Object.keys(_promise).forEach(function(key) {
-            "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
-                enumerable: !0,
-                get: function() {
-                    return _promise[key];
-                }
-            });
-        });
         var _util = __webpack_require__(7);
         Object.keys(_util).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
@@ -557,7 +548,7 @@
                 }
             });
         });
-        var _ready = __webpack_require__(28);
+        var _ready = __webpack_require__(27);
         Object.keys(_ready).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -622,7 +613,15 @@
     }, function(module, exports, __webpack_require__) {
         "use strict";
         function stringifyError(err) {
-            return err ? err instanceof Error ? err.stack : "function" == typeof err.toString ? err.toString() : Object.prototype.toString.call(err) : "<unknown error: " + Object.prototype.toString.call(err) + ">";
+            if (!err) return "<unknown error: " + Object.prototype.toString.call(err) + ">";
+            if ("string" == typeof err) return err;
+            if (err instanceof Error) {
+                var stack = err && err.stack, message = err && err.message;
+                if (stack && message) return -1 !== stack.indexOf(message) ? stack : message + "\n" + stack;
+                if (stack) return stack;
+                if (message) return message;
+            }
+            return "function" == typeof err.toString ? err.toString() : Object.prototype.toString.call(err);
         }
         function noop() {}
         function addEventListener(obj, event, handler) {
@@ -743,7 +742,7 @@
                 return _clean.cleanUpWindow;
             }
         }), exports.init = init;
-        var _public = __webpack_require__(31);
+        var _public = __webpack_require__(30);
         Object.keys(_public).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -1063,14 +1062,14 @@
                 if ((0, _src.isWindowClosed)(win)) throw new Error("Window is closed");
                 _lib.log.debug("Running send message strategies", message);
                 var messages = [], serializedMessage = (0, _lib.jsonStringify)(_defineProperty({}, _conf.CONSTANTS.WINDOW_PROPS.POSTROBOT, message), null, 2);
-                return (0, _lib.promiseMap)(Object.keys(_strategies.SEND_MESSAGE_STRATEGIES), function(strategyName) {
+                return _src2.ZalgoPromise.map(Object.keys(_strategies.SEND_MESSAGE_STRATEGIES), function(strategyName) {
                     return _src2.ZalgoPromise.try(function() {
                         if (!_conf.CONFIG.ALLOWED_POST_MESSAGE_METHODS[strategyName]) throw new Error("Strategy disallowed: " + strategyName);
                         return _strategies.SEND_MESSAGE_STRATEGIES[strategyName](win, serializedMessage, domain);
                     }).then(function() {
                         return messages.push(strategyName + ": success"), !0;
                     }, function(err) {
-                        return messages.push(strategyName + ": " + (err.stack || err.toString()) + "\n"), 
+                        return messages.push(strategyName + ": " + (0, _lib.stringifyError)(err) + "\n"), 
                         !1;
                     });
                 }).then(function(results) {
@@ -1435,6 +1434,22 @@
                     return promise;
                 }
             }, {
+                key: "map",
+                value: function(promises, method) {
+                    var promise = new ZalgoPromise(), count = promises.length, results = [];
+                    if (!count) return promise.resolve(results), promise;
+                    for (var i = 0; i < promises.length; i++) !function(i) {
+                        ZalgoPromise.try(function() {
+                            return method(promises[i]);
+                        }).then(function(result) {
+                            results[i] = result, 0 === (count -= 1) && promise.resolve(results);
+                        }, function(err) {
+                            promise.reject(err);
+                        });
+                    }(i);
+                    return promise;
+                }
+            }, {
                 key: "onPossiblyUnhandledException",
                 value: function(handler) {
                     return (0, _exceptions.onPossiblyUnhandledException)(handler);
@@ -1472,7 +1487,7 @@
                 }
             } ]), ZalgoPromise;
         }();
-        exports.ZalgoPromise = ZalgoPromise, new ZalgoPromise().resolve(void 0);
+        exports.ZalgoPromise = ZalgoPromise;
     }, function(module, exports, __webpack_require__) {
         "use strict";
         function isPromise(item) {
@@ -1662,9 +1677,8 @@
                     data: data
                 });
             }, function(err) {
-                var stack = err.stack, errmessage = err.message, error = void 0;
-                return stack ? (error = errmessage && -1 === stack.indexOf(errmessage) ? errmessage + "\n" + stack : stack, 
-                error = error.replace(/^Error: /, "")) : error = errmessage, respond({
+                var error = (0, _lib.stringifyError)(err).replace(/^Error: /, "");
+                return respond({
                     type: _conf.CONSTANTS.POST_MESSAGE_TYPE.RESPONSE,
                     ack: _conf.CONSTANTS.POST_MESSAGE_ACK.ERROR,
                     error: error
@@ -1829,20 +1843,6 @@
         });
     }, function(module, exports, __webpack_require__) {
         "use strict";
-        function promiseMap(items, method) {
-            for (var results = [], i = 0; i < items.length; i++) !function(i) {
-                results.push(_src.ZalgoPromise.try(function() {
-                    return method(items[i]);
-                }));
-            }(i);
-            return _src.ZalgoPromise.all(results);
-        }
-        Object.defineProperty(exports, "__esModule", {
-            value: !0
-        }), exports.promiseMap = promiseMap;
-        var _src = __webpack_require__(2);
-    }, function(module, exports, __webpack_require__) {
-        "use strict";
         function initOnReady() {
             (0, _interface.on)(_conf.CONSTANTS.POST_MESSAGE_NAMES.READY, {
                 window: _conf.CONSTANTS.WILDCARD,
@@ -1896,7 +1896,7 @@
                 var hasResult = !1, requestPromises = _global.global.requestPromises.get(win);
                 requestPromises || (requestPromises = [], _global.global.requestPromises.set(win, requestPromises));
                 var requestPromise = _src2.ZalgoPromise.try(function() {
-                    if ((0, _src3.isAncestor)(window, win)) return (0, _lib.onWindowReady)(win);
+                    if ((0, _src3.isAncestor)(window, win)) return _src2.ZalgoPromise.resolve((0, _lib.onWindowReady)(win));
                 }).then(function() {
                     return new _src2.ZalgoPromise(function(resolve, reject) {
                         var responseListener = {
@@ -1989,7 +1989,7 @@
         Object.defineProperty(exports, "__esModule", {
             value: !0
         }), exports.bridge = exports.parent = void 0;
-        var _client = __webpack_require__(29);
+        var _client = __webpack_require__(28);
         Object.keys(_client).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -1998,7 +1998,7 @@
                 }
             });
         });
-        var _server = __webpack_require__(32);
+        var _server = __webpack_require__(31);
         Object.keys(_server).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -2007,7 +2007,7 @@
                 }
             });
         });
-        var _config = __webpack_require__(30);
+        var _config = __webpack_require__(29);
         Object.keys(_config).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
