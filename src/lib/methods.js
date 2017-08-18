@@ -89,6 +89,18 @@ function serializeError(err : mixed) : SerializedError {
     };
 }
 
+type SerializePromise = {
+    __type__ : string,
+    __then__ : SerializedMethod
+};
+
+function serializePromise(destination : any, domain : string, promise : ZalgoPromise<mixed>, name : string) : SerializePromise {
+    return {
+        __type__: CONSTANTS.SERIALIZATION_TYPES.PROMISE,
+        __then__: serializeMethod(destination, domain, (resolve, reject) => promise.then(resolve, reject), `${name}.then`)
+    };
+}
+
 export function serializeMethods(destination : any, domain : string, obj : Object) : Object {
 
     return replaceObject({ obj }, (item, key) => {
@@ -99,10 +111,15 @@ export function serializeMethods(destination : any, domain : string, obj : Objec
         if (item instanceof Error) {
             return serializeError(item);
         }
+
+        if (ZalgoPromise.isPromise(item)) {
+            // $FlowFixMe
+            return serializePromise(destination, domain, item, key.toString());
+        }
     }).obj;
 }
 
-export function deserializeMethod(source : any, origin : string, obj : Object) : Object {
+export function deserializeMethod(source : any, origin : string, obj : Object) : Function {
 
     function wrapper() : ZalgoPromise<mixed> {
         let args = Array.prototype.slice.call(arguments);
@@ -135,6 +152,10 @@ export function deserializeError(source : any, origin : string, obj : Object) : 
     return new Error(obj.__message__);
 }
 
+export function deserializePromise(source : any, origin : string, prom : Object) : ZalgoPromise<mixed> {
+    return new ZalgoPromise((resolve, reject) => deserializeMethod(source, origin, prom.__then__)(resolve, reject));
+}
+
 export function deserializeMethods(source : any, origin : string, obj : Object) : Object {
 
     return replaceObject({ obj }, (item, key) => {
@@ -145,6 +166,10 @@ export function deserializeMethods(source : any, origin : string, obj : Object) 
 
         if (typeof item === 'object' && item !== null && isSerialized(item, CONSTANTS.SERIALIZATION_TYPES.ERROR)) {
             return deserializeError(source, origin, item);
+        }
+
+        if (typeof item === 'object' && item !== null && isSerialized(item, CONSTANTS.SERIALIZATION_TYPES.PROMISE)) {
+            return deserializePromise(source, origin, item);
         }
 
     }).obj;

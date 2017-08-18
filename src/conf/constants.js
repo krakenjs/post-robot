@@ -31,7 +31,8 @@ export let CONSTANTS = {
 
     SERIALIZATION_TYPES: {
         METHOD: 'postrobot_method',
-        ERROR: 'postrobot_error'
+        ERROR: 'postrobot_error',
+        PROMISE: 'postrobot_promise'
     },
 
     SEND_STRATEGIES: {
