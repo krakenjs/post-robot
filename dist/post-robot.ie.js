@@ -1002,7 +1002,8 @@
             },
             SERIALIZATION_TYPES: {
                 METHOD: "postrobot_method",
-                ERROR: "postrobot_error"
+                ERROR: "postrobot_error",
+                PROMISE: "postrobot_promise"
             },
             SEND_STRATEGIES: {
                 POST_MESSAGE: "postrobot_post_message",
@@ -1618,6 +1619,11 @@
                         return results;
                     });
                 }
+            }, {
+                key: "isPromise",
+                value: function(value) {
+                    return !!(value && value instanceof ZalgoPromise) || (0, _utils.isPromise)(value);
+                }
             } ]), ZalgoPromise;
         }();
         exports.ZalgoPromise = ZalgoPromise;
@@ -1626,13 +1632,14 @@
         function isPromise(item) {
             try {
                 if (!item) return !1;
+                if (window.Promise && item instanceof window.Promise) return !0;
                 if (window.Window && item instanceof window.Window) return !1;
                 if (window.constructor && item instanceof window.constructor) return !1;
                 if (toString) {
                     var name = toString.call(item);
                     if ("[object Window]" === name || "[object global]" === name || "[object DOMWindow]" === name) return !1;
                 }
-                if (item && item.then instanceof Function) return !0;
+                if (item.then instanceof Function) return !0;
             } catch (err) {
                 return !1;
             }
@@ -2220,11 +2227,19 @@
                 __message__: (0, _util.stringifyError)(err)
             };
         }
+        function serializePromise(destination, domain, promise, name) {
+            return {
+                __type__: _conf.CONSTANTS.SERIALIZATION_TYPES.PROMISE,
+                __then__: serializeMethod(destination, domain, function(resolve, reject) {
+                    return promise.then(resolve, reject);
+                }, name + ".then")
+            };
+        }
         function serializeMethods(destination, domain, obj) {
             return (0, _util.replaceObject)({
                 obj: obj
             }, function(item, key) {
-                return "function" == typeof item ? serializeMethod(destination, domain, item, key.toString()) : item instanceof Error ? serializeError(item) : void 0;
+                return "function" == typeof item ? serializeMethod(destination, domain, item, key.toString()) : item instanceof Error ? serializeError(item) : _src3.ZalgoPromise.isPromise(item) ? serializePromise(destination, domain, item, key.toString()) : void 0;
             }).obj;
         }
         function deserializeMethod(source, origin, obj) {
@@ -2251,11 +2266,16 @@
         function deserializeError(source, origin, obj) {
             return new Error(obj.__message__);
         }
+        function deserializePromise(source, origin, prom) {
+            return new _src3.ZalgoPromise(function(resolve, reject) {
+                return deserializeMethod(source, origin, prom.__then__)(resolve, reject);
+            });
+        }
         function deserializeMethods(source, origin, obj) {
             return (0, _util.replaceObject)({
                 obj: obj
             }, function(item, key) {
-                return "object" === (void 0 === item ? "undefined" : _typeof(item)) && null !== item && isSerialized(item, _conf.CONSTANTS.SERIALIZATION_TYPES.METHOD) ? deserializeMethod(source, origin, item) : "object" === (void 0 === item ? "undefined" : _typeof(item)) && null !== item && isSerialized(item, _conf.CONSTANTS.SERIALIZATION_TYPES.ERROR) ? deserializeError(source, origin, item) : void 0;
+                return "object" === (void 0 === item ? "undefined" : _typeof(item)) && null !== item && isSerialized(item, _conf.CONSTANTS.SERIALIZATION_TYPES.METHOD) ? deserializeMethod(source, origin, item) : "object" === (void 0 === item ? "undefined" : _typeof(item)) && null !== item && isSerialized(item, _conf.CONSTANTS.SERIALIZATION_TYPES.ERROR) ? deserializeError(source, origin, item) : "object" === (void 0 === item ? "undefined" : _typeof(item)) && null !== item && isSerialized(item, _conf.CONSTANTS.SERIALIZATION_TYPES.PROMISE) ? deserializePromise(source, origin, item) : void 0;
             }).obj;
         }
         Object.defineProperty(exports, "__esModule", {
@@ -2268,7 +2288,7 @@
         };
         exports.serializeMethod = serializeMethod, exports.serializeMethods = serializeMethods, 
         exports.deserializeMethod = deserializeMethod, exports.deserializeError = deserializeError, 
-        exports.deserializeMethods = deserializeMethods;
+        exports.deserializePromise = deserializePromise, exports.deserializeMethods = deserializeMethods;
         var _src = __webpack_require__(5), _src2 = __webpack_require__(1), _src3 = __webpack_require__(2), _conf = __webpack_require__(0), _util = __webpack_require__(8), _interface = __webpack_require__(7), _log = __webpack_require__(11), _global = __webpack_require__(3);
         _global.global.methods = _global.global.methods || new _src.WeakMap();
         exports.listenForMethods = (0, _util.once)(function() {
