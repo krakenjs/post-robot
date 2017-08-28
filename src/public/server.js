@@ -16,7 +16,7 @@ type ServerOptionsType = {
     errorHandler? : ?ErrorHandlerType,
     window? : ?any,
     name? : ?string,
-    domain? : ?string,
+    domain? : ?(string | RegExp | Array<string>),
     once? : ?boolean,
     errorOnClose? : ?boolean
 };
