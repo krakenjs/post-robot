@@ -1538,6 +1538,18 @@
                     });
                 }
             }, {
+                key: "timeout",
+                value: function(time, err) {
+                    var _this4 = this;
+                    if (this.resolved || this.rejected) return this;
+                    var timeout = setTimeout(function() {
+                        _this4.resolved || _this4.rejected || _this4.reject(err || new Error("Promise timed out after " + time + "ms"));
+                    }, time);
+                    return this.then(function(result) {
+                        return clearTimeout(timeout), result;
+                    });
+                }
+            }, {
                 key: "toPromise",
                 value: function() {
                     if (!window.Promise) throw new Error("Could not find window.Promise");
