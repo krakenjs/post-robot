@@ -20,11 +20,11 @@ global.WINDOW_WILDCARD   = global.WINDOW_WILDCARD   || new (function WindowWildc
 const __DOMAIN_REGEX__ = '__domain_regex__';
 
 export type RequestListenerType = {
-    handler : ({ source : any, origin : string, data : Object }) => mixed | ZalgoPromise<mixed>,
+    handler : ({ source : any, origin : string, data : Object }) => (mixed | ZalgoPromise<mixed>),
     handleError : (err : mixed) => void,
     window : ?any,
     name : string,
-    domain : string
+    domain : string | RegExp | Array<string>
 };
 
 export type ResponseListenerType = {
@@ -47,7 +47,7 @@ export function deleteResponseListener(hash : string) {
     delete global.responseListeners[hash];
 }
 
-export function getRequestListener({ name, win, domain } : { name : string, win : ?any, domain : ?string }) : ?RequestListenerType {
+export function getRequestListener({ name, win, domain } : { name : string, win : ?any, domain : ?(string | RegExp) }) : ?RequestListenerType {
 
     if (win === CONSTANTS.WILDCARD) {
         win = null;
@@ -98,12 +98,12 @@ export function getRequestListener({ name, win, domain } : { name : string, win 
     }
 }
 
-export function addRequestListener({ name, win, domain } : { name : string, win : ?any, domain : ?string }, listener : RequestListenerType) : { cancel : () => void } {
+export function addRequestListener({ name, win, domain } : { name : string, win : ?any, domain : ?(string | RegExp | Array<string>) }, listener : RequestListenerType) : { cancel : () => void } {
 
     if (!name || typeof name !== 'string') {
         throw new Error(`Name required to add request listener`);
     }
-    
+
     if (Array.isArray(win)) {
         let listenersCollection = [];
 
@@ -146,11 +146,11 @@ export function addRequestListener({ name, win, domain } : { name : string, win 
 
     if (existingListener) {
         if (win && domain) {
-            throw new Error(`Request listener already exists for ${name} on domain ${domain} for specified window`);
+            throw new Error(`Request listener already exists for ${name} on domain ${domain.toString()} for specified window`);
         } else if (win) {
             throw new Error(`Request listener already exists for ${name} for specified window`);
         } else if (domain) {
-            throw new Error(`Request listener already exists for ${name} on domain ${domain}`);
+            throw new Error(`Request listener already exists for ${name} on domain ${domain.toString()}`);
         } else {
             throw new Error(`Request listener already exists for ${name}`);
         }

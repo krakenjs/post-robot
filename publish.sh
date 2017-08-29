@@ -15,6 +15,8 @@ fi;
 rm -rf node_modules/cross-domain-safe-weakmap node_modules/zalgo-promise node_modules/cross-domain-utils
 npm install cross-domain-safe-weakmap zalgo-promise cross-domain-utils
 
+npm run postinstall
+
 gulp build;
 
 git add dist;

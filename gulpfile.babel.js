@@ -10,7 +10,7 @@ var UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 var yargs = require('yargs');
 
 gulp.task('test', ['lint', 'typecheck', 'karma']);
-gulp.task('build', ['lint', 'karma', 'webpack', 'webpack-min']);
+gulp.task('build', ['test', 'webpack', 'webpack-min']);
 
 var MODULE_NAME = 'postRobot';
 

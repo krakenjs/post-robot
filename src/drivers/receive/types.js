@@ -20,7 +20,7 @@ export let RECEIVE_MESSAGE_TYPES = {
         }
 
         if (!matchDomain(options.domain, origin)) {
-            throw new Error(`Ack origin ${origin} does not match domain ${options.domain}`);
+            throw new Error(`Ack origin ${origin} does not match domain ${options.domain.toString()}`);
         }
 
         options.ack = true;
@@ -57,7 +57,7 @@ export let RECEIVE_MESSAGE_TYPES = {
                 }
 
                 if (!matchDomain(options.domain, origin)) {
-                    throw new Error(`Request origin ${origin} does not match domain ${options.domain}`);
+                    throw new Error(`Request origin ${origin} does not match domain ${options.domain.toString()}`);
                 }
 
                 let data = message.data;
