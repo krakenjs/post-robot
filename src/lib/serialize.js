@@ -159,16 +159,19 @@ export function deserializePromise(source : any, origin : string, prom : Object)
 export function deserializeMethods(source : any, origin : string, obj : Object) : Object {
 
     return replaceObject({ obj }, (item, key) => {
+        if (typeof item !== 'object' || item === null) {
+            return;
+        }
 
-        if (typeof item === 'object' && item !== null && isSerialized(item, CONSTANTS.SERIALIZATION_TYPES.METHOD)) {
+        if (isSerialized(item, CONSTANTS.SERIALIZATION_TYPES.METHOD)) {
             return deserializeMethod(source, origin, item);
         }
 
-        if (typeof item === 'object' && item !== null && isSerialized(item, CONSTANTS.SERIALIZATION_TYPES.ERROR)) {
+        if (isSerialized(item, CONSTANTS.SERIALIZATION_TYPES.ERROR)) {
             return deserializeError(source, origin, item);
         }
 
-        if (typeof item === 'object' && item !== null && isSerialized(item, CONSTANTS.SERIALIZATION_TYPES.PROMISE)) {
+        if (isSerialized(item, CONSTANTS.SERIALIZATION_TYPES.PROMISE)) {
             return deserializePromise(source, origin, item);
         }
 
