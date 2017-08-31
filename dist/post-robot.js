@@ -187,35 +187,6 @@
             }
             return result;
         }
-        function getAllFramesInWindow(win) {
-            var result = getAllChildFrames(win);
-            result.push(win);
-            for (var _iterator3 = getParents(win), _isArray3 = Array.isArray(_iterator3), _i4 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator](); ;) {
-                var _ref3;
-                if (_isArray3) {
-                    if (_i4 >= _iterator3.length) break;
-                    _ref3 = _iterator3[_i4++];
-                } else {
-                    if (_i4 = _iterator3.next(), _i4.done) break;
-                    _ref3 = _i4.value;
-                }
-                var parent = _ref3;
-                result.push(parent);
-                for (var _iterator4 = getFrames(parent), _isArray4 = Array.isArray(_iterator4), _i5 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator](); ;) {
-                    var _ref4;
-                    if (_isArray4) {
-                        if (_i5 >= _iterator4.length) break;
-                        _ref4 = _iterator4[_i5++];
-                    } else {
-                        if (_i5 = _iterator4.next(), _i5.done) break;
-                        _ref4 = _i5.value;
-                    }
-                    var frame = _ref4;
-                    -1 === result.indexOf(frame) && result.push(frame);
-                }
-            }
-            return result;
-        }
         function getTop(win) {
             if (win) {
                 try {
@@ -223,27 +194,31 @@
                 } catch (err) {}
                 if (getParent(win) === win) return win;
                 try {
-                    if (isAncestorParent(window, win)) return window.top;
+                    if (isAncestorParent(window, win) && window.top) return window.top;
                 } catch (err) {}
                 try {
-                    if (isAncestorParent(win, window)) return window.top;
+                    if (isAncestorParent(win, window) && window.top) return window.top;
                 } catch (err) {}
-                for (var _iterator5 = getAllChildFrames(win), _isArray5 = Array.isArray(_iterator5), _i6 = 0, _iterator5 = _isArray5 ? _iterator5 : _iterator5[Symbol.iterator](); ;) {
-                    var _ref5;
-                    if (_isArray5) {
-                        if (_i6 >= _iterator5.length) break;
-                        _ref5 = _iterator5[_i6++];
+                for (var _iterator3 = getAllChildFrames(win), _isArray3 = Array.isArray(_iterator3), _i4 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator](); ;) {
+                    var _ref3;
+                    if (_isArray3) {
+                        if (_i4 >= _iterator3.length) break;
+                        _ref3 = _iterator3[_i4++];
                     } else {
-                        if (_i6 = _iterator5.next(), _i6.done) break;
-                        _ref5 = _i6.value;
+                        if (_i4 = _iterator3.next(), _i4.done) break;
+                        _ref3 = _i4.value;
                     }
-                    var frame = _ref5;
+                    var frame = _ref3;
                     try {
                         if (frame.top) return frame.top;
                     } catch (err) {}
                     if (getParent(frame) === frame) return frame;
                 }
             }
+        }
+        function getAllFramesInWindow(win) {
+            var top = getTop(win);
+            return getAllChildFrames(top).concat(top);
         }
         function isTop(win) {
             return win === getTop(win);
@@ -289,8 +264,8 @@
         function cleanIframes() {
             for (var i = 0; i < iframeFrames.length; i++) isFrameWindowClosed(iframeFrames[i]) && (iframeFrames.splice(i, 1), 
             iframeWindows.splice(i, 1));
-            for (var _i7 = 0; _i7 < iframeWindows.length; _i7++) isWindowClosed(iframeWindows[_i7]) && (iframeFrames.splice(_i7, 1), 
-            iframeWindows.splice(_i7, 1));
+            for (var _i5 = 0; _i5 < iframeWindows.length; _i5++) isWindowClosed(iframeWindows[_i5]) && (iframeFrames.splice(_i5, 1), 
+            iframeWindows.splice(_i5, 1));
         }
         function linkFrameWindow(frame) {
             if (cleanIframes(), frame && frame.contentWindow) try {
@@ -301,16 +276,16 @@
             return win = win || window, win.navigator.mockUserAgent || win.navigator.userAgent;
         }
         function getFrameByName(win, name) {
-            for (var winFrames = getFrames(win), _iterator6 = winFrames, _isArray6 = Array.isArray(_iterator6), _i8 = 0, _iterator6 = _isArray6 ? _iterator6 : _iterator6[Symbol.iterator](); ;) {
-                var _ref6;
-                if (_isArray6) {
-                    if (_i8 >= _iterator6.length) break;
-                    _ref6 = _iterator6[_i8++];
+            for (var winFrames = getFrames(win), _iterator4 = winFrames, _isArray4 = Array.isArray(_iterator4), _i6 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator](); ;) {
+                var _ref4;
+                if (_isArray4) {
+                    if (_i6 >= _iterator4.length) break;
+                    _ref4 = _iterator4[_i6++];
                 } else {
-                    if (_i8 = _iterator6.next(), _i8.done) break;
-                    _ref6 = _i8.value;
+                    if (_i6 = _iterator4.next(), _i6.done) break;
+                    _ref4 = _i6.value;
                 }
-                var childFrame = _ref6;
+                var childFrame = _ref4;
                 try {
                     if (isSameDomain(childFrame) && childFrame.name === name && -1 !== winFrames.indexOf(childFrame)) return childFrame;
                 } catch (err) {}
@@ -325,16 +300,16 @@
         function findChildFrameByName(win, name) {
             var frame = getFrameByName(win, name);
             if (frame) return frame;
-            for (var _iterator7 = getFrames(win), _isArray7 = Array.isArray(_iterator7), _i9 = 0, _iterator7 = _isArray7 ? _iterator7 : _iterator7[Symbol.iterator](); ;) {
-                var _ref7;
-                if (_isArray7) {
-                    if (_i9 >= _iterator7.length) break;
-                    _ref7 = _iterator7[_i9++];
+            for (var _iterator5 = getFrames(win), _isArray5 = Array.isArray(_iterator5), _i7 = 0, _iterator5 = _isArray5 ? _iterator5 : _iterator5[Symbol.iterator](); ;) {
+                var _ref5;
+                if (_isArray5) {
+                    if (_i7 >= _iterator5.length) break;
+                    _ref5 = _iterator5[_i7++];
                 } else {
-                    if (_i9 = _iterator7.next(), _i9.done) break;
-                    _ref7 = _i9.value;
+                    if (_i7 = _iterator5.next(), _i7.done) break;
+                    _ref5 = _i7.value;
                 }
-                var childFrame = _ref7, namedFrame = findChildFrameByName(childFrame, name);
+                var childFrame = _ref5, namedFrame = findChildFrameByName(childFrame, name);
                 if (namedFrame) return namedFrame;
             }
         }
@@ -344,16 +319,16 @@
         function isParent(win, frame) {
             var frameParent = getParent(frame);
             if (frameParent) return frameParent === win;
-            for (var _iterator8 = getFrames(win), _isArray8 = Array.isArray(_iterator8), _i10 = 0, _iterator8 = _isArray8 ? _iterator8 : _iterator8[Symbol.iterator](); ;) {
-                var _ref8;
-                if (_isArray8) {
-                    if (_i10 >= _iterator8.length) break;
-                    _ref8 = _iterator8[_i10++];
+            for (var _iterator6 = getFrames(win), _isArray6 = Array.isArray(_iterator6), _i8 = 0, _iterator6 = _isArray6 ? _iterator6 : _iterator6[Symbol.iterator](); ;) {
+                var _ref6;
+                if (_isArray6) {
+                    if (_i8 >= _iterator6.length) break;
+                    _ref6 = _iterator6[_i8++];
                 } else {
-                    if (_i10 = _iterator8.next(), _i10.done) break;
-                    _ref8 = _i10.value;
+                    if (_i8 = _iterator6.next(), _i8.done) break;
+                    _ref6 = _i8.value;
                 }
-                if (_ref8 === frame) return !0;
+                if (_ref6 === frame) return !0;
             }
             return !1;
         }
@@ -376,16 +351,16 @@
             if (actualParent) return actualParent === parent;
             if (child === parent) return !1;
             if (getTop(child) === child) return !1;
-            for (var _iterator9 = getFrames(parent), _isArray9 = Array.isArray(_iterator9), _i11 = 0, _iterator9 = _isArray9 ? _iterator9 : _iterator9[Symbol.iterator](); ;) {
-                var _ref9;
-                if (_isArray9) {
-                    if (_i11 >= _iterator9.length) break;
-                    _ref9 = _iterator9[_i11++];
+            for (var _iterator7 = getFrames(parent), _isArray7 = Array.isArray(_iterator7), _i9 = 0, _iterator7 = _isArray7 ? _iterator7 : _iterator7[Symbol.iterator](); ;) {
+                var _ref7;
+                if (_isArray7) {
+                    if (_i9 >= _iterator7.length) break;
+                    _ref7 = _iterator7[_i9++];
                 } else {
-                    if (_i11 = _iterator9.next(), _i11.done) break;
-                    _ref9 = _i11.value;
+                    if (_i9 = _iterator7.next(), _i9.done) break;
+                    _ref7 = _i9.value;
                 }
-                if (_ref9 === child) return !0;
+                if (_ref7 === child) return !0;
             }
             return !1;
         }
@@ -399,25 +374,25 @@
             return Boolean(!isIframe() && !isPopup());
         }
         function anyMatch(collection1, collection2) {
-            for (var _iterator10 = collection1, _isArray10 = Array.isArray(_iterator10), _i12 = 0, _iterator10 = _isArray10 ? _iterator10 : _iterator10[Symbol.iterator](); ;) {
-                var _ref10;
-                if (_isArray10) {
-                    if (_i12 >= _iterator10.length) break;
-                    _ref10 = _iterator10[_i12++];
+            for (var _iterator8 = collection1, _isArray8 = Array.isArray(_iterator8), _i10 = 0, _iterator8 = _isArray8 ? _iterator8 : _iterator8[Symbol.iterator](); ;) {
+                var _ref8;
+                if (_isArray8) {
+                    if (_i10 >= _iterator8.length) break;
+                    _ref8 = _iterator8[_i10++];
                 } else {
-                    if (_i12 = _iterator10.next(), _i12.done) break;
-                    _ref10 = _i12.value;
+                    if (_i10 = _iterator8.next(), _i10.done) break;
+                    _ref8 = _i10.value;
                 }
-                for (var item1 = _ref10, _iterator11 = collection2, _isArray11 = Array.isArray(_iterator11), _i13 = 0, _iterator11 = _isArray11 ? _iterator11 : _iterator11[Symbol.iterator](); ;) {
-                    var _ref11;
-                    if (_isArray11) {
-                        if (_i13 >= _iterator11.length) break;
-                        _ref11 = _iterator11[_i13++];
+                for (var item1 = _ref8, _iterator9 = collection2, _isArray9 = Array.isArray(_iterator9), _i11 = 0, _iterator9 = _isArray9 ? _iterator9 : _iterator9[Symbol.iterator](); ;) {
+                    var _ref9;
+                    if (_isArray9) {
+                        if (_i11 >= _iterator9.length) break;
+                        _ref9 = _iterator9[_i11++];
                     } else {
-                        if (_i13 = _iterator11.next(), _i13.done) break;
-                        _ref11 = _i13.value;
+                        if (_i11 = _iterator9.next(), _i11.done) break;
+                        _ref9 = _i11.value;
                     }
-                    if (item1 === _ref11) return !0;
+                    if (item1 === _ref9) return !0;
                 }
             }
         }
@@ -481,7 +456,7 @@
         exports.isActuallySameDomain = isActuallySameDomain, exports.isSameDomain = isSameDomain, 
         exports.getParent = getParent, exports.getOpener = getOpener, exports.getParents = getParents, 
         exports.isAncestorParent = isAncestorParent, exports.getFrames = getFrames, exports.getAllChildFrames = getAllChildFrames, 
-        exports.getAllFramesInWindow = getAllFramesInWindow, exports.getTop = getTop, exports.isTop = isTop, 
+        exports.getTop = getTop, exports.getAllFramesInWindow = getAllFramesInWindow, exports.isTop = isTop, 
         exports.isFrameWindowClosed = isFrameWindowClosed, exports.isWindowClosed = isWindowClosed, 
         exports.linkFrameWindow = linkFrameWindow, exports.getUserAgent = getUserAgent, 
         exports.getFrameByName = getFrameByName, exports.findChildFrameByName = findChildFrameByName, 
@@ -539,16 +514,16 @@
                 }
             });
         });
-        var _methods = __webpack_require__(26);
-        Object.keys(_methods).forEach(function(key) {
+        var _serialize = __webpack_require__(27);
+        Object.keys(_serialize).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
                 get: function() {
-                    return _methods[key];
+                    return _serialize[key];
                 }
             });
         });
-        var _ready = __webpack_require__(27);
+        var _ready = __webpack_require__(26);
         Object.keys(_ready).forEach(function(key) {
             "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
                 enumerable: !0,
@@ -1205,6 +1180,7 @@
                         delete this.weakmap;
                     }
                     if (!this.isSafeToReadWrite(key)) {
+                        this._cleanupClosedWindows();
                         var keys = this.keys, index = keys.indexOf(key);
                         if (-1 === index) return;
                         return this.values[index];
@@ -1763,6 +1739,37 @@
         exports.default = INTERFACE;
     }, function(module, exports, __webpack_require__) {
         "use strict";
+        function initOnReady() {
+            (0, _interface.on)(_conf.CONSTANTS.POST_MESSAGE_NAMES.READY, {
+                window: _conf.CONSTANTS.WILDCARD,
+                domain: _conf.CONSTANTS.WILDCARD
+            }, function(event) {
+                var win = event.source, promise = _global.global.readyPromises.get(win);
+                promise ? promise.resolve(event) : (promise = new _src3.ZalgoPromise().resolve(event), 
+                _global.global.readyPromises.set(win, promise));
+            });
+            var parent = (0, _src2.getAncestor)();
+            parent && (0, _interface.send)(parent, _conf.CONSTANTS.POST_MESSAGE_NAMES.READY, {}, {
+                domain: _conf.CONSTANTS.WILDCARD,
+                timeout: 1 / 0
+            }).catch(function(err) {
+                _log.log.debug((0, _util.stringifyError)(err));
+            });
+        }
+        function onWindowReady(win) {
+            var timeout = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 5e3, name = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : "Window", promise = _global.global.readyPromises.get(win);
+            return promise || (promise = new _src3.ZalgoPromise(), _global.global.readyPromises.set(win, promise), 
+            setTimeout(function() {
+                return promise.reject(new Error(name + " did not load after " + timeout + "ms"));
+            }, timeout), promise);
+        }
+        Object.defineProperty(exports, "__esModule", {
+            value: !0
+        }), exports.initOnReady = initOnReady, exports.onWindowReady = onWindowReady;
+        var _src = __webpack_require__(5), _src2 = __webpack_require__(1), _src3 = __webpack_require__(2), _conf = __webpack_require__(0), _interface = __webpack_require__(8), _log = __webpack_require__(9), _global = __webpack_require__(3), _util = __webpack_require__(7);
+        _global.global.readyPromises = _global.global.readyPromises || new _src.WeakMap();
+    }, function(module, exports, __webpack_require__) {
+        "use strict";
         function isSerialized(item, type) {
             return "object" === (void 0 === item ? "undefined" : _typeof(item)) && null !== item && item.__type__ === type;
         }
@@ -1832,7 +1839,7 @@
             return (0, _util.replaceObject)({
                 obj: obj
             }, function(item, key) {
-                return "object" === (void 0 === item ? "undefined" : _typeof(item)) && null !== item && isSerialized(item, _conf.CONSTANTS.SERIALIZATION_TYPES.METHOD) ? deserializeMethod(source, origin, item) : "object" === (void 0 === item ? "undefined" : _typeof(item)) && null !== item && isSerialized(item, _conf.CONSTANTS.SERIALIZATION_TYPES.ERROR) ? deserializeError(source, origin, item) : "object" === (void 0 === item ? "undefined" : _typeof(item)) && null !== item && isSerialized(item, _conf.CONSTANTS.SERIALIZATION_TYPES.PROMISE) ? deserializePromise(source, origin, item) : void 0;
+                if ("object" === (void 0 === item ? "undefined" : _typeof(item)) && null !== item) return isSerialized(item, _conf.CONSTANTS.SERIALIZATION_TYPES.METHOD) ? deserializeMethod(source, origin, item) : isSerialized(item, _conf.CONSTANTS.SERIALIZATION_TYPES.ERROR) ? deserializeError(source, origin, item) : isSerialized(item, _conf.CONSTANTS.SERIALIZATION_TYPES.PROMISE) ? deserializePromise(source, origin, item) : void 0;
             }).obj;
         }
         Object.defineProperty(exports, "__esModule", {
@@ -1873,37 +1880,6 @@
                 });
             });
         });
-    }, function(module, exports, __webpack_require__) {
-        "use strict";
-        function initOnReady() {
-            (0, _interface.on)(_conf.CONSTANTS.POST_MESSAGE_NAMES.READY, {
-                window: _conf.CONSTANTS.WILDCARD,
-                domain: _conf.CONSTANTS.WILDCARD
-            }, function(event) {
-                var win = event.source, promise = _global.global.readyPromises.get(win);
-                promise ? promise.resolve(event) : (promise = new _src3.ZalgoPromise().resolve(event), 
-                _global.global.readyPromises.set(win, promise));
-            });
-            var parent = (0, _src2.getAncestor)();
-            parent && (0, _interface.send)(parent, _conf.CONSTANTS.POST_MESSAGE_NAMES.READY, {}, {
-                domain: _conf.CONSTANTS.WILDCARD,
-                timeout: 1 / 0
-            }).catch(function(err) {
-                _log.log.debug((0, _util.stringifyError)(err));
-            });
-        }
-        function onWindowReady(win) {
-            var timeout = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 5e3, name = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : "Window", promise = _global.global.readyPromises.get(win);
-            return promise || (promise = new _src3.ZalgoPromise(), _global.global.readyPromises.set(win, promise), 
-            setTimeout(function() {
-                return promise.reject(new Error(name + " did not load after " + timeout + "ms"));
-            }, timeout), promise);
-        }
-        Object.defineProperty(exports, "__esModule", {
-            value: !0
-        }), exports.initOnReady = initOnReady, exports.onWindowReady = onWindowReady;
-        var _src = __webpack_require__(5), _src2 = __webpack_require__(1), _src3 = __webpack_require__(2), _conf = __webpack_require__(0), _interface = __webpack_require__(8), _log = __webpack_require__(9), _global = __webpack_require__(3), _util = __webpack_require__(7);
-        _global.global.readyPromises = _global.global.readyPromises || new _src.WeakMap();
     }, function(module, exports, __webpack_require__) {
         "use strict";
         function request(options) {
