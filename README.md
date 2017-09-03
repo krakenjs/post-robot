@@ -19,7 +19,7 @@ post-robot will serialize and deserialize the following data types in messages:
 - Objects, arrays, strings, numbers, booleans, null
   - Note: this includes any JSON-serializable types
 - Functions
-  - Note: the deserealized function will always return a `Promise` - specifically a [`ZalgoPromise`](https://github.com/krakenjs/zalgo-promise)
+  - Note: the function passed will be a [reference to the original function](#functions), and the deserialized function will always return a `Promise` - specifically a [`ZalgoPromise`](https://github.com/krakenjs/zalgo-promise)
 - Promises
   - Note: deserialized promises will be instances of [`ZalgoPromise`](https://github.com/krakenjs/zalgo-promise)
 
