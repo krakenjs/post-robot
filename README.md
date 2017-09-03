@@ -12,6 +12,17 @@ Send a message to another window, and:
 - Set up a [secure message channel](#secure-message-channel) between two windows on a certain domain
 - Send messages between a [parent and a popup window](#parent-to-popup-messaging) in IE
 
+## Serialization
+
+post-robot will serialize and deserialize the following data types in messages:
+
+- Objects, arrays, strings, numbers, booleans, null
+  - Note: this includes any JSON-serializable types
+- Functions
+  - Note: the deserealized function will always return a `Promise` - specifically a [`ZalgoPromise`](https://github.com/krakenjs/zalgo-promise)
+- Promises
+  - Note: deserialized promises will be instances of [`ZalgoPromise`](https://github.com/krakenjs/zalgo-promise)
+
 ## Simple listener and sender
 
 ```javascript
