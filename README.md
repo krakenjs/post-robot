@@ -22,6 +22,7 @@ post-robot will serialize and deserialize the following data types in messages:
   - Note: the function passed will be a [reference to the original function](#functions), and the deserialized function will always return a `Promise` - specifically a [`ZalgoPromise`](https://github.com/krakenjs/zalgo-promise)
 - Promises
   - Note: deserialized promises will be instances of [`ZalgoPromise`](https://github.com/krakenjs/zalgo-promise)
+- Error objects
 
 ## Simple listener and sender
 
@@ -50,7 +51,7 @@ postRobot.on('getUser', function(event) {
 
 postRobot.send(someWindow, 'getUser', { id: 1337 }).then(function(event) {
     var user = event.data;
-    
+
     console.log(event.source, event.origin, 'Got user:', user);
 
     // Call the user.logout function from the other window!
@@ -60,7 +61,7 @@ postRobot.send(someWindow, 'getUser', { id: 1337 }).then(function(event) {
 }).catch(function(err) {
 
     // Handle any errors that stopped our call from going through
-    
+
     console.error(err);
 });
 ```

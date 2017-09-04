@@ -101,6 +101,13 @@ function serializePromise(destination : any, domain : string, promise : ZalgoPro
     };
 }
 
+function serializeZalgoPromise(destination : any, domain : string, promise : ZalgoPromise<mixed>, name : string) : SerializePromise {
+    return {
+        __type__: CONSTANTS.SERIALIZATION_TYPES.ZALGO_PROMISE,
+        __then__: serializeMethod(destination, domain, (resolve, reject) => promise.then(resolve, reject), `${name}.then`)
+    };
+}
+
 export function serializeMethods(destination : any, domain : string, obj : Object) : Object {
 
     return replaceObject({ obj }, (item, key) => {
@@ -112,9 +119,13 @@ export function serializeMethods(destination : any, domain : string, obj : Objec
             return serializeError(item);
         }
 
+        if (window.Promise && item instanceof window.Promise) {
+            return serializePromise(destination, domain, item, key.toString());
+        }
+
         if (ZalgoPromise.isPromise(item)) {
             // $FlowFixMe
-            return serializePromise(destination, domain, item, key.toString());
+            return serializeZalgoPromise(destination, domain, item, key.toString());
         }
     }).obj;
 }
@@ -152,8 +163,16 @@ export function deserializeError(source : any, origin : string, obj : Object) : 
     return new Error(obj.__message__);
 }
 
-export function deserializePromise(source : any, origin : string, prom : Object) : ZalgoPromise<mixed> {
+export function deserializeZalgoPromise(source : any, origin : string, prom : Object) : ZalgoPromise<mixed> {
     return new ZalgoPromise((resolve, reject) => deserializeMethod(source, origin, prom.__then__)(resolve, reject));
+}
+
+export function deserializePromise(source : any, origin : string, prom : Object) : ZalgoPromise<mixed> {
+    if (!window.Promise) {
+        return deserializeZalgoPromise(source, origin, prom);
+    }
+
+    return new window.Promise((resolve, reject) => deserializeMethod(source, origin, prom.__then__)(resolve, reject));
 }
 
 export function deserializeMethods(source : any, origin : string, obj : Object) : Object {
@@ -173,6 +192,10 @@ export function deserializeMethods(source : any, origin : string, obj : Object) 
 
         if (isSerialized(item, CONSTANTS.SERIALIZATION_TYPES.PROMISE)) {
             return deserializePromise(source, origin, item);
+        }
+
+        if (isSerialized(item, CONSTANTS.SERIALIZATION_TYPES.ZALGO_PROMISE)) {
+            return deserializeZalgoPromise(source, origin, item);
         }
 
     }).obj;
