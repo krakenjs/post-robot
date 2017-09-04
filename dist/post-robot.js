@@ -845,7 +845,8 @@
             SERIALIZATION_TYPES: {
                 METHOD: "postrobot_method",
                 ERROR: "postrobot_error",
-                PROMISE: "postrobot_promise"
+                PROMISE: "postrobot_promise",
+                ZALGO_PROMISE: "postrobot_zalgo_promise"
             },
             SEND_STRATEGIES: {
                 POST_MESSAGE: "postrobot_post_message",
@@ -1340,7 +1341,7 @@
                                     }
                                 }
                                 result instanceof ZalgoPromise && (result.resolved || result.rejected) ? (result.resolved ? promise.resolve(result.value) : promise.reject(result.error), 
-                                result.errorHandled = !0) : (0, _utils.isPromise)(result) ? result.then(function(res) {
+                                result.errorHandled = !0) : (0, _utils.isPromise)(result) ? result instanceof ZalgoPromise && (result.resolved || result.rejected) ? result.resolved ? promise.resolve(result.value) : promise.reject(result.error) : result.then(function(res) {
                                     promise.resolve(res);
                                 }, function(err) {
                                     promise.reject(err);
@@ -1401,7 +1402,9 @@
             } ], [ {
                 key: "resolve",
                 value: function(value) {
-                    return value instanceof ZalgoPromise || (0, _utils.isPromise)(value) ? value : new ZalgoPromise().resolve(value);
+                    return value instanceof ZalgoPromise ? value : (0, _utils.isPromise)(value) ? new ZalgoPromise(function(resolve, reject) {
+                        return value.then(resolve, reject);
+                    }) : new ZalgoPromise().resolve(value);
                 }
             }, {
                 key: "reject",
@@ -1799,11 +1802,19 @@
                 }, name + ".then")
             };
         }
+        function serializeZalgoPromise(destination, domain, promise, name) {
+            return {
+                __type__: _conf.CONSTANTS.SERIALIZATION_TYPES.ZALGO_PROMISE,
+                __then__: serializeMethod(destination, domain, function(resolve, reject) {
+                    return promise.then(resolve, reject);
+                }, name + ".then")
+            };
+        }
         function serializeMethods(destination, domain, obj) {
             return (0, _util.replaceObject)({
                 obj: obj
             }, function(item, key) {
-                return "function" == typeof item ? serializeMethod(destination, domain, item, key.toString()) : item instanceof Error ? serializeError(item) : _src3.ZalgoPromise.isPromise(item) ? serializePromise(destination, domain, item, key.toString()) : void 0;
+                return "function" == typeof item ? serializeMethod(destination, domain, item, key.toString()) : item instanceof Error ? serializeError(item) : window.Promise && item instanceof window.Promise ? serializePromise(destination, domain, item, key.toString()) : _src3.ZalgoPromise.isPromise(item) ? serializeZalgoPromise(destination, domain, item, key.toString()) : void 0;
             }).obj;
         }
         function deserializeMethod(source, origin, obj) {
@@ -1830,16 +1841,21 @@
         function deserializeError(source, origin, obj) {
             return new Error(obj.__message__);
         }
-        function deserializePromise(source, origin, prom) {
+        function deserializeZalgoPromise(source, origin, prom) {
             return new _src3.ZalgoPromise(function(resolve, reject) {
                 return deserializeMethod(source, origin, prom.__then__)(resolve, reject);
             });
+        }
+        function deserializePromise(source, origin, prom) {
+            return window.Promise ? new window.Promise(function(resolve, reject) {
+                return deserializeMethod(source, origin, prom.__then__)(resolve, reject);
+            }) : deserializeZalgoPromise(source, origin, prom);
         }
         function deserializeMethods(source, origin, obj) {
             return (0, _util.replaceObject)({
                 obj: obj
             }, function(item, key) {
-                if ("object" === (void 0 === item ? "undefined" : _typeof(item)) && null !== item) return isSerialized(item, _conf.CONSTANTS.SERIALIZATION_TYPES.METHOD) ? deserializeMethod(source, origin, item) : isSerialized(item, _conf.CONSTANTS.SERIALIZATION_TYPES.ERROR) ? deserializeError(source, origin, item) : isSerialized(item, _conf.CONSTANTS.SERIALIZATION_TYPES.PROMISE) ? deserializePromise(source, origin, item) : void 0;
+                if ("object" === (void 0 === item ? "undefined" : _typeof(item)) && null !== item) return isSerialized(item, _conf.CONSTANTS.SERIALIZATION_TYPES.METHOD) ? deserializeMethod(source, origin, item) : isSerialized(item, _conf.CONSTANTS.SERIALIZATION_TYPES.ERROR) ? deserializeError(source, origin, item) : isSerialized(item, _conf.CONSTANTS.SERIALIZATION_TYPES.PROMISE) ? deserializePromise(source, origin, item) : isSerialized(item, _conf.CONSTANTS.SERIALIZATION_TYPES.ZALGO_PROMISE) ? deserializeZalgoPromise(source, origin, item) : void 0;
             }).obj;
         }
         Object.defineProperty(exports, "__esModule", {
@@ -1852,7 +1868,8 @@
         };
         exports.serializeMethod = serializeMethod, exports.serializeMethods = serializeMethods, 
         exports.deserializeMethod = deserializeMethod, exports.deserializeError = deserializeError, 
-        exports.deserializePromise = deserializePromise, exports.deserializeMethods = deserializeMethods;
+        exports.deserializeZalgoPromise = deserializeZalgoPromise, exports.deserializePromise = deserializePromise, 
+        exports.deserializeMethods = deserializeMethods;
         var _src = __webpack_require__(5), _src2 = __webpack_require__(1), _src3 = __webpack_require__(2), _conf = __webpack_require__(0), _util = __webpack_require__(7), _interface = __webpack_require__(8), _log = __webpack_require__(9), _global = __webpack_require__(3);
         _global.global.methods = _global.global.methods || new _src.WeakMap();
         exports.listenForMethods = (0, _util.once)(function() {
@@ -2065,13 +2082,15 @@
         }
         function once(name, options, handler) {
             "function" == typeof options && (handler = options, options = {}), options = options || {}, 
-            options.name = name, options.handler = handler || options.handler, options.once = !0;
-            var prom = new _src2.ZalgoPromise(function(resolve, reject) {
-                options.handler = options.handler || function(event) {
-                    return resolve(event);
-                }, options.errorHandler = options.errorHandler || reject;
-            }), myListener = listen(options);
-            return prom.cancel = myListener.cancel, prom;
+            handler = handler || options.handler;
+            var errorHandler = options.errorHandler, promise = new _src2.ZalgoPromise(function(resolve, reject) {
+                options.name = name, options.once = !0, options.handler = function(event) {
+                    if (resolve(event), handler) return handler(event);
+                }, options.errorHandler = function(err) {
+                    if (reject(err), errorHandler) return errorHandler(err);
+                };
+            }), onceListener = listen(options);
+            return promise.cancel = onceListener.cancel, promise;
         }
         function listener() {
             var options = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {};
