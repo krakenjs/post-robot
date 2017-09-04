@@ -90,20 +90,33 @@ export function once(name : string, options : ServerOptionsType, handler : Handl
     }
 
     options = options || {};
+    handler = handler || options.handler;
+    let errorHandler = options.errorHandler;
 
-    options.name = name;
-    options.handler = handler || options.handler;
-    options.once = true;
+    let promise = new ZalgoPromise((resolve, reject) => {
 
-    let prom = new ZalgoPromise((resolve, reject) => {
-        options.handler = options.handler || (event => resolve(event));
-        options.errorHandler = options.errorHandler || reject;
+        options.name = name;
+        options.once = true;
+
+        options.handler = (event) => {
+            resolve(event);
+            if (handler) {
+                return handler(event);
+            }
+        };
+
+        options.errorHandler = (err) => {
+            reject(err);
+            if (errorHandler) {
+                return errorHandler(err);
+            }
+        };
     });
 
-    let myListener = listen(options);
-    prom.cancel = myListener.cancel;
+    let onceListener = listen(options);
+    promise.cancel = onceListener.cancel;
 
-    return prom;
+    return promise;
 }
 
 export function listener(options : ServerOptionsType = {}) : { on : (name : string, handler : HandlerType) => { cancel : () => void } } {
