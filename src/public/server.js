@@ -82,7 +82,7 @@ export function on(name : string, options : ServerOptionsType | HandlerType, han
     return listen(options);
 }
 
-export function once(name : string, options : ServerOptionsType, handler : HandlerType) : ZalgoPromise<{ source : mixed, origin : string, data : Object }> {
+export function once(name : string, options : ?(ServerOptionsType | HandlerType) = {}, handler : ?HandlerType) : ZalgoPromise<{ source : mixed, origin : string, data : Object }> {
 
     if (typeof options === 'function') {
         handler = options;
@@ -94,6 +94,8 @@ export function once(name : string, options : ServerOptionsType, handler : Handl
     let errorHandler = options.errorHandler;
 
     let promise = new ZalgoPromise((resolve, reject) => {
+
+        options = options || {};
 
         options.name = name;
         options.once = true;
