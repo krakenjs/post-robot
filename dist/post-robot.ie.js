@@ -1630,7 +1630,7 @@
                     var name = toString.call(item);
                     if ("[object Window]" === name || "[object global]" === name || "[object DOMWindow]" === name) return !1;
                 }
-                if (item.then instanceof Function) return !0;
+                if ("function" == typeof item.then) return !0;
             } catch (err) {
                 return !1;
             }
@@ -2536,11 +2536,12 @@
             return "function" == typeof options && (handler = options, options = {}), options = options || {}, 
             options.name = name, options.handler = handler || options.handler, listen(options);
         }
-        function once(name, options, handler) {
+        function once(name) {
+            var options = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {}, handler = arguments[2];
             "function" == typeof options && (handler = options, options = {}), options = options || {}, 
             handler = handler || options.handler;
             var errorHandler = options.errorHandler, promise = new _src2.ZalgoPromise(function(resolve, reject) {
-                options.name = name, options.once = !0, options.handler = function(event) {
+                options = options || {}, options.name = name, options.once = !0, options.handler = function(event) {
                     if (resolve(event), handler) return handler(event);
                 }, options.errorHandler = function(err) {
                     if (reject(err), errorHandler) return errorHandler(err);
