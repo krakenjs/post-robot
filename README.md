@@ -23,6 +23,7 @@ post-robot will serialize and deserialize the following data types in messages:
 - Promises
   - Note: deserialized promises will be instances of [`ZalgoPromise`](https://github.com/krakenjs/zalgo-promise)
 - Error objects
+- Regex objects
 
 ## Simple listener and sender
 

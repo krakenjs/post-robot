@@ -33,7 +33,8 @@ export let CONSTANTS = {
         METHOD: 'postrobot_method',
         ERROR: 'postrobot_error',
         PROMISE: 'postrobot_promise',
-        ZALGO_PROMISE: 'postrobot_zalgo_promise'
+        ZALGO_PROMISE: 'postrobot_zalgo_promise',
+        REGEX: 'regex'
     },
 
     SEND_STRATEGIES: {

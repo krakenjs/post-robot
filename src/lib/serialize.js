@@ -5,7 +5,7 @@ import { matchDomain } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 
 import { CONSTANTS } from '../conf';
-import { once, uniqueID, replaceObject, stringifyError } from './util';
+import { once, uniqueID, replaceObject, stringifyError, isRegex } from './util';
 import { on, send } from '../interface';
 import { log } from './log';
 import { global } from '../global';
@@ -108,6 +108,18 @@ function serializeZalgoPromise(destination : any, domain : string, promise : Zal
     };
 }
 
+type SerializedRegex = {
+    __type__ : string,
+    __source__ : string
+};
+
+function serializeRegex(regex : RegExp) : SerializedRegex {
+    return {
+        __type__: CONSTANTS.SERIALIZATION_TYPES.REGEX,
+        __source__: regex.source
+    };
+}
+
 export function serializeMethods(destination : any, domain : string, obj : Object) : Object {
 
     return replaceObject({ obj }, (item, key) => {
@@ -126,6 +138,11 @@ export function serializeMethods(destination : any, domain : string, obj : Objec
         if (ZalgoPromise.isPromise(item)) {
             // $FlowFixMe
             return serializeZalgoPromise(destination, domain, item, key.toString());
+        }
+
+        if (isRegex(item)) {
+            // $FlowFixMe
+            return serializeRegex(item);
         }
     }).obj;
 }
@@ -175,6 +192,10 @@ export function deserializePromise(source : any, origin : string, prom : Object)
     return new window.Promise((resolve, reject) => deserializeMethod(source, origin, prom.__then__)(resolve, reject));
 }
 
+export function deserializeRegex(source : any, origin : string, item : Object) : RegExp {
+    return new RegExp(item.__source__);
+}
+
 export function deserializeMethods(source : any, origin : string, obj : Object) : Object {
 
     return replaceObject({ obj }, (item, key) => {
@@ -196,6 +217,10 @@ export function deserializeMethods(source : any, origin : string, obj : Object) 
 
         if (isSerialized(item, CONSTANTS.SERIALIZATION_TYPES.ZALGO_PROMISE)) {
             return deserializeZalgoPromise(source, origin, item);
+        }
+
+        if (isSerialized(item, CONSTANTS.SERIALIZATION_TYPES.REGEX)) {
+            return deserializeRegex(source, origin, item);
         }
 
     }).obj;
