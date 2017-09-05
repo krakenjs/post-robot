@@ -846,7 +846,8 @@
                 METHOD: "postrobot_method",
                 ERROR: "postrobot_error",
                 PROMISE: "postrobot_promise",
-                ZALGO_PROMISE: "postrobot_zalgo_promise"
+                ZALGO_PROMISE: "postrobot_zalgo_promise",
+                REGEX: "regex"
             },
             SEND_STRATEGIES: {
                 POST_MESSAGE: "postrobot_post_message",
@@ -1810,11 +1811,18 @@
                 }, name + ".then")
             };
         }
+        function serializeRegex(regex) {
+            return {
+                __type__: _conf.CONSTANTS.SERIALIZATION_TYPES.REGEX,
+                __source__: regex.source
+            };
+        }
         function serializeMethods(destination, domain, obj) {
             return (0, _util.replaceObject)({
                 obj: obj
             }, function(item, key) {
-                return "function" == typeof item ? serializeMethod(destination, domain, item, key.toString()) : item instanceof Error ? serializeError(item) : window.Promise && item instanceof window.Promise ? serializePromise(destination, domain, item, key.toString()) : _src3.ZalgoPromise.isPromise(item) ? serializeZalgoPromise(destination, domain, item, key.toString()) : void 0;
+                return "function" == typeof item ? serializeMethod(destination, domain, item, key.toString()) : item instanceof Error ? serializeError(item) : window.Promise && item instanceof window.Promise ? serializePromise(destination, domain, item, key.toString()) : _src3.ZalgoPromise.isPromise(item) ? serializeZalgoPromise(destination, domain, item, key.toString()) : (0, 
+                _util.isRegex)(item) ? serializeRegex(item) : void 0;
             }).obj;
         }
         function deserializeMethod(source, origin, obj) {
@@ -1851,11 +1859,14 @@
                 return deserializeMethod(source, origin, prom.__then__)(resolve, reject);
             }) : deserializeZalgoPromise(source, origin, prom);
         }
+        function deserializeRegex(source, origin, item) {
+            return new RegExp(item.__source__);
+        }
         function deserializeMethods(source, origin, obj) {
             return (0, _util.replaceObject)({
                 obj: obj
             }, function(item, key) {
-                if ("object" === (void 0 === item ? "undefined" : _typeof(item)) && null !== item) return isSerialized(item, _conf.CONSTANTS.SERIALIZATION_TYPES.METHOD) ? deserializeMethod(source, origin, item) : isSerialized(item, _conf.CONSTANTS.SERIALIZATION_TYPES.ERROR) ? deserializeError(source, origin, item) : isSerialized(item, _conf.CONSTANTS.SERIALIZATION_TYPES.PROMISE) ? deserializePromise(source, origin, item) : isSerialized(item, _conf.CONSTANTS.SERIALIZATION_TYPES.ZALGO_PROMISE) ? deserializeZalgoPromise(source, origin, item) : void 0;
+                if ("object" === (void 0 === item ? "undefined" : _typeof(item)) && null !== item) return isSerialized(item, _conf.CONSTANTS.SERIALIZATION_TYPES.METHOD) ? deserializeMethod(source, origin, item) : isSerialized(item, _conf.CONSTANTS.SERIALIZATION_TYPES.ERROR) ? deserializeError(source, origin, item) : isSerialized(item, _conf.CONSTANTS.SERIALIZATION_TYPES.PROMISE) ? deserializePromise(source, origin, item) : isSerialized(item, _conf.CONSTANTS.SERIALIZATION_TYPES.ZALGO_PROMISE) ? deserializeZalgoPromise(source, origin, item) : isSerialized(item, _conf.CONSTANTS.SERIALIZATION_TYPES.REGEX) ? deserializeRegex(source, origin, item) : void 0;
             }).obj;
         }
         Object.defineProperty(exports, "__esModule", {
@@ -1869,7 +1880,7 @@
         exports.serializeMethod = serializeMethod, exports.serializeMethods = serializeMethods, 
         exports.deserializeMethod = deserializeMethod, exports.deserializeError = deserializeError, 
         exports.deserializeZalgoPromise = deserializeZalgoPromise, exports.deserializePromise = deserializePromise, 
-        exports.deserializeMethods = deserializeMethods;
+        exports.deserializeRegex = deserializeRegex, exports.deserializeMethods = deserializeMethods;
         var _src = __webpack_require__(5), _src2 = __webpack_require__(1), _src3 = __webpack_require__(2), _conf = __webpack_require__(0), _util = __webpack_require__(7), _interface = __webpack_require__(8), _log = __webpack_require__(9), _global = __webpack_require__(3);
         _global.global.methods = _global.global.methods || new _src.WeakMap();
         exports.listenForMethods = (0, _util.once)(function() {
