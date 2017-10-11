@@ -90,7 +90,7 @@ export function getRequestListener({ name, win, domain } : { name : string, win 
 
         if (winListeners[__DOMAIN_REGEX__]) {
             for (let { regex, listener } of winListeners[__DOMAIN_REGEX__]) {
-                if (matchDomain(regex, domain)) {
+                if (domain && matchDomain(regex, domain)) {
                     return listener;
                 }
             }
