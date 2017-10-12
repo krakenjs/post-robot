@@ -1843,7 +1843,6 @@
         "use strict";
         function initOnReady() {
             (0, _interface.on)(_conf.CONSTANTS.POST_MESSAGE_NAMES.READY, {
-                window: _conf.CONSTANTS.WILDCARD,
                 domain: _conf.CONSTANTS.WILDCARD
             }, function(event) {
                 var win = event.source, promise = _global.global.readyPromises.get(win);
@@ -1983,7 +1982,6 @@
         _global.global.methods = _global.global.methods || new _src.WeakMap();
         exports.listenForMethods = (0, _util.once)(function() {
             (0, _interface.on)(_conf.CONSTANTS.POST_MESSAGE_NAMES.METHOD, {
-                window: _conf.CONSTANTS.WILDCARD,
                 origin: _conf.CONSTANTS.WILDCARD
             }, function(_ref) {
                 var source = _ref.source, origin = _ref.origin, data = _ref.data, methods = _global.global.methods.get(source);
@@ -2011,19 +2009,20 @@
         function request(options) {
             return _src2.ZalgoPromise.try(function() {
                 if (!options.name) throw new Error("Expected options.name");
-                var name = options.name, win = options.window, domain = void 0;
-                if ("string" == typeof win) {
-                    var el = document.getElementById(win);
-                    if (!el) throw new Error("Expected options.window " + Object.prototype.toString.call(win) + " to be a valid element id");
-                    if ("iframe" !== el.tagName.toLowerCase()) throw new Error("Expected options.window " + Object.prototype.toString.call(win) + " to be an iframe");
+                var name = options.name, targetWindow = void 0, domain = void 0;
+                if ("string" == typeof options.window) {
+                    var el = document.getElementById(options.window);
+                    if (!el) throw new Error("Expected options.window " + Object.prototype.toString.call(options.window) + " to be a valid element id");
+                    if ("iframe" !== el.tagName.toLowerCase()) throw new Error("Expected options.window " + Object.prototype.toString.call(options.window) + " to be an iframe");
                     if (!el.contentWindow) throw new Error("Iframe must have contentWindow.  Make sure it has a src attribute and is in the DOM.");
-                    win = el.contentWindow;
-                } else if (win instanceof HTMLElement) {
-                    if ("iframe" !== win.tagName.toLowerCase()) throw new Error("Expected options.window " + Object.prototype.toString.call(win) + " to be an iframe");
-                    if (win && !win.contentWindow) throw new Error("Iframe must have contentWindow.  Make sure it has a src attribute and is in the DOM.");
-                    win && win.contentWindow && (win = win.contentWindow);
-                }
-                if (!win) throw new Error("Expected options.window to be a window object, iframe, or iframe element id.");
+                    targetWindow = el.contentWindow;
+                } else if (options.window instanceof HTMLIFrameElement) {
+                    if ("iframe" !== options.window.tagName.toLowerCase()) throw new Error("Expected options.window " + Object.prototype.toString.call(options.window) + " to be an iframe");
+                    if (options.window && !options.window.contentWindow) throw new Error("Iframe must have contentWindow.  Make sure it has a src attribute and is in the DOM.");
+                    options.window && options.window.contentWindow && (targetWindow = options.window.contentWindow);
+                } else targetWindow = options.window;
+                if (!targetWindow) throw new Error("Expected options.window to be a window object, iframe, or iframe element id.");
+                var win = targetWindow;
                 domain = options.domain || _conf.CONSTANTS.WILDCARD;
                 var hash = options.name + "_" + (0, _lib.uniqueID)();
                 if ((0, _src3.isWindowClosed)(win)) throw new Error("Target window is closed");
@@ -2084,9 +2083,10 @@
         function client() {
             var options = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {};
             if (!options.window) throw new Error("Expected options.window");
+            var win = options.window;
             return {
                 send: function(name, data) {
-                    return _send(options.window, name, data, options);
+                    return _send(win, name, data, options);
                 }
             };
         }
@@ -2157,18 +2157,18 @@
         function listen(options) {
             if (!options.name) throw new Error("Expected options.name");
             if (!options.handler) throw new Error("Expected options.handler");
-            var listenerOptions = {
+            var name = options.name, win = options.window, domain = options.domain, listenerOptions = {
                 handler: options.handler,
                 handleError: options.errorHandler || function(err) {
                     throw err;
                 },
-                window: options.window,
-                domain: options.domain || _conf.CONSTANTS.WILDCARD,
-                name: options.name
+                window: win,
+                domain: domain || _conf.CONSTANTS.WILDCARD,
+                name: name
             }, requestListener = (0, _drivers.addRequestListener)({
-                name: listenerOptions.name,
-                win: listenerOptions.window,
-                domain: listenerOptions.domain
+                name: name,
+                win: win,
+                domain: domain
             }, listenerOptions);
             if (options.once) {
                 var _handler = listenerOptions.handler;
@@ -2177,7 +2177,8 @@
                 });
             }
             if (listenerOptions.window && options.errorOnClose) var interval = (0, _lib.safeInterval)(function() {
-                (0, _src.isWindowClosed)(listenerOptions.window) && (interval.cancel(), listenerOptions.handleError(new Error("Post message target window is closed")));
+                win && "object" === (void 0 === win ? "undefined" : _typeof(win)) && (0, _src.isWindowClosed)(win) && (interval.cancel(), 
+                listenerOptions.handleError(new Error("Post message target window is closed")));
             }, 50);
             return {
                 cancel: function() {
@@ -2212,7 +2213,13 @@
         }
         Object.defineProperty(exports, "__esModule", {
             value: !0
-        }), exports.on = void 0, exports.listen = listen, exports.once = once, exports.listener = listener;
+        }), exports.on = void 0;
+        var _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
+            return typeof obj;
+        } : function(obj) {
+            return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+        };
+        exports.listen = listen, exports.once = once, exports.listener = listener;
         var _src = __webpack_require__(1), _src2 = __webpack_require__(2), _lib = __webpack_require__(4), _drivers = __webpack_require__(6), _conf = __webpack_require__(0);
         exports.on = _on;
     } ]);
