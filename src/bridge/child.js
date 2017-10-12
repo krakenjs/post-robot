@@ -8,10 +8,11 @@ import { receiveMessage } from '../drivers';
 
 import { needsBridge, registerRemoteWindow, rejectRemoteSendMessage, registerRemoteSendMessage, getBridgeName } from './common';
 
-let awaitRemoteBridgeForWindow = weakMapMemoize((win : any) : ZalgoPromise<?any> => {
+let awaitRemoteBridgeForWindow = weakMapMemoize((win : CrossDomainWindowType) : ZalgoPromise<?CrossDomainWindowType> => {
     return ZalgoPromise.try(() => {
         for (let frame of getFrames(win)) {
             try {
+                // $FlowFixMe
                 if (frame && frame !== window && isSameDomain(frame) && frame[CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
                     return frame;
                 }
@@ -28,6 +29,7 @@ let awaitRemoteBridgeForWindow = weakMapMemoize((win : any) : ZalgoPromise<?any>
                 return;
             }
 
+            // $FlowFixMe
             if (isSameDomain(frame) && frame[CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
                 return frame;
             }
@@ -38,6 +40,7 @@ let awaitRemoteBridgeForWindow = weakMapMemoize((win : any) : ZalgoPromise<?any>
                 let timeout;
 
                 interval = setInterval(() => {
+                    // $FlowFixMe
                     if (frame && isSameDomain(frame) && frame[CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
                         clearInterval(interval);
                         clearTimeout(timeout);
@@ -60,7 +63,7 @@ let awaitRemoteBridgeForWindow = weakMapMemoize((win : any) : ZalgoPromise<?any>
 export function openTunnelToOpener() : ZalgoPromise<void> {
     return ZalgoPromise.try(() => {
 
-        let opener = getOpener(window);
+        const opener = getOpener(window);
 
         if (!opener) {
             return;

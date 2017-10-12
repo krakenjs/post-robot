@@ -2,7 +2,7 @@
 
 import { global } from './global';
 
-export function cleanUpWindow(win : any) {
+export function cleanUpWindow(win : CrossDomainWindowType) {
 
     // global.tunnelWindows
     // global.bridges

@@ -16,7 +16,7 @@ postRobot.on('setupListener', function({ source, data }) {
 });
 
 postRobot.on('enableIE8Mode', function({ source, data }) {
-    let ie8mode = enableIE8Mode()
+    let ie8mode = enableIE8Mode();
 
     return postRobot.bridge.openTunnelToOpener().then(() => {
         return ie8mode;

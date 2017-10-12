@@ -69,7 +69,7 @@ function listenForRegister(source, domain) {
     });
 }
 
-function openBridgeFrame(name : string, url : string) : any {
+function openBridgeFrame(name : string, url : string) : HTMLIFrameElement {
 
     log.debug(`Opening bridge:`, name, url);
 
@@ -94,7 +94,7 @@ function openBridgeFrame(name : string, url : string) : any {
     return iframe;
 }
 
-export function openBridge(url : string, domain : string) : ZalgoPromise<any> {
+export function openBridge(url : string, domain : string) : ZalgoPromise<CrossDomainWindowType> {
 
     domain = domain || getDomainFromUrl(url);
 
@@ -196,7 +196,7 @@ window.open = function(url : string, name : string, options : string, last : mix
     return win;
 };
 
-export function linkUrl(win : any, url : string) {
+export function linkUrl(win : CrossDomainWindowType, url : string) {
 
     let winOptions = global.popupWindowsByWin.get(win);
 

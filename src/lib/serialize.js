@@ -13,7 +13,7 @@ import { global } from '../global';
 global.methods = global.methods || new WeakMap();
 
 export let listenForMethods = once(() => {
-    on(CONSTANTS.POST_MESSAGE_NAMES.METHOD, { window: CONSTANTS.WILDCARD, origin: CONSTANTS.WILDCARD }, ({ source, origin, data } : { source : any, origin : string, data : Object }) => {
+    on(CONSTANTS.POST_MESSAGE_NAMES.METHOD, { origin: CONSTANTS.WILDCARD }, ({ source, origin, data } : { source : CrossDomainWindowType, origin : string, data : Object }) => {
 
         let methods = global.methods.get(source);
 
@@ -57,7 +57,7 @@ type SerializedMethod = {
     __name__ : string
 };
 
-export function serializeMethod(destination : any, domain : string, method : Function, name : string) : SerializedMethod {
+export function serializeMethod(destination : CrossDomainWindowType, domain : string, method : Function, name : string) : SerializedMethod {
 
     let id = uniqueID();
 
@@ -94,14 +94,14 @@ type SerializePromise = {
     __then__ : SerializedMethod
 };
 
-function serializePromise(destination : any, domain : string, promise : ZalgoPromise<mixed>, name : string) : SerializePromise {
+function serializePromise(destination : CrossDomainWindowType, domain : string, promise : ZalgoPromise<mixed>, name : string) : SerializePromise {
     return {
         __type__: CONSTANTS.SERIALIZATION_TYPES.PROMISE,
         __then__: serializeMethod(destination, domain, (resolve, reject) => promise.then(resolve, reject), `${name}.then`)
     };
 }
 
-function serializeZalgoPromise(destination : any, domain : string, promise : ZalgoPromise<mixed>, name : string) : SerializePromise {
+function serializeZalgoPromise(destination : CrossDomainWindowType, domain : string, promise : ZalgoPromise<mixed>, name : string) : SerializePromise {
     return {
         __type__: CONSTANTS.SERIALIZATION_TYPES.ZALGO_PROMISE,
         __then__: serializeMethod(destination, domain, (resolve, reject) => promise.then(resolve, reject), `${name}.then`)
@@ -120,7 +120,7 @@ function serializeRegex(regex : RegExp) : SerializedRegex {
     };
 }
 
-export function serializeMethods(destination : any, domain : string, obj : Object) : Object {
+export function serializeMethods(destination : CrossDomainWindowType, domain : string, obj : Object) : Object {
 
     return replaceObject({ obj }, (item, key) => {
         if (typeof item === 'function') {
@@ -147,7 +147,7 @@ export function serializeMethods(destination : any, domain : string, obj : Objec
     }).obj;
 }
 
-export function deserializeMethod(source : any, origin : string, obj : Object) : Function {
+export function deserializeMethod(source : CrossDomainWindowType, origin : string, obj : Object) : Function {
 
     function wrapper() : ZalgoPromise<mixed> {
         let args = Array.prototype.slice.call(arguments);
@@ -176,15 +176,15 @@ export function deserializeMethod(source : any, origin : string, obj : Object) :
     return wrapper;
 }
 
-export function deserializeError(source : any, origin : string, obj : Object) : Error {
+export function deserializeError(source : CrossDomainWindowType, origin : string, obj : Object) : Error {
     return new Error(obj.__message__);
 }
 
-export function deserializeZalgoPromise(source : any, origin : string, prom : Object) : ZalgoPromise<mixed> {
+export function deserializeZalgoPromise(source : CrossDomainWindowType, origin : string, prom : Object) : ZalgoPromise<mixed> {
     return new ZalgoPromise((resolve, reject) => deserializeMethod(source, origin, prom.__then__)(resolve, reject));
 }
 
-export function deserializePromise(source : any, origin : string, prom : Object) : ZalgoPromise<mixed> {
+export function deserializePromise(source : CrossDomainWindowType, origin : string, prom : Object) : ZalgoPromise<mixed> {
     if (!window.Promise) {
         return deserializeZalgoPromise(source, origin, prom);
     }
@@ -192,11 +192,11 @@ export function deserializePromise(source : any, origin : string, prom : Object)
     return new window.Promise((resolve, reject) => deserializeMethod(source, origin, prom.__then__)(resolve, reject));
 }
 
-export function deserializeRegex(source : any, origin : string, item : Object) : RegExp {
+export function deserializeRegex(source : CrossDomainWindowType, origin : string, item : Object) : RegExp {
     return new RegExp(item.__source__);
 }
 
-export function deserializeMethods(source : any, origin : string, obj : Object) : Object {
+export function deserializeMethods(source : CrossDomainWindowType, origin : string, obj : Object) : Object {
 
     return replaceObject({ obj }, (item, key) => {
         if (typeof item !== 'object' || item === null) {

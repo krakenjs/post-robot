@@ -9,12 +9,12 @@ import { type RequestListenerType } from '../drivers';
 import { CONSTANTS } from '../conf';
 
 type ErrorHandlerType = (err : mixed) => void;
-type HandlerType = ({ source : any, origin : string, data : Object }) => (void | mixed | ZalgoPromise<mixed>);
+type HandlerType = ({ source : CrossDomainWindowType, origin : string, data : Object }) => (void | mixed | ZalgoPromise<mixed>);
 
 type ServerOptionsType = {
     handler? : ?HandlerType,
     errorHandler? : ?ErrorHandlerType,
-    window? : ?any,
+    window? : CrossDomainWindowType,
     name? : ?string,
     domain? : ?(string | RegExp | Array<string>),
     once? : ?boolean,
@@ -31,17 +31,21 @@ export function listen(options : ServerOptionsType) : { cancel : () => void } {
         throw new Error('Expected options.handler');
     }
 
+    const name = options.name;
+    const win = options.window;
+    const domain = options.domain;
+
     let listenerOptions : RequestListenerType = {
         handler: options.handler,
         handleError: options.errorHandler || (err => {
             throw err;
         }),
-        window: options.window,
-        domain: options.domain || CONSTANTS.WILDCARD,
-        name: options.name
+        window: win,
+        domain: domain || CONSTANTS.WILDCARD,
+        name
     };
 
-    let requestListener = addRequestListener({ name: listenerOptions.name, win: listenerOptions.window, domain: listenerOptions.domain }, listenerOptions);
+    let requestListener = addRequestListener({ name, win, domain }, listenerOptions);
 
     if (options.once) {
         let handler = listenerOptions.handler;
@@ -53,7 +57,7 @@ export function listen(options : ServerOptionsType) : { cancel : () => void } {
 
     if (listenerOptions.window && options.errorOnClose) {
         let interval = safeInterval(() => {
-            if (isWindowClosed(listenerOptions.window)) {
+            if (win && typeof win === 'object' && isWindowClosed(win)) {
                 interval.cancel();
                 listenerOptions.handleError(new Error('Post message target window is closed'));
             }

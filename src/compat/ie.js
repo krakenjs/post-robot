@@ -4,7 +4,7 @@ import { isSameTopWindow } from 'cross-domain-utils/src';
 
 import { CONFIG } from '../conf';
 
-export function emulateIERestrictions(sourceWindow : any, targetWindow : any) {
+export function emulateIERestrictions(sourceWindow : CrossDomainWindowType, targetWindow : CrossDomainWindowType) {
     if (!CONFIG.ALLOW_POSTMESSAGE_POPUP) {
 
         if (isSameTopWindow(sourceWindow, targetWindow) === false) {

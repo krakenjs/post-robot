@@ -11,7 +11,7 @@ import { RECEIVE_MESSAGE_TYPES } from './types';
 global.receivedMessages = global.receivedMessages || [];
 
 type MessageEvent = {
-    source : any,
+    source : CrossDomainWindowType,
     origin : string,
     data : string
 };
@@ -112,7 +112,7 @@ export function receiveMessage(event : MessageEvent) {
     RECEIVE_MESSAGE_TYPES[message.type](source, origin, message);
 }
 
-export function messageListener(event : { source : any, origin : string, data : string, sourceElement : any, originalEvent? : { origin : string } }) {
+export function messageListener(event : { source : CrossDomainWindowType, origin : string, data : string, sourceElement : CrossDomainWindowType, originalEvent? : { origin : string } }) {
 
     try {
         event.source // eslint-disable-line

@@ -11,7 +11,7 @@ import { getRequestListener, getResponseListener, deleteResponseListener } from 
 
 export let RECEIVE_MESSAGE_TYPES = {
 
-    [ CONSTANTS.POST_MESSAGE_TYPE.ACK ](source : any, origin : string, message : Object) {
+    [ CONSTANTS.POST_MESSAGE_TYPE.ACK ](source : CrossDomainWindowType, origin : string, message : Object) {
 
         let options = getResponseListener(message.hash);
 
@@ -26,7 +26,7 @@ export let RECEIVE_MESSAGE_TYPES = {
         options.ack = true;
     },
 
-    [ CONSTANTS.POST_MESSAGE_TYPE.REQUEST ](source : any, origin : string, message : Object) : ZalgoPromise<void> {
+    [ CONSTANTS.POST_MESSAGE_TYPE.REQUEST ](source : CrossDomainWindowType, origin : string, message : Object) : ZalgoPromise<void> {
 
         let options = getRequestListener({ name: message.name, win: source, domain: origin });
 
@@ -93,7 +93,7 @@ export let RECEIVE_MESSAGE_TYPES = {
         });
     },
 
-    [ CONSTANTS.POST_MESSAGE_TYPE.RESPONSE ](source : any, origin : string, message : Object) : void | ZalgoPromise<void> {
+    [ CONSTANTS.POST_MESSAGE_TYPE.RESPONSE ](source : CrossDomainWindowType, origin : string, message : Object) : void | ZalgoPromise<void> {
 
         let options = getResponseListener(message.hash);
 

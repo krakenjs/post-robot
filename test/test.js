@@ -81,7 +81,7 @@ describe('[post-robot] happy cases', function() {
         }).then(function() {
             return postRobot.send(childFrame, 'sendMessageToParent', {
                 messageName: 'multilistener'
-            })
+            });
         }).then(function() {
             assert.equal(count, 2);
         });
@@ -110,7 +110,7 @@ describe('[post-robot] happy cases', function() {
 
             messageName: 'foo',
             data: {
-                done: done
+                done
             }
 
         }).then(function() {
@@ -408,7 +408,7 @@ describe('[post-robot] error cases', function() {
 
         let targetWindow = createPopup('child.htm');
 
-        postRobot.on('foobar', { window: targetWindow, errorHandler: function() { done() }, errorOnClose: true }, function() {
+        postRobot.on('foobar', { window: targetWindow, errorHandler() { done(); }, errorOnClose: true }, function() {
             throw new Error('Expected handler to not be called');
         });
 

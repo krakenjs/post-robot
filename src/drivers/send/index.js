@@ -9,7 +9,7 @@ import { uniqueID, serializeMethods, log, getWindowType, jsonStringify, stringif
 import { SEND_MESSAGE_STRATEGIES } from './strategies';
 
 
-function buildMessage(win : any, message : Object, options = {}) : Object {
+function buildMessage(win : CrossDomainWindowType, message : Object, options = {}) : Object {
 
     let id   = uniqueID();
     let type = getWindowType();
@@ -25,7 +25,7 @@ function buildMessage(win : any, message : Object, options = {}) : Object {
 }
 
 
-export function sendMessage(win : any, message : Object, domain : string) : ZalgoPromise<void> {
+export function sendMessage(win : CrossDomainWindowType, message : Object, domain : string) : ZalgoPromise<void> {
     return ZalgoPromise.try(() => {
 
         message = buildMessage(win, message, {

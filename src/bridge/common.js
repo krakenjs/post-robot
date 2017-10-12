@@ -21,7 +21,7 @@ export function needsBridgeForBrowser() : boolean {
     return false;
 }
 
-export function needsBridgeForWin(win : any) : boolean {
+export function needsBridgeForWin(win : CrossDomainWindowType) : boolean {
 
     if (!isSameTopWindow(window, win)) {
         return true;
@@ -30,7 +30,7 @@ export function needsBridgeForWin(win : any) : boolean {
     return false;
 }
 
-export function needsBridgeForDomain(domain : ?string, win : any) : boolean {
+export function needsBridgeForDomain(domain : ?string, win : CrossDomainWindowType) : boolean {
 
     if (domain) {
         if (getDomain() !== getDomainFromUrl(domain)) {
@@ -45,7 +45,7 @@ export function needsBridgeForDomain(domain : ?string, win : any) : boolean {
     return false;
 }
 
-export function needsBridge({ win, domain } : { win : any, domain? : string }) : boolean {
+export function needsBridge({ win, domain } : { win : CrossDomainWindowType, domain? : string }) : boolean {
 
     if (!needsBridgeForBrowser()) {
         return false;
@@ -93,15 +93,15 @@ export let documentBodyReady = new ZalgoPromise(resolve => {
 
 global.remoteWindows = global.remoteWindows || new WeakMap();
 
-export function registerRemoteWindow(win : any, timeout : number = CONFIG.BRIDGE_TIMEOUT) {
+export function registerRemoteWindow(win : CrossDomainWindowType, timeout : number = CONFIG.BRIDGE_TIMEOUT) {
     global.remoteWindows.set(win, { sendMessagePromise: new ZalgoPromise() });
 }
 
-export function findRemoteWindow(win : any) : { sendMessagePromise : ZalgoPromise<(remoteWin : any, message : string, remoteDomain : string) => void> } {
+export function findRemoteWindow(win : CrossDomainWindowType) : { sendMessagePromise : ZalgoPromise<(remoteWin : CrossDomainWindowType, message : string, remoteDomain : string) => void> } {
     return global.remoteWindows.get(win);
 }
 
-export function registerRemoteSendMessage(win : any, domain : string, sendMessage : (message : string) => void) {
+export function registerRemoteSendMessage(win : CrossDomainWindowType, domain : string, sendMessage : (message : string) => void) {
 
     let remoteWindow = findRemoteWindow(win);
 
@@ -109,7 +109,7 @@ export function registerRemoteSendMessage(win : any, domain : string, sendMessag
         throw new Error(`Window not found to register sendMessage to`);
     }
 
-    let sendMessageWrapper = (remoteWin : any, message : string, remoteDomain : string) => {
+    let sendMessageWrapper = (remoteWin : CrossDomainWindowType, message : string, remoteDomain : string) => {
 
         if (remoteWin !== win) {
             throw new Error(`Remote window does not match window`);
@@ -126,7 +126,7 @@ export function registerRemoteSendMessage(win : any, domain : string, sendMessag
     remoteWindow.sendMessagePromise = ZalgoPromise.resolve(sendMessageWrapper);
 }
 
-export function rejectRemoteSendMessage(win : any, err : Error) {
+export function rejectRemoteSendMessage(win : CrossDomainWindowType, err : Error) {
 
     let remoteWindow = findRemoteWindow(win);
 
@@ -137,7 +137,7 @@ export function rejectRemoteSendMessage(win : any, err : Error) {
     remoteWindow.sendMessagePromise.asyncReject(err);
 }
 
-export function sendBridgeMessage(win : any, message : string, domain : string) : ZalgoPromise<void> {
+export function sendBridgeMessage(win : CrossDomainWindowType, message : string, domain : string) : ZalgoPromise<void> {
 
     let messagingChild  = isOpener(window, win);
     let messagingParent = isOpener(win, window);
@@ -157,6 +157,6 @@ export function sendBridgeMessage(win : any, message : string, domain : string) 
     });
 }
 
-global.receiveMessage = function(event : { source : any, origin : string, data : string }) {
+global.receiveMessage = function(event : { source : CrossDomainWindowType, origin : string, data : string }) {
     receiveMessage(event);
 };

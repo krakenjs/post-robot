@@ -12,8 +12,10 @@ import { global } from '../global';
 
 global.requestPromises = global.requestPromises || new WeakMap();
 
+type WindowResolverType = CrossDomainWindowType | string | HTMLIFrameElement;
+
 type RequestOptionsType = {
-    window? : ?(any | string | HTMLElement),
+    window? : ?WindowResolverType,
     domain? : ?string,
     name? : ?string,
     data? : ?Object,
@@ -22,7 +24,7 @@ type RequestOptionsType = {
 };
 
 type ResponseMessageEvent = {
-    source : any,
+    source : CrossDomainWindowType,
     origin : string,
     data : Object
 };
@@ -36,44 +38,50 @@ export function request(options : RequestOptionsType) : ZalgoPromise<ResponseMes
         }
 
         let name = options.name;
-        let win = options.window;
+        let targetWindow : ?CrossDomainWindowType;
         let domain : string;
 
-        if (typeof win === 'string') {
-            let el = document.getElementById(win);
+        if (typeof options.window === 'string') {
+            let el = document.getElementById(options.window);
 
             if (!el) {
-                throw new Error(`Expected options.window ${Object.prototype.toString.call(win)} to be a valid element id`);
+                throw new Error(`Expected options.window ${Object.prototype.toString.call(options.window)} to be a valid element id`);
             }
 
             if (el.tagName.toLowerCase() !== 'iframe') {
-                throw new Error(`Expected options.window ${Object.prototype.toString.call(win)} to be an iframe`);
+                throw new Error(`Expected options.window ${Object.prototype.toString.call(options.window)} to be an iframe`);
             }
 
             if (!el.contentWindow) {
                 throw new Error('Iframe must have contentWindow.  Make sure it has a src attribute and is in the DOM.');
             }
 
-            win = el.contentWindow;
+            // $FlowFixMe
+            targetWindow = el.contentWindow;
 
-        } else if (win instanceof HTMLElement) {
+        } else if (options.window instanceof HTMLIFrameElement) {
 
-            if (win.tagName.toLowerCase() !== 'iframe') {
-                throw new Error(`Expected options.window ${Object.prototype.toString.call(win)} to be an iframe`);
+            if (options.window.tagName.toLowerCase() !== 'iframe') {
+                throw new Error(`Expected options.window ${Object.prototype.toString.call(options.window)} to be an iframe`);
             }
 
-            if (win && !win.contentWindow) {
+            if (options.window && !options.window.contentWindow) {
                 throw new Error('Iframe must have contentWindow.  Make sure it has a src attribute and is in the DOM.');
             }
 
-            if (win && win.contentWindow) {
-                win = win.contentWindow;
+            if (options.window && options.window.contentWindow) {
+                // $FlowFixMe
+                targetWindow = options.window.contentWindow;
             }
+        } else {
+            targetWindow = options.window;
         }
 
-        if (!win) {
+        if (!targetWindow) {
             throw new Error('Expected options.window to be a window object, iframe, or iframe element id.');
         }
+
+        const win = targetWindow;
 
         domain = options.domain || CONSTANTS.WILDCARD;
 
@@ -193,7 +201,7 @@ export function request(options : RequestOptionsType) : ZalgoPromise<ResponseMes
     return prom;
 }
 
-export function send(window : any, name : string, data : ?Object, options : ?RequestOptionsType) : ZalgoPromise<ResponseMessageEvent> {
+export function send(window : WindowResolverType, name : string, data : ?Object, options : ?RequestOptionsType) : ZalgoPromise<ResponseMessageEvent> {
 
     options = options || {};
     options.window = window;
@@ -214,15 +222,17 @@ export function sendToParent(name : string, data : ?Object, options : ?RequestOp
     return send(win, name, data, options);
 }
 
-export function client(options : RequestOptionsType = {}) : ({ send : (name : string, data : ?Object) => ZalgoPromise<ResponseMessageEvent> }) {
+export function client(options : RequestOptionsType = {}) : { send : (string, ?Object) => ZalgoPromise<ResponseMessageEvent> } {
 
     if (!options.window) {
         throw new Error(`Expected options.window`);
     }
 
+    const win = options.window;
+
     return {
         send(name : string, data : ?Object) : ZalgoPromise<ResponseMessageEvent> {
-            return send(options.window, name, data, options);
+            return send(win, name, data, options);
         }
     };
 }

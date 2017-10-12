@@ -20,16 +20,16 @@ global.WINDOW_WILDCARD   = global.WINDOW_WILDCARD   || new (function WindowWildc
 const __DOMAIN_REGEX__ = '__domain_regex__';
 
 export type RequestListenerType = {
-    handler : ({ source : any, origin : string, data : Object }) => (mixed | ZalgoPromise<mixed>),
+    handler : ({ source : CrossDomainWindowType, origin : string, data : Object }) => (mixed | ZalgoPromise<mixed>),
     handleError : (err : mixed) => void,
-    window : ?any,
+    window : ?CrossDomainWindowType,
     name : string,
     domain : string | RegExp | Array<string>
 };
 
 export type ResponseListenerType = {
     name : string,
-    window : any,
+    window : CrossDomainWindowType,
     domain : string,
     respond : (err : ?mixed, result : ?Object) => void,
     ack? : ?boolean
@@ -47,7 +47,7 @@ export function deleteResponseListener(hash : string) {
     delete global.responseListeners[hash];
 }
 
-export function getRequestListener({ name, win, domain } : { name : string, win : ?any, domain : ?(string | RegExp) }) : ?RequestListenerType {
+export function getRequestListener({ name, win, domain } : { name : string, win : ?CrossDomainWindowType, domain : ?(string | RegExp) }) : ?RequestListenerType {
 
     if (win === CONSTANTS.WILDCARD) {
         win = null;
@@ -98,7 +98,7 @@ export function getRequestListener({ name, win, domain } : { name : string, win 
     }
 }
 
-export function addRequestListener({ name, win, domain } : { name : string, win : ?any, domain : ?(string | RegExp | Array<string>) }, listener : RequestListenerType) : { cancel : () => void } {
+export function addRequestListener({ name, win, domain } : { name : string, win : ?CrossDomainWindowType, domain : ?(string | RegExp | Array<string>) }, listener : RequestListenerType) : { cancel : () => void } {
 
     if (!name || typeof name !== 'string') {
         throw new Error(`Name required to add request listener`);

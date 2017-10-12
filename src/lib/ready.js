@@ -14,7 +14,7 @@ global.readyPromises = global.readyPromises || new WeakMap();
 
 export function initOnReady() {
 
-    on(CONSTANTS.POST_MESSAGE_NAMES.READY, { window: CONSTANTS.WILDCARD, domain: CONSTANTS.WILDCARD }, (event : { source : mixed, origin : string, data : Object }) => {
+    on(CONSTANTS.POST_MESSAGE_NAMES.READY, { domain: CONSTANTS.WILDCARD }, (event : { source : CrossDomainWindowType, origin : string, data : Object }) => {
 
         let win = event.source;
         let promise = global.readyPromises.get(win);

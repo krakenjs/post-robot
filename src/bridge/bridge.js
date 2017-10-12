@@ -58,7 +58,7 @@ function cleanTunnelWindows() {
 
 type TunnelWindowDataType = {
     name : string,
-    source : any,
+    source : CrossDomainWindowType,
     canary : () => void,
     sendMessage : (message : string) => void
 };
@@ -74,7 +74,7 @@ function getTunnelWindow(id : number) : TunnelWindowDataType {
     return global.tunnelWindows[id];
 }
 
-global.openTunnelToParent = function openTunnelToParent({ name, source, canary, sendMessage } : TunnelWindowDataType) : ZalgoPromise<{ source : any, origin : string, data : Object }> {
+global.openTunnelToParent = function openTunnelToParent({ name, source, canary, sendMessage } : TunnelWindowDataType) : ZalgoPromise<{ source : CrossDomainWindowType, origin : string, data : Object }> {
 
     let parentWindow = getParent(window);
 

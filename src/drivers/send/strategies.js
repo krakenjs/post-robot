@@ -9,7 +9,7 @@ export let SEND_MESSAGE_STRATEGIES = {};
 
 
 
-SEND_MESSAGE_STRATEGIES[CONSTANTS.SEND_STRATEGIES.POST_MESSAGE] = (win : any, serializedMessage : string, domain : string) => {
+SEND_MESSAGE_STRATEGIES[CONSTANTS.SEND_STRATEGIES.POST_MESSAGE] = (win : CrossDomainWindowType, serializedMessage : string, domain : string) => {
 
     if (__IE_POPUP_SUPPORT__) {
         try {
@@ -41,6 +41,7 @@ SEND_MESSAGE_STRATEGIES[CONSTANTS.SEND_STRATEGIES.POST_MESSAGE] = (win : any, se
                 throw new Error(`Attempting to send messsage to mock domain ${dom}, but window is actually cross-domain`);
             }
 
+            // $FlowFixMe
             return getActualDomain(win);
         }
 
@@ -60,7 +61,7 @@ if (__IE_POPUP_SUPPORT__) {
 
     let sendBridgeMessage = require('../../bridge').sendBridgeMessage;
 
-    SEND_MESSAGE_STRATEGIES[CONSTANTS.SEND_STRATEGIES.BRIDGE] = (win : any, serializedMessage : string, domain : string) => {
+    SEND_MESSAGE_STRATEGIES[CONSTANTS.SEND_STRATEGIES.BRIDGE] = (win : CrossDomainWindowType, serializedMessage : string, domain : string) => {
 
         if (isSameDomain(win)) {
             throw new Error(`Post message through bridge disabled between same domain windows`);
@@ -73,7 +74,7 @@ if (__IE_POPUP_SUPPORT__) {
         return sendBridgeMessage(win, serializedMessage, domain);
     };
 
-    SEND_MESSAGE_STRATEGIES[CONSTANTS.SEND_STRATEGIES.GLOBAL] = (win : any, serializedMessage : string, domain : string) => {
+    SEND_MESSAGE_STRATEGIES[CONSTANTS.SEND_STRATEGIES.GLOBAL] = (win : CrossDomainWindowType, serializedMessage : string, domain : string) => {
 
         if (!isSameDomain(win)) {
             throw new Error(`Post message through global disabled between different domain windows`);
@@ -83,6 +84,7 @@ if (__IE_POPUP_SUPPORT__) {
             throw new Error(`Can only use global to communicate between two different windows, not between frames`);
         }
 
+        // $FlowFixMe
         let foreignGlobal = win[CONSTANTS.WINDOW_PROPS.POSTROBOT];
 
         if (!foreignGlobal) {

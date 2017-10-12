@@ -39,7 +39,7 @@ export function stringifyError(err : mixed) : string {
     return Object.prototype.toString.call(err);
 }
 
-
+// eslint-disable-next-line flowtype/no-weak-types
 export let once = <T>(method : Function) : ((...args : Array<any>) => T | void) => {
     if (!method) {
         return method;
@@ -169,10 +169,12 @@ export function isRegex(item : mixed) : boolean {
 
 type FunctionProxy<T : Function> = (method : T) => T;
 
+// eslint-disable-next-line flowtype/no-weak-types
 export let weakMapMemoize : FunctionProxy<*> = <R : mixed>(method : (arg : any) => R) : ((...args : Array<any>) => R) => {
 
     let weakmap = new WeakMap();
 
+    // eslint-disable-next-line flowtype/no-weak-types
     return function(arg : any) : R {
         let result = weakmap.get(arg);
 
