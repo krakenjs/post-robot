@@ -30,7 +30,7 @@ export function needsBridgeForWin(win : CrossDomainWindowType) : boolean {
     return false;
 }
 
-export function needsBridgeForDomain(domain : ?string, win : CrossDomainWindowType) : boolean {
+export function needsBridgeForDomain(domain : ?string, win : ?CrossDomainWindowType) : boolean {
 
     if (domain) {
         if (getDomain() !== getDomainFromUrl(domain)) {
@@ -45,7 +45,7 @@ export function needsBridgeForDomain(domain : ?string, win : CrossDomainWindowTy
     return false;
 }
 
-export function needsBridge({ win, domain } : { win : CrossDomainWindowType, domain? : string }) : boolean {
+export function needsBridge({ win, domain } : { win? : CrossDomainWindowType, domain? : string }) : boolean {
 
     if (!needsBridgeForBrowser()) {
         return false;
