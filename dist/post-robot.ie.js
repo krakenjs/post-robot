@@ -544,8 +544,7 @@
         __webpack_require__.d(__webpack_exports__, "Promise", function() {
             return __WEBPACK_IMPORTED_MODULE_6_zalgo_promise_src__.a;
         }), init();
-        var bridge = void 0;
-        bridge = __WEBPACK_IMPORTED_MODULE_4__bridge_interface__;
+        var bridge = __WEBPACK_IMPORTED_MODULE_4__bridge_interface__;
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
         var __WEBPACK_IMPORTED_MODULE_0__interface__ = __webpack_require__(12);
