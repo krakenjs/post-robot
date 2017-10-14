@@ -937,22 +937,22 @@
             if (nameListeners) for (var _arr = [ win, _global.global.WINDOW_WILDCARD ], _i = 0; _i < _arr.length; _i++) {
                 var winQualifier = _arr[_i], winListeners = winQualifier && nameListeners.get(winQualifier);
                 if (winListeners) {
-                    for (var _arr2 = [ domain, _conf.CONSTANTS.WILDCARD ], _i2 = 0; _i2 < _arr2.length; _i2++) {
-                        var domainQualifier = _arr2[_i2];
-                        if (domainQualifier && (domainQualifier = domainQualifier.toString(), winListeners[domainQualifier])) return winListeners[domainQualifier];
-                    }
-                    if (winListeners[__DOMAIN_REGEX__]) for (var _iterator = winListeners[__DOMAIN_REGEX__], _isArray = Array.isArray(_iterator), _i3 = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
-                        var _ref3;
-                        if (_isArray) {
-                            if (_i3 >= _iterator.length) break;
-                            _ref3 = _iterator[_i3++];
-                        } else {
-                            if (_i3 = _iterator.next(), _i3.done) break;
-                            _ref3 = _i3.value;
+                    if (domain && "string" == typeof domain) {
+                        if (winListeners[domain]) return winListeners[domain];
+                        if (winListeners[__DOMAIN_REGEX__]) for (var _iterator = winListeners[__DOMAIN_REGEX__], _isArray = Array.isArray(_iterator), _i2 = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
+                            var _ref3;
+                            if (_isArray) {
+                                if (_i2 >= _iterator.length) break;
+                                _ref3 = _iterator[_i2++];
+                            } else {
+                                if (_i2 = _iterator.next(), _i2.done) break;
+                                _ref3 = _i2.value;
+                            }
+                            var _ref4 = _ref3, regex = _ref4.regex, listener = _ref4.listener;
+                            if ((0, _src2.matchDomain)(regex, domain)) return listener;
                         }
-                        var _ref4 = _ref3, regex = _ref4.regex, listener = _ref4.listener;
-                        if (domain && (0, _src2.matchDomain)(regex, domain)) return listener;
                     }
+                    if (winListeners[_conf.CONSTANTS.WILDCARD]) return winListeners[_conf.CONSTANTS.WILDCARD];
                 }
             }
         }
@@ -960,14 +960,14 @@
             var name = _ref5.name, win = _ref5.win, domain = _ref5.domain;
             if (!name || "string" != typeof name) throw new Error("Name required to add request listener");
             if (Array.isArray(win)) {
-                for (var listenersCollection = [], _iterator2 = win, _isArray2 = Array.isArray(_iterator2), _i4 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator](); ;) {
+                for (var listenersCollection = [], _iterator2 = win, _isArray2 = Array.isArray(_iterator2), _i3 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator](); ;) {
                     var _ref6;
                     if (_isArray2) {
-                        if (_i4 >= _iterator2.length) break;
-                        _ref6 = _iterator2[_i4++];
+                        if (_i3 >= _iterator2.length) break;
+                        _ref6 = _iterator2[_i3++];
                     } else {
-                        if (_i4 = _iterator2.next(), _i4.done) break;
-                        _ref6 = _i4.value;
+                        if (_i3 = _iterator2.next(), _i3.done) break;
+                        _ref6 = _i3.value;
                     }
                     var item = _ref6;
                     listenersCollection.push(addRequestListener({
@@ -978,14 +978,14 @@
                 }
                 return {
                     cancel: function() {
-                        for (var _iterator3 = listenersCollection, _isArray3 = Array.isArray(_iterator3), _i5 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator](); ;) {
+                        for (var _iterator3 = listenersCollection, _isArray3 = Array.isArray(_iterator3), _i4 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator](); ;) {
                             var _ref7;
                             if (_isArray3) {
-                                if (_i5 >= _iterator3.length) break;
-                                _ref7 = _iterator3[_i5++];
+                                if (_i4 >= _iterator3.length) break;
+                                _ref7 = _iterator3[_i4++];
                             } else {
-                                if (_i5 = _iterator3.next(), _i5.done) break;
-                                _ref7 = _i5.value;
+                                if (_i4 = _iterator3.next(), _i4.done) break;
+                                _ref7 = _i4.value;
                             }
                             _ref7.cancel();
                         }
@@ -993,14 +993,14 @@
                 };
             }
             if (Array.isArray(domain)) {
-                for (var _listenersCollection = [], _iterator4 = domain, _isArray4 = Array.isArray(_iterator4), _i6 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator](); ;) {
+                for (var _listenersCollection = [], _iterator4 = domain, _isArray4 = Array.isArray(_iterator4), _i5 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator](); ;) {
                     var _ref8;
                     if (_isArray4) {
-                        if (_i6 >= _iterator4.length) break;
-                        _ref8 = _iterator4[_i6++];
+                        if (_i5 >= _iterator4.length) break;
+                        _ref8 = _iterator4[_i5++];
                     } else {
-                        if (_i6 = _iterator4.next(), _i6.done) break;
-                        _ref8 = _i6.value;
+                        if (_i5 = _iterator4.next(), _i5.done) break;
+                        _ref8 = _i5.value;
                     }
                     var _item = _ref8;
                     _listenersCollection.push(addRequestListener({
@@ -1011,14 +1011,14 @@
                 }
                 return {
                     cancel: function() {
-                        for (var _iterator5 = _listenersCollection, _isArray5 = Array.isArray(_iterator5), _i7 = 0, _iterator5 = _isArray5 ? _iterator5 : _iterator5[Symbol.iterator](); ;) {
+                        for (var _iterator5 = _listenersCollection, _isArray5 = Array.isArray(_iterator5), _i6 = 0, _iterator5 = _isArray5 ? _iterator5 : _iterator5[Symbol.iterator](); ;) {
                             var _ref9;
                             if (_isArray5) {
-                                if (_i7 >= _iterator5.length) break;
-                                _ref9 = _iterator5[_i7++];
+                                if (_i6 >= _iterator5.length) break;
+                                _ref9 = _iterator5[_i6++];
                             } else {
-                                if (_i7 = _iterator5.next(), _i7.done) break;
-                                _ref9 = _i7.value;
+                                if (_i6 = _iterator5.next(), _i6.done) break;
+                                _ref9 = _i6.value;
                             }
                             _ref9.cancel();
                         }
@@ -1036,14 +1036,12 @@
             nameListeners || (nameListeners = new _src.WeakMap(), requestListeners[name] = nameListeners);
             var winListeners = nameListeners.get(win);
             winListeners || (winListeners = {}, nameListeners.set(win, winListeners));
-            var strDomain = domain.toString();
-            winListeners[strDomain] = listener;
-            var regexListeners = winListeners[__DOMAIN_REGEX__], regexListener = void 0;
-            return (0, _lib.isRegex)(domain) && (regexListeners || (regexListeners = [], winListeners[__DOMAIN_REGEX__] = regexListeners), 
+            var strDomain = domain.toString(), regexListeners = winListeners[__DOMAIN_REGEX__], regexListener = void 0;
+            return (0, _lib.isRegex)(domain) ? (regexListeners || (regexListeners = [], winListeners[__DOMAIN_REGEX__] = regexListeners), 
             regexListener = {
                 regex: domain,
                 listener: listener
-            }, regexListeners.push(regexListener)), {
+            }, regexListeners.push(regexListener)) : winListeners[strDomain] = listener, {
                 cancel: function() {
                     winListeners && (delete winListeners[strDomain], win && 0 === Object.keys(winListeners).length && nameListeners.delete(win), 
                     regexListener && regexListeners.splice(regexListeners.indexOf(regexListener, 1)));
