@@ -27,7 +27,7 @@ init();
 import * as popupBridge from './bridge/interface';
 // #endif
 
-export let bridge = popupBridge;
+export let bridge = __IE_POPUP_SUPPORT__ ? popupBridge : null;
 
 export * from './public';
 export { ZalgoPromise as Promise } from 'zalgo-promise/src';
