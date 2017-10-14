@@ -75,25 +75,22 @@ export function getRequestListener({ name, win, domain } : { name : string, win 
             continue;
         }
 
-        for (let domainQualifier of [ domain, CONSTANTS.WILDCARD ]) {
-
-            if (!domainQualifier) {
-                continue;
+        if (domain && typeof domain === 'string') {
+            if (winListeners[domain]) {
+                return winListeners[domain];
             }
 
-            domainQualifier = domainQualifier.toString();
-
-            if (winListeners[domainQualifier]) {
-                return winListeners[domainQualifier];
+            if (winListeners[__DOMAIN_REGEX__]) {
+                for (let { regex, listener } of winListeners[__DOMAIN_REGEX__]) {
+                    if (matchDomain(regex, domain)) {
+                        return listener;
+                    }
+                }
             }
         }
 
-        if (winListeners[__DOMAIN_REGEX__]) {
-            for (let { regex, listener } of winListeners[__DOMAIN_REGEX__]) {
-                if (domain && matchDomain(regex, domain)) {
-                    return listener;
-                }
-            }
+        if (winListeners[CONSTANTS.WILDCARD]) {
+            return winListeners[CONSTANTS.WILDCARD];
         }
     }
 }
@@ -174,8 +171,6 @@ export function addRequestListener({ name, win, domain } : { name : string, win 
 
     let strDomain = domain.toString();
 
-    winListeners[strDomain] = listener;
-
     let regexListeners = winListeners[__DOMAIN_REGEX__];
     let regexListener;
 
@@ -189,6 +184,9 @@ export function addRequestListener({ name, win, domain } : { name : string, win 
         regexListener = { regex: domain, listener };
 
         regexListeners.push(regexListener);
+
+    } else {
+        winListeners[strDomain] = listener;
     }
 
     return {
