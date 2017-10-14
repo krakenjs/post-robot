@@ -23,12 +23,11 @@ export function init() {
 
 init();
 
-export let bridge;
-
 // #if __IE_POPUP_SUPPORT__
 import * as popupBridge from './bridge/interface';
-bridge = popupBridge;
 // #endif
+
+export let bridge = popupBridge;
 
 export * from './public';
 export { ZalgoPromise as Promise } from 'zalgo-promise/src';
