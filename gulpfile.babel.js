@@ -8,6 +8,7 @@ var Server = require('karma').Server;
 var argv = require('yargs').argv;
 var UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 var yargs = require('yargs');
+var qs = require('querystring');
 
 gulp.task('test', ['lint', 'typecheck', 'karma']);
 gulp.task('build', ['test', 'webpack', 'webpack-min']);
@@ -17,6 +18,17 @@ var MODULE_NAME = 'postRobot';
 
 
 function buildWebpackConfig({  filename, modulename, minify = false, globals = {} }) {
+
+    globals = {
+        TEST:                 false,
+        __IE_POPUP_SUPPORT__: false,
+        ...globals
+    };
+
+    const PREPROCESSOR_OPTS = {
+        'ifdef-triple-slash': 'false',
+        ...globals
+    };
 
     return {
         stats: {
@@ -37,6 +49,10 @@ function buildWebpackConfig({  filename, modulename, minify = false, globals = {
             rules: [
                 {
                     test: /\.js$/,
+                    loader: `ifdef-loader?${ qs.encode(PREPROCESSOR_OPTS) }`
+                },
+                {
+                    test: /\.js$/,
                     loader: 'babel-loader'
                 }
             ]
@@ -55,10 +71,7 @@ function buildWebpackConfig({  filename, modulename, minify = false, globals = {
             library: modulename
         },
         plugins: [
-            new webpack.DefinePlugin(Object.assign({
-                __TEST__: false,
-                __IE_POPUP_SUPPORT__: false
-            }, globals)),
+            new webpack.DefinePlugin(globals),
             new webpack.SourceMapDevToolPlugin({
                 filename: '[file].map'
             }),
