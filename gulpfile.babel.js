@@ -20,7 +20,7 @@ var MODULE_NAME = 'postRobot';
 function buildWebpackConfig({  filename, modulename, minify = false, globals = {} }) {
 
     globals = {
-        TEST:                 false,
+        __TEST__:             false,
         __IE_POPUP_SUPPORT__: false,
         ...globals
     };
