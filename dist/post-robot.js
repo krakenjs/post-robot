@@ -1411,11 +1411,11 @@
             return CONFIG;
         });
         var _ALLOWED_POST_MESSAGE, __WEBPACK_IMPORTED_MODULE_0__constants__ = __webpack_require__(11), CONFIG = {
-            ALLOW_POSTMESSAGE_POPUP: !__TEST__,
+            ALLOW_POSTMESSAGE_POPUP: !0,
             LOG_LEVEL: "info",
             BRIDGE_TIMEOUT: 5e3,
             ACK_TIMEOUT: 1e3,
-            RES_TIMEOUT: __TEST__ ? 2e3 : 1 / 0,
+            RES_TIMEOUT: 1 / 0,
             LOG_TO_PAGE: !1,
             ALLOWED_POST_MESSAGE_METHODS: (_ALLOWED_POST_MESSAGE = {}, _defineProperty(_ALLOWED_POST_MESSAGE, __WEBPACK_IMPORTED_MODULE_0__constants__.a.SEND_STRATEGIES.POST_MESSAGE, !0), 
             _defineProperty(_ALLOWED_POST_MESSAGE, __WEBPACK_IMPORTED_MODULE_0__constants__.a.SEND_STRATEGIES.BRIDGE, !0), 
