@@ -110,25 +110,29 @@ export function request(options : RequestOptionsType) : ZalgoPromise<ResponseMes
 
             return new ZalgoPromise((resolve, reject) => {
 
-                let responseListener : ResponseListenerType = {
-                    name,
-                    window: win,
-                    domain,
-                    respond(err, result) {
-                        if (!err) {
-                            hasResult = true;
-                            requestPromises.splice(requestPromises.indexOf(requestPromise, 1));
-                        }
+                let responseListener : ResponseListenerType;
 
-                        if (err) {
-                            reject(err);
-                        } else {
-                            resolve(result);
-                        }
-                    }
-                };
+                if (!options.fireAndForget) {
+                    responseListener = {
+                        name,
+                        window: win,
+                        domain,
+                        respond(err, result) {
+                            if (!err) {
+                                hasResult = true;
+                                requestPromises.splice(requestPromises.indexOf(requestPromise, 1));
+                            }
 
-                addResponseListener(hash, responseListener);
+                            if (err) {
+                                reject(err);
+                            } else {
+                                resolve(result);
+                            }
+                        }
+                    };
+
+                    addResponseListener(hash, responseListener);
+                }
 
                 sendMessage(win, {
                     type: CONSTANTS.POST_MESSAGE_TYPE.REQUEST,
