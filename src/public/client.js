@@ -5,7 +5,7 @@ import { ZalgoPromise } from 'zalgo-promise/src';
 import { getAncestor, isAncestor, isWindowClosed } from 'cross-domain-utils/src';
 
 import { CONFIG, CONSTANTS } from '../conf';
-import { sendMessage, addResponseListener, deleteResponseListener } from '../drivers';
+import { sendMessage, addResponseListener, deleteResponseListener, msgpack_support } from '../drivers';
 import { type ResponseListenerType } from '../drivers';
 import { uniqueID, onWindowReady } from '../lib';
 import { global } from '../global';
@@ -28,6 +28,12 @@ type ResponseMessageEvent = {
     origin : string,
     data : Object
 };
+
+export const msgpackSupport = msgpack_support;
+
+export function enableMsgpack(win : Object) {
+    msgpack_support.set(win, true);
+}
 
 export function request(options : RequestOptionsType) : ZalgoPromise<ResponseMessageEvent> {
 
