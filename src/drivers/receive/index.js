@@ -8,6 +8,9 @@ import { global } from '../../global';
 
 import { RECEIVE_MESSAGE_TYPES } from './types';
 
+import * as msgpack5_func from 'msgpack5';
+const msgpack5=msgpack5_func()
+
 global.receivedMessages = global.receivedMessages || [];
 
 type MessageEvent = {
@@ -16,12 +19,18 @@ type MessageEvent = {
     data : string
 };
 
-function parseMessage(message : string) : ?Object {
+function parseMessage(message) : ?Object {
 
     let parsedMessage;
 
     try {
-        parsedMessage = jsonParse(message);
+		if (typeof message == 'string'){
+			//console.log('json')
+			parsedMessage = jsonParse(message);
+		} else {
+			//console.log('msgpack')
+			parsedMessage = msgpack5.decode(message);
+		}
     } catch (err) {
         return;
     }
