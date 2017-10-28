@@ -8,6 +8,14 @@ import { uniqueID, serializeMethods, log, getWindowType, jsonStringify, stringif
 
 import { SEND_MESSAGE_STRATEGIES } from './strategies';
 
+import * as msgpack5_func from 'msgpack5';
+const msgpack5=msgpack5_func()
+
+const msgpack_encode=function(a){return msgpack5.encode(a)}
+
+export var msgpack_support=new (WeakMap||Map);
+
+//console.log('msgpacked',msgpack_support)
 
 function buildMessage(win : CrossDomainWindowType, message : Object, options = {}) : Object {
 
@@ -56,8 +64,12 @@ export function sendMessage(win : CrossDomainWindowType, message : Object, domai
         log.debug('Running send message strategies', message);
 
         let messages = [];
-
-        let serializedMessage = jsonStringify({
+		
+		var encoder=jsonStringify
+		
+		if(msgpack_support.get(win)){encoder=msgpack_encode}
+		
+        let serializedMessage = encoder({
             [ CONSTANTS.WINDOW_PROPS.POSTROBOT ]: message
         }, null, 2);
 
