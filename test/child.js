@@ -4,6 +4,8 @@ import postRobot from 'src/index';
 
 window.postRobot = postRobot;
 
+postRobot.CONFIG.ALLOW_POSTMESSAGE_POPUP = true;
+
 postRobot.on('sendMessageToParent', function({ source, data }) {
     return postRobot.sendToParent(data.messageName, data.data)
         .then(({ data }) => data);
