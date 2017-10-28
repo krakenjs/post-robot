@@ -29,6 +29,10 @@ let bridge;
 
 let childWindow, childFrame, otherChildFrame, frameElement;
 
+beforeEach(() => {
+    postRobot.CONFIG.ALLOW_POSTMESSAGE_POPUP = true;
+});
+
 before(function() {
     return postRobot.bridge.openBridge('/base/test/bridge.htm', 'mock://test-post-robot-child.com').then(frame => {
         bridge = frame;
@@ -455,8 +459,9 @@ describe('[post-robot] popup tests', function() {
             }).then(function() {
 
                 return postRobot.send(childWindow, 'foo').then(() => {
+                    let remote = remoteIE8mode.cancel();
                     ie8mode.cancel();
-                    return remoteIE8mode.cancel();
+                    return remote;
                 });
             });
 

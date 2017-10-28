@@ -10,7 +10,7 @@ import { receiveMessage } from '../drivers';
 
 export function needsBridgeForBrowser() : boolean {
 
-    if (getUserAgent(window).match(/MSIE|trident|edge/i)) {
+    if (getUserAgent(window).match(/MSIE|trident|edge\/12|edge\/13/i)) {
         return true;
     }
 

@@ -59,9 +59,13 @@ SEND_MESSAGE_STRATEGIES[CONSTANTS.SEND_STRATEGIES.POST_MESSAGE] = (win : CrossDo
 
 if (__IE_POPUP_SUPPORT__) {
 
-    let sendBridgeMessage = require('../../bridge').sendBridgeMessage;
+    let { sendBridgeMessage, needsBridgeForBrowser, isBridge } = require('../../bridge');
 
     SEND_MESSAGE_STRATEGIES[CONSTANTS.SEND_STRATEGIES.BRIDGE] = (win : CrossDomainWindowType, serializedMessage : string, domain : string) => {
+
+        if (!needsBridgeForBrowser() && !isBridge()) {
+            return;
+        }
 
         if (isSameDomain(win)) {
             throw new Error(`Post message through bridge disabled between same domain windows`);
@@ -75,6 +79,10 @@ if (__IE_POPUP_SUPPORT__) {
     };
 
     SEND_MESSAGE_STRATEGIES[CONSTANTS.SEND_STRATEGIES.GLOBAL] = (win : CrossDomainWindowType, serializedMessage : string, domain : string) => {
+
+        if (!needsBridgeForBrowser()) {
+            return;
+        }
 
         if (!isSameDomain(win)) {
             throw new Error(`Post message through global disabled between different domain windows`);
