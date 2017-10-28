@@ -668,7 +668,7 @@
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
         function needsBridgeForBrowser() {
-            return !!__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.o)(window).match(/MSIE|trident|edge/i) || !__WEBPACK_IMPORTED_MODULE_3__conf__.a.ALLOW_POSTMESSAGE_POPUP;
+            return !!__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.o)(window).match(/MSIE|trident|edge\/12|edge\/13/i) || !__WEBPACK_IMPORTED_MODULE_3__conf__.a.ALLOW_POSTMESSAGE_POPUP;
         }
         function needsBridgeForWin(win) {
             return !__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.k)(window, win);
@@ -1491,20 +1491,21 @@
                     return 0 === count && promise.resolve(results), promise;
                 }
             }, {
-                key: "map",
-                value: function(promises, method) {
-                    var promise = new ZalgoPromise(), count = promises.length, results = [];
-                    if (!count) return promise.resolve(results), promise;
-                    for (var i = 0; i < promises.length; i++) !function(i) {
-                        ZalgoPromise.try(function() {
-                            return method(promises[i]);
-                        }).then(function(result) {
-                            results[i] = result, 0 === (count -= 1) && promise.resolve(results);
-                        }, function(err) {
-                            promise.reject(err);
+                key: "hash",
+                value: function(promises) {
+                    var result = {};
+                    return ZalgoPromise.all(Object.keys(promises).map(function(key) {
+                        return ZalgoPromise.resolve(promises[key]).then(function(value) {
+                            result[key] = value;
                         });
-                    }(i);
-                    return promise;
+                    })).then(function() {
+                        return result;
+                    });
+                }
+            }, {
+                key: "map",
+                value: function(items, method) {
+                    return ZalgoPromise.all(items.map(method));
                 }
             }, {
                 key: "onPossiblyUnhandledException",
@@ -1527,19 +1528,6 @@
                 value: function(_delay) {
                     return new ZalgoPromise(function(resolve) {
                         setTimeout(resolve, _delay);
-                    });
-                }
-            }, {
-                key: "hash",
-                value: function(obj) {
-                    var results = {}, promises = [];
-                    for (var key in obj) !function(key) {
-                        obj.hasOwnProperty(key) && promises.push(ZalgoPromise.resolve(obj[key]).then(function(result) {
-                            results[key] = result;
-                        }));
-                    }(key);
-                    return ZalgoPromise.all(promises).then(function() {
-                        return results;
                     });
                 }
             }, {
@@ -2113,21 +2101,25 @@
                 return win.postMessage(serializedMessage, dom);
             });
         };
-        var sendBridgeMessage = __webpack_require__(10).sendBridgeMessage;
+        var _require = __webpack_require__(10), sendBridgeMessage = _require.sendBridgeMessage, needsBridgeForBrowser = _require.needsBridgeForBrowser, isBridge = _require.isBridge;
         SEND_MESSAGE_STRATEGIES[__WEBPACK_IMPORTED_MODULE_1__conf__.b.SEND_STRATEGIES.BRIDGE] = function(win, serializedMessage, domain) {
-            if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__.j)(win)) throw new Error("Post message through bridge disabled between same domain windows");
-            if (!1 !== __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__.k)(window, win)) throw new Error("Can only use bridge to communicate between two different windows, not between frames");
-            return sendBridgeMessage(win, serializedMessage, domain);
+            if (needsBridgeForBrowser() || isBridge()) {
+                if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__.j)(win)) throw new Error("Post message through bridge disabled between same domain windows");
+                if (!1 !== __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__.k)(window, win)) throw new Error("Can only use bridge to communicate between two different windows, not between frames");
+                return sendBridgeMessage(win, serializedMessage, domain);
+            }
         }, SEND_MESSAGE_STRATEGIES[__WEBPACK_IMPORTED_MODULE_1__conf__.b.SEND_STRATEGIES.GLOBAL] = function(win, serializedMessage, domain) {
-            if (!__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__.j)(win)) throw new Error("Post message through global disabled between different domain windows");
-            if (!1 !== __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__.k)(window, win)) throw new Error("Can only use global to communicate between two different windows, not between frames");
-            var foreignGlobal = win[__WEBPACK_IMPORTED_MODULE_1__conf__.b.WINDOW_PROPS.POSTROBOT];
-            if (!foreignGlobal) throw new Error("Can not find postRobot global on foreign window");
-            return foreignGlobal.receiveMessage({
-                source: window,
-                origin: __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__.g)(),
-                data: serializedMessage
-            });
+            if (needsBridgeForBrowser()) {
+                if (!__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__.j)(win)) throw new Error("Post message through global disabled between different domain windows");
+                if (!1 !== __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__.k)(window, win)) throw new Error("Can only use global to communicate between two different windows, not between frames");
+                var foreignGlobal = win[__WEBPACK_IMPORTED_MODULE_1__conf__.b.WINDOW_PROPS.POSTROBOT];
+                if (!foreignGlobal) throw new Error("Can not find postRobot global on foreign window");
+                return foreignGlobal.receiveMessage({
+                    source: window,
+                    origin: __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__.g)(),
+                    data: serializedMessage
+                });
+            }
         };
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
