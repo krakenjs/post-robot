@@ -66,9 +66,7 @@ function listenForRegister(source, domain) {
                         source: winDetails.win
                     });
                 } catch (err) {
-                    setTimeout(() => {
-                        throw err;
-                    }, 1);
+                    ZalgoPromise.reject(err);
                 }
             }
         };

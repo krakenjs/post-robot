@@ -114,9 +114,7 @@ export function openTunnelToOpener() : ZalgoPromise<void> {
                             source: this.source
                         });
                     } catch (err) {
-                        setTimeout(() => {
-                            throw err;
-                        }, 1);
+                        ZalgoPromise.reject(err);
                     }
                 }
 
