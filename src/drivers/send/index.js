@@ -1,5 +1,9 @@
 /* @flow */
 
+declare var UInt8Array: Function;
+
+import { WeakMap } from 'cross-domain-safe-weakmap/src';
+
 import { getDomain, isWindowClosed } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 
@@ -7,6 +11,13 @@ import { CONSTANTS, CONFIG, POST_MESSAGE_NAMES_LIST } from '../../conf';
 import { uniqueID, serializeMethods, log, getWindowType, jsonStringify, stringifyError } from '../../lib';
 
 import { SEND_MESSAGE_STRATEGIES } from './strategies';
+
+// import * as Msgpack5_func from 'msgpack5';
+const msgpack5 = require('msgpack5')(); // new Msgpack5_func();
+
+const msgpack_encode = msgpack5.encode.bind(msgpack5);
+
+export const msgpack_support = new WeakMap();
 
 
 function buildMessage(win : CrossDomainWindowType, message : Object, options = {}) : Object {
@@ -56,8 +67,12 @@ export function sendMessage(win : CrossDomainWindowType, message : Object, domai
         log.debug('Running send message strategies', message);
 
         let messages = [];
-
-        let serializedMessage = jsonStringify({
+		
+        let encoder = jsonStringify;
+		
+        if (msgpack_support.get(win)) { encoder = msgpack_encode; }
+		
+        let serializedMessage = encoder({
             [ CONSTANTS.WINDOW_PROPS.POSTROBOT ]: message
         }, null, 2);
 

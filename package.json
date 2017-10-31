@@ -84,6 +84,7 @@
   "dependencies": {
     "cross-domain-safe-weakmap": "^1.0.1",
     "cross-domain-utils": "^2.0.0",
+    "msgpack5": "^3.5.1",
     "zalgo-promise": "^1.0.3"
   }
 }
