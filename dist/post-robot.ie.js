@@ -1694,9 +1694,7 @@
                                     source: this.source
                                 });
                             } catch (err) {
-                                setTimeout(function() {
-                                    throw err;
-                                }, 1);
+                                __WEBPACK_IMPORTED_MODULE_0_zalgo_promise_src__.a.reject(err);
                             }
                         }
                     }).then(function(_ref2) {
@@ -1795,9 +1793,7 @@
                                     source: winDetails.win
                                 });
                             } catch (err) {
-                                setTimeout(function() {
-                                    throw err;
-                                }, 1);
+                                __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__.a.reject(err);
                             }
                         }
                     }
