@@ -5,7 +5,7 @@ import { ZalgoPromise } from 'zalgo-promise/src';
 import { getAncestor, isAncestor, isWindowClosed } from 'cross-domain-utils/src';
 
 import { CONFIG, CONSTANTS } from '../conf';
-import { sendMessage, addResponseListener, deleteResponseListener } from '../drivers';
+import { sendMessage, addResponseListener, deleteResponseListener, markResponseListenerErrored } from '../drivers';
 import { type ResponseListenerType } from '../drivers';
 import { uniqueID, onWindowReady } from '../lib';
 import { global } from '../global';
@@ -194,6 +194,7 @@ export function request(options : RequestOptionsType) : ZalgoPromise<ResponseMes
         });
 
         requestPromise.catch(() => {
+            markResponseListenerErrored(hash);
             deleteResponseListener(hash);
         });
 

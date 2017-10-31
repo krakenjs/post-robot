@@ -17,6 +17,8 @@ global.responseListeners = global.responseListeners || {};
 global.requestListeners  = global.requestListeners  || {};
 global.WINDOW_WILDCARD   = global.WINDOW_WILDCARD   || new (function WindowWildcard() { /* pass */ });
 
+global.erroredResponseListeners = global.erroredResponseListeners || {};
+
 const __DOMAIN_REGEX__ = '__domain_regex__';
 
 export type RequestListenerType = {
@@ -45,6 +47,14 @@ export function getResponseListener(hash : string) : ResponseListenerType {
 
 export function deleteResponseListener(hash : string) {
     delete global.responseListeners[hash];
+}
+
+export function markResponseListenerErrored(hash : string) {
+    global.erroredResponseListeners[hash] = true;
+}
+
+export function isResponseListenerErrored(hash : string) : boolean {
+    return Boolean(global.erroredResponseListeners[hash]);
 }
 
 export function getRequestListener({ name, win, domain } : { name : string, win : ?CrossDomainWindowType, domain : ?(string | RegExp) }) : ?RequestListenerType {

@@ -7,11 +7,15 @@ import { CONSTANTS } from '../../conf';
 import { log, stringifyError, noop } from '../../lib';
 
 import { sendMessage } from '../send';
-import { getRequestListener, getResponseListener, deleteResponseListener } from '../listeners';
+import { getRequestListener, getResponseListener, deleteResponseListener, isResponseListenerErrored } from '../listeners';
 
 export let RECEIVE_MESSAGE_TYPES = {
 
     [ CONSTANTS.POST_MESSAGE_TYPE.ACK ](source : CrossDomainWindowType, origin : string, message : Object) {
+
+        if (isResponseListenerErrored(message.hash)) {
+            return;
+        }
 
         let options = getResponseListener(message.hash);
 
@@ -94,6 +98,10 @@ export let RECEIVE_MESSAGE_TYPES = {
     },
 
     [ CONSTANTS.POST_MESSAGE_TYPE.RESPONSE ](source : CrossDomainWindowType, origin : string, message : Object) : void | ZalgoPromise<void> {
+
+        if (isResponseListenerErrored(message.hash)) {
+            return;
+        }
 
         let options = getResponseListener(message.hash);
 
