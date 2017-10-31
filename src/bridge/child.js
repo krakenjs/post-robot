@@ -107,11 +107,17 @@ export function openTunnelToOpener() : ZalgoPromise<void> {
                         return;
                     }
 
-                    receiveMessage({
-                        data:   message,
-                        origin: this.origin,
-                        source: this.source
-                    });
+                    try {
+                        receiveMessage({
+                            data: message,
+                            origin: this.origin,
+                            source: this.source
+                        });
+                    } catch (err) {
+                        setTimeout(() => {
+                            throw err;
+                        }, 1);
+                    }
                 }
 
             }).then(({ source, origin, data }) => {
