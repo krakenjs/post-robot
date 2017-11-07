@@ -125,31 +125,24 @@ export function openBridge(url : string, domain : string) : ZalgoPromise<CrossDo
 
         return documentBodyReady.then(body => {
 
+            body.appendChild(iframe);
+
+            let bridge = iframe.contentWindow;
+
+            listenForRegister(bridge, domain);
+
             return new ZalgoPromise((resolve, reject) => {
 
-                setTimeout(resolve, 1);
+                iframe.onload = resolve;
+                iframe.onerror = reject;
 
             }).then(() => {
 
-                body.appendChild(iframe);
+                return onWindowReady(bridge, CONFIG.BRIDGE_TIMEOUT, `Bridge ${url}`);
 
-                let bridge = iframe.contentWindow;
+            }).then(() => {
 
-                listenForRegister(bridge, domain);
-
-                return new ZalgoPromise((resolve, reject) => {
-
-                    iframe.onload = resolve;
-                    iframe.onerror = reject;
-
-                }).then(() => {
-
-                    return onWindowReady(bridge, CONFIG.BRIDGE_TIMEOUT, `Bridge ${url}`);
-
-                }).then(() => {
-
-                    return bridge;
-                });
+                return bridge;
             });
         });
     });
@@ -215,9 +208,10 @@ export function linkUrl(win : CrossDomainWindowType, url : string) {
 export function destroyBridges() {
     for (let domain of Object.keys(global.bridgeFrames)) {
         let frame = global.bridgeFrames[domain];
-        if (frame && frame.parentNode) {
+        if (frame.parentNode) {
             frame.parentNode.removeChild(frame);
         }
     }
+    global.bridgeFrames = {};
     global.bridges = {};
 }
