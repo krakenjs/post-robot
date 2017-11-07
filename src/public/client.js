@@ -2,7 +2,7 @@
 
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { getAncestor, isAncestor, isWindowClosed } from 'cross-domain-utils/src';
+import { getAncestor, isAncestor, isWindowClosed, getDomain } from 'cross-domain-utils/src';
 
 import { CONFIG, CONSTANTS } from '../conf';
 import { sendMessage, addResponseListener, deleteResponseListener, markResponseListenerErrored } from '../drivers';
@@ -180,10 +180,10 @@ export function request(options : RequestOptionsType) : ZalgoPromise<ResponseMes
                         cycleTime = Math.min(resTimeout, 2000);
 
                     } else if (ackTimeout <= 0) {
-                        return reject(new Error(`No ack for postMessage ${name} in ${CONFIG.ACK_TIMEOUT}ms`));
+                        return reject(new Error(`No ack for postMessage ${name} in ${ getDomain() } in ${CONFIG.ACK_TIMEOUT}ms`));
 
                     } else if (resTimeout <= 0) {
-                        return reject(new Error(`No response for postMessage ${name} in ${options.timeout || CONFIG.RES_TIMEOUT}ms`));
+                        return reject(new Error(`No response for postMessage ${name} in ${ getDomain() } in ${options.timeout || CONFIG.RES_TIMEOUT}ms`));
                     }
 
                     setTimeout(cycle, cycleTime);
