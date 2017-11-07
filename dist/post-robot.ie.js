@@ -795,6 +795,8 @@
             return __WEBPACK_IMPORTED_MODULE_3__parent__.a;
         }), __webpack_require__.d(__webpack_exports__, "linkUrl", function() {
             return __WEBPACK_IMPORTED_MODULE_3__parent__.b;
+        }), __webpack_require__.d(__webpack_exports__, "destroyBridges", function() {
+            return __WEBPACK_IMPORTED_MODULE_3__parent__.c;
         });
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
@@ -1062,7 +1064,7 @@
                 domain: domain
             });
             if (win && win !== __WEBPACK_IMPORTED_MODULE_5__conf__.b.WILDCARD || (win = __WEBPACK_IMPORTED_MODULE_3__global__.a.WINDOW_WILDCARD), 
-            domain = domain || __WEBPACK_IMPORTED_MODULE_5__conf__.b.WILDCARD, existingListener) throw win && domain ? new Error("Request listener already exists for " + name + " on domain " + domain.toString() + " for specified window") : win ? new Error("Request listener already exists for " + name + " for specified window") : domain ? new Error("Request listener already exists for " + name + " on domain " + domain.toString()) : new Error("Request listener already exists for " + name);
+            domain = domain || __WEBPACK_IMPORTED_MODULE_5__conf__.b.WILDCARD, existingListener) throw win && domain ? new Error("Request listener already exists for " + name + " on domain " + domain.toString() + " for " + (win === __WEBPACK_IMPORTED_MODULE_3__global__.a.WINDOW_WILDCARD ? "wildcard" : "specified") + " window") : win ? new Error("Request listener already exists for " + name + " for " + (win === __WEBPACK_IMPORTED_MODULE_3__global__.a.WINDOW_WILDCARD ? "wildcard" : "specified") + " window") : domain ? new Error("Request listener already exists for " + name + " on domain " + domain.toString()) : new Error("Request listener already exists for " + name);
             var requestListeners = __WEBPACK_IMPORTED_MODULE_3__global__.a.requestListeners, nameListeners = requestListeners[name];
             nameListeners || (nameListeners = new __WEBPACK_IMPORTED_MODULE_1_cross_domain_safe_weakmap_src__.a(), 
             requestListeners[name] = nameListeners);
@@ -1772,12 +1774,14 @@
             return __WEBPACK_IMPORTED_MODULE_0__index__.needsBridgeForDomain;
         }), __webpack_require__.o(__WEBPACK_IMPORTED_MODULE_0__index__, "openTunnelToOpener") && __webpack_require__.d(__webpack_exports__, "openTunnelToOpener", function() {
             return __WEBPACK_IMPORTED_MODULE_0__index__.openTunnelToOpener;
+        }), __webpack_require__.o(__WEBPACK_IMPORTED_MODULE_0__index__, "destroyBridges") && __webpack_require__.d(__webpack_exports__, "destroyBridges", function() {
+            return __WEBPACK_IMPORTED_MODULE_0__index__.destroyBridges;
         });
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
         function listenForRegister(source, domain) {
             __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__interface__.on)(__WEBPACK_IMPORTED_MODULE_3__conf__.b.POST_MESSAGE_NAMES.OPEN_TUNNEL, {
-                source: source,
+                window: source,
                 domain: domain
             }, function(_ref) {
                 var origin = _ref.origin, data = _ref.data;
@@ -1822,7 +1826,7 @@
                 var name = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_8__common__.e)(domain);
                 if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.n)(window, name)) throw new Error("Frame with name " + name + " already exists on page");
                 var iframe = openBridgeFrame(name, url);
-                return __WEBPACK_IMPORTED_MODULE_8__common__.g.then(function(body) {
+                return __WEBPACK_IMPORTED_MODULE_5__global__.a.bridgeFrames[domain] = iframe, __WEBPACK_IMPORTED_MODULE_8__common__.g.then(function(body) {
                     return new __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__.a(function(resolve, reject) {
                         setTimeout(resolve, 1);
                     }).then(function() {
@@ -1844,7 +1848,22 @@
             winOptions && (winOptions.domain = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.m)(url), 
             __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_8__common__.h)(win));
         }
-        __webpack_exports__.a = openBridge, __webpack_exports__.b = linkUrl;
+        function destroyBridges() {
+            for (var _iterator2 = Object.keys(__WEBPACK_IMPORTED_MODULE_5__global__.a.bridgeFrames), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator](); ;) {
+                var _ref3;
+                if (_isArray2) {
+                    if (_i2 >= _iterator2.length) break;
+                    _ref3 = _iterator2[_i2++];
+                } else {
+                    if (_i2 = _iterator2.next(), _i2.done) break;
+                    _ref3 = _i2.value;
+                }
+                var domain = _ref3, frame = __WEBPACK_IMPORTED_MODULE_5__global__.a.bridgeFrames[domain];
+                frame && frame.parentNode && frame.parentNode.removeChild(frame);
+            }
+            __WEBPACK_IMPORTED_MODULE_5__global__.a.bridges = {};
+        }
+        __webpack_exports__.a = openBridge, __webpack_exports__.b = linkUrl, __webpack_exports__.c = destroyBridges;
         var __WEBPACK_IMPORTED_MODULE_0_cross_domain_safe_weakmap_src__ = __webpack_require__(7), __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__ = __webpack_require__(2), __WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__ = __webpack_require__(1), __WEBPACK_IMPORTED_MODULE_3__conf__ = __webpack_require__(0), __WEBPACK_IMPORTED_MODULE_4__lib__ = __webpack_require__(4), __WEBPACK_IMPORTED_MODULE_5__global__ = __webpack_require__(3), __WEBPACK_IMPORTED_MODULE_6__interface__ = __webpack_require__(6), __WEBPACK_IMPORTED_MODULE_7__drivers__ = __webpack_require__(5), __WEBPACK_IMPORTED_MODULE_8__common__ = __webpack_require__(9), _slicedToArray = function() {
             function sliceIterator(arr, i) {
                 var _arr = [], _n = !0, _d = !1, _e = void 0;
@@ -1869,6 +1888,7 @@
             };
         }();
         __WEBPACK_IMPORTED_MODULE_5__global__.a.bridges = __WEBPACK_IMPORTED_MODULE_5__global__.a.bridges || {}, 
+        __WEBPACK_IMPORTED_MODULE_5__global__.a.bridgeFrames = __WEBPACK_IMPORTED_MODULE_5__global__.a.bridgeFrames || {}, 
         __WEBPACK_IMPORTED_MODULE_5__global__.a.popupWindowsByWin = __WEBPACK_IMPORTED_MODULE_5__global__.a.popupWindowsByWin || new __WEBPACK_IMPORTED_MODULE_0_cross_domain_safe_weakmap_src__.a(), 
         __WEBPACK_IMPORTED_MODULE_5__global__.a.popupWindowsByName = __WEBPACK_IMPORTED_MODULE_5__global__.a.popupWindowsByName || {};
         var windowOpen = window.open;
