@@ -153,9 +153,9 @@ export function addRequestListener({ name, win, domain } : { name : string, win 
 
     if (existingListener) {
         if (win && domain) {
-            throw new Error(`Request listener already exists for ${name} on domain ${domain.toString()} for specified window`);
+            throw new Error(`Request listener already exists for ${name} on domain ${domain.toString()} for ${win === global.WINDOW_WILDCARD ? 'wildcard' : 'specified' } window`);
         } else if (win) {
-            throw new Error(`Request listener already exists for ${name} for specified window`);
+            throw new Error(`Request listener already exists for ${name} for ${win === global.WINDOW_WILDCARD ? 'wildcard' : 'specified' } window`);
         } else if (domain) {
             throw new Error(`Request listener already exists for ${name} on domain ${domain.toString()}`);
         } else {
