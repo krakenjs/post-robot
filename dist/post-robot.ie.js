@@ -1827,18 +1827,14 @@
                 if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.n)(window, name)) throw new Error("Frame with name " + name + " already exists on page");
                 var iframe = openBridgeFrame(name, url);
                 return __WEBPACK_IMPORTED_MODULE_5__global__.a.bridgeFrames[domain] = iframe, __WEBPACK_IMPORTED_MODULE_8__common__.g.then(function(body) {
-                    return new __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__.a(function(resolve, reject) {
-                        setTimeout(resolve, 1);
+                    body.appendChild(iframe);
+                    var bridge = iframe.contentWindow;
+                    return listenForRegister(bridge, domain), new __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__.a(function(resolve, reject) {
+                        iframe.onload = resolve, iframe.onerror = reject;
                     }).then(function() {
-                        body.appendChild(iframe);
-                        var bridge = iframe.contentWindow;
-                        return listenForRegister(bridge, domain), new __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__.a(function(resolve, reject) {
-                            iframe.onload = resolve, iframe.onerror = reject;
-                        }).then(function() {
-                            return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_4__lib__.p)(bridge, __WEBPACK_IMPORTED_MODULE_3__conf__.a.BRIDGE_TIMEOUT, "Bridge " + url);
-                        }).then(function() {
-                            return bridge;
-                        });
+                        return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_4__lib__.p)(bridge, __WEBPACK_IMPORTED_MODULE_3__conf__.a.BRIDGE_TIMEOUT, "Bridge " + url);
+                    }).then(function() {
+                        return bridge;
                     });
                 });
             }), __WEBPACK_IMPORTED_MODULE_5__global__.a.bridges[domain]);
@@ -1859,9 +1855,9 @@
                     _ref3 = _i2.value;
                 }
                 var domain = _ref3, frame = __WEBPACK_IMPORTED_MODULE_5__global__.a.bridgeFrames[domain];
-                frame && frame.parentNode && frame.parentNode.removeChild(frame);
+                frame.parentNode && frame.parentNode.removeChild(frame);
             }
-            __WEBPACK_IMPORTED_MODULE_5__global__.a.bridges = {};
+            __WEBPACK_IMPORTED_MODULE_5__global__.a.bridgeFrames = {}, __WEBPACK_IMPORTED_MODULE_5__global__.a.bridges = {};
         }
         __webpack_exports__.a = openBridge, __webpack_exports__.b = linkUrl, __webpack_exports__.c = destroyBridges;
         var __WEBPACK_IMPORTED_MODULE_0_cross_domain_safe_weakmap_src__ = __webpack_require__(7), __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__ = __webpack_require__(2), __WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__ = __webpack_require__(1), __WEBPACK_IMPORTED_MODULE_3__conf__ = __webpack_require__(0), __WEBPACK_IMPORTED_MODULE_4__lib__ = __webpack_require__(4), __WEBPACK_IMPORTED_MODULE_5__global__ = __webpack_require__(3), __WEBPACK_IMPORTED_MODULE_6__interface__ = __webpack_require__(6), __WEBPACK_IMPORTED_MODULE_7__drivers__ = __webpack_require__(5), __WEBPACK_IMPORTED_MODULE_8__common__ = __webpack_require__(9), _slicedToArray = function() {
