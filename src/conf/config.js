@@ -4,7 +4,9 @@ import { CONSTANTS } from './constants';
 
 export let CONFIG : Object = {
 
-    ALLOW_POSTMESSAGE_POPUP: __ALLOW_POSTMESSAGE_POPUP__,
+    ALLOW_POSTMESSAGE_POPUP: ('__ALLOW_POSTMESSAGE_POPUP__' in window)
+        ? window.__ALLOW_POSTMESSAGE_POPUP__
+        : __ALLOW_POSTMESSAGE_POPUP__,
 
     LOG_LEVEL: 'info',
 
