@@ -13,6 +13,7 @@ import { receiveMessage } from '../drivers';
 import { getBridgeName, documentBodyReady, registerRemoteSendMessage, registerRemoteWindow } from './common';
 
 global.bridges = global.bridges || {};
+global.bridgeFrames = global.bridgeFrames || {};
 
 global.popupWindowsByWin = global.popupWindowsByWin || new WeakMap();
 global.popupWindowsByName = global.popupWindowsByName || {};
@@ -120,6 +121,7 @@ export function openBridge(url : string, domain : string) : ZalgoPromise<CrossDo
         }
 
         let iframe = openBridgeFrame(name, url);
+        global.bridgeFrames[domain] = iframe;
 
         return documentBodyReady.then(body => {
 
@@ -208,4 +210,14 @@ export function linkUrl(win : CrossDomainWindowType, url : string) {
         winOptions.domain = getDomainFromUrl(url);
         registerRemoteWindow(win);
     }
+}
+
+export function destroyBridges() {
+    for (let domain of Object.keys(global.bridgeFrames)) {
+        let frame = global.bridgeFrames[domain];
+        if (frame && frame.parentNode) {
+            frame.parentNode.removeChild(frame);
+        }
+    }
+    global.bridges = {};
 }
