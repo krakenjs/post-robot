@@ -19,7 +19,7 @@ global.popupWindowsByWin = global.popupWindowsByWin || new WeakMap();
 global.popupWindowsByName = global.popupWindowsByName || {};
 
 function listenForRegister(source, domain) {
-    on(CONSTANTS.POST_MESSAGE_NAMES.OPEN_TUNNEL, { source, domain }, ({ origin, data }) => {
+    on(CONSTANTS.POST_MESSAGE_NAMES.OPEN_TUNNEL, { window: source, domain }, ({ origin, data }) => {
 
         if (origin !== domain) {
             throw new Error(`Domain ${domain} does not match origin ${origin}`);
