@@ -1962,7 +1962,7 @@
             return CONFIG;
         });
         var _ALLOWED_POST_MESSAGE, __WEBPACK_IMPORTED_MODULE_0__constants__ = __webpack_require__(14), CONFIG = {
-            ALLOW_POSTMESSAGE_POPUP: !0,
+            ALLOW_POSTMESSAGE_POPUP: !("__ALLOW_POSTMESSAGE_POPUP__" in window) || window.__ALLOW_POSTMESSAGE_POPUP__,
             LOG_LEVEL: "info",
             BRIDGE_TIMEOUT: 5e3,
             ACK_TIMEOUT: -1 !== window.navigator.userAgent.match(/MSIE/i) ? 2e3 : 1e3,
