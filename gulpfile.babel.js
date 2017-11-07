@@ -22,6 +22,7 @@ function buildWebpackConfig({  filename, modulename, minify = false, globals = {
     globals = {
         __TEST__:             false,
         __IE_POPUP_SUPPORT__: false,
+        __ALLOW_POSTMESSAGE_POPUP__: true,
         ...globals
     };
 

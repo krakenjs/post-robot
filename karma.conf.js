@@ -77,7 +77,8 @@ module.exports = function(config) {
             plugins: [
                 new webpack.DefinePlugin({
                     __TEST__: true,
-                    __IE_POPUP_SUPPORT__: true
+                    __IE_POPUP_SUPPORT__: true,
+                    __ALLOW_POSTMESSAGE_POPUP__: false
                 })
             ]
         },
