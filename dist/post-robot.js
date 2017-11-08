@@ -1839,8 +1839,8 @@
                                     if (resTimeout === 1 / 0) return;
                                     cycleTime = Math.min(resTimeout, 2e3);
                                 } else {
-                                    if (ackTimeout <= 0) return reject(new Error("No ack for postMessage " + name + " in " + __WEBPACK_IMPORTED_MODULE_3__conf__.a.ACK_TIMEOUT + "ms"));
-                                    if (resTimeout <= 0) return reject(new Error("No response for postMessage " + name + " in " + (options.timeout || __WEBPACK_IMPORTED_MODULE_3__conf__.a.RES_TIMEOUT) + "ms"));
+                                    if (ackTimeout <= 0) return reject(new Error("No ack for postMessage " + name + " in " + __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.g)() + " in " + __WEBPACK_IMPORTED_MODULE_3__conf__.a.ACK_TIMEOUT + "ms"));
+                                    if (resTimeout <= 0) return reject(new Error("No response for postMessage " + name + " in " + __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.g)() + " in " + (options.timeout || __WEBPACK_IMPORTED_MODULE_3__conf__.a.RES_TIMEOUT) + "ms"));
                                 }
                                 setTimeout(cycle, cycleTime);
                             }

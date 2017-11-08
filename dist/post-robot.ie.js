@@ -791,12 +791,14 @@
             return __WEBPACK_IMPORTED_MODULE_2__common__.l;
         });
         var __WEBPACK_IMPORTED_MODULE_3__parent__ = __webpack_require__(27);
-        __webpack_require__.d(__webpack_exports__, "openBridge", function() {
+        __webpack_require__.d(__webpack_exports__, "hasBridge", function() {
             return __WEBPACK_IMPORTED_MODULE_3__parent__.a;
-        }), __webpack_require__.d(__webpack_exports__, "linkUrl", function() {
+        }), __webpack_require__.d(__webpack_exports__, "openBridge", function() {
             return __WEBPACK_IMPORTED_MODULE_3__parent__.b;
-        }), __webpack_require__.d(__webpack_exports__, "destroyBridges", function() {
+        }), __webpack_require__.d(__webpack_exports__, "linkUrl", function() {
             return __WEBPACK_IMPORTED_MODULE_3__parent__.c;
+        }), __webpack_require__.d(__webpack_exports__, "destroyBridges", function() {
+            return __WEBPACK_IMPORTED_MODULE_3__parent__.d;
         });
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
@@ -1768,6 +1770,8 @@
             return __WEBPACK_IMPORTED_MODULE_0__index__.needsBridge;
         }), __webpack_require__.o(__WEBPACK_IMPORTED_MODULE_0__index__, "needsBridgeForBrowser") && __webpack_require__.d(__webpack_exports__, "needsBridgeForBrowser", function() {
             return __WEBPACK_IMPORTED_MODULE_0__index__.needsBridgeForBrowser;
+        }), __webpack_require__.o(__WEBPACK_IMPORTED_MODULE_0__index__, "hasBridge") && __webpack_require__.d(__webpack_exports__, "hasBridge", function() {
+            return __WEBPACK_IMPORTED_MODULE_0__index__.hasBridge;
         }), __webpack_require__.o(__WEBPACK_IMPORTED_MODULE_0__index__, "needsBridgeForWin") && __webpack_require__.d(__webpack_exports__, "needsBridgeForWin", function() {
             return __WEBPACK_IMPORTED_MODULE_0__index__.needsBridgeForWin;
         }), __webpack_require__.o(__WEBPACK_IMPORTED_MODULE_0__index__, "needsBridgeForDomain") && __webpack_require__.d(__webpack_exports__, "needsBridgeForDomain", function() {
@@ -1819,6 +1823,10 @@
             iframe.setAttribute("hidden", "true"), iframe.setAttribute("title", ""), iframe.setAttribute("role", "presentation"), 
             iframe.src = url, iframe;
         }
+        function hasBridge(url, domain) {
+            return domain = domain || __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.m)(url), 
+            Boolean(__WEBPACK_IMPORTED_MODULE_5__global__.a.bridges[domain]);
+        }
         function openBridge(url, domain) {
             return domain = domain || __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.m)(url), 
             __WEBPACK_IMPORTED_MODULE_5__global__.a.bridges[domain] ? __WEBPACK_IMPORTED_MODULE_5__global__.a.bridges[domain] : (__WEBPACK_IMPORTED_MODULE_5__global__.a.bridges[domain] = __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__.a.try(function() {
@@ -1859,7 +1867,8 @@
             }
             __WEBPACK_IMPORTED_MODULE_5__global__.a.bridgeFrames = {}, __WEBPACK_IMPORTED_MODULE_5__global__.a.bridges = {};
         }
-        __webpack_exports__.a = openBridge, __webpack_exports__.b = linkUrl, __webpack_exports__.c = destroyBridges;
+        __webpack_exports__.a = hasBridge, __webpack_exports__.b = openBridge, __webpack_exports__.c = linkUrl, 
+        __webpack_exports__.d = destroyBridges;
         var __WEBPACK_IMPORTED_MODULE_0_cross_domain_safe_weakmap_src__ = __webpack_require__(7), __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__ = __webpack_require__(2), __WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__ = __webpack_require__(1), __WEBPACK_IMPORTED_MODULE_3__conf__ = __webpack_require__(0), __WEBPACK_IMPORTED_MODULE_4__lib__ = __webpack_require__(4), __WEBPACK_IMPORTED_MODULE_5__global__ = __webpack_require__(3), __WEBPACK_IMPORTED_MODULE_6__interface__ = __webpack_require__(6), __WEBPACK_IMPORTED_MODULE_7__drivers__ = __webpack_require__(5), __WEBPACK_IMPORTED_MODULE_8__common__ = __webpack_require__(9), _slicedToArray = function() {
             function sliceIterator(arr, i) {
                 var _arr = [], _n = !0, _d = !1, _e = void 0;
@@ -2417,8 +2426,8 @@
                                     if (resTimeout === 1 / 0) return;
                                     cycleTime = Math.min(resTimeout, 2e3);
                                 } else {
-                                    if (ackTimeout <= 0) return reject(new Error("No ack for postMessage " + name + " in " + __WEBPACK_IMPORTED_MODULE_3__conf__.a.ACK_TIMEOUT + "ms"));
-                                    if (resTimeout <= 0) return reject(new Error("No response for postMessage " + name + " in " + (options.timeout || __WEBPACK_IMPORTED_MODULE_3__conf__.a.RES_TIMEOUT) + "ms"));
+                                    if (ackTimeout <= 0) return reject(new Error("No ack for postMessage " + name + " in " + __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.g)() + " in " + __WEBPACK_IMPORTED_MODULE_3__conf__.a.ACK_TIMEOUT + "ms"));
+                                    if (resTimeout <= 0) return reject(new Error("No response for postMessage " + name + " in " + __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.g)() + " in " + (options.timeout || __WEBPACK_IMPORTED_MODULE_3__conf__.a.RES_TIMEOUT) + "ms"));
                                 }
                                 setTimeout(cycle, cycleTime);
                             }
