@@ -99,6 +99,11 @@ function openBridgeFrame(name : string, url : string) : HTMLIFrameElement {
     return iframe;
 }
 
+export function hasBridge(url : string, domain : string) : boolean {
+    domain = domain || getDomainFromUrl(url);
+    return Boolean(global.bridges[domain]);
+}
+
 export function openBridge(url : string, domain : string) : ZalgoPromise<CrossDomainWindowType> {
 
     domain = domain || getDomainFromUrl(url);

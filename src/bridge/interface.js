@@ -1,4 +1,4 @@
 /* @flow */
 
-export { openBridge, linkUrl, isBridge, needsBridge, needsBridgeForBrowser,
+export { openBridge, linkUrl, isBridge, needsBridge, needsBridgeForBrowser, hasBridge,
     needsBridgeForWin, needsBridgeForDomain, openTunnelToOpener, destroyBridges } from './index';
