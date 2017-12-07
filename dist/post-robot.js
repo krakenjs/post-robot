@@ -1418,6 +1418,7 @@
             ALLOW_POSTMESSAGE_POPUP: !("__ALLOW_POSTMESSAGE_POPUP__" in window) || window.__ALLOW_POSTMESSAGE_POPUP__,
             LOG_LEVEL: "info",
             BRIDGE_TIMEOUT: 5e3,
+            REQUEST_TIMEOUT: 5e3,
             ACK_TIMEOUT: -1 !== window.navigator.userAgent.match(/MSIE/i) ? 2e3 : 1e3,
             RES_TIMEOUT: 1 / 0,
             LOG_TO_PAGE: !1,
@@ -1811,7 +1812,7 @@
                 var hasResult = !1, requestPromises = __WEBPACK_IMPORTED_MODULE_6__global__.a.requestPromises.get(win);
                 requestPromises || (requestPromises = [], __WEBPACK_IMPORTED_MODULE_6__global__.a.requestPromises.set(win, requestPromises));
                 var requestPromise = __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__.a.try(function() {
-                    if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.j)(window, win)) return __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__.a.resolve(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__lib__.p)(win));
+                    if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.j)(window, win)) return __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__.a.resolve(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__lib__.p)(win, __WEBPACK_IMPORTED_MODULE_3__conf__.a.REQUEST_TIMEOUT));
                 }).then(function() {
                     return new __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__.a(function(resolve, reject) {
                         var responseListener = void 0;

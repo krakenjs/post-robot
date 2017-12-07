@@ -82,8 +82,8 @@
     "yargs": "^4.7.1"
   },
   "dependencies": {
-    "cross-domain-safe-weakmap": "^1.0.1",
-    "cross-domain-utils": "^2.0.0",
-    "zalgo-promise": "^1.0.3"
+    "cross-domain-safe-weakmap": "^1.0.19",
+    "cross-domain-utils": "^2.0.1",
+    "zalgo-promise": "^1.0.22"
   }
 }
