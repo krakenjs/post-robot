@@ -45,7 +45,7 @@ export function sendMessage(win : CrossDomainWindowType, message : Object, domai
 
         log.logLevel(level, [ '\n\n\t', '#send', message.type.replace(/^postrobot_message_/, ''), '::', message.name, '::', domain || CONSTANTS.WILDCARD, '\n\n', message ]);
 
-        if (win === window) {
+        if (win === window && !CONFIG.ALLOW_SAME_ORIGIN) {
             throw new Error('Attemping to send message to self');
         }
 
