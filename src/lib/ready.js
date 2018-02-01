@@ -1,3 +1,4 @@
+/* eslint-disable flowtype/space-before-type-colon */
 /* @flow */
 
 import {WeakMap} from 'cross-domain-safe-weakmap/src';
@@ -14,7 +15,7 @@ global.readyPromises = global.readyPromises || new WeakMap();
 
 export function initOnReady() {
 
-    on(CONSTANTS.POST_MESSAGE_NAMES.READY, {domain: CONSTANTS.WILDCARD}, (event: { source: CrossDomainWindowType, origin: string, data: Object }) => {
+    on(CONSTANTS.POST_MESSAGE_NAMES.READY, {domain: CONSTANTS.WILDCARD}, (event : { source : CrossDomainWindowType, origin : string, data : Object }) => {
 
         let win = event.source;
         let promise = global.readyPromises.get(win);
