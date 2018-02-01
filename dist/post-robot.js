@@ -1858,7 +1858,6 @@
             });
         }
         function _send(window, name, data, options) {
-            console.debug(options);
             return options = options || {}, options.window = window, options.name = name, options.data = data, 
             request(options);
         }

@@ -39,8 +39,8 @@ export function initOnReady() {
     }
 }
 
-export function onWindowReady(win: mixed, timeout: number = -1, name: string = 'Window'): ZalgoPromise<{ source: mixed, origin: string, data: Object }> {
-    console.debug('timeout: ' + timeout);
+export function onWindowReady(win : mixed, timeout : number = -1, name : string = 'Window'): ZalgoPromise<{ source : mixed, origin : string, data : Object }> {
+    console.debug(`timeout: ${timeout}`);
     let promise = global.readyPromises.get(win);
 
     if (promise) {
