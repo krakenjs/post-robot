@@ -2233,10 +2233,12 @@
             });
         }
         function onWindowReady(win) {
-            var timeout = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 5e3, name = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : "Window", promise = __WEBPACK_IMPORTED_MODULE_6__global__.a.readyPromises.get(win);
+            var timeout = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : -1, name = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : "Window";
+            console.debug("timeout: " + timeout);
+            var promise = __WEBPACK_IMPORTED_MODULE_6__global__.a.readyPromises.get(win);
             return promise || (promise = new __WEBPACK_IMPORTED_MODULE_2_zalgo_promise_src__.a(), 
-            __WEBPACK_IMPORTED_MODULE_6__global__.a.readyPromises.set(win, promise), setTimeout(function() {
-                return promise.reject(new Error(name + " did not load after " + timeout + "ms"));
+            __WEBPACK_IMPORTED_MODULE_6__global__.a.readyPromises.set(win, promise), timeout > -1 && setTimeout(function() {
+                promise.reject(new Error(name + " did not load after " + timeout + "ms"));
             }, timeout), promise);
         }
         __webpack_exports__.a = initOnReady, __webpack_exports__.b = onWindowReady;
