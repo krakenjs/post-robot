@@ -142,7 +142,7 @@ export function openBridge(url : string, domain : string) : ZalgoPromise<CrossDo
                 iframe.onerror = reject;
 
             }).then(() => {
-
+                console.debug('parent');
                 return onWindowReady(bridge, CONFIG.BRIDGE_TIMEOUT, `Bridge ${url}`);
 
             }).then(() => {

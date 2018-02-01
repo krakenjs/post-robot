@@ -103,7 +103,8 @@ export function request(options : RequestOptionsType) : ZalgoPromise<ResponseMes
         let requestPromise = ZalgoPromise.try(() => {
 
             if (isAncestor(window, win)) {
-                return ZalgoPromise.resolve(onWindowReady(win));
+                console.debug('from request');
+                return ZalgoPromise.resolve(onWindowReady(win, options.timeout || CONFIG.BRIDGE_TIMEOUT));
             }
 
         }).then(() => {

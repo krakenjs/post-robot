@@ -1646,10 +1646,12 @@
             });
         }
         function onWindowReady(win) {
-            var timeout = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 5e3, name = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : "Window", promise = __WEBPACK_IMPORTED_MODULE_6__global__.a.readyPromises.get(win);
+            var timeout = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : -1, name = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : "Window";
+            console.debug("timeout: " + timeout);
+            var promise = __WEBPACK_IMPORTED_MODULE_6__global__.a.readyPromises.get(win);
             return promise || (promise = new __WEBPACK_IMPORTED_MODULE_2_zalgo_promise_src__.a(), 
-            __WEBPACK_IMPORTED_MODULE_6__global__.a.readyPromises.set(win, promise), setTimeout(function() {
-                return promise.reject(new Error(name + " did not load after " + timeout + "ms"));
+            __WEBPACK_IMPORTED_MODULE_6__global__.a.readyPromises.set(win, promise), timeout > -1 && setTimeout(function() {
+                promise.reject(new Error(name + " did not load after " + timeout + "ms"));
             }, timeout), promise);
         }
         __webpack_exports__.a = initOnReady, __webpack_exports__.b = onWindowReady;
@@ -1812,7 +1814,8 @@
                 var hasResult = !1, requestPromises = __WEBPACK_IMPORTED_MODULE_6__global__.a.requestPromises.get(win);
                 requestPromises || (requestPromises = [], __WEBPACK_IMPORTED_MODULE_6__global__.a.requestPromises.set(win, requestPromises));
                 var requestPromise = __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__.a.try(function() {
-                    if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.j)(window, win)) return __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__.a.resolve(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__lib__.p)(win));
+                    if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.j)(window, win)) return console.debug("from request"), 
+                    __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__.a.resolve(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__lib__.p)(win, options.timeout || __WEBPACK_IMPORTED_MODULE_3__conf__.a.BRIDGE_TIMEOUT));
                 }).then(function() {
                     return new __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__.a(function(resolve, reject) {
                         var responseListener = void 0;
@@ -1855,6 +1858,7 @@
             });
         }
         function _send(window, name, data, options) {
+            console.debug(options);
             return options = options || {}, options.window = window, options.name = name, options.data = data, 
             request(options);
         }
