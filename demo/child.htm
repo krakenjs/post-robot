@@ -6,7 +6,7 @@
 
 </script>
 
-<script src="../dist/post-robot.ie.js"></script>
+<script src="../dist/post-robot.js"></script>
 
 
 <button onclick="sendMessage()">post</button>
@@ -15,7 +15,7 @@
 
 <script>
 	function sendMessage() {
-		postRobot.send(window.opener, 'foo', { message: Math.random().toString() }).then(function(event) {
+		postRobot.send(window.opener, 'foo', { message: Math.random().toString() }, { timeout : 12345}).then(function(event) {
 			var el = document.getElementById('messages');
 			el.innerHTML += '\n' + event.data.message;
 		});
