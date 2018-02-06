@@ -11,6 +11,7 @@ export let CONFIG : Object = {
     LOG_LEVEL: 'info',
 
     BRIDGE_TIMEOUT: 5000,
+    CHILD_WINDOW_TIMEOUT: 5000,
 
     ACK_TIMEOUT: (window.navigator.userAgent.match(/MSIE/i) !== -1 && !__TEST__) ? 2000 : 1000,
     RES_TIMEOUT: __TEST__ ? 2000 : Infinity,
