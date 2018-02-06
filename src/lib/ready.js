@@ -47,7 +47,7 @@ export function onWindowReady(win : mixed, timeout : number = 5000, name : strin
     promise = new ZalgoPromise();
     global.readyPromises.set(win, promise);
 
-    if (timeout === -1) {
+    if (timeout !== -1) {
         setTimeout(() => promise.reject(new Error(`${name} did not load after ${timeout}ms`)), timeout);
     }
 
