@@ -2104,11 +2104,12 @@
                     data: data
                 });
             }, function(err) {
-                var error = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.i)(err).replace(/^Error: /, "");
+                var error = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib__.i)(err).replace(/^Error: /, ""), code = err.code;
                 return respond({
                     type: __WEBPACK_IMPORTED_MODULE_2__conf__.b.POST_MESSAGE_TYPE.RESPONSE,
                     ack: __WEBPACK_IMPORTED_MODULE_2__conf__.b.POST_MESSAGE_ACK.ERROR,
-                    error: error
+                    error: error,
+                    code: code
                 });
             }) ]).then(__WEBPACK_IMPORTED_MODULE_3__lib__.m).catch(function(err) {
                 if (options && options.handleError) return options.handleError(err);
@@ -2120,7 +2121,10 @@
                 if (!options) throw new Error("No handler found for post message response for message: " + message.name + " from " + origin + " in " + window.location.protocol + "//" + window.location.host + window.location.pathname);
                 if (!__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1_cross_domain_utils_src__.b)(options.domain, origin)) throw new Error("Response origin " + origin + " does not match domain " + options.domain);
                 if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__listeners__.d)(message.hash), 
-                message.ack === __WEBPACK_IMPORTED_MODULE_2__conf__.b.POST_MESSAGE_ACK.ERROR) return options.respond(new Error(message.error), null);
+                message.ack === __WEBPACK_IMPORTED_MODULE_2__conf__.b.POST_MESSAGE_ACK.ERROR) {
+                    var err = new Error(message.error);
+                    return message.code && (err.code = message.code), options.respond(err, null);
+                }
                 if (message.ack === __WEBPACK_IMPORTED_MODULE_2__conf__.b.POST_MESSAGE_ACK.SUCCESS) {
                     var data = message.data || message.response;
                     return options.respond(null, {
@@ -2263,7 +2267,8 @@
         function serializeError(err) {
             return {
                 __type__: __WEBPACK_IMPORTED_MODULE_3__conf__.b.SERIALIZATION_TYPES.ERROR,
-                __message__: __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_4__util__.b)(err)
+                __message__: __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_4__util__.b)(err),
+                __code__: err.code
             };
         }
         function serializePromise(destination, domain, promise, name) {
@@ -2319,7 +2324,8 @@
             wrapper.origin = origin, wrapper;
         }
         function deserializeError(source, origin, obj) {
-            return new Error(obj.__message__);
+            var err = new Error(obj.__message__);
+            return obj.__code__ && (err.code = obj.__code__), err;
         }
         function deserializeZalgoPromise(source, origin, prom) {
             return new __WEBPACK_IMPORTED_MODULE_2_zalgo_promise_src__.a(function(resolve, reject) {
