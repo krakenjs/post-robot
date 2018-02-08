@@ -1974,6 +1974,7 @@
             ALLOW_POSTMESSAGE_POPUP: !("__ALLOW_POSTMESSAGE_POPUP__" in window) || window.__ALLOW_POSTMESSAGE_POPUP__,
             LOG_LEVEL: "info",
             BRIDGE_TIMEOUT: 5e3,
+            CHILD_WINDOW_TIMEOUT: 5e3,
             ACK_TIMEOUT: -1 !== window.navigator.userAgent.match(/MSIE/i) ? 2e3 : 1e3,
             RES_TIMEOUT: 1 / 0,
             LOG_TO_PAGE: !1,
@@ -2235,7 +2236,7 @@
         function onWindowReady(win) {
             var timeout = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 5e3, name = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : "Window", promise = __WEBPACK_IMPORTED_MODULE_6__global__.a.readyPromises.get(win);
             return promise || (promise = new __WEBPACK_IMPORTED_MODULE_2_zalgo_promise_src__.a(), 
-            __WEBPACK_IMPORTED_MODULE_6__global__.a.readyPromises.set(win, promise), setTimeout(function() {
+            __WEBPACK_IMPORTED_MODULE_6__global__.a.readyPromises.set(win, promise), -1 !== timeout && setTimeout(function() {
                 return promise.reject(new Error(name + " did not load after " + timeout + "ms"));
             }, timeout), promise);
         }
@@ -2399,7 +2400,7 @@
                 var hasResult = !1, requestPromises = __WEBPACK_IMPORTED_MODULE_6__global__.a.requestPromises.get(win);
                 requestPromises || (requestPromises = [], __WEBPACK_IMPORTED_MODULE_6__global__.a.requestPromises.set(win, requestPromises));
                 var requestPromise = __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__.a.try(function() {
-                    if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.l)(window, win)) return __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__.a.resolve(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__lib__.p)(win));
+                    if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_cross_domain_utils_src__.l)(window, win)) return __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__.a.resolve(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__lib__.p)(win, options.timeout || __WEBPACK_IMPORTED_MODULE_3__conf__.a.CHILD_WINDOW_TIMEOUT));
                 }).then(function() {
                     return new __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__.a(function(resolve, reject) {
                         var responseListener = void 0;
