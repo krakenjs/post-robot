@@ -79,11 +79,14 @@ export let RECEIVE_MESSAGE_TYPES = {
             }, err => {
 
                 let error = stringifyError(err).replace(/^Error: /, '');
+                // $FlowFixMe
+                let code = err.code;
 
                 return respond({
                     type: CONSTANTS.POST_MESSAGE_TYPE.RESPONSE,
                     ack: CONSTANTS.POST_MESSAGE_ACK.ERROR,
-                    error
+                    error,
+                    code
                 });
             })
 
@@ -116,7 +119,12 @@ export let RECEIVE_MESSAGE_TYPES = {
         deleteResponseListener(message.hash);
 
         if (message.ack === CONSTANTS.POST_MESSAGE_ACK.ERROR) {
-            return options.respond(new Error(message.error), null);
+            let err = new Error(message.error);
+            if (message.code) {
+                // $FlowFixMe
+                err.code = message.code;
+            }
+            return options.respond(err, null);
         } else if (message.ack === CONSTANTS.POST_MESSAGE_ACK.SUCCESS) {
             let data = message.data || message.response;
 

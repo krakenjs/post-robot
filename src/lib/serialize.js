@@ -85,7 +85,9 @@ type SerializedError = {
 function serializeError(err : mixed) : SerializedError {
     return {
         __type__: CONSTANTS.SERIALIZATION_TYPES.ERROR,
-        __message__: stringifyError(err)
+        __message__: stringifyError(err),
+        // $FlowFixMe
+        __code__: err.code
     };
 }
 
@@ -177,7 +179,12 @@ export function deserializeMethod(source : CrossDomainWindowType, origin : strin
 }
 
 export function deserializeError(source : CrossDomainWindowType, origin : string, obj : Object) : Error {
-    return new Error(obj.__message__);
+    let err = new Error(obj.__message__);
+    if (obj.__code__) {
+        // $FlowFixMe
+        err.code = obj.__code__;
+    }
+    return err;
 }
 
 export function deserializeZalgoPromise(source : CrossDomainWindowType, origin : string, prom : Object) : ZalgoPromise<mixed> {
