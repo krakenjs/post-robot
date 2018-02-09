@@ -6,7 +6,6 @@ import { CONSTANTS } from '../conf';
 import { getParent, isWindowClosed } from 'cross-domain-utils/src';
 import { noop } from '../lib';
 import { global } from '../global';
-import { send } from '../interface';
 
 /*
     HERE BE DRAGONS
@@ -84,7 +83,7 @@ global.openTunnelToParent = function openTunnelToParent({ name, source, canary, 
 
     let id = addTunnelWindow({ name, source, canary, sendMessage });
 
-    return send(parentWindow, CONSTANTS.POST_MESSAGE_NAMES.OPEN_TUNNEL, {
+    return global.send(parentWindow, CONSTANTS.POST_MESSAGE_NAMES.OPEN_TUNNEL, {
 
         name,
 

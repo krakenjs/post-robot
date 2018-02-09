@@ -141,3 +141,5 @@ export function messageListener(event : { source : CrossDomainWindowType, origin
 export function listenForMessages() {
     addEventListener(window, 'message', messageListener);
 }
+
+global.receiveMessage = receiveMessage;

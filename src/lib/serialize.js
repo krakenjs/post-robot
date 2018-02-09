@@ -6,14 +6,13 @@ import { ZalgoPromise } from 'zalgo-promise/src';
 
 import { CONSTANTS } from '../conf';
 import { once, uniqueID, replaceObject, stringifyError, isRegex } from './util';
-import { on, send } from '../interface';
 import { log } from './log';
 import { global } from '../global';
 
 global.methods = global.methods || new WeakMap();
 
 export let listenForMethods = once(() => {
-    on(CONSTANTS.POST_MESSAGE_NAMES.METHOD, { origin: CONSTANTS.WILDCARD }, ({ source, origin, data } : { source : CrossDomainWindowType, origin : string, data : Object }) => {
+    global.on(CONSTANTS.POST_MESSAGE_NAMES.METHOD, { origin: CONSTANTS.WILDCARD }, ({ source, origin, data } : { source : CrossDomainWindowType, origin : string, data : Object }) => {
 
         let methods = global.methods.get(source);
 
@@ -154,7 +153,7 @@ export function deserializeMethod(source : CrossDomainWindowType, origin : strin
     function wrapper() : ZalgoPromise<mixed> {
         let args = Array.prototype.slice.call(arguments);
         log.debug('Call foreign method', obj.__name__, args);
-        return send(source, CONSTANTS.POST_MESSAGE_NAMES.METHOD, {
+        return global.send(source, CONSTANTS.POST_MESSAGE_NAMES.METHOD, {
             id: obj.__id__,
             name: obj.__name__,
             args

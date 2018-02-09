@@ -6,7 +6,6 @@ import { getDomain, isSameDomain, isOpener, isSameTopWindow, matchDomain, getUse
 
 import { CONFIG, CONSTANTS } from '../conf';
 import { global } from '../global';
-import { receiveMessage } from '../drivers';
 
 export function needsBridgeForBrowser() : boolean {
 
@@ -156,7 +155,3 @@ export function sendBridgeMessage(win : CrossDomainWindowType, message : string,
         return sendMessage(win, message, domain);
     });
 }
-
-global.receiveMessage = function(event : { source : CrossDomainWindowType, origin : string, data : string }) {
-    receiveMessage(event);
-};

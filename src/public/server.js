@@ -7,6 +7,7 @@ import { once as onceFunction, safeInterval } from '../lib';
 import { addRequestListener } from '../drivers';
 import { type RequestListenerType } from '../drivers';
 import { CONSTANTS } from '../conf';
+import { global } from '../global';
 
 type ErrorHandlerType = (err : mixed) => void;
 type HandlerType = ({ source : CrossDomainWindowType, origin : string, data : Object }) => (void | mixed | ZalgoPromise<mixed>);
@@ -133,3 +134,5 @@ export function listener(options : ServerOptionsType = {}) : { on : (name : stri
         }
     };
 }
+
+global.on = on;

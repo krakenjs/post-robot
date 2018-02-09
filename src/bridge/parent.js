@@ -7,8 +7,6 @@ import { getDomain, getFrameByName, isWindowClosed, getDomainFromUrl } from 'cro
 import { CONFIG, CONSTANTS } from '../conf';
 import { log, onWindowReady } from '../lib';
 import { global } from '../global';
-import { on } from '../interface';
-import { receiveMessage } from '../drivers';
 
 import { getBridgeName, documentBodyReady, registerRemoteSendMessage, registerRemoteWindow } from './common';
 
@@ -19,7 +17,7 @@ global.popupWindowsByWin = global.popupWindowsByWin || new WeakMap();
 global.popupWindowsByName = global.popupWindowsByName || {};
 
 function listenForRegister(source, domain) {
-    on(CONSTANTS.POST_MESSAGE_NAMES.OPEN_TUNNEL, { window: source, domain }, ({ origin, data }) => {
+    global.on(CONSTANTS.POST_MESSAGE_NAMES.OPEN_TUNNEL, { window: source, domain }, ({ origin, data }) => {
 
         if (origin !== domain) {
             throw new Error(`Domain ${domain} does not match origin ${origin}`);
@@ -61,7 +59,7 @@ function listenForRegister(source, domain) {
                 }
 
                 try {
-                    receiveMessage({
+                    global.receiveMessage({
                         data: message,
                         origin: winDetails.domain,
                         source: winDetails.win

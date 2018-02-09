@@ -5,7 +5,6 @@ import { getAncestor } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 
 import { CONSTANTS } from '../conf';
-import { on, send } from '../interface';
 import { log } from './log';
 import { global } from '../global';
 import { stringifyError } from './util';
@@ -14,7 +13,7 @@ global.readyPromises = global.readyPromises || new WeakMap();
 
 export function initOnReady() {
 
-    on(CONSTANTS.POST_MESSAGE_NAMES.READY, { domain: CONSTANTS.WILDCARD }, (event : { source : CrossDomainWindowType, origin : string, data : Object }) => {
+    global.on(CONSTANTS.POST_MESSAGE_NAMES.READY, { domain: CONSTANTS.WILDCARD }, (event : { source : CrossDomainWindowType, origin : string, data : Object }) => {
 
         let win = event.source;
         let promise = global.readyPromises.get(win);
@@ -30,7 +29,7 @@ export function initOnReady() {
     let parent = getAncestor();
 
     if (parent) {
-        send(parent, CONSTANTS.POST_MESSAGE_NAMES.READY, {}, { domain: CONSTANTS.WILDCARD, timeout: Infinity }).catch(err => {
+        global.send(parent, CONSTANTS.POST_MESSAGE_NAMES.READY, {}, { domain: CONSTANTS.WILDCARD, timeout: Infinity }).catch(err => {
             log.debug(stringifyError(err));
         });
     }

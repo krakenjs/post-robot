@@ -241,3 +241,5 @@ export function client(options : RequestOptionsType = {}) : { send : (string, ?O
         }
     };
 }
+
+global.send = send;

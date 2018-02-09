@@ -9,6 +9,7 @@ var argv = require('yargs').argv;
 var UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 var yargs = require('yargs');
 var qs = require('querystring');
+var CircularDependencyPlugin = require('circular-dependency-plugin');
 
 gulp.task('test', ['lint', 'typecheck', 'karma']);
 gulp.task('build', ['test', 'webpack', 'webpack-min']);
@@ -66,7 +67,7 @@ function buildWebpackConfig({  filename, modulename, minify = false, globals = {
             ]
         },
         output: {
-            filename: filename,
+            filename,
             libraryTarget: 'umd',
             umdNamedDefine: true,
             library: modulename
@@ -83,6 +84,9 @@ function buildWebpackConfig({  filename, modulename, minify = false, globals = {
                 compress: { warnings: false },
                 mangle: minify,
                 sourceMap: true
+            }),
+            new CircularDependencyPlugin({
+                failOnError: true
             })
         ],
         bail: true
@@ -139,7 +143,7 @@ gulp.task('typecheck', [ 'lint' ], function() {
     return gulp.src([ 'src/**/*.js', 'test/**/*.js' ])
         .pipe(gulpFlowtype({
             abort: true
-        }))
+        }));
 });
 
 
