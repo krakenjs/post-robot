@@ -3,6 +3,7 @@
 import { getWindowType, jsonStringify } from './util';
 import { CONFIG } from '../conf';
 
+const LOG_DISABLE = 'disabled';
 const LOG_LEVELS = ['debug', 'info', 'warn', 'error'];
 
 if (Function.prototype.bind && window.console && typeof console.log === 'object') {
@@ -91,7 +92,7 @@ export let log = {
             try {
                 let logLevel = window.LOG_LEVEL || CONFIG.LOG_LEVEL;
 
-                if (LOG_LEVELS.indexOf(level) < LOG_LEVELS.indexOf(logLevel)) {
+                if (logLevel === LOG_DISABLE || LOG_LEVELS.indexOf(level) < LOG_LEVELS.indexOf(logLevel)) {
                     return;
                 }
 
