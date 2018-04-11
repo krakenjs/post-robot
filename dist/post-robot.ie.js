@@ -31,14 +31,14 @@
             return __webpack_require__.d(getter, "a", getter), getter;
         }, __webpack_require__.o = function(object, property) {
             return Object.prototype.hasOwnProperty.call(object, property);
-        }, __webpack_require__.p = "", __webpack_require__(__webpack_require__.s = 35);
+        }, __webpack_require__.p = "", __webpack_require__(__webpack_require__.s = 37);
     }([ function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
-        var __WEBPACK_IMPORTED_MODULE_0__config__ = __webpack_require__(31);
+        var __WEBPACK_IMPORTED_MODULE_0__config__ = __webpack_require__(33);
         __webpack_require__.d(__webpack_exports__, "b", function() {
             return __WEBPACK_IMPORTED_MODULE_0__config__.a;
         });
-        var __WEBPACK_IMPORTED_MODULE_1__constants__ = __webpack_require__(14);
+        var __WEBPACK_IMPORTED_MODULE_1__constants__ = __webpack_require__(15);
         __webpack_require__.d(__webpack_exports__, "a", function() {
             return __WEBPACK_IMPORTED_MODULE_1__constants__.a;
         }), __webpack_require__.d(__webpack_exports__, "c", function() {
@@ -46,46 +46,8 @@
         });
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
-        function getActualDomain(win) {
-            var location = win.location;
-            if (!location) throw new Error("Can not read window location");
-            var protocol = location.protocol;
-            if (!protocol) throw new Error("Can not read window protocol");
-            if (protocol === CONSTANTS.FILE_PROTOCOL) return CONSTANTS.FILE_PROTOCOL + "//";
-            var host = location.host;
-            if (!host) throw new Error("Can not read window host");
-            return protocol + "//" + host;
-        }
-        function getDomain(win) {
-            win = win || window;
-            var domain = getActualDomain(win);
-            return domain && win.mockDomain && 0 === win.mockDomain.indexOf(CONSTANTS.MOCK_PROTOCOL) ? win.mockDomain : domain;
-        }
-        function isBlankDomain(win) {
-            try {
-                if (!win.location.href) return !0;
-                if ("about:blank" === win.location.href) return !0;
-            } catch (err) {}
-            return !1;
-        }
-        function isActuallySameDomain(win) {
-            try {
-                var desc = Object.getOwnPropertyDescriptor(win, "location");
-                if (desc && !1 === desc.enumerable) return !1;
-            } catch (err) {}
-            try {
-                if (isBlankDomain(win)) return !0;
-                if (getActualDomain(win) === getActualDomain(window)) return !0;
-            } catch (err) {}
-            return !1;
-        }
-        function isSameDomain(win) {
-            if (!isActuallySameDomain(win)) return !1;
-            try {
-                if (isBlankDomain(win)) return !0;
-                if (getDomain(window) === getDomain(win)) return !0;
-            } catch (err) {}
-            return !1;
+        function isAboutProtocol() {
+            return (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window).location.protocol === CONSTANTS.ABOUT_PROTOCOL;
         }
         function getParent(win) {
             if (win) try {
@@ -100,6 +62,57 @@
             } catch (err) {
                 return;
             }
+        }
+        function canReadFromWindow(win) {
+            try {
+                return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__util__.a)(win && win.location && win.location.href), 
+                !0;
+            } catch (err) {}
+            return !1;
+        }
+        function getActualDomain(win) {
+            var location = win.location;
+            if (!location) throw new Error("Can not read window location");
+            var protocol = location.protocol;
+            if (!protocol) throw new Error("Can not read window protocol");
+            if (protocol === CONSTANTS.FILE_PROTOCOL) return CONSTANTS.FILE_PROTOCOL + "//";
+            if (protocol === CONSTANTS.ABOUT_PROTOCOL) {
+                var parent = getParent(win);
+                return parent && canReadFromWindow(win) ? getActualDomain(parent) : CONSTANTS.ABOUT_PROTOCOL + "//";
+            }
+            var host = location.host;
+            if (!host) throw new Error("Can not read window host");
+            return protocol + "//" + host;
+        }
+        function getDomain(win) {
+            win = win || window;
+            var domain = getActualDomain(win);
+            return domain && win.mockDomain && 0 === win.mockDomain.indexOf(CONSTANTS.MOCK_PROTOCOL) ? win.mockDomain : domain;
+        }
+        function isActuallySameDomain(win) {
+            try {
+                if (win === window) return !0;
+            } catch (err) {}
+            try {
+                var desc = Object.getOwnPropertyDescriptor(win, "location");
+                if (desc && !1 === desc.enumerable) return !1;
+            } catch (err) {}
+            try {
+                if (isAboutProtocol(win) && canReadFromWindow(win)) return !0;
+            } catch (err) {}
+            try {
+                if (getActualDomain(win) === getActualDomain(window)) return !0;
+            } catch (err) {}
+            return !1;
+        }
+        function isSameDomain(win) {
+            if (!isActuallySameDomain(win)) return !1;
+            try {
+                if (win === window) return !0;
+                if (isAboutProtocol(win) && canReadFromWindow(win)) return !0;
+                if (getDomain(window) === getDomain(win)) return !0;
+            } catch (err) {}
+            return !1;
         }
         function getParents(win) {
             var result = [];
@@ -407,21 +420,22 @@
             }
             return !1;
         }
-        __webpack_exports__.r = getActualDomain, __webpack_exports__.h = getDomain, __webpack_exports__.q = isActuallySameDomain, 
-        __webpack_exports__.l = isSameDomain, __webpack_exports__.p = getParent, __webpack_exports__.o = getOpener, 
-        __webpack_exports__.n = getFrames, __webpack_exports__.e = isWindowClosed, __webpack_exports__.j = getUserAgent, 
-        __webpack_exports__.i = getFrameByName, __webpack_exports__.m = isOpener, __webpack_exports__.a = getAncestor, 
-        __webpack_exports__.s = isAncestor, __webpack_exports__.b = isPopup, __webpack_exports__.c = isIframe, 
-        __webpack_exports__.k = isSameTopWindow, __webpack_exports__.f = matchDomain, __webpack_exports__.g = getDomainFromUrl, 
-        __webpack_exports__.d = isWindow;
-        var __WEBPACK_IMPORTED_MODULE_0__util__ = __webpack_require__(21), CONSTANTS = {
+        __webpack_exports__.p = getParent, __webpack_exports__.o = getOpener, __webpack_exports__.r = getActualDomain, 
+        __webpack_exports__.h = getDomain, __webpack_exports__.q = isActuallySameDomain, 
+        __webpack_exports__.l = isSameDomain, __webpack_exports__.n = getFrames, __webpack_exports__.e = isWindowClosed, 
+        __webpack_exports__.j = getUserAgent, __webpack_exports__.i = getFrameByName, __webpack_exports__.m = isOpener, 
+        __webpack_exports__.a = getAncestor, __webpack_exports__.s = isAncestor, __webpack_exports__.b = isPopup, 
+        __webpack_exports__.c = isIframe, __webpack_exports__.k = isSameTopWindow, __webpack_exports__.f = matchDomain, 
+        __webpack_exports__.g = getDomainFromUrl, __webpack_exports__.d = isWindow;
+        var __WEBPACK_IMPORTED_MODULE_0__util__ = __webpack_require__(22), CONSTANTS = {
             MOCK_PROTOCOL: "mock:",
             FILE_PROTOCOL: "file:",
+            ABOUT_PROTOCOL: "about:",
             WILDCARD: "*"
         }, IE_WIN_ACCESS_ERROR = "Call was rejected by callee.\r\n", iframeWindows = [], iframeFrames = [];
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
-        var __WEBPACK_IMPORTED_MODULE_0__promise__ = __webpack_require__(23);
+        var __WEBPACK_IMPORTED_MODULE_0__promise__ = __webpack_require__(25);
         __webpack_require__.d(__webpack_exports__, "a", function() {
             return __WEBPACK_IMPORTED_MODULE_0__promise__.a;
         });
@@ -462,7 +476,7 @@
         __webpack_require__.d(__webpack_exports__, "c", function() {
             return __WEBPACK_IMPORTED_MODULE_1__log__.a;
         });
-        var __WEBPACK_IMPORTED_MODULE_2__serialize__ = __webpack_require__(37);
+        var __WEBPACK_IMPORTED_MODULE_2__serialize__ = __webpack_require__(39);
         __webpack_require__.d(__webpack_exports__, "b", function() {
             return __WEBPACK_IMPORTED_MODULE_2__serialize__.a;
         }), __webpack_require__.d(__webpack_exports__, "j", function() {
@@ -470,7 +484,7 @@
         }), __webpack_require__.d(__webpack_exports__, "n", function() {
             return __WEBPACK_IMPORTED_MODULE_2__serialize__.c;
         });
-        var __WEBPACK_IMPORTED_MODULE_3__ready__ = __webpack_require__(36);
+        var __WEBPACK_IMPORTED_MODULE_3__ready__ = __webpack_require__(38);
         __webpack_require__.d(__webpack_exports__, "a", function() {
             return __WEBPACK_IMPORTED_MODULE_3__ready__.a;
         }), __webpack_require__.d(__webpack_exports__, "d", function() {
@@ -484,17 +498,17 @@
         });
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
-        var __WEBPACK_IMPORTED_MODULE_0__receive__ = __webpack_require__(32);
+        var __WEBPACK_IMPORTED_MODULE_0__receive__ = __webpack_require__(34);
         __webpack_require__.d(__webpack_exports__, "a", function() {
             return __WEBPACK_IMPORTED_MODULE_0__receive__.a;
         }), __webpack_require__.d(__webpack_exports__, "b", function() {
             return __WEBPACK_IMPORTED_MODULE_0__receive__.b;
         });
-        var __WEBPACK_IMPORTED_MODULE_1__send__ = __webpack_require__(16);
+        var __WEBPACK_IMPORTED_MODULE_1__send__ = __webpack_require__(17);
         __webpack_require__.d(__webpack_exports__, "e", function() {
             return __WEBPACK_IMPORTED_MODULE_1__send__.a;
         });
-        var __WEBPACK_IMPORTED_MODULE_2__listeners__ = __webpack_require__(15);
+        var __WEBPACK_IMPORTED_MODULE_2__listeners__ = __webpack_require__(16);
         __webpack_require__.d(__webpack_exports__, "c", function() {
             return __WEBPACK_IMPORTED_MODULE_2__listeners__.e;
         }), __webpack_require__.d(__webpack_exports__, "d", function() {
@@ -639,7 +653,7 @@
         }), __webpack_require__.d(__webpack_exports__, "bridge", function() {
             return bridge;
         }), __webpack_exports__.init = init;
-        var __WEBPACK_IMPORTED_MODULE_0__lib__ = __webpack_require__(4), __WEBPACK_IMPORTED_MODULE_1__drivers__ = __webpack_require__(6), __WEBPACK_IMPORTED_MODULE_2__global__ = __webpack_require__(3), __WEBPACK_IMPORTED_MODULE_3__public__ = __webpack_require__(17), __WEBPACK_IMPORTED_MODULE_4__bridge_interface__ = __webpack_require__(27);
+        var __WEBPACK_IMPORTED_MODULE_0__lib__ = __webpack_require__(4), __WEBPACK_IMPORTED_MODULE_1__drivers__ = __webpack_require__(6), __WEBPACK_IMPORTED_MODULE_2__global__ = __webpack_require__(3), __WEBPACK_IMPORTED_MODULE_3__public__ = __webpack_require__(18), __WEBPACK_IMPORTED_MODULE_4__bridge_interface__ = __webpack_require__(29);
         __webpack_require__.d(__webpack_exports__, "parent", function() {
             return __WEBPACK_IMPORTED_MODULE_3__public__.a;
         }), __webpack_require__.d(__webpack_exports__, "send", function() {
@@ -665,7 +679,7 @@
         }), __webpack_require__.d(__webpack_exports__, "disable", function() {
             return __WEBPACK_IMPORTED_MODULE_3__public__.l;
         });
-        var __WEBPACK_IMPORTED_MODULE_5__clean__ = __webpack_require__(29);
+        var __WEBPACK_IMPORTED_MODULE_5__clean__ = __webpack_require__(31);
         __webpack_require__.d(__webpack_exports__, "cleanUpWindow", function() {
             return __WEBPACK_IMPORTED_MODULE_5__clean__.a;
         });
@@ -753,13 +767,13 @@
         Object.defineProperty(__webpack_exports__, "__esModule", {
             value: !0
         });
-        var __WEBPACK_IMPORTED_MODULE_0__bridge__ = __webpack_require__(25);
+        var __WEBPACK_IMPORTED_MODULE_0__bridge__ = __webpack_require__(27);
         for (var __WEBPACK_IMPORT_KEY__ in __WEBPACK_IMPORTED_MODULE_0__bridge__) "default" !== __WEBPACK_IMPORT_KEY__ && function(key) {
             __webpack_require__.d(__webpack_exports__, key, function() {
                 return __WEBPACK_IMPORTED_MODULE_0__bridge__[key];
             });
         }(__WEBPACK_IMPORT_KEY__);
-        var __WEBPACK_IMPORTED_MODULE_1__child__ = __webpack_require__(26);
+        var __WEBPACK_IMPORTED_MODULE_1__child__ = __webpack_require__(28);
         __webpack_require__.d(__webpack_exports__, "openTunnelToOpener", function() {
             return __WEBPACK_IMPORTED_MODULE_1__child__.a;
         });
@@ -789,7 +803,7 @@
         }), __webpack_require__.d(__webpack_exports__, "sendBridgeMessage", function() {
             return __WEBPACK_IMPORTED_MODULE_2__common__.l;
         });
-        var __WEBPACK_IMPORTED_MODULE_3__parent__ = __webpack_require__(28);
+        var __WEBPACK_IMPORTED_MODULE_3__parent__ = __webpack_require__(30);
         __webpack_require__.d(__webpack_exports__, "hasBridge", function() {
             return __WEBPACK_IMPORTED_MODULE_3__parent__.a;
         }), __webpack_require__.d(__webpack_exports__, "openBridge", function() {
@@ -883,16 +897,32 @@
         Object.defineProperty(__webpack_exports__, "__esModule", {
             value: !0
         });
-        var __WEBPACK_IMPORTED_MODULE_0__weakmap__ = __webpack_require__(20);
+        var __WEBPACK_IMPORTED_MODULE_0__weakmap__ = __webpack_require__(21);
         __webpack_require__.d(__webpack_exports__, "WeakMap", function() {
             return __WEBPACK_IMPORTED_MODULE_0__weakmap__.a;
         });
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
+        (function(global) {
+            function getGlobal() {
+                var glob = void 0;
+                if ("undefined" != typeof window) glob = window; else {
+                    if (void 0 === global) throw new Error("Can not find global");
+                    glob = global;
+                }
+                var zalgoGlobal = glob.__zalgopromise__ = glob.__zalgopromise__ || {};
+                return zalgoGlobal.flushPromises = zalgoGlobal.flushPromises || [], zalgoGlobal.activeCount = zalgoGlobal.activeCount || 0, 
+                zalgoGlobal.possiblyUnhandledPromiseHandlers = zalgoGlobal.possiblyUnhandledPromiseHandlers || [], 
+                zalgoGlobal.dispatchedErrors = zalgoGlobal.dispatchedErrors || [], zalgoGlobal;
+            }
+            __webpack_exports__.a = getGlobal;
+        }).call(__webpack_exports__, __webpack_require__(23));
+    }, function(module, __webpack_exports__, __webpack_require__) {
+        "use strict";
         Object.defineProperty(__webpack_exports__, "__esModule", {
             value: !0
         });
-        var __WEBPACK_IMPORTED_MODULE_0__ie__ = __webpack_require__(30);
+        var __WEBPACK_IMPORTED_MODULE_0__ie__ = __webpack_require__(32);
         __webpack_require__.d(__webpack_exports__, "emulateIERestrictions", function() {
             return __WEBPACK_IMPORTED_MODULE_0__ie__.a;
         });
@@ -1142,7 +1172,7 @@
             });
         }
         __webpack_exports__.a = sendMessage;
-        var __WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__ = __webpack_require__(1), __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__ = __webpack_require__(2), __WEBPACK_IMPORTED_MODULE_2__conf__ = __webpack_require__(0), __WEBPACK_IMPORTED_MODULE_3__lib__ = __webpack_require__(4), __WEBPACK_IMPORTED_MODULE_4__strategies__ = __webpack_require__(34), _extends = Object.assign || function(target) {
+        var __WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__ = __webpack_require__(1), __WEBPACK_IMPORTED_MODULE_1_zalgo_promise_src__ = __webpack_require__(2), __WEBPACK_IMPORTED_MODULE_2__conf__ = __webpack_require__(0), __WEBPACK_IMPORTED_MODULE_3__lib__ = __webpack_require__(4), __WEBPACK_IMPORTED_MODULE_4__strategies__ = __webpack_require__(36), _extends = Object.assign || function(target) {
             for (var i = 1; i < arguments.length; i++) {
                 var source = arguments[i];
                 for (var key in source) Object.prototype.hasOwnProperty.call(source, key) && (target[key] = source[key]);
@@ -1154,7 +1184,7 @@
         __webpack_require__.d(__webpack_exports__, "a", function() {
             return parent;
         });
-        var __WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__ = __webpack_require__(1), __WEBPACK_IMPORTED_MODULE_1__client__ = __webpack_require__(38);
+        var __WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__ = __webpack_require__(1), __WEBPACK_IMPORTED_MODULE_1__client__ = __webpack_require__(40);
         __webpack_require__.d(__webpack_exports__, "b", function() {
             return __WEBPACK_IMPORTED_MODULE_1__client__.a;
         }), __webpack_require__.d(__webpack_exports__, "c", function() {
@@ -1164,7 +1194,7 @@
         }), __webpack_require__.d(__webpack_exports__, "e", function() {
             return __WEBPACK_IMPORTED_MODULE_1__client__.d;
         });
-        var __WEBPACK_IMPORTED_MODULE_2__server__ = __webpack_require__(40);
+        var __WEBPACK_IMPORTED_MODULE_2__server__ = __webpack_require__(42);
         __webpack_require__.d(__webpack_exports__, "f", function() {
             return __WEBPACK_IMPORTED_MODULE_2__server__.a;
         }), __webpack_require__.d(__webpack_exports__, "g", function() {
@@ -1174,7 +1204,7 @@
         }), __webpack_require__.d(__webpack_exports__, "i", function() {
             return __WEBPACK_IMPORTED_MODULE_2__server__.d;
         });
-        var __WEBPACK_IMPORTED_MODULE_3__config__ = __webpack_require__(39);
+        var __WEBPACK_IMPORTED_MODULE_3__config__ = __webpack_require__(41);
         __webpack_require__.d(__webpack_exports__, "j", function() {
             return __WEBPACK_IMPORTED_MODULE_3__config__.a;
         }), __webpack_require__.d(__webpack_exports__, "k", function() {
@@ -1215,7 +1245,7 @@
         __webpack_require__.d(__webpack_exports__, "a", function() {
             return CrossDomainSafeWeakMap;
         });
-        var __WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__ = __webpack_require__(1), __WEBPACK_IMPORTED_MODULE_1__native__ = __webpack_require__(18), __WEBPACK_IMPORTED_MODULE_2__util__ = __webpack_require__(19), _createClass = function() {
+        var __WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__ = __webpack_require__(1), __WEBPACK_IMPORTED_MODULE_1__native__ = __webpack_require__(19), __WEBPACK_IMPORTED_MODULE_2__util__ = __webpack_require__(20), _createClass = function() {
             function defineProperties(target, props) {
                 for (var i = 0; i < props.length; i++) {
                     var descriptor = props[i];
@@ -1344,25 +1374,42 @@
         }
         function noop() {}
         __webpack_exports__.b = isRegex, __webpack_exports__.a = noop;
+    }, function(module, exports) {
+        var g, _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
+            return typeof obj;
+        } : function(obj) {
+            return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+        };
+        g = function() {
+            return this;
+        }();
+        try {
+            g = g || Function("return this")() || (0, eval)("this");
+        } catch (e) {
+            "object" === ("undefined" == typeof window ? "undefined" : _typeof(window)) && (g = window);
+        }
+        module.exports = g;
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
         function dispatchPossiblyUnhandledError(err) {
-            if (-1 === dispatchedErrors.indexOf(err)) {
-                dispatchedErrors.push(err), setTimeout(function() {
+            if (-1 === __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__global__.a)().dispatchedErrors.indexOf(err)) {
+                __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__global__.a)().dispatchedErrors.push(err), 
+                setTimeout(function() {
                     throw err;
                 }, 1);
-                for (var j = 0; j < possiblyUnhandledPromiseHandlers.length; j++) possiblyUnhandledPromiseHandlers[j](err);
+                for (var j = 0; j < __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__global__.a)().possiblyUnhandledPromiseHandlers.length; j++) __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__global__.a)().possiblyUnhandledPromiseHandlers[j](err);
             }
         }
         function onPossiblyUnhandledException(handler) {
-            return possiblyUnhandledPromiseHandlers.push(handler), {
+            return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__global__.a)().possiblyUnhandledPromiseHandlers.push(handler), 
+            {
                 cancel: function() {
-                    possiblyUnhandledPromiseHandlers.splice(possiblyUnhandledPromiseHandlers.indexOf(handler), 1);
+                    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__global__.a)().possiblyUnhandledPromiseHandlers.splice(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__global__.a)().possiblyUnhandledPromiseHandlers.indexOf(handler), 1);
                 }
             };
         }
         __webpack_exports__.a = dispatchPossiblyUnhandledError, __webpack_exports__.b = onPossiblyUnhandledException;
-        var possiblyUnhandledPromiseHandlers = [], dispatchedErrors = [];
+        var __WEBPACK_IMPORTED_MODULE_0__global__ = __webpack_require__(13);
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
         function _classCallCheck(instance, Constructor) {
@@ -1371,7 +1418,7 @@
         __webpack_require__.d(__webpack_exports__, "a", function() {
             return ZalgoPromise;
         });
-        var __WEBPACK_IMPORTED_MODULE_0__utils__ = __webpack_require__(24), __WEBPACK_IMPORTED_MODULE_1__exceptions__ = __webpack_require__(22), _createClass = function() {
+        var __WEBPACK_IMPORTED_MODULE_0__utils__ = __webpack_require__(26), __WEBPACK_IMPORTED_MODULE_1__exceptions__ = __webpack_require__(24), __WEBPACK_IMPORTED_MODULE_2__global__ = __webpack_require__(13), _createClass = function() {
             function defineProperties(target, props) {
                 for (var i = 0; i < props.length; i++) {
                     var descriptor = props[i];
@@ -1383,10 +1430,7 @@
                 return protoProps && defineProperties(Constructor.prototype, protoProps), staticProps && defineProperties(Constructor, staticProps), 
                 Constructor;
             };
-        }(), global = window.__zalgopromise__ = window.__zalgopromise__ || {
-            flushPromises: [],
-            activeCount: 0
-        }, ZalgoPromise = function() {
+        }(), ZalgoPromise = function() {
             function ZalgoPromise(handler) {
                 var _this = this;
                 if (_classCallCheck(this, ZalgoPromise), this.resolved = !1, this.rejected = !1, 
@@ -1435,7 +1479,7 @@
                 value: function() {
                     var _this3 = this, dispatching = this.dispatching, resolved = this.resolved, rejected = this.rejected, handlers = this.handlers;
                     if (!dispatching && (resolved || rejected)) {
-                        this.dispatching = !0, global.activeCount += 1;
+                        this.dispatching = !0, __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__global__.a)().activeCount += 1;
                         for (var i = 0; i < handlers.length; i++) {
                             (function(i) {
                                 var _handlers$i = handlers[i], onSuccess = _handlers$i.onSuccess, onError = _handlers$i.onError, promise = _handlers$i.promise, result = void 0;
@@ -1459,7 +1503,8 @@
                                 }) : promise.resolve(result);
                             })(i);
                         }
-                        handlers.length = 0, this.dispatching = !1, global.activeCount -= 1, 0 === global.activeCount && ZalgoPromise.flushQueue();
+                        handlers.length = 0, this.dispatching = !1, __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__global__.a)().activeCount -= 1, 
+                        0 === __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__global__.a)().activeCount && ZalgoPromise.flushQueue();
                     }
                 }
             }, {
@@ -1507,8 +1552,8 @@
             }, {
                 key: "toPromise",
                 value: function() {
-                    if (!window.Promise) throw new Error("Could not find window.Promise");
-                    return window.Promise.resolve(this);
+                    if ("undefined" == typeof Promise) throw new Error("Could not find Promise");
+                    return Promise.resolve(this);
                 }
             } ], [ {
                 key: "resolve",
@@ -1592,14 +1637,15 @@
                 key: "flush",
                 value: function() {
                     var promise = new ZalgoPromise();
-                    return global.flushPromises.push(promise), 0 === global.activeCount && ZalgoPromise.flushQueue(), 
+                    return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__global__.a)().flushPromises.push(promise), 
+                    0 === __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__global__.a)().activeCount && ZalgoPromise.flushQueue(), 
                     promise;
                 }
             }, {
                 key: "flushQueue",
                 value: function() {
-                    var promisesToFlush = global.flushPromises;
-                    global.flushPromises = [];
+                    var promisesToFlush = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__global__.a)().flushPromises;
+                    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__global__.a)().flushPromises = [];
                     for (var _iterator = promisesToFlush, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
                         var _ref;
                         if (_isArray) {
@@ -1619,11 +1665,12 @@
         function isPromise(item) {
             try {
                 if (!item) return !1;
-                if (window.Promise && item instanceof window.Promise) return !0;
-                if (window.Window && item instanceof window.Window) return !1;
-                if (window.constructor && item instanceof window.constructor) return !1;
-                if (toString) {
-                    var name = toString.call(item);
+                if ("undefined" != typeof Promise && item instanceof Promise) return !0;
+                if ("undefined" != typeof window && window.Window && item instanceof window.Window) return !1;
+                if ("undefined" != typeof window && window.constructor && item instanceof window.constructor) return !1;
+                var _toString = {}.toString;
+                if (_toString) {
+                    var name = _toString.call(item);
                     if ("[object Window]" === name || "[object global]" === name || "[object DOMWindow]" === name) return !1;
                 }
                 if ("function" == typeof item.then) return !0;
@@ -1633,7 +1680,6 @@
             return !1;
         }
         __webpack_exports__.a = isPromise;
-        var toString = {}.toString;
     }, function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
         function deleteTunnelWindow(id) {
@@ -2003,7 +2049,7 @@
         __webpack_require__.d(__webpack_exports__, "a", function() {
             return CONFIG;
         });
-        var _ALLOWED_POST_MESSAGE, __WEBPACK_IMPORTED_MODULE_0__constants__ = __webpack_require__(14), CONFIG = {
+        var _ALLOWED_POST_MESSAGE, __WEBPACK_IMPORTED_MODULE_0__constants__ = __webpack_require__(15), CONFIG = {
             ALLOW_POSTMESSAGE_POPUP: !("__ALLOW_POSTMESSAGE_POPUP__" in window) || window.__ALLOW_POSTMESSAGE_POPUP__,
             LOG_LEVEL: "info",
             BRIDGE_TIMEOUT: 5e3,
@@ -2063,7 +2109,7 @@
                 data: event.data
             };
             try {
-                __webpack_require__(13).emulateIERestrictions(messageEvent.source, window);
+                __webpack_require__(14).emulateIERestrictions(messageEvent.source, window);
             } catch (err) {
                 return;
             }
@@ -2073,7 +2119,7 @@
             __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__lib__.o)(window, "message", messageListener);
         }
         __webpack_exports__.b = messageListener, __webpack_exports__.a = listenForMessages;
-        var __WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__ = __webpack_require__(1), __WEBPACK_IMPORTED_MODULE_1__conf__ = __webpack_require__(0), __WEBPACK_IMPORTED_MODULE_2__lib__ = __webpack_require__(4), __WEBPACK_IMPORTED_MODULE_3__global__ = __webpack_require__(3), __WEBPACK_IMPORTED_MODULE_4__types__ = __webpack_require__(33), _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
+        var __WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__ = __webpack_require__(1), __WEBPACK_IMPORTED_MODULE_1__conf__ = __webpack_require__(0), __WEBPACK_IMPORTED_MODULE_2__lib__ = __webpack_require__(4), __WEBPACK_IMPORTED_MODULE_3__global__ = __webpack_require__(3), __WEBPACK_IMPORTED_MODULE_4__types__ = __webpack_require__(35), _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
             return typeof obj;
         } : function(obj) {
             return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
@@ -2093,7 +2139,7 @@
         __webpack_require__.d(__webpack_exports__, "a", function() {
             return RECEIVE_MESSAGE_TYPES;
         });
-        var _RECEIVE_MESSAGE_TYPE, __WEBPACK_IMPORTED_MODULE_0_zalgo_promise_src__ = __webpack_require__(2), __WEBPACK_IMPORTED_MODULE_1_cross_domain_utils_src__ = __webpack_require__(1), __WEBPACK_IMPORTED_MODULE_2__conf__ = __webpack_require__(0), __WEBPACK_IMPORTED_MODULE_3__lib__ = __webpack_require__(4), __WEBPACK_IMPORTED_MODULE_4__send__ = __webpack_require__(16), __WEBPACK_IMPORTED_MODULE_5__listeners__ = __webpack_require__(15), _extends = Object.assign || function(target) {
+        var _RECEIVE_MESSAGE_TYPE, __WEBPACK_IMPORTED_MODULE_0_zalgo_promise_src__ = __webpack_require__(2), __WEBPACK_IMPORTED_MODULE_1_cross_domain_utils_src__ = __webpack_require__(1), __WEBPACK_IMPORTED_MODULE_2__conf__ = __webpack_require__(0), __WEBPACK_IMPORTED_MODULE_3__lib__ = __webpack_require__(4), __WEBPACK_IMPORTED_MODULE_4__send__ = __webpack_require__(17), __WEBPACK_IMPORTED_MODULE_5__listeners__ = __webpack_require__(16), _extends = Object.assign || function(target) {
             for (var i = 1; i < arguments.length; i++) {
                 var source = arguments[i];
                 for (var key in source) Object.prototype.hasOwnProperty.call(source, key) && (target[key] = source[key]);
@@ -2176,7 +2222,7 @@
         var __WEBPACK_IMPORTED_MODULE_0_cross_domain_utils_src__ = __webpack_require__(1), __WEBPACK_IMPORTED_MODULE_1__conf__ = __webpack_require__(0), SEND_MESSAGE_STRATEGIES = {};
         SEND_MESSAGE_STRATEGIES[__WEBPACK_IMPORTED_MODULE_1__conf__.a.SEND_STRATEGIES.POST_MESSAGE] = function(win, serializedMessage, domain) {
             try {
-                __webpack_require__(13).emulateIERestrictions(window, win);
+                __webpack_require__(14).emulateIERestrictions(window, win);
             } catch (err) {
                 return;
             }
