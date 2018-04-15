@@ -43,11 +43,16 @@ beforeEach(() => {
     postRobot.CONFIG.ALLOW_POSTMESSAGE_POPUP = true;
 });
 
+afterEach(() => {
+    postRobot.CONFIG.ALLOW_SAME_WINDOW = false;
+    postRobot.CONFIG.ACK_TIMEOUT = 1000;
+});
+
 before(() : ZalgoPromise<mixed> => {
     if (!postRobot.bridge) {
         throw new Error(`Expected postRobot.bridge to be available`);
     }
-    
+
     return postRobot.bridge.openBridge('/base/test/bridge.htm', 'mock://test-post-robot-child.com').then(frame => {
         bridge = frame;
     }).then(() => {
@@ -338,6 +343,27 @@ describe('[post-robot] options', () => {
                 assert.equal(count, 1);
             });
         });
+    });
+
+    it('should ignore its own requests when ALLOW_SAME_WINDOW is enabled', (done) => {
+
+        postRobot.CONFIG.ALLOW_SAME_WINDOW = true;
+        postRobot.CONFIG.ACK_TIMEOUT = 50;
+
+        postRobot.send(window, 'doesntexist').then(() => {
+            done(new Error('Expected success handler to not be called'));
+        }).catch((err) => {
+            // It fails because there's no one listening and so no ACK gets back in specified time,
+            // but there's no error when this instance of post-robot sees (receives) this same request.
+            // Note that we don't set up a handler for "doesntexist".
+            if (err instanceof Error) {
+                assert.equal(err.message.indexOf('No ack for postMessage doesntexist in'), 0);
+            } else {
+                assert.ok(err);
+            }
+        });
+
+        setTimeout(done, 100);
     });
 });
 

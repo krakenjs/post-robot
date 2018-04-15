@@ -3,7 +3,7 @@
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { isWindowClosed, matchDomain, stringifyDomainPattern, type CrossDomainWindowType } from 'cross-domain-utils/src';
 
-import { CONSTANTS } from '../../conf';
+import { CONSTANTS, CONFIG } from '../../conf';
 import { log, stringifyError, noop } from '../../lib';
 import { sendMessage } from '../send';
 import { getRequestListener, getResponseListener, deleteResponseListener, isResponseListenerErrored } from '../listeners';
@@ -19,6 +19,10 @@ export let RECEIVE_MESSAGE_TYPES = {
         let options = getResponseListener(message.hash);
 
         if (!options) {
+            if (CONFIG.ALLOW_SAME_WINDOW) {
+                return;
+            }
+
             throw new Error(`No handler found for post message ack for message: ${ message.name } from ${ origin } in ${ window.location.protocol }//${ window.location.host }${ window.location.pathname }`);
         }
 
@@ -32,6 +36,10 @@ export let RECEIVE_MESSAGE_TYPES = {
     [ CONSTANTS.POST_MESSAGE_TYPE.REQUEST ](source : CrossDomainWindowType, origin : string, message : Object) : ZalgoPromise<void> {
 
         let options = getRequestListener({ name: message.name, win: source, domain: origin });
+
+        if (!options && CONFIG.ALLOW_SAME_WINDOW) {
+            return ZalgoPromise.resolve();
+        }
 
         function respond(data) : ZalgoPromise<void> {
 
@@ -108,6 +116,10 @@ export let RECEIVE_MESSAGE_TYPES = {
         let options = getResponseListener(message.hash);
 
         if (!options) {
+            if (CONFIG.ALLOW_SAME_WINDOW) {
+                return;
+            }
+
             throw new Error(`No handler found for post message response for message: ${ message.name } from ${ origin } in ${ window.location.protocol }//${ window.location.host }${ window.location.pathname }`);
         }
 
