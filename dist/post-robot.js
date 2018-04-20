@@ -2205,10 +2205,10 @@
                         var level = void 0;
                         level = -1 !== _conf.POST_MESSAGE_NAMES_LIST.indexOf(message.name) || message.type === _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK ? "debug" : "error" === message.ack ? "error" : "info";
                         _lib.log.logLevel(level, [ "\n\n\t", "#receive", message.type.replace(/^postrobot_message_/, ""), "::", message.name, "::", origin, "\n\n", message ]);
-                        if ((0, _src.isWindowClosed)(source)) _lib.log.debug("Source window is closed - can not send " + message.type + " " + message.name); else {
+                        if (!(0, _src.isWindowClosed)(source) || message.fireAndForget) {
                             message.data && (message.data = (0, _lib.deserializeMethods)(source, origin, message.data));
                             _types.RECEIVE_MESSAGE_TYPES[message.type](source, origin, message);
-                        }
+                        } else _lib.log.debug("Source window is closed - can not send " + message.type + " " + message.name);
                     }
                 }
             }
