@@ -1825,6 +1825,32 @@
             __webpack_require__("./node_modules/cross-domain-utils/src/index.js");
             var _global = __webpack_require__("./src/global.js");
         },
+        "./src/compat/ie.js": function(module, exports, __webpack_require__) {
+            "use strict";
+            function emulateIERestrictions(sourceWindow, targetWindow) {
+                if (!_conf.CONFIG.ALLOW_POSTMESSAGE_POPUP && !1 === (0, _src.isSameTopWindow)(sourceWindow, targetWindow)) throw new Error("Can not send and receive post messages between two different windows (disabled to emulate IE)");
+            }
+            Object.defineProperty(exports, "__esModule", {
+                value: !0
+            });
+            exports.emulateIERestrictions = emulateIERestrictions;
+            var _src = __webpack_require__("./node_modules/cross-domain-utils/src/index.js"), _conf = __webpack_require__("./src/conf/index.js");
+        },
+        "./src/compat/index.js": function(module, exports, __webpack_require__) {
+            "use strict";
+            Object.defineProperty(exports, "__esModule", {
+                value: !0
+            });
+            var _ie = __webpack_require__("./src/compat/ie.js");
+            Object.keys(_ie).forEach(function(key) {
+                "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
+                    enumerable: !0,
+                    get: function() {
+                        return _ie[key];
+                    }
+                });
+            });
+        },
         "./src/conf/config.js": function(module, exports, __webpack_require__) {
             "use strict";
             function _defineProperty(obj, key, value) {
@@ -2197,6 +2223,11 @@
                     origin: event.origin || event.originalEvent && event.originalEvent.origin,
                     data: event.data
                 };
+                try {
+                    __webpack_require__("./src/compat/index.js").emulateIERestrictions(messageEvent.source, window);
+                } catch (err) {
+                    return;
+                }
                 receiveMessage(messageEvent);
             }
             function listenForMessages() {
@@ -2384,6 +2415,11 @@
             exports.SEND_MESSAGE_STRATEGIES = void 0;
             var _src = __webpack_require__("./node_modules/cross-domain-utils/src/index.js"), _conf = __webpack_require__("./src/conf/index.js"), SEND_MESSAGE_STRATEGIES = exports.SEND_MESSAGE_STRATEGIES = {};
             SEND_MESSAGE_STRATEGIES[_conf.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE] = function(win, serializedMessage, domain) {
+                try {
+                    __webpack_require__("./src/compat/index.js").emulateIERestrictions(window, win);
+                } catch (err) {
+                    return;
+                }
                 var domains = void 0;
                 domains = Array.isArray(domain) ? domain : "string" == typeof domain ? [ domain ] : [ _conf.CONSTANTS.WILDCARD ];
                 domains = domains.map(function(dom) {
@@ -2397,6 +2433,27 @@
                 domains.forEach(function(dom) {
                     return win.postMessage(serializedMessage, dom);
                 });
+            };
+            var _require = __webpack_require__("./src/bridge/index.js"), sendBridgeMessage = _require.sendBridgeMessage, needsBridgeForBrowser = _require.needsBridgeForBrowser, isBridge = _require.isBridge;
+            SEND_MESSAGE_STRATEGIES[_conf.CONSTANTS.SEND_STRATEGIES.BRIDGE] = function(win, serializedMessage, domain) {
+                if (needsBridgeForBrowser() || isBridge()) {
+                    if ((0, _src.isSameDomain)(win)) throw new Error("Post message through bridge disabled between same domain windows");
+                    if (!1 !== (0, _src.isSameTopWindow)(window, win)) throw new Error("Can only use bridge to communicate between two different windows, not between frames");
+                    return sendBridgeMessage(win, serializedMessage, domain);
+                }
+            };
+            SEND_MESSAGE_STRATEGIES[_conf.CONSTANTS.SEND_STRATEGIES.GLOBAL] = function(win, serializedMessage) {
+                if (needsBridgeForBrowser()) {
+                    if (!(0, _src.isSameDomain)(win)) throw new Error("Post message through global disabled between different domain windows");
+                    if (!1 !== (0, _src.isSameTopWindow)(window, win)) throw new Error("Can only use global to communicate between two different windows, not between frames");
+                    var foreignGlobal = win[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT];
+                    if (!foreignGlobal) throw new Error("Can not find postRobot global on foreign window");
+                    return foreignGlobal.receiveMessage({
+                        source: window,
+                        origin: (0, _src.getDomain)(),
+                        data: serializedMessage
+                    });
+                }
             };
         },
         "./src/global.js": function(module, exports, __webpack_require__) {
@@ -2436,6 +2493,7 @@
             function init() {
                 if (!_global.global.initialized) {
                     (0, _drivers.listenForMessages)();
+                    __webpack_require__("./src/bridge/index.js").openTunnelToOpener();
                     (0, _lib.initOnReady)();
                     (0, _lib.listenForMethods)({
                         on: _public.on,
@@ -2472,13 +2530,14 @@
                 }
             });
             exports.init = init;
-            var _lib = __webpack_require__("./src/lib/index.js"), _drivers = __webpack_require__("./src/drivers/index.js"), _global = __webpack_require__("./src/global.js"), _interface = __webpack_require__("./src/bridge/interface.js");
-            (function(obj) {
+            var _lib = __webpack_require__("./src/lib/index.js"), _drivers = __webpack_require__("./src/drivers/index.js"), _global = __webpack_require__("./src/global.js"), _interface = __webpack_require__("./src/bridge/interface.js"), popupBridge = function(obj) {
                 if (obj && obj.__esModule) return obj;
                 var newObj = {};
                 if (null != obj) for (var key in obj) Object.prototype.hasOwnProperty.call(obj, key) && (newObj[key] = obj[key]);
                 newObj.default = obj;
-            })(_interface), exports.bridge = null;
+                return newObj;
+            }(_interface);
+            exports.bridge = popupBridge;
             init();
         },
         "./src/lib/index.js": function(module, exports, __webpack_require__) {
