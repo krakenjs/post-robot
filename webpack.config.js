@@ -27,7 +27,7 @@ export let WEBPACK_CONFIG_MIN = getWebpackConfig({
 });
 
 export let WEBPACK_CONFIG_IE = getWebpackConfig({
-    filename:   `${ FILE_NAME }.js`,
+    filename:   `${ FILE_NAME }.ie.js`,
     modulename: MODULE_NAME,
     vars:       {
         __IE_POPUP_SUPPORT__:        true,
@@ -36,7 +36,7 @@ export let WEBPACK_CONFIG_IE = getWebpackConfig({
 });
 
 export let WEBPACK_CONFIG_IE_MIN = getWebpackConfig({
-    filename:   `${ FILE_NAME }.min.js`,
+    filename:   `${ FILE_NAME }.ie.min.js`,
     modulename: MODULE_NAME,
     minify:     true,
     vars:       {
