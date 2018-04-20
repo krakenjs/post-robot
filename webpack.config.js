@@ -59,4 +59,4 @@ export let WEBPACK_CONFIG_TEST = getWebpackConfig({
     }
 });
 
-export default [ WEBPACK_CONFIG, WEBPACK_CONFIG_MIN ];
+export default [ WEBPACK_CONFIG, WEBPACK_CONFIG_MIN, WEBPACK_CONFIG_IE, WEBPACK_CONFIG_IE_MIN ];
