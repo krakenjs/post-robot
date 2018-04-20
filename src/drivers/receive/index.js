@@ -100,7 +100,7 @@ export function receiveMessage(event : MessageEvent) {
 
     log.logLevel(level, [ '\n\n\t', '#receive', message.type.replace(/^postrobot_message_/, ''), '::', message.name, '::', origin, '\n\n', message ]);
 
-    if (isWindowClosed(source)) {
+    if (isWindowClosed(source) && !message.fireAndForget) {
         log.debug(`Source window is closed - can not send ${ message.type } ${ message.name }`);
         return;
     }
