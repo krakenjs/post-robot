@@ -1,41 +1,47 @@
 /* @flow */
 
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
-import { getAncestor } from 'cross-domain-utils/src';
+import { getAncestor, type CrossDomainWindowType } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 
 import { CONSTANTS } from '../conf';
-import { log } from './log';
 import { global } from '../global';
+
+import { log } from './log';
 import { stringifyError } from './util';
 
 global.readyPromises = global.readyPromises || new WeakMap();
 
+export function onHello(handler : ({ source? : CrossDomainWindowType, origin? : string }) => void) {
+    global.on(CONSTANTS.POST_MESSAGE_NAMES.HELLO, { domain: CONSTANTS.WILDCARD }, ({ source, origin }) => {
+        return handler({ source, origin });
+    });
+}
+
+export function sayHello(win : CrossDomainWindowType) : ZalgoPromise<{ origin : string }> {
+    return global.send(win, CONSTANTS.POST_MESSAGE_NAMES.HELLO, {}, { domain: CONSTANTS.WILDCARD, timeout: Infinity })
+        .then(({ origin }) => {
+            return { origin };
+        });
+}
+
 export function initOnReady() {
 
-    global.on(CONSTANTS.POST_MESSAGE_NAMES.READY, { domain: CONSTANTS.WILDCARD }, (event : { source : CrossDomainWindowType, origin : string, data : Object }) => {
-
-        let win = event.source;
-        let promise = global.readyPromises.get(win);
-
-        if (promise) {
-            promise.resolve(event);
-        } else {
-            promise = new ZalgoPromise().resolve(event);
-            global.readyPromises.set(win, promise);
-        }
+    onHello(({ source, origin }) => {
+        let promise = global.readyPromises.get(source) || new ZalgoPromise();
+        promise.resolve({ origin });
+        global.readyPromises.set(source, promise);
     });
 
     let parent = getAncestor();
-
     if (parent) {
-        global.send(parent, CONSTANTS.POST_MESSAGE_NAMES.READY, {}, { domain: CONSTANTS.WILDCARD, timeout: Infinity }).catch(err => {
+        sayHello(parent).catch(err => {
             log.debug(stringifyError(err));
         });
     }
 }
 
-export function onWindowReady(win : mixed, timeout : number = 5000, name : string = 'Window') : ZalgoPromise<{ source : mixed, origin : string, data : Object }> {
+export function onChildWindowReady(win : mixed, timeout : number = 5000, name : string = 'Window') : ZalgoPromise<{ origin : string }> {
 
     let promise = global.readyPromises.get(win);
 
@@ -47,7 +53,7 @@ export function onWindowReady(win : mixed, timeout : number = 5000, name : strin
     global.readyPromises.set(win, promise);
 
     if (timeout !== -1) {
-        setTimeout(() => promise.reject(new Error(`${name} did not load after ${timeout}ms`)), timeout);
+        setTimeout(() => promise.reject(new Error(`${ name } did not load after ${ timeout }ms`)), timeout);
     }
 
     return promise;

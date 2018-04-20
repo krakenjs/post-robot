@@ -1,5 +1,7 @@
 /* @flow */
 
+import { type CrossDomainWindowType } from 'cross-domain-utils/src';
+
 import { global } from './global';
 
 export function cleanUpWindow(win : CrossDomainWindowType) {

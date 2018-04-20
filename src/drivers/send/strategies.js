@@ -1,15 +1,13 @@
 /* @flow */
 
-import { isSameDomain, isSameTopWindow, isActuallySameDomain, getActualDomain, getDomain } from 'cross-domain-utils/src';
+import { isSameDomain, isSameTopWindow, isActuallySameDomain, getActualDomain, getDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
 
 import { CONSTANTS } from '../../conf';
 
 export let SEND_MESSAGE_STRATEGIES = {};
 
 
-
-
-SEND_MESSAGE_STRATEGIES[CONSTANTS.SEND_STRATEGIES.POST_MESSAGE] = (win : CrossDomainWindowType, serializedMessage : string, domain : string) => {
+SEND_MESSAGE_STRATEGIES[CONSTANTS.SEND_STRATEGIES.POST_MESSAGE] = (win : CrossDomainWindowType, serializedMessage : string, domain : (string | Array<string>)) => {
 
     if (__IE_POPUP_SUPPORT__) {
         try {
@@ -23,7 +21,7 @@ SEND_MESSAGE_STRATEGIES[CONSTANTS.SEND_STRATEGIES.POST_MESSAGE] = (win : CrossDo
 
     if (Array.isArray(domain)) {
         domains = domain;
-    } else if (domain) {
+    } else if (typeof domain === 'string') {
         domains = [ domain ];
     } else {
         domains = [ CONSTANTS.WILDCARD ];
@@ -38,7 +36,7 @@ SEND_MESSAGE_STRATEGIES[CONSTANTS.SEND_STRATEGIES.POST_MESSAGE] = (win : CrossDo
             }
 
             if (!isActuallySameDomain(win)) {
-                throw new Error(`Attempting to send messsage to mock domain ${dom}, but window is actually cross-domain`);
+                throw new Error(`Attempting to send messsage to mock domain ${ dom }, but window is actually cross-domain`);
             }
 
             // $FlowFixMe
@@ -78,7 +76,7 @@ if (__IE_POPUP_SUPPORT__) {
         return sendBridgeMessage(win, serializedMessage, domain);
     };
 
-    SEND_MESSAGE_STRATEGIES[CONSTANTS.SEND_STRATEGIES.GLOBAL] = (win : CrossDomainWindowType, serializedMessage : string, domain : string) => {
+    SEND_MESSAGE_STRATEGIES[CONSTANTS.SEND_STRATEGIES.GLOBAL] = (win : CrossDomainWindowType, serializedMessage : string) => {
 
         if (!needsBridgeForBrowser()) {
             return;
@@ -102,7 +100,7 @@ if (__IE_POPUP_SUPPORT__) {
         return foreignGlobal.receiveMessage({
             source: window,
             origin: getDomain(),
-            data: serializedMessage
+            data:   serializedMessage
         });
     };
 }

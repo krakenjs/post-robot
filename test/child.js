@@ -1,32 +1,39 @@
+/* @flow */
+
+import postRobot from '../src';
 
 import { enableIE8Mode } from './common';
-import postRobot from 'src/index';
 
 window.postRobot = postRobot;
 
 postRobot.CONFIG.ALLOW_POSTMESSAGE_POPUP = true;
 
-postRobot.on('sendMessageToParent', function({ source, data }) {
+postRobot.on('sendMessageToParent', ({ data }) => {
     return postRobot.sendToParent(data.messageName, data.data)
-        .then(({ data }) => data);
+        .then((event) => event.data);
 });
 
-postRobot.on('setupListener', function({ source, data }) {
-    postRobot.once(data.messageName, function() {
+postRobot.on('setupListener', ({ data }) => {
+    // eslint-disable-next-line promise/catch-or-return
+    postRobot.once(data.messageName, () => {
         return data.handler ? data.handler() : data.data;
-    }).then(({ data }) => data);
+    }).then((event) => event.data);
 });
 
-postRobot.on('enableIE8Mode', function({ source, data }) {
+postRobot.on('enableIE8Mode', () => {
     let ie8mode = enableIE8Mode();
+
+    if (!postRobot.bridge) {
+        throw new Error(`Expected postRobot.bridge to be available`);
+    }
 
     return postRobot.bridge.openTunnelToOpener().then(() => {
         return ie8mode;
     });
 });
 
-postRobot.on('waitForMessage', function({ source, data }) {
-    return postRobot.once(data.messageName, function() {
+postRobot.on('waitForMessage', ({ data }) => {
+    return postRobot.once(data.messageName, () => {
         return data.handler ? data.handler() : data.data;
-    }).then(({ data }) => data);
+    }).then((event) => event.data);
 });

@@ -1,7 +1,8 @@
 /* @flow */
 
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { isSameDomain, getOpener, getFrames, getDomain, getFrameByName } from 'cross-domain-utils/src';
+import { isSameDomain, getOpener, getFrames, getDomain, getFrameByName, type CrossDomainWindowType } from 'cross-domain-utils/src';
+
 import { CONSTANTS } from '../conf';
 import { weakMapMemoize, noop } from '../lib';
 import { global } from '../global';
@@ -55,7 +56,7 @@ let awaitRemoteBridgeForWindow = weakMapMemoize((win : CrossDomainWindowType) : 
             });
 
         } catch (err) {
-            return;
+            // pass
         }
     });
 });
@@ -109,7 +110,7 @@ export function openTunnelToOpener() : ZalgoPromise<void> {
 
                     try {
                         global.receiveMessage({
-                            data: message,
+                            data:   message,
                             origin: this.origin,
                             source: this.source
                         });

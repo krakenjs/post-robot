@@ -4,8 +4,8 @@ import { initOnReady, listenForMethods } from './lib';
 import { listenForMessages } from './drivers';
 import { global } from './global';
 import { on, send } from './public';
-
 // #if __IE_POPUP_SUPPORT__
+// eslint-disable-next-line import/no-namespace
 import * as popupBridge from './bridge/interface';
 // #endif
 

@@ -2,6 +2,7 @@
 
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
 import { isPopup, isIframe } from 'cross-domain-utils/src';
+
 import { CONSTANTS } from '../conf';
 
 
@@ -13,7 +14,7 @@ export function stringifyError(err : mixed, level : number = 1) : string {
 
     try {
         if (!err) {
-            return `<unknown error: ${Object.prototype.toString.call(err)}>`;
+            return `<unknown error: ${ Object.prototype.toString.call(err) }>`;
         }
 
         if (typeof err === 'string') {
@@ -28,7 +29,7 @@ export function stringifyError(err : mixed, level : number = 1) : string {
                 if (stack.indexOf(message) !== -1) {
                     return stack;
                 } else {
-                    return `${message}\n${stack}`;
+                    return `${ message }\n${ stack }`;
                 }
             } else if (stack) {
                 return stack;
@@ -43,7 +44,7 @@ export function stringifyError(err : mixed, level : number = 1) : string {
 
         return Object.prototype.toString.call(err);
 
-    } catch (newErr) {
+    } catch (newErr) { // eslint-disable-line unicorn/catch-error-name
         return `Error while stringifying error: ${ stringifyError(newErr, level + 1) }`;
     }
 }
@@ -62,6 +63,7 @@ export let once = <T>(method : Function) : ((...args : Array<any>) => T | void) 
     };
 };
 
+// eslint-disable-next-line no-unused-vars
 export function noop(...args : Array<mixed>) {
     // pass
 }
@@ -70,7 +72,7 @@ export function addEventListener(obj : Object, event : string, handler : Functio
     if (obj.addEventListener) {
         obj.addEventListener(event, handler);
     } else {
-        obj.attachEvent(`on${event}`, handler);
+        obj.attachEvent(`on${ event }`, handler);
     }
 
     return {
@@ -78,7 +80,7 @@ export function addEventListener(obj : Object, event : string, handler : Functio
             if (obj.removeEventListener) {
                 obj.removeEventListener(event, handler);
             } else {
-                obj.detachEvent(`on${event}`, handler);
+                obj.detachEvent(`on${ event }`, handler);
             }
         }
     };
@@ -130,7 +132,7 @@ export function replaceObject<T : Object | MixedArrayType>(item : T, callback : 
     } else if (Array.isArray(item)) {
         newobj = [];
     } else {
-        throw new Error(`Invalid type: ${typeof item}`);
+        throw new TypeError(`Invalid type: ${ typeof item }`);
     }
 
     each(item, (childItem, key) => {
@@ -175,7 +177,6 @@ export function isRegex(item : mixed) : boolean {
 }
 
 
-
 type FunctionProxy<T : Function> = (method : T) => T;
 
 // eslint-disable-next-line flowtype/no-weak-types
@@ -184,7 +185,7 @@ export let weakMapMemoize : FunctionProxy<*> = <R : mixed>(method : (arg : any) 
     let weakmap = new WeakMap();
 
     // eslint-disable-next-line flowtype/no-weak-types
-    return function(arg : any) : R {
+    return function weakmapMemoized(arg : any) : R {
         let result = weakmap.get(arg);
 
         if (typeof result !== 'undefined') {
@@ -220,7 +221,7 @@ export function jsonStringify<T : mixed>(obj : T, replacer : ?Function, indent :
         if (JSON.stringify({}) !== '{}') {
             // $FlowFixMe
             objectToJSON = Object.prototype.toJSON;
-             // $FlowFixMe
+            // $FlowFixMe
             delete Object.prototype.toJSON;
         }
 
@@ -229,9 +230,9 @@ export function jsonStringify<T : mixed>(obj : T, replacer : ?Function, indent :
         }
 
         if (JSON.stringify([]) !== '[]') {
-             // $FlowFixMe
+            // $FlowFixMe
             arrayToJSON  = Array.prototype.toJSON;
-             // $FlowFixMe
+            // $FlowFixMe
             delete Array.prototype.toJSON;
         }
 
@@ -240,24 +241,24 @@ export function jsonStringify<T : mixed>(obj : T, replacer : ?Function, indent :
         }
 
     } catch (err) {
-        throw new Error(`Can not repair JSON.stringify: ${err.message}`);
+        throw new Error(`Can not repair JSON.stringify: ${ err.message }`);
     }
 
     let result = JSON.stringify.call(this, obj, replacer, indent);
 
     try {
         if (objectToJSON) {
-             // $FlowFixMe
-            Object.prototype.toJSON = objectToJSON; // eslint-disable-line
+            // $FlowFixMe
+            Object.prototype.toJSON = objectToJSON; // eslint-disable-line no-extend-native
         }
 
         if (arrayToJSON) {
-             // $FlowFixMe
-            Array.prototype.toJSON = arrayToJSON; // eslint-disable-line
+            // $FlowFixMe
+            Array.prototype.toJSON = arrayToJSON; // eslint-disable-line no-extend-native
         }
 
     } catch (err) {
-        throw new Error(`Can not repair JSON.stringify: ${err.message}`);
+        throw new Error(`Can not repair JSON.stringify: ${ err.message }`);
     }
 
 

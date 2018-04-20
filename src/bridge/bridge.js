@@ -1,9 +1,9 @@
 /* @flow */
 
 import { type ZalgoPromise } from 'zalgo-promise/src';
+import { getParent, isWindowClosed, type CrossDomainWindowType } from 'cross-domain-utils/src';
 
 import { CONSTANTS } from '../conf';
-import { getParent, isWindowClosed } from 'cross-domain-utils/src';
 import { noop } from '../lib';
 import { global } from '../global';
 
@@ -92,7 +92,7 @@ global.openTunnelToParent = function openTunnelToParent({ name, source, canary, 
             let tunnelWindow = getTunnelWindow(id);
 
             try {
-                 // IE gets antsy if you try to even reference a closed window
+                // IE gets antsy if you try to even reference a closed window
                 noop(tunnelWindow && tunnelWindow.source);
             } catch (err) {
                 deleteTunnelWindow(id);

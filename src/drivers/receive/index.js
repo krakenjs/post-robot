@@ -1,9 +1,9 @@
 /* @flow */
 
-import { isWindowClosed } from 'cross-domain-utils/src';
+import { isWindowClosed, type CrossDomainWindowType } from 'cross-domain-utils/src';
 
 import { CONSTANTS, POST_MESSAGE_NAMES_LIST } from '../../conf';
-import { deserializeMethods, log, jsonParse, addEventListener } from '../../lib';
+import { deserializeMethods, log, jsonParse, addEventListener, noop } from '../../lib';
 import { global } from '../../global';
 
 import { RECEIVE_MESSAGE_TYPES } from './types';
@@ -101,7 +101,7 @@ export function receiveMessage(event : MessageEvent) {
     log.logLevel(level, [ '\n\n\t', '#receive', message.type.replace(/^postrobot_message_/, ''), '::', message.name, '::', origin, '\n\n', message ]);
 
     if (isWindowClosed(source)) {
-        log.debug(`Source window is closed - can not send ${message.type} ${message.name}`);
+        log.debug(`Source window is closed - can not send ${ message.type } ${ message.name }`);
         return;
     }
 
@@ -115,7 +115,7 @@ export function receiveMessage(event : MessageEvent) {
 export function messageListener(event : { source : CrossDomainWindowType, origin : string, data : string, sourceElement : CrossDomainWindowType, originalEvent? : { origin : string } }) {
 
     try {
-        event.source // eslint-disable-line
+        noop(event.source);
     } catch (err) {
         return;
     }

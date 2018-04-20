@@ -10,7 +10,7 @@ export let CONFIG : Object = {
 
     LOG_LEVEL: 'info',
 
-    BRIDGE_TIMEOUT: 5000,
+    BRIDGE_TIMEOUT:       5000,
     CHILD_WINDOW_TIMEOUT: 5000,
 
     ACK_TIMEOUT: (window.navigator.userAgent.match(/MSIE/i) !== -1 && !__TEST__) ? 2000 : 1000,
@@ -20,8 +20,8 @@ export let CONFIG : Object = {
 
     ALLOWED_POST_MESSAGE_METHODS: {
         [ CONSTANTS.SEND_STRATEGIES.POST_MESSAGE ]: true,
-        [ CONSTANTS.SEND_STRATEGIES.BRIDGE ]: true,
-        [ CONSTANTS.SEND_STRATEGIES.GLOBAL ]: true
+        [ CONSTANTS.SEND_STRATEGIES.BRIDGE ]:       true,
+        [ CONSTANTS.SEND_STRATEGIES.GLOBAL ]:       true
     },
 
     ALLOW_SAME_ORIGIN: false

@@ -1,6 +1,6 @@
 /* @flow */
 
-import { getDomain, isWindowClosed } from 'cross-domain-utils/src';
+import { getDomain, isWindowClosed, type CrossDomainWindowType } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 
 import { CONSTANTS, CONFIG, POST_MESSAGE_NAMES_LIST } from '../../conf';
@@ -25,7 +25,7 @@ function buildMessage(win : CrossDomainWindowType, message : Object, options = {
 }
 
 
-export function sendMessage(win : CrossDomainWindowType, message : Object, domain : string) : ZalgoPromise<void> {
+export function sendMessage(win : CrossDomainWindowType, message : Object, domain : string | Array<string>) : ZalgoPromise<void> {
     return ZalgoPromise.try(() => {
 
         message = buildMessage(win, message, {
@@ -66,23 +66,23 @@ export function sendMessage(win : CrossDomainWindowType, message : Object, domai
             return ZalgoPromise.try(() => {
 
                 if (!CONFIG.ALLOWED_POST_MESSAGE_METHODS[strategyName]) {
-                    throw new Error(`Strategy disallowed: ${strategyName}`);
+                    throw new Error(`Strategy disallowed: ${ strategyName }`);
                 }
 
                 return SEND_MESSAGE_STRATEGIES[strategyName](win, serializedMessage, domain);
 
             }).then(() => {
-                messages.push(`${strategyName}: success`);
+                messages.push(`${ strategyName }: success`);
                 return true;
             }, err => {
-                messages.push(`${strategyName}: ${stringifyError(err)}\n`);
+                messages.push(`${ strategyName }: ${ stringifyError(err) }\n`);
                 return false;
             });
 
         }).then(results => {
 
             let success = results.some(Boolean);
-            let status = `${message.type} ${message.name} ${success ? 'success' : 'error'}:\n  - ${messages.join('\n  - ')}\n`;
+            let status = `${ message.type } ${ message.name } ${ success ? 'success' : 'error' }:\n  - ${ messages.join('\n  - ') }\n`;
 
             log.debug(status);
 

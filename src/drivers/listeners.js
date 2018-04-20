@@ -2,7 +2,7 @@
 
 import { type ZalgoPromise } from 'zalgo-promise/src';
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
-import { matchDomain } from 'cross-domain-utils/src';
+import { matchDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
 
 import { global } from '../global';
 import { isRegex } from '../lib';
@@ -15,7 +15,7 @@ export function resetListeners() {
 
 global.responseListeners = global.responseListeners || {};
 global.requestListeners  = global.requestListeners  || {};
-global.WINDOW_WILDCARD   = global.WINDOW_WILDCARD   || new (function WindowWildcard() { /* pass */ });
+global.WINDOW_WILDCARD   = global.WINDOW_WILDCARD   || new (function WindowWildcard() { /* pass */ })();
 
 global.erroredResponseListeners = global.erroredResponseListeners || {};
 
@@ -32,7 +32,7 @@ export type RequestListenerType = {
 export type ResponseListenerType = {
     name : string,
     window : CrossDomainWindowType,
-    domain : string,
+    domain : (string | Array<string> | RegExp),
     respond : (err : ?mixed, result : ?Object) => void,
     ack? : ?boolean
 };
@@ -105,6 +105,7 @@ export function getRequestListener({ name, win, domain } : { name : string, win 
     }
 }
 
+// eslint-disable-next-line complexity
 export function addRequestListener({ name, win, domain } : { name : string, win : ?CrossDomainWindowType, domain : ?(string | RegExp | Array<string>) }, listener : RequestListenerType) : { cancel : () => void } {
 
     if (!name || typeof name !== 'string') {
@@ -153,13 +154,13 @@ export function addRequestListener({ name, win, domain } : { name : string, win 
 
     if (existingListener) {
         if (win && domain) {
-            throw new Error(`Request listener already exists for ${name} on domain ${domain.toString()} for ${win === global.WINDOW_WILDCARD ? 'wildcard' : 'specified' } window`);
+            throw new Error(`Request listener already exists for ${ name } on domain ${ domain.toString() } for ${ win === global.WINDOW_WILDCARD ? 'wildcard' : 'specified' } window`);
         } else if (win) {
-            throw new Error(`Request listener already exists for ${name} for ${win === global.WINDOW_WILDCARD ? 'wildcard' : 'specified' } window`);
+            throw new Error(`Request listener already exists for ${ name } for ${ win === global.WINDOW_WILDCARD ? 'wildcard' : 'specified' } window`);
         } else if (domain) {
-            throw new Error(`Request listener already exists for ${name} on domain ${domain.toString()}`);
+            throw new Error(`Request listener already exists for ${ name } on domain ${ domain.toString() }`);
         } else {
-            throw new Error(`Request listener already exists for ${name}`);
+            throw new Error(`Request listener already exists for ${ name }`);
         }
     }
 

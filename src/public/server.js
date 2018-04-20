@@ -1,11 +1,10 @@
 /* @flow */
 
-import { isWindowClosed } from 'cross-domain-utils/src';
+import { isWindowClosed, type CrossDomainWindowType } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 
 import { once as onceFunction, safeInterval } from '../lib';
-import { addRequestListener } from '../drivers';
-import { type RequestListenerType } from '../drivers';
+import { addRequestListener, type RequestListenerType } from '../drivers';
 import { CONSTANTS } from '../conf';
 import { global } from '../global';
 
@@ -37,7 +36,7 @@ export function listen(options : ServerOptionsType) : { cancel : () => void } {
     const domain = options.domain;
 
     let listenerOptions : RequestListenerType = {
-        handler: options.handler,
+        handler:     options.handler,
         handleError: options.errorHandler || (err => {
             throw err;
         }),
@@ -50,7 +49,7 @@ export function listen(options : ServerOptionsType) : { cancel : () => void } {
 
     if (options.once) {
         let handler = listenerOptions.handler;
-        listenerOptions.handler = onceFunction(function() : mixed | ZalgoPromise<mixed> {
+        listenerOptions.handler = onceFunction(function listenOnce() : mixed | ZalgoPromise<mixed> {
             requestListener.cancel();
             return handler.apply(this, arguments);
         });

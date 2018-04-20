@@ -2,10 +2,10 @@
 
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { getDomain, getFrameByName, isWindowClosed, getDomainFromUrl } from 'cross-domain-utils/src';
+import { getDomain, getFrameByName, isWindowClosed, getDomainFromUrl, type CrossDomainWindowType } from 'cross-domain-utils/src';
 
 import { CONFIG, CONSTANTS } from '../conf';
-import { log, onWindowReady } from '../lib';
+import { log, onChildWindowReady } from '../lib';
 import { global } from '../global';
 
 import { getBridgeName, documentBodyReady, registerRemoteSendMessage, registerRemoteWindow } from './common';
@@ -20,7 +20,7 @@ function listenForRegister(source, domain) {
     global.on(CONSTANTS.POST_MESSAGE_NAMES.OPEN_TUNNEL, { window: source, domain }, ({ origin, data }) => {
 
         if (origin !== domain) {
-            throw new Error(`Domain ${domain} does not match origin ${origin}`);
+            throw new Error(`Domain ${ domain } does not match origin ${ origin }`);
         }
 
         if (!data.name) {
@@ -32,15 +32,15 @@ function listenForRegister(source, domain) {
         }
 
         if (!global.popupWindowsByName[data.name]) {
-            throw new Error(`Window with name ${data.name} does not exist, or was not opened by this window`);
+            throw new Error(`Window with name ${ data.name } does not exist, or was not opened by this window`);
         }
 
         if (!global.popupWindowsByName[data.name].domain) {
-            throw new Error(`We do not have a registered domain for window ${data.name}`);
+            throw new Error(`We do not have a registered domain for window ${ data.name }`);
         }
 
         if (global.popupWindowsByName[data.name].domain !== origin) {
-            throw new Error(`Message origin ${origin} does not matched registered window origin ${global.popupWindowsByName[data.name].domain}`);
+            throw new Error(`Message origin ${ origin } does not matched registered window origin ${ global.popupWindowsByName[data.name].domain }`);
         }
 
         registerRemoteSendMessage(global.popupWindowsByName[data.name].win, domain, data.sendMessage);
@@ -60,7 +60,7 @@ function listenForRegister(source, domain) {
 
                 try {
                     global.receiveMessage({
-                        data: message,
+                        data:   message,
                         origin: winDetails.domain,
                         source: winDetails.win
                     });
@@ -113,14 +113,14 @@ export function openBridge(url : string, domain : string) : ZalgoPromise<CrossDo
     global.bridges[domain] = ZalgoPromise.try(() => {
 
         if (getDomain() === domain) {
-            throw new Error(`Can not open bridge on the same domain as current domain: ${domain}`);
+            throw new Error(`Can not open bridge on the same domain as current domain: ${ domain }`);
         }
 
         let name  = getBridgeName(domain);
         let frame = getFrameByName(window, name);
 
         if (frame) {
-            throw new Error(`Frame with name ${name} already exists on page`);
+            throw new Error(`Frame with name ${ name } already exists on page`);
         }
 
         let iframe = openBridgeFrame(name, url);
@@ -141,7 +141,7 @@ export function openBridge(url : string, domain : string) : ZalgoPromise<CrossDo
 
             }).then(() => {
 
-                return onWindowReady(bridge, CONFIG.BRIDGE_TIMEOUT, `Bridge ${url}`);
+                return onChildWindowReady(bridge, CONFIG.BRIDGE_TIMEOUT, `Bridge ${ url }`);
 
             }).then(() => {
 
@@ -155,7 +155,7 @@ export function openBridge(url : string, domain : string) : ZalgoPromise<CrossDo
 
 let windowOpen = window.open;
 
-window.open = function(url : string, name : string, options : string, last : mixed) : mixed {
+window.open = function windowOpenWrapper(url : string, name : string, options : string, last : mixed) : mixed {
 
     let domain = url;
 

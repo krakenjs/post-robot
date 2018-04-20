@@ -1,15 +1,17 @@
 /* @flow */
 
-import { getWindowType, jsonStringify } from './util';
 import { CONFIG } from '../conf';
 
-const LOG_DISABLE = 'disabled';
-const LOG_LEVELS = ['debug', 'info', 'warn', 'error'];
+import { getWindowType, jsonStringify } from './util';
 
+const LOG_DISABLE = 'disabled';
+const LOG_LEVELS = [ 'debug', 'info', 'warn', 'error' ];
+
+// eslint-disable-next-line no-console
 if (Function.prototype.bind && window.console && typeof console.log === 'object') {
-    [ 'log', 'info', 'warn', 'error' ].forEach(function(method) {
+    [ 'log', 'info', 'warn', 'error' ].forEach(function bindConsole(method) {
         // $FlowFixMe
-        console[method] = this.bind(console[method], console);
+        console[method] = this.bind(console[method], console); // eslint-disable-line no-console
     }, Function.prototype.call);
 }
 
@@ -57,26 +59,26 @@ export let log = {
                 let json;
                 try {
                     json = jsonStringify(item, null, 2);
-                } catch (e) {
+                } catch (err) {
                     json = '[object]';
                 }
 
-                return `\n\n${json}\n\n`;
+                return `\n\n${ json }\n\n`;
             }).join(' ');
 
 
-            let msg = `${date} ${level} ${payload}`;
+            let msg = `${ date } ${ level } ${ payload }`;
             el.innerHTML = msg;
 
             let color = {
-                log: '#ddd',
-                warn: 'orange',
+                log:   '#ddd',
+                warn:  'orange',
                 error: 'red',
-                info: 'blue',
+                info:  'blue',
                 debug: '#aaa'
             }[level];
 
-            el.style.cssText = `margin-top: 10px; color: ${color};`;
+            el.style.cssText = `margin-top: 10px; color: ${ color };`;
 
             if (!container.childNodes.length) {
                 container.appendChild(el);
@@ -98,9 +100,9 @@ export let log = {
 
                 args = Array.prototype.slice.call(args);
 
-                args.unshift(`${window.location.host}${window.location.pathname}`);
+                args.unshift(`${ window.location.host }${ window.location.pathname }`);
                 args.unshift(`::`);
-                args.unshift(`${getWindowType().toLowerCase()}`);
+                args.unshift(`${ getWindowType().toLowerCase() }`);
                 args.unshift('[post-robot]');
 
                 if (CONFIG.LOG_TO_PAGE) {

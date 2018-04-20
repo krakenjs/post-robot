@@ -1,11 +1,10 @@
 /* @flow */
 
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { isWindowClosed, matchDomain } from 'cross-domain-utils/src';
+import { isWindowClosed, matchDomain, stringifyDomainPattern, type CrossDomainWindowType } from 'cross-domain-utils/src';
 
 import { CONSTANTS } from '../../conf';
 import { log, stringifyError, noop } from '../../lib';
-
 import { sendMessage } from '../send';
 import { getRequestListener, getResponseListener, deleteResponseListener, isResponseListenerErrored } from '../listeners';
 
@@ -20,11 +19,11 @@ export let RECEIVE_MESSAGE_TYPES = {
         let options = getResponseListener(message.hash);
 
         if (!options) {
-            throw new Error(`No handler found for post message ack for message: ${message.name} from ${origin} in ${window.location.protocol}//${window.location.host}${window.location.pathname}`);
+            throw new Error(`No handler found for post message ack for message: ${ message.name } from ${ origin } in ${ window.location.protocol }//${ window.location.host }${ window.location.pathname }`);
         }
 
         if (!matchDomain(options.domain, origin)) {
-            throw new Error(`Ack origin ${origin} does not match domain ${options.domain.toString()}`);
+            throw new Error(`Ack origin ${ origin } does not match domain ${ options.domain.toString() }`);
         }
 
         options.ack = true;
@@ -42,8 +41,8 @@ export let RECEIVE_MESSAGE_TYPES = {
 
             return sendMessage(source, {
                 target: message.originalSource,
-                hash: message.hash,
-                name: message.name,
+                hash:   message.hash,
+                name:   message.name,
                 ...data
             }, origin);
         }
@@ -57,11 +56,11 @@ export let RECEIVE_MESSAGE_TYPES = {
             ZalgoPromise.try(() => {
 
                 if (!options) {
-                    throw new Error(`No handler found for post message: ${message.name} from ${origin} in ${window.location.protocol}//${window.location.host}${window.location.pathname}`);
+                    throw new Error(`No handler found for post message: ${ message.name } from ${ origin } in ${ window.location.protocol }//${ window.location.host }${ window.location.pathname }`);
                 }
 
                 if (!matchDomain(options.domain, origin)) {
-                    throw new Error(`Request origin ${origin} does not match domain ${options.domain.toString()}`);
+                    throw new Error(`Request origin ${ origin } does not match domain ${ options.domain.toString() }`);
                 }
 
                 let data = message.data;
@@ -72,7 +71,7 @@ export let RECEIVE_MESSAGE_TYPES = {
 
                 return respond({
                     type: CONSTANTS.POST_MESSAGE_TYPE.RESPONSE,
-                    ack: CONSTANTS.POST_MESSAGE_ACK.SUCCESS,
+                    ack:  CONSTANTS.POST_MESSAGE_ACK.SUCCESS,
                     data
                 });
 
@@ -84,7 +83,7 @@ export let RECEIVE_MESSAGE_TYPES = {
 
                 return respond({
                     type: CONSTANTS.POST_MESSAGE_TYPE.RESPONSE,
-                    ack: CONSTANTS.POST_MESSAGE_ACK.ERROR,
+                    ack:  CONSTANTS.POST_MESSAGE_ACK.ERROR,
                     error,
                     code
                 });
@@ -109,11 +108,11 @@ export let RECEIVE_MESSAGE_TYPES = {
         let options = getResponseListener(message.hash);
 
         if (!options) {
-            throw new Error(`No handler found for post message response for message: ${message.name} from ${origin} in ${window.location.protocol}//${window.location.host}${window.location.pathname}`);
+            throw new Error(`No handler found for post message response for message: ${ message.name } from ${ origin } in ${ window.location.protocol }//${ window.location.host }${ window.location.pathname }`);
         }
 
         if (!matchDomain(options.domain, origin)) {
-            throw new Error(`Response origin ${origin} does not match domain ${options.domain}`);
+            throw new Error(`Response origin ${ origin } does not match domain ${ stringifyDomainPattern(options.domain) }`);
         }
 
         deleteResponseListener(message.hash);

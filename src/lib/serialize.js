@@ -1,13 +1,14 @@
 /* @flow */
 
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
-import { matchDomain } from 'cross-domain-utils/src';
+import { matchDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 
 import { CONSTANTS } from '../conf';
+import { global } from '../global';
+
 import { once, uniqueID, replaceObject, stringifyError, isRegex } from './util';
 import { log } from './log';
-import { global } from '../global';
 
 global.methods = global.methods || new WeakMap();
 
@@ -23,11 +24,11 @@ export let listenForMethods = once(() => {
         let meth = methods[data.id];
 
         if (!meth) {
-            throw new Error(`Could not find method with id: ${data.id}`);
+            throw new Error(`Could not find method with id: ${ data.id }`);
         }
 
         if (!matchDomain(meth.domain, origin)) {
-            throw new Error(`Method domain ${meth.domain} does not match origin ${origin}`);
+            throw new Error(`Method domain ${ meth.domain } does not match origin ${ origin }`);
         }
 
         log.debug('Call local method', data.name, data.args);
@@ -39,7 +40,7 @@ export let listenForMethods = once(() => {
 
             return {
                 result,
-                id: data.id,
+                id:   data.id,
                 name: data.name
             };
         });
@@ -56,7 +57,7 @@ type SerializedMethod = {
     __name__ : string
 };
 
-export function serializeMethod(destination : CrossDomainWindowType, domain : string, method : Function, name : string) : SerializedMethod {
+export function serializeMethod(destination : CrossDomainWindowType, domain : string | Array<string>, method : Function, name : string) : SerializedMethod {
 
     let id = uniqueID();
 
@@ -71,7 +72,7 @@ export function serializeMethod(destination : CrossDomainWindowType, domain : st
 
     return {
         __type__: CONSTANTS.SERIALIZATION_TYPES.METHOD,
-        __id__: id,
+        __id__:   id,
         __name__: name
     };
 }
@@ -83,10 +84,10 @@ type SerializedError = {
 
 function serializeError(err : mixed) : SerializedError {
     return {
-        __type__: CONSTANTS.SERIALIZATION_TYPES.ERROR,
+        __type__:    CONSTANTS.SERIALIZATION_TYPES.ERROR,
         __message__: stringifyError(err),
         // $FlowFixMe
-        __code__: err.code
+        __code__:    err.code
     };
 }
 
@@ -95,17 +96,17 @@ type SerializePromise = {
     __then__ : SerializedMethod
 };
 
-function serializePromise(destination : CrossDomainWindowType, domain : string, promise : ZalgoPromise<mixed>, name : string) : SerializePromise {
+function serializePromise(destination : CrossDomainWindowType, domain : string | Array<string>, promise : ZalgoPromise<mixed>, name : string) : SerializePromise {
     return {
         __type__: CONSTANTS.SERIALIZATION_TYPES.PROMISE,
-        __then__: serializeMethod(destination, domain, (resolve, reject) => promise.then(resolve, reject), `${name}.then`)
+        __then__: serializeMethod(destination, domain, (resolve, reject) => promise.then(resolve, reject), `${ name }.then`)
     };
 }
 
-function serializeZalgoPromise(destination : CrossDomainWindowType, domain : string, promise : ZalgoPromise<mixed>, name : string) : SerializePromise {
+function serializeZalgoPromise(destination : CrossDomainWindowType, domain : string | Array<string>, promise : ZalgoPromise<mixed>, name : string) : SerializePromise {
     return {
         __type__: CONSTANTS.SERIALIZATION_TYPES.ZALGO_PROMISE,
-        __then__: serializeMethod(destination, domain, (resolve, reject) => promise.then(resolve, reject), `${name}.then`)
+        __then__: serializeMethod(destination, domain, (resolve, reject) => promise.then(resolve, reject), `${ name }.then`)
     };
 }
 
@@ -116,12 +117,12 @@ type SerializedRegex = {
 
 function serializeRegex(regex : RegExp) : SerializedRegex {
     return {
-        __type__: CONSTANTS.SERIALIZATION_TYPES.REGEX,
+        __type__:   CONSTANTS.SERIALIZATION_TYPES.REGEX,
         __source__: regex.source
     };
 }
 
-export function serializeMethods(destination : CrossDomainWindowType, domain : string, obj : Object) : Object {
+export function serializeMethods(destination : CrossDomainWindowType, domain : string | Array<string>, obj : Object) : Object {
 
     return replaceObject({ obj }, (item, key) => {
         if (typeof item === 'function') {
@@ -154,7 +155,7 @@ export function deserializeMethod(source : CrossDomainWindowType, origin : strin
         let args = Array.prototype.slice.call(arguments);
         log.debug('Call foreign method', obj.__name__, args);
         return global.send(source, CONSTANTS.POST_MESSAGE_NAMES.METHOD, {
-            id: obj.__id__,
+            id:   obj.__id__,
             name: obj.__name__,
             args
 
@@ -199,12 +200,13 @@ export function deserializePromise(source : CrossDomainWindowType, origin : stri
 }
 
 export function deserializeRegex(source : CrossDomainWindowType, origin : string, item : Object) : RegExp {
+    // eslint-disable-next-line security/detect-non-literal-regexp
     return new RegExp(item.__source__);
 }
 
 export function deserializeMethods(source : CrossDomainWindowType, origin : string, obj : Object) : Object {
 
-    return replaceObject({ obj }, (item, key) => {
+    return replaceObject({ obj }, (item) => {
         if (typeof item !== 'object' || item === null) {
             return;
         }

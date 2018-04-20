@@ -2,12 +2,11 @@
 
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { getAncestor, isAncestor, isWindowClosed, getDomain } from 'cross-domain-utils/src';
+import { getAncestor, isAncestor, isWindowClosed, getDomain, matchDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
 
 import { CONFIG, CONSTANTS } from '../conf';
-import { sendMessage, addResponseListener, deleteResponseListener, markResponseListenerErrored } from '../drivers';
-import { type ResponseListenerType } from '../drivers';
-import { uniqueID, onWindowReady } from '../lib';
+import { sendMessage, addResponseListener, deleteResponseListener, markResponseListenerErrored, type ResponseListenerType } from '../drivers';
+import { uniqueID, onChildWindowReady, sayHello, isRegex } from '../lib';
 import { global } from '../global';
 
 global.requestPromises = global.requestPromises || new WeakMap();
@@ -16,7 +15,7 @@ type WindowResolverType = CrossDomainWindowType | string | HTMLIFrameElement;
 
 type RequestOptionsType = {
     window? : ?WindowResolverType,
-    domain? : ?string,
+    domain? : ?(string | Array<string> | RegExp),
     name? : ?string,
     data? : ?Object,
     fireAndForget? : ?boolean,
@@ -39,19 +38,20 @@ export function request(options : RequestOptionsType) : ZalgoPromise<ResponseMes
 
         let name = options.name;
         let targetWindow : ?CrossDomainWindowType;
-        let domain : string;
+        let domain : string | Array<string> | RegExp;
 
         if (typeof options.window === 'string') {
             let el = document.getElementById(options.window);
 
             if (!el) {
-                throw new Error(`Expected options.window ${Object.prototype.toString.call(options.window)} to be a valid element id`);
+                throw new Error(`Expected options.window ${ Object.prototype.toString.call(options.window) } to be a valid element id`);
             }
 
             if (el.tagName.toLowerCase() !== 'iframe') {
-                throw new Error(`Expected options.window ${Object.prototype.toString.call(options.window)} to be an iframe`);
+                throw new Error(`Expected options.window ${ Object.prototype.toString.call(options.window) } to be an iframe`);
             }
 
+            // $FlowFixMe
             if (!el.contentWindow) {
                 throw new Error('Iframe must have contentWindow.  Make sure it has a src attribute and is in the DOM.');
             }
@@ -62,7 +62,7 @@ export function request(options : RequestOptionsType) : ZalgoPromise<ResponseMes
         } else if (options.window instanceof HTMLIFrameElement) {
 
             if (options.window.tagName.toLowerCase() !== 'iframe') {
-                throw new Error(`Expected options.window ${Object.prototype.toString.call(options.window)} to be an iframe`);
+                throw new Error(`Expected options.window ${ Object.prototype.toString.call(options.window) } to be an iframe`);
             }
 
             if (options.window && !options.window.contentWindow) {
@@ -85,7 +85,7 @@ export function request(options : RequestOptionsType) : ZalgoPromise<ResponseMes
 
         domain = options.domain || CONSTANTS.WILDCARD;
 
-        let hash = `${options.name}_${uniqueID()}`;
+        let hash = `${ options.name }_${ uniqueID() }`;
 
         if (isWindowClosed(win)) {
             throw new Error('Target window is closed');
@@ -103,10 +103,30 @@ export function request(options : RequestOptionsType) : ZalgoPromise<ResponseMes
         let requestPromise = ZalgoPromise.try(() => {
 
             if (isAncestor(window, win)) {
-                return ZalgoPromise.resolve(onWindowReady(win, options.timeout || CONFIG.CHILD_WINDOW_TIMEOUT));
+                return onChildWindowReady(win, options.timeout || CONFIG.CHILD_WINDOW_TIMEOUT);
             }
 
-        }).then(() => {
+        }).then(({ origin } = {}) => {
+
+            if (isRegex(domain) && !origin) {
+                return sayHello(win);
+            }
+
+        }).then(({ origin } = {}) => {
+
+            if (isRegex(domain)) {
+                if (!matchDomain(domain, origin)) {
+                    throw new Error(`Remote window domain ${ origin } does not match regex: ${ domain.toString() }`);
+                }
+
+                domain = origin;
+            }
+
+            if (typeof domain !== 'string' && !Array.isArray(domain)) {
+                throw new TypeError(`Expected domain to be a string or array`);
+            }
+
+            const actualDomain = domain;
 
             return new ZalgoPromise((resolve, reject) => {
 
@@ -116,7 +136,7 @@ export function request(options : RequestOptionsType) : ZalgoPromise<ResponseMes
                     responseListener = {
                         name,
                         window: win,
-                        domain,
+                        domain: actualDomain,
                         respond(err, result) {
                             if (!err) {
                                 hasResult = true;
@@ -135,12 +155,12 @@ export function request(options : RequestOptionsType) : ZalgoPromise<ResponseMes
                 }
 
                 sendMessage(win, {
-                    type: CONSTANTS.POST_MESSAGE_TYPE.REQUEST,
+                    type:          CONSTANTS.POST_MESSAGE_TYPE.REQUEST,
                     hash,
                     name,
-                    data: options.data,
+                    data:          options.data,
                     fireAndForget: options.fireAndForget
-                }, domain).catch(reject);
+                }, actualDomain).catch(reject);
 
                 if (options.fireAndForget) {
                     return resolve();
@@ -160,10 +180,10 @@ export function request(options : RequestOptionsType) : ZalgoPromise<ResponseMes
                     if (isWindowClosed(win)) {
 
                         if (!responseListener.ack) {
-                            return reject(new Error(`Window closed for ${name} before ack`));
+                            return reject(new Error(`Window closed for ${ name } before ack`));
                         }
 
-                        return reject(new Error(`Window closed for ${name} before response`));
+                        return reject(new Error(`Window closed for ${ name } before response`));
                     }
 
                     ackTimeout -= cycleTime;
@@ -180,10 +200,10 @@ export function request(options : RequestOptionsType) : ZalgoPromise<ResponseMes
                         cycleTime = Math.min(resTimeout, 2000);
 
                     } else if (ackTimeout <= 0) {
-                        return reject(new Error(`No ack for postMessage ${name} in ${ getDomain() } in ${CONFIG.ACK_TIMEOUT}ms`));
+                        return reject(new Error(`No ack for postMessage ${ name } in ${ getDomain() } in ${ CONFIG.ACK_TIMEOUT }ms`));
 
                     } else if (resTimeout <= 0) {
-                        return reject(new Error(`No response for postMessage ${name} in ${ getDomain() } in ${options.timeout || CONFIG.RES_TIMEOUT}ms`));
+                        return reject(new Error(`No response for postMessage ${ name } in ${ getDomain() } in ${ options.timeout || CONFIG.RES_TIMEOUT }ms`));
                     }
 
                     setTimeout(cycle, cycleTime);

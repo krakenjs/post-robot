@@ -1,6 +1,6 @@
 /* @flow */
 
-import { isSameTopWindow } from 'cross-domain-utils/src';
+import { isSameTopWindow, type CrossDomainWindowType } from 'cross-domain-utils/src';
 
 import { CONFIG } from '../conf';
 

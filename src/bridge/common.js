@@ -2,7 +2,7 @@
 
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { getDomain, isSameDomain, isOpener, isSameTopWindow, matchDomain, getUserAgent, getDomainFromUrl } from 'cross-domain-utils/src';
+import { getDomain, isSameDomain, isOpener, isSameTopWindow, matchDomain, getUserAgent, getDomainFromUrl, type CrossDomainWindowType } from 'cross-domain-utils/src';
 
 import { CONFIG, CONSTANTS } from '../conf';
 import { global } from '../global';
@@ -67,7 +67,7 @@ export function getBridgeName(domain : string) : string {
 
     let sanitizedDomain = domain.replace(/[^a-zA-Z0-9]+/g, '_');
 
-    let id = `${CONSTANTS.BRIDGE_NAME_PREFIX}_${sanitizedDomain}`;
+    let id = `${ CONSTANTS.BRIDGE_NAME_PREFIX }_${ sanitizedDomain }`;
 
     return id;
 }
@@ -92,7 +92,7 @@ export let documentBodyReady = new ZalgoPromise(resolve => {
 
 global.remoteWindows = global.remoteWindows || new WeakMap();
 
-export function registerRemoteWindow(win : CrossDomainWindowType, timeout : number = CONFIG.BRIDGE_TIMEOUT) {
+export function registerRemoteWindow(win : CrossDomainWindowType) {
     global.remoteWindows.set(win, { sendMessagePromise: new ZalgoPromise() });
 }
 
@@ -115,7 +115,7 @@ export function registerRemoteSendMessage(win : CrossDomainWindowType, domain : 
         }
 
         if (!matchDomain(remoteDomain, domain)) {
-            throw new Error(`Remote domain ${remoteDomain} does not match domain ${domain}`);
+            throw new Error(`Remote domain ${ remoteDomain } does not match domain ${ domain }`);
         }
 
         sendMessage(message);
