@@ -1873,7 +1873,7 @@
                 },
                 POST_MESSAGE_NAMES: {
                     METHOD: "postrobot_method",
-                    HELLO: "postrobot_hello",
+                    HELLO: "postrobot_ready",
                     OPEN_TUNNEL: "postrobot_open_tunnel"
                 },
                 WINDOW_TYPES: {
