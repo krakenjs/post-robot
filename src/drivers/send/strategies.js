@@ -9,7 +9,7 @@ export let SEND_MESSAGE_STRATEGIES = {};
 
 SEND_MESSAGE_STRATEGIES[CONSTANTS.SEND_STRATEGIES.POST_MESSAGE] = (win : CrossDomainWindowType, serializedMessage : string, domain : (string | Array<string>)) => {
 
-    if (__IE_POPUP_SUPPORT__) {
+    if (__POST_ROBOT__.__IE_POPUP_SUPPORT__) {
         try {
             require('../../compat').emulateIERestrictions(window, win);
         } catch (err) {
@@ -55,7 +55,7 @@ SEND_MESSAGE_STRATEGIES[CONSTANTS.SEND_STRATEGIES.POST_MESSAGE] = (win : CrossDo
     });
 };
 
-if (__IE_POPUP_SUPPORT__) {
+if (__POST_ROBOT__.__IE_POPUP_SUPPORT__) {
 
     let { sendBridgeMessage, needsBridgeForBrowser, isBridge } = require('../../bridge');
 

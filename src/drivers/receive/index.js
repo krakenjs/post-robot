@@ -127,7 +127,7 @@ export function messageListener(event : { source : CrossDomainWindowType, origin
         data:   event.data
     };
 
-    if (__IE_POPUP_SUPPORT__) {
+    if (__POST_ROBOT__.__IE_POPUP_SUPPORT__) {
         try {
             require('../../compat').emulateIERestrictions(messageEvent.source, window);
         } catch (err) {
