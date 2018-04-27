@@ -13,7 +13,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 var CONFIG = exports.CONFIG = {
 
-    ALLOW_POSTMESSAGE_POPUP: '__ALLOW_POSTMESSAGE_POPUP__' in window ? window.__ALLOW_POSTMESSAGE_POPUP__ : __ALLOW_POSTMESSAGE_POPUP__,
+    ALLOW_POSTMESSAGE_POPUP: '__ALLOW_POSTMESSAGE_POPUP__' in window ? window.__ALLOW_POSTMESSAGE_POPUP__ : __POST_ROBOT__.__ALLOW_POSTMESSAGE_POPUP__,
 
     LOG_LEVEL: 'info',
 

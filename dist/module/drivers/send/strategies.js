@@ -13,7 +13,7 @@ var SEND_MESSAGE_STRATEGIES = exports.SEND_MESSAGE_STRATEGIES = {};
 
 SEND_MESSAGE_STRATEGIES[_conf.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE] = function (win, serializedMessage, domain) {
 
-    if (__IE_POPUP_SUPPORT__) {
+    if (__POST_ROBOT__.__IE_POPUP_SUPPORT__) {
         try {
             require('../../compat').emulateIERestrictions(window, win);
         } catch (err) {
@@ -59,7 +59,7 @@ SEND_MESSAGE_STRATEGIES[_conf.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE] = function
     });
 };
 
-if (__IE_POPUP_SUPPORT__) {
+if (__POST_ROBOT__.__IE_POPUP_SUPPORT__) {
     var _require = require('../../bridge'),
         sendBridgeMessage = _require.sendBridgeMessage,
         needsBridgeForBrowser = _require.needsBridgeForBrowser,

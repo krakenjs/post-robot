@@ -42,19 +42,13 @@ var _drivers = require('./drivers');
 
 var _global = require('./global');
 
-var _interface = require('./bridge/interface');
-
-var popupBridge = _interopRequireWildcard(_interface);
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj['default'] = obj; return newObj; } }
-
-var bridge = exports.bridge = __IE_POPUP_SUPPORT__ ? popupBridge : null;
+var bridge = exports.bridge = __POST_ROBOT__.__IE_POPUP_SUPPORT__ ? require('./bridge/interface') : null;
 
 function init() {
     if (!_global.global.initialized) {
         (0, _drivers.listenForMessages)();
 
-        if (__IE_POPUP_SUPPORT__) {
+        if (__POST_ROBOT__.__IE_POPUP_SUPPORT__) {
             require('./bridge').openTunnelToOpener();
         }
 
