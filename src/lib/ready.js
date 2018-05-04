@@ -19,7 +19,7 @@ export function onHello(handler : ({ source? : CrossDomainWindowType, origin? : 
 }
 
 export function sayHello(win : CrossDomainWindowType) : ZalgoPromise<{ origin : string }> {
-    return global.send(win, CONSTANTS.POST_MESSAGE_NAMES.HELLO, {}, { domain: CONSTANTS.WILDCARD, timeout: Infinity })
+    return global.send(win, CONSTANTS.POST_MESSAGE_NAMES.HELLO, {}, { domain: CONSTANTS.WILDCARD, timeout: -1 })
         .then(({ origin }) => {
             return { origin };
         });

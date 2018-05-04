@@ -186,23 +186,25 @@ export function request(options : RequestOptionsType) : ZalgoPromise<ResponseMes
                         return reject(new Error(`Window closed for ${ name } before response`));
                     }
 
-                    ackTimeout -= cycleTime;
-                    resTimeout -= cycleTime;
+                    ackTimeout = Math.max(ackTimeout - cycleTime, 0);
+                    if (resTimeout !== -1) {
+                        resTimeout = Math.max(resTimeout - cycleTime, 0);
+                    }
 
                     let hasAck = responseListener.ack;
 
                     if (hasAck) {
 
-                        if (resTimeout === Infinity) {
+                        if (resTimeout === -1) {
                             return;
                         }
 
                         cycleTime = Math.min(resTimeout, 2000);
 
-                    } else if (ackTimeout <= 0) {
+                    } else if (ackTimeout === 0) {
                         return reject(new Error(`No ack for postMessage ${ name } in ${ getDomain() } in ${ CONFIG.ACK_TIMEOUT }ms`));
 
-                    } else if (resTimeout <= 0) {
+                    } else if (resTimeout === 0) {
                         return reject(new Error(`No response for postMessage ${ name } in ${ getDomain() } in ${ options.timeout || CONFIG.RES_TIMEOUT }ms`));
                     }
 
