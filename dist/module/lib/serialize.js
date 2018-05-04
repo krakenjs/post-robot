@@ -165,7 +165,7 @@ function deserializeMethod(source, origin, obj) {
             name: obj.__name__,
             args: args
 
-        }, { domain: origin, timeout: Infinity }).then(function (_ref2) {
+        }, { domain: origin, timeout: -1 }).then(function (_ref2) {
             var data = _ref2.data;
 
 

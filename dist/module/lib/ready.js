@@ -34,7 +34,7 @@ function onHello(handler) {
 }
 
 function sayHello(win) {
-    return _global.global.send(win, _conf.CONSTANTS.POST_MESSAGE_NAMES.HELLO, {}, { domain: _conf.CONSTANTS.WILDCARD, timeout: Infinity }).then(function (_ref2) {
+    return _global.global.send(win, _conf.CONSTANTS.POST_MESSAGE_NAMES.HELLO, {}, { domain: _conf.CONSTANTS.WILDCARD, timeout: -1 }).then(function (_ref2) {
         var origin = _ref2.origin;
 
         return { origin: origin };

@@ -1271,7 +1271,7 @@
                 BRIDGE_TIMEOUT: 5e3,
                 CHILD_WINDOW_TIMEOUT: 5e3,
                 ACK_TIMEOUT: -1 !== window.navigator.userAgent.match(/MSIE/i) ? 2e3 : 1e3,
-                RES_TIMEOUT: 1 / 0,
+                RES_TIMEOUT: -1,
                 LOG_TO_PAGE: !1,
                 ALLOWED_POST_MESSAGE_METHODS: (_ALLOWED_POST_MESSAGE = {}, _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE, !0), 
                 _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.BRIDGE, !0), 
@@ -2066,7 +2066,7 @@
             function sayHello(win) {
                 return _global.global.send(win, _conf.CONSTANTS.POST_MESSAGE_NAMES.HELLO, {}, {
                     domain: _conf.CONSTANTS.WILDCARD,
-                    timeout: 1 / 0
+                    timeout: -1
                 }).then(function(_ref2) {
                     return {
                         origin: _ref2.origin
@@ -2185,7 +2185,7 @@
                         args: args
                     }, {
                         domain: origin,
-                        timeout: 1 / 0
+                        timeout: -1
                     }).then(function(_ref2) {
                         var data = _ref2.data;
                         _log.log.debug("Got foreign method result", obj.__name__, data.result);
@@ -2451,15 +2451,15 @@
                             setTimeout(function cycle() {
                                 if (!hasResult) {
                                     if ((0, _src3.isWindowClosed)(win)) return responseListener.ack ? reject(new Error("Window closed for " + name + " before response")) : reject(new Error("Window closed for " + name + " before ack"));
-                                    ackTimeout -= cycleTime;
-                                    resTimeout -= cycleTime;
+                                    ackTimeout = Math.max(ackTimeout - cycleTime, 0);
+                                    -1 !== resTimeout && (resTimeout = Math.max(resTimeout - cycleTime, 0));
                                     if (responseListener.ack) {
-                                        if (resTimeout === 1 / 0) return;
+                                        if (-1 === resTimeout) return;
                                         cycleTime = Math.min(resTimeout, 2e3);
                                     } else {
-                                        if (ackTimeout <= 0) return reject(new Error("No ack for postMessage " + name + " in " + (0, 
+                                        if (0 === ackTimeout) return reject(new Error("No ack for postMessage " + name + " in " + (0, 
                                         _src3.getDomain)() + " in " + _conf.CONFIG.ACK_TIMEOUT + "ms"));
-                                        if (resTimeout <= 0) return reject(new Error("No response for postMessage " + name + " in " + (0, 
+                                        if (0 === resTimeout) return reject(new Error("No response for postMessage " + name + " in " + (0, 
                                         _src3.getDomain)() + " in " + (options.timeout || _conf.CONFIG.RES_TIMEOUT) + "ms"));
                                     }
                                     setTimeout(cycle, cycleTime);
