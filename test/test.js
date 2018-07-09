@@ -62,6 +62,8 @@ before(() : ZalgoPromise<mixed> => {
             onChildWindowReady(childFrame),
             onChildWindowReady(otherChildFrame)
         ]);
+    }).then(() => {
+        // pass
     });
 });
 
