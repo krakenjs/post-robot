@@ -3,6 +3,7 @@
 import { isSameDomain, isSameTopWindow, isActuallySameDomain, getActualDomain, getDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
 
 import { CONSTANTS } from '../../conf';
+import { needsGlobalMessagingForBrowser } from '../../lib';
 
 export let SEND_MESSAGE_STRATEGIES = {};
 
@@ -75,10 +76,13 @@ if (__POST_ROBOT__.__IE_POPUP_SUPPORT__) {
 
         return sendBridgeMessage(win, serializedMessage, domain);
     };
+}
 
+if (__POST_ROBOT__.__IE_POPUP_SUPPORT__ || __POST_ROBOT__.__GLOBAL_MESSAGE_SUPPORT__) {
+    
     SEND_MESSAGE_STRATEGIES[CONSTANTS.SEND_STRATEGIES.GLOBAL] = (win : CrossDomainWindowType, serializedMessage : string) => {
 
-        if (!needsBridgeForBrowser()) {
+        if (!needsGlobalMessagingForBrowser()) {
             return;
         }
 

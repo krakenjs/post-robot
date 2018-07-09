@@ -1,9 +1,9 @@
 /* @flow */
 
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
-import { isPopup, isIframe } from 'cross-domain-utils/src';
+import { isPopup, isIframe, getUserAgent } from 'cross-domain-utils/src';
 
-import { CONSTANTS } from '../conf';
+import { CONFIG, CONSTANTS } from '../conf';
 
 
 export function stringifyError(err : mixed, level : number = 1) : string {
@@ -267,4 +267,17 @@ export function jsonStringify<T : mixed>(obj : T, replacer : ?Function, indent :
 
 export function jsonParse(item : string) : mixed {
     return JSON.parse(item);
+}
+            
+export function needsGlobalMessagingForBrowser() : boolean {
+
+    if (getUserAgent(window).match(/MSIE|trident|edge\/12|edge\/13/i)) {
+        return true;
+    }
+        
+    if (!CONFIG.ALLOW_POSTMESSAGE_POPUP) {
+        return true;
+    }
+        
+    return false;
 }
