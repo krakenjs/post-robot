@@ -1,8 +1,6 @@
 'use strict';
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
+exports.__esModule = true;
 exports.RECEIVE_MESSAGE_TYPES = undefined;
 
 var _RECEIVE_MESSAGE_TYPE;
@@ -21,9 +19,7 @@ var _send = require('../send');
 
 var _listeners = require('../listeners');
 
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-var RECEIVE_MESSAGE_TYPES = exports.RECEIVE_MESSAGE_TYPES = (_RECEIVE_MESSAGE_TYPE = {}, _defineProperty(_RECEIVE_MESSAGE_TYPE, _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK, function (source, origin, message) {
+var RECEIVE_MESSAGE_TYPES = exports.RECEIVE_MESSAGE_TYPES = (_RECEIVE_MESSAGE_TYPE = {}, _RECEIVE_MESSAGE_TYPE[_conf.CONSTANTS.POST_MESSAGE_TYPE.ACK] = function (source, origin, message) {
 
     if ((0, _listeners.isResponseListenerErrored)(message.hash)) {
         return;
@@ -40,7 +36,7 @@ var RECEIVE_MESSAGE_TYPES = exports.RECEIVE_MESSAGE_TYPES = (_RECEIVE_MESSAGE_TY
     }
 
     options.ack = true;
-}), _defineProperty(_RECEIVE_MESSAGE_TYPE, _conf.CONSTANTS.POST_MESSAGE_TYPE.REQUEST, function (source, origin, message) {
+}, _RECEIVE_MESSAGE_TYPE[_conf.CONSTANTS.POST_MESSAGE_TYPE.REQUEST] = function (source, origin, message) {
 
     var options = (0, _listeners.getRequestListener)({ name: message.name, win: source, domain: origin });
 
@@ -99,7 +95,7 @@ var RECEIVE_MESSAGE_TYPES = exports.RECEIVE_MESSAGE_TYPES = (_RECEIVE_MESSAGE_TY
             _lib.log.error((0, _lib.stringifyError)(err));
         }
     });
-}), _defineProperty(_RECEIVE_MESSAGE_TYPE, _conf.CONSTANTS.POST_MESSAGE_TYPE.RESPONSE, function (source, origin, message) {
+}, _RECEIVE_MESSAGE_TYPE[_conf.CONSTANTS.POST_MESSAGE_TYPE.RESPONSE] = function (source, origin, message) {
 
     if ((0, _listeners.isResponseListenerErrored)(message.hash)) {
         return;
@@ -129,4 +125,4 @@ var RECEIVE_MESSAGE_TYPES = exports.RECEIVE_MESSAGE_TYPES = (_RECEIVE_MESSAGE_TY
 
         return options.respond(null, { source: source, origin: origin, data: data });
     }
-}), _RECEIVE_MESSAGE_TYPE);
+}, _RECEIVE_MESSAGE_TYPE);

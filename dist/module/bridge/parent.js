@@ -1,11 +1,6 @@
 'use strict';
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-
+exports.__esModule = true;
 exports.hasBridge = hasBridge;
 exports.openBridge = openBridge;
 exports.linkUrl = linkUrl;
@@ -26,6 +21,7 @@ var _global = require('../global');
 var _common = require('./common');
 
 _global.global.bridges = _global.global.bridges || {};
+
 _global.global.bridgeFrames = _global.global.bridgeFrames || {};
 
 _global.global.popupWindowsByWin = _global.global.popupWindowsByWin || new _src.WeakMap();
@@ -178,10 +174,8 @@ window.open = function windowOpenWrapper(url, name, options, last) {
     if (url && url.indexOf(_conf.CONSTANTS.MOCK_PROTOCOL) === 0) {
         var _url$split = url.split('|');
 
-        var _url$split2 = _slicedToArray(_url$split, 2);
-
-        domain = _url$split2[0];
-        url = _url$split2[1];
+        domain = _url$split[0];
+        url = _url$split[1];
     }
 
     if (domain) {

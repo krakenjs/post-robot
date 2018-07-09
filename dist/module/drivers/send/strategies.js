@@ -1,13 +1,13 @@
 'use strict';
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
+exports.__esModule = true;
 exports.SEND_MESSAGE_STRATEGIES = undefined;
 
 var _src = require('cross-domain-utils/src');
 
 var _conf = require('../../conf');
+
+var _lib = require('../../lib');
 
 var SEND_MESSAGE_STRATEGIES = exports.SEND_MESSAGE_STRATEGIES = {};
 
@@ -81,10 +81,13 @@ if (__POST_ROBOT__.__IE_POPUP_SUPPORT__) {
 
         return sendBridgeMessage(win, serializedMessage, domain);
     };
+}
+
+if (__POST_ROBOT__.__IE_POPUP_SUPPORT__ || __POST_ROBOT__.__GLOBAL_MESSAGE_SUPPORT__) {
 
     SEND_MESSAGE_STRATEGIES[_conf.CONSTANTS.SEND_STRATEGIES.GLOBAL] = function (win, serializedMessage) {
 
-        if (!needsBridgeForBrowser()) {
+        if (!(0, _lib.needsGlobalMessagingForBrowser)()) {
             return;
         }
 

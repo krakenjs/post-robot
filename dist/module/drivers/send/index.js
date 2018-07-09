@@ -1,8 +1,6 @@
 'use strict';
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
+exports.__esModule = true;
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
@@ -17,8 +15,6 @@ var _conf = require('../../conf');
 var _lib = require('../../lib');
 
 var _strategies = require('./strategies');
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function buildMessage(win, message) {
     var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
@@ -37,6 +33,7 @@ function buildMessage(win, message) {
 
 function sendMessage(win, message, domain) {
     return _src2.ZalgoPromise['try'](function () {
+        var _jsonStringify;
 
         message = buildMessage(win, message, {
             data: (0, _lib.serializeMethods)(win, domain, message.data),
@@ -67,7 +64,7 @@ function sendMessage(win, message, domain) {
 
         var messages = [];
 
-        var serializedMessage = (0, _lib.jsonStringify)(_defineProperty({}, _conf.CONSTANTS.WINDOW_PROPS.POSTROBOT, message), null, 2);
+        var serializedMessage = (0, _lib.jsonStringify)((_jsonStringify = {}, _jsonStringify[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT] = message, _jsonStringify), null, 2);
 
         return _src2.ZalgoPromise.map(Object.keys(_strategies.SEND_MESSAGE_STRATEGIES), function (strategyName) {
 

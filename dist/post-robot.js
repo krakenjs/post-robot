@@ -40,9 +40,7 @@
     }({
         "./node_modules/cross-domain-safe-weakmap/src/index.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             var _interface = __webpack_require__("./node_modules/cross-domain-safe-weakmap/src/interface.js");
             Object.keys(_interface).forEach(function(key) {
                 "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
@@ -63,9 +61,7 @@
         },
         "./node_modules/cross-domain-safe-weakmap/src/interface.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             var _weakmap = __webpack_require__("./node_modules/cross-domain-safe-weakmap/src/weakmap.js");
             Object.defineProperty(exports, "WeakMap", {
                 enumerable: !0,
@@ -76,9 +72,7 @@
         },
         "./node_modules/cross-domain-safe-weakmap/src/native.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.hasNativeWeakMap = function() {
                 if (!window.WeakMap) return !1;
                 if (!window.Object.freeze) return !1;
@@ -94,9 +88,7 @@
         },
         "./node_modules/cross-domain-safe-weakmap/src/util.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.safeIndexOf = function(collection, item) {
                 for (var i = 0; i < collection.length; i++) try {
                     if (collection[i] === item) return i;
@@ -107,26 +99,9 @@
         },
         "./node_modules/cross-domain-safe-weakmap/src/weakmap.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.CrossDomainSafeWeakMap = void 0;
-            var _createClass = function() {
-                function defineProperties(target, props) {
-                    for (var i = 0; i < props.length; i++) {
-                        var descriptor = props[i];
-                        descriptor.enumerable = descriptor.enumerable || !1;
-                        descriptor.configurable = !0;
-                        "value" in descriptor && (descriptor.writable = !0);
-                        Object.defineProperty(target, descriptor.key, descriptor);
-                    }
-                }
-                return function(Constructor, protoProps, staticProps) {
-                    protoProps && defineProperties(Constructor.prototype, protoProps);
-                    staticProps && defineProperties(Constructor, staticProps);
-                    return Constructor;
-                };
-            }(), _src = __webpack_require__("./node_modules/cross-domain-utils/src/index.js"), _native = __webpack_require__("./node_modules/cross-domain-safe-weakmap/src/native.js"), _util = __webpack_require__("./node_modules/cross-domain-safe-weakmap/src/util.js");
+            var _src = __webpack_require__("./node_modules/cross-domain-utils/src/index.js"), _native = __webpack_require__("./node_modules/cross-domain-safe-weakmap/src/native.js"), _util = __webpack_require__("./node_modules/cross-domain-safe-weakmap/src/util.js");
             var defineProperty = Object.defineProperty, counter = Date.now() % 1e9;
             exports.CrossDomainSafeWeakMap = function() {
                 function CrossDomainSafeWeakMap() {
@@ -141,125 +116,110 @@
                     this.keys = [];
                     this.values = [];
                 }
-                _createClass(CrossDomainSafeWeakMap, [ {
-                    key: "_cleanupClosedWindows",
-                    value: function() {
-                        for (var weakmap = this.weakmap, keys = this.keys, i = 0; i < keys.length; i++) {
-                            var value = keys[i];
-                            if ((0, _src.isWindow)(value) && (0, _src.isWindowClosed)(value)) {
-                                if (weakmap) try {
-                                    weakmap.delete(value);
-                                } catch (err) {}
-                                keys.splice(i, 1);
-                                this.values.splice(i, 1);
-                                i -= 1;
-                            }
+                CrossDomainSafeWeakMap.prototype._cleanupClosedWindows = function() {
+                    for (var weakmap = this.weakmap, keys = this.keys, i = 0; i < keys.length; i++) {
+                        var value = keys[i];
+                        if ((0, _src.isWindow)(value) && (0, _src.isWindowClosed)(value)) {
+                            if (weakmap) try {
+                                weakmap.delete(value);
+                            } catch (err) {}
+                            keys.splice(i, 1);
+                            this.values.splice(i, 1);
+                            i -= 1;
                         }
                     }
-                }, {
-                    key: "isSafeToReadWrite",
-                    value: function(key) {
-                        if ((0, _src.isWindow)(key)) return !1;
-                        try {
-                            (0, _util.noop)(key && key.self);
-                            (0, _util.noop)(key && key[this.name]);
-                        } catch (err) {
-                            return !1;
-                        }
-                        return !0;
+                };
+                CrossDomainSafeWeakMap.prototype.isSafeToReadWrite = function(key) {
+                    if ((0, _src.isWindow)(key)) return !1;
+                    try {
+                        (0, _util.noop)(key && key.self);
+                        (0, _util.noop)(key && key[this.name]);
+                    } catch (err) {
+                        return !1;
                     }
-                }, {
-                    key: "set",
-                    value: function(key, value) {
-                        if (!key) throw new Error("WeakMap expected key");
-                        var weakmap = this.weakmap;
-                        if (weakmap) try {
-                            weakmap.set(key, value);
-                        } catch (err) {
-                            delete this.weakmap;
-                        }
-                        if (this.isSafeToReadWrite(key)) {
-                            var name = this.name, entry = key[name];
-                            entry && entry[0] === key ? entry[1] = value : defineProperty(key, name, {
-                                value: [ key, value ],
-                                writable: !0
-                            });
-                        } else {
-                            this._cleanupClosedWindows();
-                            var keys = this.keys, values = this.values, index = (0, _util.safeIndexOf)(keys, key);
-                            if (-1 === index) {
-                                keys.push(key);
-                                values.push(value);
-                            } else values[index] = value;
-                        }
+                    return !0;
+                };
+                CrossDomainSafeWeakMap.prototype.set = function(key, value) {
+                    if (!key) throw new Error("WeakMap expected key");
+                    var weakmap = this.weakmap;
+                    if (weakmap) try {
+                        weakmap.set(key, value);
+                    } catch (err) {
+                        delete this.weakmap;
                     }
-                }, {
-                    key: "get",
-                    value: function(key) {
-                        if (!key) throw new Error("WeakMap expected key");
-                        var weakmap = this.weakmap;
-                        if (weakmap) try {
-                            if (weakmap.has(key)) return weakmap.get(key);
-                        } catch (err) {
-                            delete this.weakmap;
-                        }
-                        if (!this.isSafeToReadWrite(key)) {
-                            this._cleanupClosedWindows();
-                            var keys = this.keys, index = (0, _util.safeIndexOf)(keys, key);
-                            if (-1 === index) return;
-                            return this.values[index];
-                        }
-                        var entry = key[this.name];
-                        if (entry && entry[0] === key) return entry[1];
-                    }
-                }, {
-                    key: "delete",
-                    value: function(key) {
-                        if (!key) throw new Error("WeakMap expected key");
-                        var weakmap = this.weakmap;
-                        if (weakmap) try {
-                            weakmap.delete(key);
-                        } catch (err) {
-                            delete this.weakmap;
-                        }
-                        if (this.isSafeToReadWrite(key)) {
-                            var entry = key[this.name];
-                            entry && entry[0] === key && (entry[0] = entry[1] = void 0);
-                        } else {
-                            this._cleanupClosedWindows();
-                            var keys = this.keys, index = (0, _util.safeIndexOf)(keys, key);
-                            if (-1 !== index) {
-                                keys.splice(index, 1);
-                                this.values.splice(index, 1);
-                            }
-                        }
-                    }
-                }, {
-                    key: "has",
-                    value: function(key) {
-                        if (!key) throw new Error("WeakMap expected key");
-                        var weakmap = this.weakmap;
-                        if (weakmap) try {
-                            return weakmap.has(key);
-                        } catch (err) {
-                            delete this.weakmap;
-                        }
-                        if (this.isSafeToReadWrite(key)) {
-                            var entry = key[this.name];
-                            return !(!entry || entry[0] !== key);
-                        }
+                    if (this.isSafeToReadWrite(key)) {
+                        var name = this.name, entry = key[name];
+                        entry && entry[0] === key ? entry[1] = value : defineProperty(key, name, {
+                            value: [ key, value ],
+                            writable: !0
+                        });
+                    } else {
                         this._cleanupClosedWindows();
-                        return -1 !== (0, _util.safeIndexOf)(this.keys, key);
+                        var keys = this.keys, values = this.values, index = (0, _util.safeIndexOf)(keys, key);
+                        if (-1 === index) {
+                            keys.push(key);
+                            values.push(value);
+                        } else values[index] = value;
                     }
-                } ]);
+                };
+                CrossDomainSafeWeakMap.prototype.get = function(key) {
+                    if (!key) throw new Error("WeakMap expected key");
+                    var weakmap = this.weakmap;
+                    if (weakmap) try {
+                        if (weakmap.has(key)) return weakmap.get(key);
+                    } catch (err) {
+                        delete this.weakmap;
+                    }
+                    if (!this.isSafeToReadWrite(key)) {
+                        this._cleanupClosedWindows();
+                        var keys = this.keys, index = (0, _util.safeIndexOf)(keys, key);
+                        if (-1 === index) return;
+                        return this.values[index];
+                    }
+                    var entry = key[this.name];
+                    if (entry && entry[0] === key) return entry[1];
+                };
+                CrossDomainSafeWeakMap.prototype.delete = function(key) {
+                    if (!key) throw new Error("WeakMap expected key");
+                    var weakmap = this.weakmap;
+                    if (weakmap) try {
+                        weakmap.delete(key);
+                    } catch (err) {
+                        delete this.weakmap;
+                    }
+                    if (this.isSafeToReadWrite(key)) {
+                        var entry = key[this.name];
+                        entry && entry[0] === key && (entry[0] = entry[1] = void 0);
+                    } else {
+                        this._cleanupClosedWindows();
+                        var keys = this.keys, index = (0, _util.safeIndexOf)(keys, key);
+                        if (-1 !== index) {
+                            keys.splice(index, 1);
+                            this.values.splice(index, 1);
+                        }
+                    }
+                };
+                CrossDomainSafeWeakMap.prototype.has = function(key) {
+                    if (!key) throw new Error("WeakMap expected key");
+                    var weakmap = this.weakmap;
+                    if (weakmap) try {
+                        return weakmap.has(key);
+                    } catch (err) {
+                        delete this.weakmap;
+                    }
+                    if (this.isSafeToReadWrite(key)) {
+                        var entry = key[this.name];
+                        return !(!entry || entry[0] !== key);
+                    }
+                    this._cleanupClosedWindows();
+                    return -1 !== (0, _util.safeIndexOf)(this.keys, key);
+                };
                 return CrossDomainSafeWeakMap;
             }();
         },
         "./node_modules/cross-domain-utils/src/index.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             var _utils = __webpack_require__("./node_modules/cross-domain-utils/src/utils.js");
             Object.keys(_utils).forEach(function(key) {
                 "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
@@ -284,9 +244,7 @@
         },
         "./node_modules/cross-domain-utils/src/util.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.isRegex = function(item) {
                 return "[object RegExp]" === Object.prototype.toString.call(item);
             };
@@ -294,9 +252,7 @@
         },
         "./node_modules/cross-domain-utils/src/utils.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.isFileProtocol = function() {
                 return (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window).location.protocol === CONSTANTS.FILE_PROTOCOL;
             };
@@ -842,9 +798,7 @@
         },
         "./node_modules/zalgo-promise/src/exceptions.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.dispatchPossiblyUnhandledError = function(err) {
                 if (-1 !== (0, _global.getGlobal)().dispatchedErrors.indexOf(err)) return;
                 (0, _global.getGlobal)().dispatchedErrors.push(err);
@@ -867,9 +821,7 @@
         "./node_modules/zalgo-promise/src/global.js": function(module, exports, __webpack_require__) {
             "use strict";
             (function(global) {
-                Object.defineProperty(exports, "__esModule", {
-                    value: !0
-                });
+                exports.__esModule = !0;
                 exports.getGlobal = function() {
                     var glob = void 0;
                     if ("undefined" != typeof window) glob = window; else {
@@ -887,9 +839,7 @@
         },
         "./node_modules/zalgo-promise/src/index.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             var _promise = __webpack_require__("./node_modules/zalgo-promise/src/promise.js");
             Object.defineProperty(exports, "ZalgoPromise", {
                 enumerable: !0,
@@ -900,26 +850,9 @@
         },
         "./node_modules/zalgo-promise/src/promise.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.ZalgoPromise = void 0;
-            var _createClass = function() {
-                function defineProperties(target, props) {
-                    for (var i = 0; i < props.length; i++) {
-                        var descriptor = props[i];
-                        descriptor.enumerable = descriptor.enumerable || !1;
-                        descriptor.configurable = !0;
-                        "value" in descriptor && (descriptor.writable = !0);
-                        Object.defineProperty(target, descriptor.key, descriptor);
-                    }
-                }
-                return function(Constructor, protoProps, staticProps) {
-                    protoProps && defineProperties(Constructor.prototype, protoProps);
-                    staticProps && defineProperties(Constructor, staticProps);
-                    return Constructor;
-                };
-            }(), _utils = __webpack_require__("./node_modules/zalgo-promise/src/utils.js"), _exceptions = __webpack_require__("./node_modules/zalgo-promise/src/exceptions.js"), _global = __webpack_require__("./node_modules/zalgo-promise/src/global.js");
+            var _utils = __webpack_require__("./node_modules/zalgo-promise/src/utils.js"), _exceptions = __webpack_require__("./node_modules/zalgo-promise/src/exceptions.js"), _global = __webpack_require__("./node_modules/zalgo-promise/src/global.js");
             var ZalgoPromise = function() {
                 function ZalgoPromise(handler) {
                     var _this = this;
@@ -952,257 +885,214 @@
                         resolved ? this.resolve(_result) : rejected && this.reject(_error);
                     }
                 }
-                _createClass(ZalgoPromise, [ {
-                    key: "resolve",
-                    value: function(result) {
-                        if (this.resolved || this.rejected) return this;
-                        if ((0, _utils.isPromise)(result)) throw new Error("Can not resolve promise with another promise");
-                        this.resolved = !0;
-                        this.value = result;
-                        this.dispatch();
-                        return this;
+                ZalgoPromise.prototype.resolve = function(result) {
+                    if (this.resolved || this.rejected) return this;
+                    if ((0, _utils.isPromise)(result)) throw new Error("Can not resolve promise with another promise");
+                    this.resolved = !0;
+                    this.value = result;
+                    this.dispatch();
+                    return this;
+                };
+                ZalgoPromise.prototype.reject = function(error) {
+                    var _this2 = this;
+                    if (this.resolved || this.rejected) return this;
+                    if ((0, _utils.isPromise)(error)) throw new Error("Can not reject promise with another promise");
+                    if (!error) {
+                        var _err = error && "function" == typeof error.toString ? error.toString() : Object.prototype.toString.call(error);
+                        error = new Error("Expected reject to be called with Error, got " + _err);
                     }
-                }, {
-                    key: "reject",
-                    value: function(error) {
-                        var _this2 = this;
-                        if (this.resolved || this.rejected) return this;
-                        if ((0, _utils.isPromise)(error)) throw new Error("Can not reject promise with another promise");
-                        if (!error) {
-                            var _err = error && "function" == typeof error.toString ? error.toString() : Object.prototype.toString.call(error);
-                            error = new Error("Expected reject to be called with Error, got " + _err);
-                        }
-                        this.rejected = !0;
-                        this.error = error;
-                        this.errorHandled || setTimeout(function() {
-                            _this2.errorHandled || (0, _exceptions.dispatchPossiblyUnhandledError)(error);
-                        }, 1);
-                        this.dispatch();
-                        return this;
-                    }
-                }, {
-                    key: "asyncReject",
-                    value: function(error) {
-                        this.errorHandled = !0;
-                        this.reject(error);
-                    }
-                }, {
-                    key: "dispatch",
-                    value: function() {
-                        var _this3 = this, dispatching = this.dispatching, resolved = this.resolved, rejected = this.rejected, handlers = this.handlers;
-                        if (!dispatching && (resolved || rejected)) {
-                            this.dispatching = !0;
-                            (0, _global.getGlobal)().activeCount += 1;
-                            for (var _loop = function(i) {
-                                var _handlers$i = handlers[i], onSuccess = _handlers$i.onSuccess, onError = _handlers$i.onError, promise = _handlers$i.promise, result = void 0;
-                                if (resolved) try {
-                                    result = onSuccess ? onSuccess(_this3.value) : _this3.value;
+                    this.rejected = !0;
+                    this.error = error;
+                    this.errorHandled || setTimeout(function() {
+                        _this2.errorHandled || (0, _exceptions.dispatchPossiblyUnhandledError)(error);
+                    }, 1);
+                    this.dispatch();
+                    return this;
+                };
+                ZalgoPromise.prototype.asyncReject = function(error) {
+                    this.errorHandled = !0;
+                    this.reject(error);
+                };
+                ZalgoPromise.prototype.dispatch = function() {
+                    var _this3 = this, dispatching = this.dispatching, resolved = this.resolved, rejected = this.rejected, handlers = this.handlers;
+                    if (!dispatching && (resolved || rejected)) {
+                        this.dispatching = !0;
+                        (0, _global.getGlobal)().activeCount += 1;
+                        for (var _loop = function(i) {
+                            var _handlers$i = handlers[i], onSuccess = _handlers$i.onSuccess, onError = _handlers$i.onError, promise = _handlers$i.promise, result = void 0;
+                            if (resolved) try {
+                                result = onSuccess ? onSuccess(_this3.value) : _this3.value;
+                            } catch (err) {
+                                promise.reject(err);
+                                return "continue";
+                            } else if (rejected) {
+                                if (!onError) {
+                                    promise.reject(_this3.error);
+                                    return "continue";
+                                }
+                                try {
+                                    result = onError(_this3.error);
                                 } catch (err) {
                                     promise.reject(err);
                                     return "continue";
-                                } else if (rejected) {
-                                    if (!onError) {
-                                        promise.reject(_this3.error);
-                                        return "continue";
-                                    }
-                                    try {
-                                        result = onError(_this3.error);
-                                    } catch (err) {
-                                        promise.reject(err);
-                                        return "continue";
-                                    }
                                 }
-                                if (result instanceof ZalgoPromise && (result.resolved || result.rejected)) {
-                                    result.resolved ? promise.resolve(result.value) : promise.reject(result.error);
-                                    result.errorHandled = !0;
-                                } else (0, _utils.isPromise)(result) ? result instanceof ZalgoPromise && (result.resolved || result.rejected) ? result.resolved ? promise.resolve(result.value) : promise.reject(result.error) : result.then(function(res) {
-                                    promise.resolve(res);
-                                }, function(err) {
-                                    promise.reject(err);
-                                }) : promise.resolve(result);
-                            }, i = 0; i < handlers.length; i++) _loop(i);
-                            handlers.length = 0;
-                            this.dispatching = !1;
-                            (0, _global.getGlobal)().activeCount -= 1;
-                            0 === (0, _global.getGlobal)().activeCount && ZalgoPromise.flushQueue();
-                        }
+                            }
+                            if (result instanceof ZalgoPromise && (result.resolved || result.rejected)) {
+                                result.resolved ? promise.resolve(result.value) : promise.reject(result.error);
+                                result.errorHandled = !0;
+                            } else (0, _utils.isPromise)(result) ? result instanceof ZalgoPromise && (result.resolved || result.rejected) ? result.resolved ? promise.resolve(result.value) : promise.reject(result.error) : result.then(function(res) {
+                                promise.resolve(res);
+                            }, function(err) {
+                                promise.reject(err);
+                            }) : promise.resolve(result);
+                        }, i = 0; i < handlers.length; i++) _loop(i);
+                        handlers.length = 0;
+                        this.dispatching = !1;
+                        (0, _global.getGlobal)().activeCount -= 1;
+                        0 === (0, _global.getGlobal)().activeCount && ZalgoPromise.flushQueue();
                     }
-                }, {
-                    key: "then",
-                    value: function(onSuccess, onError) {
-                        if (onSuccess && "function" != typeof onSuccess && !onSuccess.call) throw new Error("Promise.then expected a function for success handler");
-                        if (onError && "function" != typeof onError && !onError.call) throw new Error("Promise.then expected a function for error handler");
-                        var promise = new ZalgoPromise();
-                        this.handlers.push({
-                            promise: promise,
-                            onSuccess: onSuccess,
-                            onError: onError
-                        });
-                        this.errorHandled = !0;
-                        this.dispatch();
-                        return promise;
-                    }
-                }, {
-                    key: "catch",
-                    value: function(onError) {
-                        return this.then(void 0, onError);
-                    }
-                }, {
-                    key: "finally",
-                    value: function(handler) {
-                        return this.then(function(result) {
-                            return ZalgoPromise.try(handler).then(function() {
-                                return result;
-                            });
-                        }, function(err) {
-                            return ZalgoPromise.try(handler).then(function() {
-                                throw err;
-                            });
-                        });
-                    }
-                }, {
-                    key: "timeout",
-                    value: function(time, err) {
-                        var _this4 = this;
-                        if (this.resolved || this.rejected) return this;
-                        var timeout = setTimeout(function() {
-                            _this4.resolved || _this4.rejected || _this4.reject(err || new Error("Promise timed out after " + time + "ms"));
-                        }, time);
-                        return this.then(function(result) {
-                            clearTimeout(timeout);
+                };
+                ZalgoPromise.prototype.then = function(onSuccess, onError) {
+                    if (onSuccess && "function" != typeof onSuccess && !onSuccess.call) throw new Error("Promise.then expected a function for success handler");
+                    if (onError && "function" != typeof onError && !onError.call) throw new Error("Promise.then expected a function for error handler");
+                    var promise = new ZalgoPromise();
+                    this.handlers.push({
+                        promise: promise,
+                        onSuccess: onSuccess,
+                        onError: onError
+                    });
+                    this.errorHandled = !0;
+                    this.dispatch();
+                    return promise;
+                };
+                ZalgoPromise.prototype.catch = function(onError) {
+                    return this.then(void 0, onError);
+                };
+                ZalgoPromise.prototype.finally = function(handler) {
+                    return this.then(function(result) {
+                        return ZalgoPromise.try(handler).then(function() {
                             return result;
                         });
+                    }, function(err) {
+                        return ZalgoPromise.try(handler).then(function() {
+                            throw err;
+                        });
+                    });
+                };
+                ZalgoPromise.prototype.timeout = function(time, err) {
+                    var _this4 = this;
+                    if (this.resolved || this.rejected) return this;
+                    var timeout = setTimeout(function() {
+                        _this4.resolved || _this4.rejected || _this4.reject(err || new Error("Promise timed out after " + time + "ms"));
+                    }, time);
+                    return this.then(function(result) {
+                        clearTimeout(timeout);
+                        return result;
+                    });
+                };
+                ZalgoPromise.prototype.toPromise = function() {
+                    if ("undefined" == typeof Promise) throw new TypeError("Could not find Promise");
+                    return Promise.resolve(this);
+                };
+                ZalgoPromise.resolve = function(value) {
+                    return value instanceof ZalgoPromise ? value : (0, _utils.isPromise)(value) ? new ZalgoPromise(function(resolve, reject) {
+                        return value.then(resolve, reject);
+                    }) : new ZalgoPromise().resolve(value);
+                };
+                ZalgoPromise.reject = function(error) {
+                    return new ZalgoPromise().reject(error);
+                };
+                ZalgoPromise.all = function(promises) {
+                    var promise = new ZalgoPromise(), count = promises.length, results = [];
+                    if (!count) {
+                        promise.resolve(results);
+                        return promise;
                     }
-                }, {
-                    key: "toPromise",
-                    value: function() {
-                        if ("undefined" == typeof Promise) throw new TypeError("Could not find Promise");
-                        return Promise.resolve(this);
-                    }
-                } ], [ {
-                    key: "resolve",
-                    value: function(value) {
-                        return value instanceof ZalgoPromise ? value : (0, _utils.isPromise)(value) ? new ZalgoPromise(function(resolve, reject) {
-                            return value.then(resolve, reject);
-                        }) : new ZalgoPromise().resolve(value);
-                    }
-                }, {
-                    key: "reject",
-                    value: function(error) {
-                        return new ZalgoPromise().reject(error);
-                    }
-                }, {
-                    key: "all",
-                    value: function(promises) {
-                        var promise = new ZalgoPromise(), count = promises.length, results = [];
-                        if (!count) {
-                            promise.resolve(results);
-                            return promise;
-                        }
-                        for (var _loop2 = function(i) {
-                            var prom = promises[i];
-                            if (prom instanceof ZalgoPromise) {
-                                if (prom.resolved) {
-                                    results[i] = prom.value;
-                                    count -= 1;
-                                    return "continue";
-                                }
-                            } else if (!(0, _utils.isPromise)(prom)) {
-                                results[i] = prom;
+                    for (var _loop2 = function(i) {
+                        var prom = promises[i];
+                        if (prom instanceof ZalgoPromise) {
+                            if (prom.resolved) {
+                                results[i] = prom.value;
                                 count -= 1;
                                 return "continue";
                             }
-                            ZalgoPromise.resolve(prom).then(function(result) {
-                                results[i] = result;
-                                0 === (count -= 1) && promise.resolve(results);
-                            }, function(err) {
-                                promise.reject(err);
-                            });
-                        }, i = 0; i < promises.length; i++) _loop2(i);
-                        0 === count && promise.resolve(results);
-                        return promise;
-                    }
-                }, {
-                    key: "hash",
-                    value: function(promises) {
-                        var result = {};
-                        return ZalgoPromise.all(Object.keys(promises).map(function(key) {
-                            return ZalgoPromise.resolve(promises[key]).then(function(value) {
-                                result[key] = value;
-                            });
-                        })).then(function() {
-                            return result;
-                        });
-                    }
-                }, {
-                    key: "map",
-                    value: function(items, method) {
-                        return ZalgoPromise.all(items.map(method));
-                    }
-                }, {
-                    key: "onPossiblyUnhandledException",
-                    value: function(handler) {
-                        return (0, _exceptions.onPossiblyUnhandledException)(handler);
-                    }
-                }, {
-                    key: "try",
-                    value: function(method, context, args) {
-                        var result = void 0;
-                        try {
-                            result = method.apply(context, args || []);
-                        } catch (err) {
-                            return ZalgoPromise.reject(err);
+                        } else if (!(0, _utils.isPromise)(prom)) {
+                            results[i] = prom;
+                            count -= 1;
+                            return "continue";
                         }
-                        return ZalgoPromise.resolve(result);
-                    }
-                }, {
-                    key: "delay",
-                    value: function(_delay) {
-                        return new ZalgoPromise(function(resolve) {
-                            setTimeout(resolve, _delay);
+                        ZalgoPromise.resolve(prom).then(function(result) {
+                            results[i] = result;
+                            0 === (count -= 1) && promise.resolve(results);
+                        }, function(err) {
+                            promise.reject(err);
                         });
+                    }, i = 0; i < promises.length; i++) _loop2(i);
+                    0 === count && promise.resolve(results);
+                    return promise;
+                };
+                ZalgoPromise.hash = function(promises) {
+                    var result = {};
+                    return ZalgoPromise.all(Object.keys(promises).map(function(key) {
+                        return ZalgoPromise.resolve(promises[key]).then(function(value) {
+                            result[key] = value;
+                        });
+                    })).then(function() {
+                        return result;
+                    });
+                };
+                ZalgoPromise.map = function(items, method) {
+                    return ZalgoPromise.all(items.map(method));
+                };
+                ZalgoPromise.onPossiblyUnhandledException = function(handler) {
+                    return (0, _exceptions.onPossiblyUnhandledException)(handler);
+                };
+                ZalgoPromise.try = function(method, context, args) {
+                    var result = void 0;
+                    try {
+                        result = method.apply(context, args || []);
+                    } catch (err) {
+                        return ZalgoPromise.reject(err);
                     }
-                }, {
-                    key: "isPromise",
-                    value: function(value) {
-                        return !!(value && value instanceof ZalgoPromise) || (0, _utils.isPromise)(value);
-                    }
-                }, {
-                    key: "flush",
-                    value: function() {
-                        var promise = new ZalgoPromise();
-                        (0, _global.getGlobal)().flushPromises.push(promise);
-                        0 === (0, _global.getGlobal)().activeCount && ZalgoPromise.flushQueue();
-                        return promise;
-                    }
-                }, {
-                    key: "flushQueue",
-                    value: function() {
-                        var promisesToFlush = (0, _global.getGlobal)().flushPromises;
-                        (0, _global.getGlobal)().flushPromises = [];
-                        var _iterator = promisesToFlush, _isArray = Array.isArray(_iterator), _i = 0;
-                        for (_iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
-                            var _ref;
-                            if (_isArray) {
-                                if (_i >= _iterator.length) break;
-                                _ref = _iterator[_i++];
-                            } else {
-                                if ((_i = _iterator.next()).done) break;
-                                _ref = _i.value;
-                            }
-                            _ref.resolve();
+                    return ZalgoPromise.resolve(result);
+                };
+                ZalgoPromise.delay = function(_delay) {
+                    return new ZalgoPromise(function(resolve) {
+                        setTimeout(resolve, _delay);
+                    });
+                };
+                ZalgoPromise.isPromise = function(value) {
+                    return !!(value && value instanceof ZalgoPromise) || (0, _utils.isPromise)(value);
+                };
+                ZalgoPromise.flush = function() {
+                    var promise = new ZalgoPromise();
+                    (0, _global.getGlobal)().flushPromises.push(promise);
+                    0 === (0, _global.getGlobal)().activeCount && ZalgoPromise.flushQueue();
+                    return promise;
+                };
+                ZalgoPromise.flushQueue = function() {
+                    var promisesToFlush = (0, _global.getGlobal)().flushPromises;
+                    (0, _global.getGlobal)().flushPromises = [];
+                    var _iterator = promisesToFlush, _isArray = Array.isArray(_iterator), _i = 0;
+                    for (_iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
+                        var _ref;
+                        if (_isArray) {
+                            if (_i >= _iterator.length) break;
+                            _ref = _iterator[_i++];
+                        } else {
+                            if ((_i = _iterator.next()).done) break;
+                            _ref = _i.value;
                         }
+                        _ref.resolve();
                     }
-                } ]);
+                };
                 return ZalgoPromise;
             }();
             exports.ZalgoPromise = ZalgoPromise;
         },
         "./node_modules/zalgo-promise/src/utils.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.isPromise = function(item) {
                 try {
                     if (!item) return !1;
@@ -1223,9 +1113,7 @@
         },
         "./src/clean.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.cleanUpWindow = function(win) {
                 var requestPromises = _global.global.requestPromises.get(win);
                 if (requestPromises) for (var _iterator = requestPromises, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator](); ;) {
@@ -1251,21 +1139,9 @@
         },
         "./src/conf/config.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.CONFIG = void 0;
-            var _ALLOWED_POST_MESSAGE, _constants = __webpack_require__("./src/conf/constants.js");
-            function _defineProperty(obj, key, value) {
-                key in obj ? Object.defineProperty(obj, key, {
-                    value: value,
-                    enumerable: !0,
-                    configurable: !0,
-                    writable: !0
-                }) : obj[key] = value;
-                return obj;
-            }
-            var CONFIG = exports.CONFIG = {
+            var _ALLOWED_POST_MESSAGE, _constants = __webpack_require__("./src/conf/constants.js"), CONFIG = exports.CONFIG = {
                 ALLOW_POSTMESSAGE_POPUP: !("__ALLOW_POSTMESSAGE_POPUP__" in window) || window.__ALLOW_POSTMESSAGE_POPUP__,
                 LOG_LEVEL: "info",
                 BRIDGE_TIMEOUT: 5e3,
@@ -1273,9 +1149,8 @@
                 ACK_TIMEOUT: -1 !== window.navigator.userAgent.match(/MSIE/i) ? 2e3 : 1e3,
                 RES_TIMEOUT: -1,
                 LOG_TO_PAGE: !1,
-                ALLOWED_POST_MESSAGE_METHODS: (_ALLOWED_POST_MESSAGE = {}, _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE, !0), 
-                _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.BRIDGE, !0), 
-                _defineProperty(_ALLOWED_POST_MESSAGE, _constants.CONSTANTS.SEND_STRATEGIES.GLOBAL, !0), 
+                ALLOWED_POST_MESSAGE_METHODS: (_ALLOWED_POST_MESSAGE = {}, _ALLOWED_POST_MESSAGE[_constants.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE] = !0, 
+                _ALLOWED_POST_MESSAGE[_constants.CONSTANTS.SEND_STRATEGIES.BRIDGE] = !0, _ALLOWED_POST_MESSAGE[_constants.CONSTANTS.SEND_STRATEGIES.GLOBAL] = !0, 
                 _ALLOWED_POST_MESSAGE),
                 ALLOW_SAME_ORIGIN: !1
             };
@@ -1283,9 +1158,7 @@
         },
         "./src/conf/constants.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.CONSTANTS = {
                 POST_MESSAGE_TYPE: {
                     REQUEST: "postrobot_message_request",
@@ -1338,9 +1211,7 @@
         },
         "./src/conf/index.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             var _config = __webpack_require__("./src/conf/config.js");
             Object.keys(_config).forEach(function(key) {
                 "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
@@ -1362,9 +1233,7 @@
         },
         "./src/drivers/index.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             var _receive = __webpack_require__("./src/drivers/receive/index.js");
             Object.keys(_receive).forEach(function(key) {
                 "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
@@ -1395,9 +1264,7 @@
         },
         "./src/drivers/listeners.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.resetListeners = function() {
                 _global.global.responseListeners = {};
                 _global.global.requestListeners = {};
@@ -1573,9 +1440,7 @@
         },
         "./src/drivers/receive/index.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             var _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
                 return typeof obj;
             } : function(obj) {
@@ -1637,9 +1502,7 @@
         },
         "./src/drivers/receive/types.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.RECEIVE_MESSAGE_TYPES = void 0;
             var _RECEIVE_MESSAGE_TYPE, _extends = Object.assign || function(target) {
                 for (var i = 1; i < arguments.length; i++) {
@@ -1648,23 +1511,14 @@
                 }
                 return target;
             }, _src = __webpack_require__("./node_modules/zalgo-promise/src/index.js"), _src2 = __webpack_require__("./node_modules/cross-domain-utils/src/index.js"), _conf = __webpack_require__("./src/conf/index.js"), _lib = __webpack_require__("./src/lib/index.js"), _send = __webpack_require__("./src/drivers/send/index.js"), _listeners = __webpack_require__("./src/drivers/listeners.js");
-            function _defineProperty(obj, key, value) {
-                key in obj ? Object.defineProperty(obj, key, {
-                    value: value,
-                    enumerable: !0,
-                    configurable: !0,
-                    writable: !0
-                }) : obj[key] = value;
-                return obj;
-            }
-            exports.RECEIVE_MESSAGE_TYPES = (_defineProperty(_RECEIVE_MESSAGE_TYPE = {}, _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK, function(source, origin, message) {
+            exports.RECEIVE_MESSAGE_TYPES = ((_RECEIVE_MESSAGE_TYPE = {})[_conf.CONSTANTS.POST_MESSAGE_TYPE.ACK] = function(source, origin, message) {
                 if (!(0, _listeners.isResponseListenerErrored)(message.hash)) {
                     var options = (0, _listeners.getResponseListener)(message.hash);
                     if (!options) throw new Error("No handler found for post message ack for message: " + message.name + " from " + origin + " in " + window.location.protocol + "//" + window.location.host + window.location.pathname);
                     if (!(0, _src2.matchDomain)(options.domain, origin)) throw new Error("Ack origin " + origin + " does not match domain " + options.domain.toString());
                     options.ack = !0;
                 }
-            }), _defineProperty(_RECEIVE_MESSAGE_TYPE, _conf.CONSTANTS.POST_MESSAGE_TYPE.REQUEST, function(source, origin, message) {
+            }, _RECEIVE_MESSAGE_TYPE[_conf.CONSTANTS.POST_MESSAGE_TYPE.REQUEST] = function(source, origin, message) {
                 var options = (0, _listeners.getRequestListener)({
                     name: message.name,
                     win: source,
@@ -1707,7 +1561,7 @@
                     if (options && options.handleError) return options.handleError(err);
                     _lib.log.error((0, _lib.stringifyError)(err));
                 });
-            }), _defineProperty(_RECEIVE_MESSAGE_TYPE, _conf.CONSTANTS.POST_MESSAGE_TYPE.RESPONSE, function(source, origin, message) {
+            }, _RECEIVE_MESSAGE_TYPE[_conf.CONSTANTS.POST_MESSAGE_TYPE.RESPONSE] = function(source, origin, message) {
                 if (!(0, _listeners.isResponseListenerErrored)(message.hash)) {
                     var options = (0, _listeners.getResponseListener)(message.hash);
                     if (!options) throw new Error("No handler found for post message response for message: " + message.name + " from " + origin + " in " + window.location.protocol + "//" + window.location.host + window.location.pathname);
@@ -1728,13 +1582,11 @@
                         });
                     }
                 }
-            }), _RECEIVE_MESSAGE_TYPE);
+            }, _RECEIVE_MESSAGE_TYPE);
         },
         "./src/drivers/send/index.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             var _extends = Object.assign || function(target) {
                 for (var i = 1; i < arguments.length; i++) {
                     var source = arguments[i];
@@ -1744,6 +1596,7 @@
             };
             exports.sendMessage = function(win, message, domain) {
                 return _src2.ZalgoPromise.try(function() {
+                    var _jsonStringify;
                     message = function(win, message) {
                         var options = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : {}, id = (0, 
                         _lib.uniqueID)(), type = (0, _lib.getWindowType)(), sourceDomain = (0, _src.getDomain)(window);
@@ -1762,15 +1615,8 @@
                     if (win === window && !_conf.CONFIG.ALLOW_SAME_ORIGIN) throw new Error("Attemping to send message to self");
                     if ((0, _src.isWindowClosed)(win)) throw new Error("Window is closed");
                     _lib.log.debug("Running send message strategies", message);
-                    var messages = [], serializedMessage = (0, _lib.jsonStringify)(function(obj, key, value) {
-                        key in obj ? Object.defineProperty(obj, key, {
-                            value: value,
-                            enumerable: !0,
-                            configurable: !0,
-                            writable: !0
-                        }) : obj[key] = value;
-                        return obj;
-                    }({}, _conf.CONSTANTS.WINDOW_PROPS.POSTROBOT, message), null, 2);
+                    var messages = [], serializedMessage = (0, _lib.jsonStringify)(((_jsonStringify = {})[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT] = message, 
+                    _jsonStringify), null, 2);
                     return _src2.ZalgoPromise.map(Object.keys(_strategies.SEND_MESSAGE_STRATEGIES), function(strategyName) {
                         return _src2.ZalgoPromise.try(function() {
                             if (!_conf.CONFIG.ALLOWED_POST_MESSAGE_METHODS[strategyName]) throw new Error("Strategy disallowed: " + strategyName);
@@ -1793,11 +1639,10 @@
         },
         "./src/drivers/send/strategies.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.SEND_MESSAGE_STRATEGIES = void 0;
-            var _src = __webpack_require__("./node_modules/cross-domain-utils/src/index.js"), _conf = __webpack_require__("./src/conf/index.js"), SEND_MESSAGE_STRATEGIES = exports.SEND_MESSAGE_STRATEGIES = {};
+            var _src = __webpack_require__("./node_modules/cross-domain-utils/src/index.js"), _conf = __webpack_require__("./src/conf/index.js"), SEND_MESSAGE_STRATEGIES = (__webpack_require__("./src/lib/index.js"), 
+            exports.SEND_MESSAGE_STRATEGIES = {});
             SEND_MESSAGE_STRATEGIES[_conf.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE] = function(win, serializedMessage, domain) {
                 0;
                 (Array.isArray(domain) ? domain : "string" == typeof domain ? [ domain ] : [ _conf.CONSTANTS.WILDCARD ]).map(function(dom) {
@@ -1811,21 +1656,18 @@
                     return win.postMessage(serializedMessage, dom);
                 });
             };
+            0;
         },
         "./src/global.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.global = void 0;
             var _conf = __webpack_require__("./src/conf/index.js");
             (exports.global = window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT] = window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT] || {}).registerSelf = function() {};
         },
         "./src/index.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             var _interface = __webpack_require__("./src/interface.js");
             Object.keys(_interface).forEach(function(key) {
                 "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
@@ -1846,9 +1688,7 @@
         },
         "./src/interface.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.bridge = exports.Promise = exports.cleanUpWindow = void 0;
             var _public = __webpack_require__("./src/public/index.js");
             Object.keys(_public).forEach(function(key) {
@@ -1892,9 +1732,7 @@
         },
         "./src/lib/index.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             var _util = __webpack_require__("./src/lib/util.js");
             Object.keys(_util).forEach(function(key) {
                 "default" !== key && "__esModule" !== key && Object.defineProperty(exports, key, {
@@ -1934,9 +1772,7 @@
         },
         "./src/lib/log.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.log = void 0;
             var _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
                 return typeof obj;
@@ -2022,9 +1858,7 @@
         },
         "./src/lib/ready.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.onHello = onHello;
             exports.sayHello = sayHello;
             exports.initOnReady = function() {
@@ -2076,9 +1910,7 @@
         },
         "./src/lib/serialize.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.listenForMethods = void 0;
             var _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
                 return typeof obj;
@@ -2222,9 +2054,7 @@
         },
         "./src/lib/util.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.weakMapMemoize = exports.once = void 0;
             var _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
                 return typeof obj;
@@ -2328,6 +2158,11 @@
             exports.jsonParse = function(item) {
                 return JSON.parse(item);
             };
+            exports.needsGlobalMessagingForBrowser = function() {
+                if ((0, _src2.getUserAgent)(window).match(/MSIE|trident|edge\/12|edge\/13/i)) return !0;
+                if (!_conf.CONFIG.ALLOW_POSTMESSAGE_POPUP) return !0;
+                return !1;
+            };
             var _src = __webpack_require__("./node_modules/cross-domain-safe-weakmap/src/index.js"), _src2 = __webpack_require__("./node_modules/cross-domain-utils/src/index.js"), _conf = __webpack_require__("./src/conf/index.js");
             exports.once = function(method) {
                 if (!method) return method;
@@ -2360,9 +2195,7 @@
         },
         "./src/public/client.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.send = void 0;
             exports.request = request;
             exports.sendToParent = function(name, data, options) {
@@ -2486,9 +2319,7 @@
         },
         "./src/public/config.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.CONSTANTS = exports.CONFIG = void 0;
             var _conf = __webpack_require__("./src/conf/index.js");
             Object.defineProperty(exports, "CONFIG", {
@@ -2511,9 +2342,7 @@
         },
         "./src/public/index.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.parent = void 0;
             var _client = __webpack_require__("./src/public/client.js");
             Object.keys(_client).forEach(function(key) {
@@ -2547,9 +2376,7 @@
         },
         "./src/public/server.js": function(module, exports, __webpack_require__) {
             "use strict";
-            Object.defineProperty(exports, "__esModule", {
-                value: !0
-            });
+            exports.__esModule = !0;
             exports.on = void 0;
             var _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
                 return typeof obj;

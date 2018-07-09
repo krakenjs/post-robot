@@ -1,8 +1,6 @@
 'use strict';
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
+exports.__esModule = true;
 exports.weakMapMemoize = exports.once = undefined;
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -20,6 +18,7 @@ exports.isRegex = isRegex;
 exports.getWindowType = getWindowType;
 exports.jsonStringify = jsonStringify;
 exports.jsonParse = jsonParse;
+exports.needsGlobalMessagingForBrowser = needsGlobalMessagingForBrowser;
 
 var _src = require('cross-domain-safe-weakmap/src');
 
@@ -284,4 +283,17 @@ function jsonStringify(obj, replacer, indent) {
 
 function jsonParse(item) {
     return JSON.parse(item);
+}
+
+function needsGlobalMessagingForBrowser() {
+
+    if ((0, _src2.getUserAgent)(window).match(/MSIE|trident|edge\/12|edge\/13/i)) {
+        return true;
+    }
+
+    if (!_conf.CONFIG.ALLOW_POSTMESSAGE_POPUP) {
+        return true;
+    }
+
+    return false;
 }
