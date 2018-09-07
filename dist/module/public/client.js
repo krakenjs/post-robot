@@ -1,30 +1,18 @@
-'use strict';
+export { _send as send };
+import { WeakMap } from 'cross-domain-safe-weakmap/src';
+import { ZalgoPromise } from 'zalgo-promise/src';
+import { getAncestor, isAncestor, isWindowClosed, getDomain, matchDomain } from 'cross-domain-utils/src';
 
-exports.__esModule = true;
-exports.send = undefined;
-exports.request = request;
-exports.sendToParent = sendToParent;
-exports.client = client;
+import { CONFIG, CONSTANTS } from '../conf';
+import { sendMessage, addResponseListener, deleteResponseListener, markResponseListenerErrored } from '../drivers';
+import { uniqueID, onChildWindowReady, sayHello, isRegex } from '../lib';
+import { global } from '../global';
 
-var _src = require('cross-domain-safe-weakmap/src');
+global.requestPromises = global.requestPromises || new WeakMap();
 
-var _src2 = require('zalgo-promise/src');
+export function request(options) {
 
-var _src3 = require('cross-domain-utils/src');
-
-var _conf = require('../conf');
-
-var _drivers = require('../drivers');
-
-var _lib = require('../lib');
-
-var _global = require('../global');
-
-_global.global.requestPromises = _global.global.requestPromises || new _src.WeakMap();
-
-function request(options) {
-
-    var prom = _src2.ZalgoPromise['try'](function () {
+    var prom = ZalgoPromise['try'](function () {
 
         if (!options.name) {
             throw new Error('Expected options.name');
@@ -76,41 +64,41 @@ function request(options) {
 
         var win = targetWindow;
 
-        domain = options.domain || _conf.CONSTANTS.WILDCARD;
+        domain = options.domain || CONSTANTS.WILDCARD;
 
-        var hash = options.name + '_' + (0, _lib.uniqueID)();
+        var hash = options.name + '_' + uniqueID();
 
-        if ((0, _src3.isWindowClosed)(win)) {
+        if (isWindowClosed(win)) {
             throw new Error('Target window is closed');
         }
 
         var hasResult = false;
 
-        var requestPromises = _global.global.requestPromises.get(win);
+        var requestPromises = global.requestPromises.get(win);
 
         if (!requestPromises) {
             requestPromises = [];
-            _global.global.requestPromises.set(win, requestPromises);
+            global.requestPromises.set(win, requestPromises);
         }
 
-        var requestPromise = _src2.ZalgoPromise['try'](function () {
+        var requestPromise = ZalgoPromise['try'](function () {
 
-            if ((0, _src3.isAncestor)(window, win)) {
-                return (0, _lib.onChildWindowReady)(win, options.timeout || _conf.CONFIG.CHILD_WINDOW_TIMEOUT);
+            if (isAncestor(window, win)) {
+                return onChildWindowReady(win, options.timeout || CONFIG.CHILD_WINDOW_TIMEOUT);
             }
         }).then(function () {
             var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
                 origin = _ref.origin;
 
-            if ((0, _lib.isRegex)(domain) && !origin) {
-                return (0, _lib.sayHello)(win);
+            if (isRegex(domain) && !origin) {
+                return sayHello(win);
             }
         }).then(function () {
             var _ref2 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
                 origin = _ref2.origin;
 
-            if ((0, _lib.isRegex)(domain)) {
-                if (!(0, _src3.matchDomain)(domain, origin)) {
+            if (isRegex(domain)) {
+                if (!matchDomain(domain, origin)) {
                     throw new Error('Remote window domain ' + origin + ' does not match regex: ' + domain.toString());
                 }
 
@@ -123,7 +111,7 @@ function request(options) {
 
             var actualDomain = domain;
 
-            return new _src2.ZalgoPromise(function (resolve, reject) {
+            return new ZalgoPromise(function (resolve, reject) {
 
                 var responseListener = void 0;
 
@@ -146,11 +134,11 @@ function request(options) {
                         }
                     };
 
-                    (0, _drivers.addResponseListener)(hash, responseListener);
+                    addResponseListener(hash, responseListener);
                 }
 
-                (0, _drivers.sendMessage)(win, {
-                    type: _conf.CONSTANTS.POST_MESSAGE_TYPE.REQUEST,
+                sendMessage(win, {
+                    type: CONSTANTS.POST_MESSAGE_TYPE.REQUEST,
                     hash: hash,
                     name: name,
                     data: options.data,
@@ -161,8 +149,8 @@ function request(options) {
                     return resolve();
                 }
 
-                var ackTimeout = _conf.CONFIG.ACK_TIMEOUT;
-                var resTimeout = options.timeout || _conf.CONFIG.RES_TIMEOUT;
+                var ackTimeout = CONFIG.ACK_TIMEOUT;
+                var resTimeout = options.timeout || CONFIG.RES_TIMEOUT;
 
                 var cycleTime = 100;
 
@@ -172,7 +160,7 @@ function request(options) {
                         return;
                     }
 
-                    if ((0, _src3.isWindowClosed)(win)) {
+                    if (isWindowClosed(win)) {
 
                         if (!responseListener.ack) {
                             return reject(new Error('Window closed for ' + name + ' before ack'));
@@ -196,9 +184,9 @@ function request(options) {
 
                         cycleTime = Math.min(resTimeout, 2000);
                     } else if (ackTimeout === 0) {
-                        return reject(new Error('No ack for postMessage ' + name + ' in ' + (0, _src3.getDomain)() + ' in ' + _conf.CONFIG.ACK_TIMEOUT + 'ms'));
+                        return reject(new Error('No ack for postMessage ' + name + ' in ' + getDomain() + ' in ' + CONFIG.ACK_TIMEOUT + 'ms'));
                     } else if (resTimeout === 0) {
-                        return reject(new Error('No response for postMessage ' + name + ' in ' + (0, _src3.getDomain)() + ' in ' + (options.timeout || _conf.CONFIG.RES_TIMEOUT) + 'ms'));
+                        return reject(new Error('No response for postMessage ' + name + ' in ' + getDomain() + ' in ' + (options.timeout || CONFIG.RES_TIMEOUT) + 'ms'));
                     }
 
                     setTimeout(cycle, cycleTime);
@@ -209,8 +197,8 @@ function request(options) {
         });
 
         requestPromise['catch'](function () {
-            (0, _drivers.markResponseListenerErrored)(hash);
-            (0, _drivers.deleteResponseListener)(hash);
+            markResponseListenerErrored(hash);
+            deleteResponseListener(hash);
         });
 
         requestPromises.push(requestPromise);
@@ -231,13 +219,12 @@ function _send(window, name, data, options) {
     return request(options);
 }
 
-exports.send = _send;
-function sendToParent(name, data, options) {
+export function sendToParent(name, data, options) {
 
-    var win = (0, _src3.getAncestor)();
+    var win = getAncestor();
 
     if (!win) {
-        return new _src2.ZalgoPromise(function (resolve, reject) {
+        return new ZalgoPromise(function (resolve, reject) {
             return reject(new Error('Window does not have a parent'));
         });
     }
@@ -245,7 +232,7 @@ function sendToParent(name, data, options) {
     return _send(win, name, data, options);
 }
 
-function client() {
+export function client() {
     var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
 
@@ -262,4 +249,4 @@ function client() {
     };
 }
 
-_global.global.send = _send;
+global.send = _send;

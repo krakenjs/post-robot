@@ -1,27 +1,16 @@
-'use strict';
-
-exports.__esModule = true;
-exports.on = undefined;
+export { _on as on };
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-exports.listen = listen;
-exports.once = once;
-exports.listener = listener;
+import { isWindowClosed } from 'cross-domain-utils/src';
+import { ZalgoPromise } from 'zalgo-promise/src';
 
-var _src = require('cross-domain-utils/src');
+import { once as onceFunction, safeInterval } from '../lib';
+import { addRequestListener } from '../drivers';
+import { CONSTANTS } from '../conf';
+import { global } from '../global';
 
-var _src2 = require('zalgo-promise/src');
-
-var _lib = require('../lib');
-
-var _drivers = require('../drivers');
-
-var _conf = require('../conf');
-
-var _global = require('../global');
-
-function listen(options) {
+export function listen(options) {
 
     if (!options.name) {
         throw new Error('Expected options.name');
@@ -41,23 +30,23 @@ function listen(options) {
             throw err;
         },
         window: win,
-        domain: domain || _conf.CONSTANTS.WILDCARD,
+        domain: domain || CONSTANTS.WILDCARD,
         name: name
     };
 
-    var requestListener = (0, _drivers.addRequestListener)({ name: name, win: win, domain: domain }, listenerOptions);
+    var requestListener = addRequestListener({ name: name, win: win, domain: domain }, listenerOptions);
 
     if (options.once) {
         var _handler = listenerOptions.handler;
-        listenerOptions.handler = (0, _lib.once)(function listenOnce() {
+        listenerOptions.handler = onceFunction(function listenOnce() {
             requestListener.cancel();
             return _handler.apply(this, arguments);
         });
     }
 
     if (listenerOptions.window && options.errorOnClose) {
-        var interval = (0, _lib.safeInterval)(function () {
-            if (win && (typeof win === 'undefined' ? 'undefined' : _typeof(win)) === 'object' && (0, _src.isWindowClosed)(win)) {
+        var interval = safeInterval(function () {
+            if (win && (typeof win === 'undefined' ? 'undefined' : _typeof(win)) === 'object' && isWindowClosed(win)) {
                 interval.cancel();
                 listenerOptions.handleError(new Error('Post message target window is closed'));
             }
@@ -86,8 +75,7 @@ function _on(name, options, handler) {
     return listen(options);
 }
 
-exports.on = _on;
-function once(name) {
+export function once(name) {
     var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
     var handler = arguments[2];
 
@@ -101,7 +89,7 @@ function once(name) {
     handler = handler || options.handler;
     var errorHandler = options.errorHandler;
 
-    var promise = new _src2.ZalgoPromise(function (resolve, reject) {
+    var promise = new ZalgoPromise(function (resolve, reject) {
 
         options = options || {};
 
@@ -129,7 +117,7 @@ function once(name) {
     return promise;
 }
 
-function listener() {
+export function listener() {
     var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
 
@@ -140,4 +128,4 @@ function listener() {
     };
 }
 
-_global.global.on = _on;
+global.on = _on;

@@ -1,67 +1,58 @@
-'use strict';
-
-exports.__esModule = true;
-exports.RECEIVE_MESSAGE_TYPES = undefined;
-
 var _RECEIVE_MESSAGE_TYPE;
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-var _src = require('zalgo-promise/src');
+import { ZalgoPromise } from 'zalgo-promise/src';
+import { isWindowClosed, matchDomain, stringifyDomainPattern } from 'cross-domain-utils/src';
 
-var _src2 = require('cross-domain-utils/src');
+import { CONSTANTS } from '../../conf';
+import { stringifyError, noop } from '../../lib';
+import { sendMessage } from '../send';
+import { getRequestListener, getResponseListener, deleteResponseListener, isResponseListenerErrored } from '../listeners';
 
-var _conf = require('../../conf');
+export var RECEIVE_MESSAGE_TYPES = (_RECEIVE_MESSAGE_TYPE = {}, _RECEIVE_MESSAGE_TYPE[CONSTANTS.POST_MESSAGE_TYPE.ACK] = function (source, origin, message) {
 
-var _lib = require('../../lib');
-
-var _send = require('../send');
-
-var _listeners = require('../listeners');
-
-var RECEIVE_MESSAGE_TYPES = exports.RECEIVE_MESSAGE_TYPES = (_RECEIVE_MESSAGE_TYPE = {}, _RECEIVE_MESSAGE_TYPE[_conf.CONSTANTS.POST_MESSAGE_TYPE.ACK] = function (source, origin, message) {
-
-    if ((0, _listeners.isResponseListenerErrored)(message.hash)) {
+    if (isResponseListenerErrored(message.hash)) {
         return;
     }
 
-    var options = (0, _listeners.getResponseListener)(message.hash);
+    var options = getResponseListener(message.hash);
 
     if (!options) {
         throw new Error('No handler found for post message ack for message: ' + message.name + ' from ' + origin + ' in ' + window.location.protocol + '//' + window.location.host + window.location.pathname);
     }
 
-    if (!(0, _src2.matchDomain)(options.domain, origin)) {
+    if (!matchDomain(options.domain, origin)) {
         throw new Error('Ack origin ' + origin + ' does not match domain ' + options.domain.toString());
     }
 
     options.ack = true;
-}, _RECEIVE_MESSAGE_TYPE[_conf.CONSTANTS.POST_MESSAGE_TYPE.REQUEST] = function (source, origin, message) {
+}, _RECEIVE_MESSAGE_TYPE[CONSTANTS.POST_MESSAGE_TYPE.REQUEST] = function (source, origin, message) {
 
-    var options = (0, _listeners.getRequestListener)({ name: message.name, win: source, domain: origin });
+    var options = getRequestListener({ name: message.name, win: source, domain: origin });
 
     function respond(data) {
 
-        if (message.fireAndForget || (0, _src2.isWindowClosed)(source)) {
-            return _src.ZalgoPromise.resolve();
+        if (message.fireAndForget || isWindowClosed(source)) {
+            return ZalgoPromise.resolve();
         }
 
-        return (0, _send.sendMessage)(source, _extends({
+        return sendMessage(source, _extends({
             target: message.originalSource,
             hash: message.hash,
             name: message.name
         }, data), origin);
     }
 
-    return _src.ZalgoPromise.all([respond({
-        type: _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK
-    }), _src.ZalgoPromise['try'](function () {
+    return ZalgoPromise.all([respond({
+        type: CONSTANTS.POST_MESSAGE_TYPE.ACK
+    }), ZalgoPromise['try'](function () {
 
         if (!options) {
             throw new Error('No handler found for post message: ' + message.name + ' from ' + origin + ' in ' + window.location.protocol + '//' + window.location.host + window.location.pathname);
         }
 
-        if (!(0, _src2.matchDomain)(options.domain, origin)) {
+        if (!matchDomain(options.domain, origin)) {
             throw new Error('Request origin ' + origin + ' does not match domain ' + options.domain.toString());
         }
 
@@ -71,56 +62,56 @@ var RECEIVE_MESSAGE_TYPES = exports.RECEIVE_MESSAGE_TYPES = (_RECEIVE_MESSAGE_TY
     }).then(function (data) {
 
         return respond({
-            type: _conf.CONSTANTS.POST_MESSAGE_TYPE.RESPONSE,
-            ack: _conf.CONSTANTS.POST_MESSAGE_ACK.SUCCESS,
+            type: CONSTANTS.POST_MESSAGE_TYPE.RESPONSE,
+            ack: CONSTANTS.POST_MESSAGE_ACK.SUCCESS,
             data: data
         });
     }, function (err) {
 
-        var error = (0, _lib.stringifyError)(err).replace(/^Error: /, '');
+        var error = stringifyError(err).replace(/^Error: /, '');
         // $FlowFixMe
         var code = err.code;
 
         return respond({
-            type: _conf.CONSTANTS.POST_MESSAGE_TYPE.RESPONSE,
-            ack: _conf.CONSTANTS.POST_MESSAGE_ACK.ERROR,
+            type: CONSTANTS.POST_MESSAGE_TYPE.RESPONSE,
+            ack: CONSTANTS.POST_MESSAGE_ACK.ERROR,
             error: error,
             code: code
         });
-    })]).then(_lib.noop)['catch'](function (err) {
+    })]).then(noop)['catch'](function (err) {
 
         if (options && options.handleError) {
             return options.handleError(err);
         } else {
-            _lib.log.error((0, _lib.stringifyError)(err));
+            throw err;
         }
     });
-}, _RECEIVE_MESSAGE_TYPE[_conf.CONSTANTS.POST_MESSAGE_TYPE.RESPONSE] = function (source, origin, message) {
+}, _RECEIVE_MESSAGE_TYPE[CONSTANTS.POST_MESSAGE_TYPE.RESPONSE] = function (source, origin, message) {
 
-    if ((0, _listeners.isResponseListenerErrored)(message.hash)) {
+    if (isResponseListenerErrored(message.hash)) {
         return;
     }
 
-    var options = (0, _listeners.getResponseListener)(message.hash);
+    var options = getResponseListener(message.hash);
 
     if (!options) {
         throw new Error('No handler found for post message response for message: ' + message.name + ' from ' + origin + ' in ' + window.location.protocol + '//' + window.location.host + window.location.pathname);
     }
 
-    if (!(0, _src2.matchDomain)(options.domain, origin)) {
-        throw new Error('Response origin ' + origin + ' does not match domain ' + (0, _src2.stringifyDomainPattern)(options.domain));
+    if (!matchDomain(options.domain, origin)) {
+        throw new Error('Response origin ' + origin + ' does not match domain ' + stringifyDomainPattern(options.domain));
     }
 
-    (0, _listeners.deleteResponseListener)(message.hash);
+    deleteResponseListener(message.hash);
 
-    if (message.ack === _conf.CONSTANTS.POST_MESSAGE_ACK.ERROR) {
+    if (message.ack === CONSTANTS.POST_MESSAGE_ACK.ERROR) {
         var err = new Error(message.error);
         if (message.code) {
             // $FlowFixMe
             err.code = message.code;
         }
         return options.respond(err, null);
-    } else if (message.ack === _conf.CONSTANTS.POST_MESSAGE_ACK.SUCCESS) {
+    } else if (message.ack === CONSTANTS.POST_MESSAGE_ACK.SUCCESS) {
         var data = message.data || message.response;
 
         return options.respond(null, { source: source, origin: origin, data: data });

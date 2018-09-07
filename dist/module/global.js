@@ -1,11 +1,6 @@
-'use strict';
+import { CONSTANTS } from './conf';
 
-exports.__esModule = true;
-exports.global = undefined;
-
-var _conf = require('./conf');
-
-var global = exports.global = window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT] = window[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT] || {};
+export var global = window[CONSTANTS.WINDOW_PROPS.POSTROBOT] = window[CONSTANTS.WINDOW_PROPS.POSTROBOT] || {};
 
 // Backwards compatibility
 

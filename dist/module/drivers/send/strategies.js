@@ -1,17 +1,11 @@
-'use strict';
+import { isSameDomain, isSameTopWindow, isActuallySameDomain, getActualDomain, getDomain } from 'cross-domain-utils/src';
 
-exports.__esModule = true;
-exports.SEND_MESSAGE_STRATEGIES = undefined;
+import { CONSTANTS } from '../../conf';
+import { needsGlobalMessagingForBrowser } from '../../lib';
 
-var _src = require('cross-domain-utils/src');
+export var SEND_MESSAGE_STRATEGIES = {};
 
-var _conf = require('../../conf');
-
-var _lib = require('../../lib');
-
-var SEND_MESSAGE_STRATEGIES = exports.SEND_MESSAGE_STRATEGIES = {};
-
-SEND_MESSAGE_STRATEGIES[_conf.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE] = function (win, serializedMessage, domain) {
+SEND_MESSAGE_STRATEGIES[CONSTANTS.SEND_STRATEGIES.POST_MESSAGE] = function (win, serializedMessage, domain) {
 
     if (__POST_ROBOT__.__IE_POPUP_SUPPORT__) {
         try {
@@ -28,27 +22,27 @@ SEND_MESSAGE_STRATEGIES[_conf.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE] = function
     } else if (typeof domain === 'string') {
         domains = [domain];
     } else {
-        domains = [_conf.CONSTANTS.WILDCARD];
+        domains = [CONSTANTS.WILDCARD];
     }
 
     domains = domains.map(function (dom) {
 
-        if (dom.indexOf(_conf.CONSTANTS.MOCK_PROTOCOL) === 0) {
+        if (dom.indexOf(CONSTANTS.MOCK_PROTOCOL) === 0) {
 
-            if (window.location.protocol === _conf.CONSTANTS.FILE_PROTOCOL) {
-                return _conf.CONSTANTS.WILDCARD;
+            if (window.location.protocol === CONSTANTS.FILE_PROTOCOL) {
+                return CONSTANTS.WILDCARD;
             }
 
-            if (!(0, _src.isActuallySameDomain)(win)) {
+            if (!isActuallySameDomain(win)) {
                 throw new Error('Attempting to send messsage to mock domain ' + dom + ', but window is actually cross-domain');
             }
 
             // $FlowFixMe
-            return (0, _src.getActualDomain)(win);
+            return getActualDomain(win);
         }
 
-        if (dom.indexOf(_conf.CONSTANTS.FILE_PROTOCOL) === 0) {
-            return _conf.CONSTANTS.WILDCARD;
+        if (dom.indexOf(CONSTANTS.FILE_PROTOCOL) === 0) {
+            return CONSTANTS.WILDCARD;
         }
 
         return dom;
@@ -65,17 +59,17 @@ if (__POST_ROBOT__.__IE_POPUP_SUPPORT__) {
         needsBridgeForBrowser = _require.needsBridgeForBrowser,
         isBridge = _require.isBridge;
 
-    SEND_MESSAGE_STRATEGIES[_conf.CONSTANTS.SEND_STRATEGIES.BRIDGE] = function (win, serializedMessage, domain) {
+    SEND_MESSAGE_STRATEGIES[CONSTANTS.SEND_STRATEGIES.BRIDGE] = function (win, serializedMessage, domain) {
 
         if (!needsBridgeForBrowser() && !isBridge()) {
             return;
         }
 
-        if ((0, _src.isSameDomain)(win)) {
+        if (isSameDomain(win)) {
             throw new Error('Post message through bridge disabled between same domain windows');
         }
 
-        if ((0, _src.isSameTopWindow)(window, win) !== false) {
+        if (isSameTopWindow(window, win) !== false) {
             throw new Error('Can only use bridge to communicate between two different windows, not between frames');
         }
 
@@ -85,22 +79,22 @@ if (__POST_ROBOT__.__IE_POPUP_SUPPORT__) {
 
 if (__POST_ROBOT__.__IE_POPUP_SUPPORT__ || __POST_ROBOT__.__GLOBAL_MESSAGE_SUPPORT__) {
 
-    SEND_MESSAGE_STRATEGIES[_conf.CONSTANTS.SEND_STRATEGIES.GLOBAL] = function (win, serializedMessage) {
+    SEND_MESSAGE_STRATEGIES[CONSTANTS.SEND_STRATEGIES.GLOBAL] = function (win, serializedMessage) {
 
-        if (!(0, _lib.needsGlobalMessagingForBrowser)()) {
+        if (!needsGlobalMessagingForBrowser()) {
             return;
         }
 
-        if (!(0, _src.isSameDomain)(win)) {
+        if (!isSameDomain(win)) {
             throw new Error('Post message through global disabled between different domain windows');
         }
 
-        if ((0, _src.isSameTopWindow)(window, win) !== false) {
+        if (isSameTopWindow(window, win) !== false) {
             throw new Error('Can only use global to communicate between two different windows, not between frames');
         }
 
         // $FlowFixMe
-        var foreignGlobal = win[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT];
+        var foreignGlobal = win[CONSTANTS.WINDOW_PROPS.POSTROBOT];
 
         if (!foreignGlobal) {
             throw new Error('Can not find postRobot global on foreign window');
@@ -108,7 +102,7 @@ if (__POST_ROBOT__.__IE_POPUP_SUPPORT__ || __POST_ROBOT__.__GLOBAL_MESSAGE_SUPPO
 
         return foreignGlobal.receiveMessage({
             source: window,
-            origin: (0, _src.getDomain)(),
+            origin: getDomain(),
             data: serializedMessage
         });
     };

@@ -1,7 +1,4 @@
-'use strict';
-
-exports.__esModule = true;
-var CONSTANTS = exports.CONSTANTS = {
+export var CONSTANTS = {
 
     POST_MESSAGE_TYPE: {
         REQUEST: 'postrobot_message_request',
@@ -53,12 +50,12 @@ var CONSTANTS = exports.CONSTANTS = {
     WILDCARD: '*'
 };
 
-var POST_MESSAGE_NAMES = exports.POST_MESSAGE_NAMES = {
+export var POST_MESSAGE_NAMES = {
     METHOD: 'postrobot_method',
     HELLO: 'postrobot_hello',
     OPEN_TUNNEL: 'postrobot_open_tunnel'
 };
 
-var POST_MESSAGE_NAMES_LIST = exports.POST_MESSAGE_NAMES_LIST = Object.keys(POST_MESSAGE_NAMES).map(function (key) {
+export var POST_MESSAGE_NAMES_LIST = Object.keys(POST_MESSAGE_NAMES).map(function (key) {
     return POST_MESSAGE_NAMES[key];
 });

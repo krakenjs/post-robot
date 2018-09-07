@@ -1,29 +1,16 @@
-'use strict';
+import { WeakMap } from 'cross-domain-safe-weakmap/src';
+import { getAncestor } from 'cross-domain-utils/src';
+import { ZalgoPromise } from 'zalgo-promise/src';
 
-exports.__esModule = true;
-exports.onHello = onHello;
-exports.sayHello = sayHello;
-exports.initOnReady = initOnReady;
-exports.onChildWindowReady = onChildWindowReady;
+import { CONSTANTS } from '../conf';
+import { global } from '../global';
 
-var _src = require('cross-domain-safe-weakmap/src');
+import { noop } from './util';
 
-var _src2 = require('cross-domain-utils/src');
+global.readyPromises = global.readyPromises || new WeakMap();
 
-var _src3 = require('zalgo-promise/src');
-
-var _conf = require('../conf');
-
-var _global = require('../global');
-
-var _log = require('./log');
-
-var _util = require('./util');
-
-_global.global.readyPromises = _global.global.readyPromises || new _src.WeakMap();
-
-function onHello(handler) {
-    _global.global.on(_conf.CONSTANTS.POST_MESSAGE_NAMES.HELLO, { domain: _conf.CONSTANTS.WILDCARD }, function (_ref) {
+export function onHello(handler) {
+    global.on(CONSTANTS.POST_MESSAGE_NAMES.HELLO, { domain: CONSTANTS.WILDCARD }, function (_ref) {
         var source = _ref.source,
             origin = _ref.origin;
 
@@ -31,46 +18,44 @@ function onHello(handler) {
     });
 }
 
-function sayHello(win) {
-    return _global.global.send(win, _conf.CONSTANTS.POST_MESSAGE_NAMES.HELLO, {}, { domain: _conf.CONSTANTS.WILDCARD, timeout: -1 }).then(function (_ref2) {
+export function sayHello(win) {
+    return global.send(win, CONSTANTS.POST_MESSAGE_NAMES.HELLO, {}, { domain: CONSTANTS.WILDCARD, timeout: -1 }).then(function (_ref2) {
         var origin = _ref2.origin;
 
         return { origin: origin };
     });
 }
 
-function initOnReady() {
+export function initOnReady() {
 
     onHello(function (_ref3) {
         var source = _ref3.source,
             origin = _ref3.origin;
 
-        var promise = _global.global.readyPromises.get(source) || new _src3.ZalgoPromise();
+        var promise = global.readyPromises.get(source) || new ZalgoPromise();
         promise.resolve({ origin: origin });
-        _global.global.readyPromises.set(source, promise);
+        global.readyPromises.set(source, promise);
     });
 
-    var parent = (0, _src2.getAncestor)();
+    var parent = getAncestor();
     if (parent) {
-        sayHello(parent)['catch'](function (err) {
-            _log.log.debug((0, _util.stringifyError)(err));
-        });
+        sayHello(parent)['catch'](noop);
     }
 }
 
-function onChildWindowReady(win) {
+export function onChildWindowReady(win) {
     var timeout = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 5000;
     var name = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'Window';
 
 
-    var promise = _global.global.readyPromises.get(win);
+    var promise = global.readyPromises.get(win);
 
     if (promise) {
         return promise;
     }
 
-    promise = new _src3.ZalgoPromise();
-    _global.global.readyPromises.set(win, promise);
+    promise = new ZalgoPromise();
+    global.readyPromises.set(win, promise);
 
     if (timeout !== -1) {
         setTimeout(function () {

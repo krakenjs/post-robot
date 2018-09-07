@@ -1,16 +1,11 @@
-'use strict';
+import { isSameTopWindow } from 'cross-domain-utils/src';
 
-exports.__esModule = true;
-exports.emulateIERestrictions = emulateIERestrictions;
+import { CONFIG } from '../conf';
 
-var _src = require('cross-domain-utils/src');
+export function emulateIERestrictions(sourceWindow, targetWindow) {
+    if (!CONFIG.ALLOW_POSTMESSAGE_POPUP) {
 
-var _conf = require('../conf');
-
-function emulateIERestrictions(sourceWindow, targetWindow) {
-    if (!_conf.CONFIG.ALLOW_POSTMESSAGE_POPUP) {
-
-        if ((0, _src.isSameTopWindow)(sourceWindow, targetWindow) === false) {
+        if (isSameTopWindow(sourceWindow, targetWindow) === false) {
             throw new Error('Can not send and receive post messages between two different windows (disabled to emulate IE)');
         }
     }

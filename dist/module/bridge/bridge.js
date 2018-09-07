@@ -1,14 +1,9 @@
-'use strict';
+import 'zalgo-promise/src';
+import { getParent, isWindowClosed } from 'cross-domain-utils/src';
 
-require('zalgo-promise/src');
-
-var _src = require('cross-domain-utils/src');
-
-var _conf = require('../conf');
-
-var _lib = require('../lib');
-
-var _global = require('../global');
+import { CONSTANTS } from '../conf';
+import { noop } from '../lib';
+import { global } from '../global';
 
 /*
     HERE BE DRAGONS
@@ -23,79 +18,66 @@ var _global = require('../global');
     If you're editing this file, be sure to run significant memory / GC tests afterwards.
 */
 
-_global.global.tunnelWindows = _global.global.tunnelWindows || {};
-
-_global.global.tunnelWindowId = 0;
+global.tunnelWindows = global.tunnelWindows || {};
+global.tunnelWindowId = 0;
 
 function deleteTunnelWindow(id) {
 
     try {
-        if (_global.global.tunnelWindows[id]) {
-            delete _global.global.tunnelWindows[id].source;
+        if (global.tunnelWindows[id]) {
+            delete global.tunnelWindows[id].source;
         }
     } catch (err) {
         // pass
     }
 
-    delete _global.global.tunnelWindows[id];
+    delete global.tunnelWindows[id];
 }
 
 function cleanTunnelWindows() {
-    var tunnelWindows = _global.global.tunnelWindows;
+    var tunnelWindows = global.tunnelWindows;
 
-    for (var _iterator = Object.keys(tunnelWindows), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
-        var _ref;
-
-        if (_isArray) {
-            if (_i >= _iterator.length) break;
-            _ref = _iterator[_i++];
-        } else {
-            _i = _iterator.next();
-            if (_i.done) break;
-            _ref = _i.value;
-        }
-
-        var key = _ref;
-
+    for (var _i2 = 0, _Object$keys2 = Object.keys(tunnelWindows), _length2 = _Object$keys2 == null ? 0 : _Object$keys2.length; _i2 < _length2; _i2++) {
+        var key = _Object$keys2[_i2];
         var tunnelWindow = tunnelWindows[key];
 
         try {
-            (0, _lib.noop)(tunnelWindow.source);
+            noop(tunnelWindow.source);
         } catch (err) {
             deleteTunnelWindow(key);
             continue;
         }
 
-        if ((0, _src.isWindowClosed)(tunnelWindow.source)) {
+        if (isWindowClosed(tunnelWindow.source)) {
             deleteTunnelWindow(key);
         }
     }
 }
 
-function addTunnelWindow(_ref2) {
+function addTunnelWindow(_ref) {
+    var name = _ref.name,
+        source = _ref.source,
+        canary = _ref.canary,
+        sendMessage = _ref.sendMessage;
+
+    cleanTunnelWindows();
+    global.tunnelWindowId += 1;
+    global.tunnelWindows[global.tunnelWindowId] = { name: name, source: source, canary: canary, sendMessage: sendMessage };
+    return global.tunnelWindowId;
+}
+
+function getTunnelWindow(id) {
+    return global.tunnelWindows[id];
+}
+
+global.openTunnelToParent = function openTunnelToParent(_ref2) {
     var name = _ref2.name,
         source = _ref2.source,
         canary = _ref2.canary,
         sendMessage = _ref2.sendMessage;
 
-    cleanTunnelWindows();
-    _global.global.tunnelWindowId += 1;
-    _global.global.tunnelWindows[_global.global.tunnelWindowId] = { name: name, source: source, canary: canary, sendMessage: sendMessage };
-    return _global.global.tunnelWindowId;
-}
 
-function getTunnelWindow(id) {
-    return _global.global.tunnelWindows[id];
-}
-
-_global.global.openTunnelToParent = function openTunnelToParent(_ref3) {
-    var name = _ref3.name,
-        source = _ref3.source,
-        canary = _ref3.canary,
-        sendMessage = _ref3.sendMessage;
-
-
-    var parentWindow = (0, _src.getParent)(window);
+    var parentWindow = getParent(window);
 
     if (!parentWindow) {
         throw new Error('No parent window found to open tunnel to');
@@ -103,7 +85,7 @@ _global.global.openTunnelToParent = function openTunnelToParent(_ref3) {
 
     var id = addTunnelWindow({ name: name, source: source, canary: canary, sendMessage: sendMessage });
 
-    return _global.global.send(parentWindow, _conf.CONSTANTS.POST_MESSAGE_NAMES.OPEN_TUNNEL, {
+    return global.send(parentWindow, CONSTANTS.POST_MESSAGE_NAMES.OPEN_TUNNEL, {
 
         name: name,
 
@@ -113,13 +95,13 @@ _global.global.openTunnelToParent = function openTunnelToParent(_ref3) {
 
             try {
                 // IE gets antsy if you try to even reference a closed window
-                (0, _lib.noop)(tunnelWindow && tunnelWindow.source);
+                noop(tunnelWindow && tunnelWindow.source);
             } catch (err) {
                 deleteTunnelWindow(id);
                 return;
             }
 
-            if (!tunnelWindow || !tunnelWindow.source || (0, _src.isWindowClosed)(tunnelWindow.source)) {
+            if (!tunnelWindow || !tunnelWindow.source || isWindowClosed(tunnelWindow.source)) {
                 return;
             }
 
@@ -131,5 +113,5 @@ _global.global.openTunnelToParent = function openTunnelToParent(_ref3) {
 
             tunnelWindow.sendMessage.apply(this, arguments);
         }
-    }, { domain: _conf.CONSTANTS.WILDCARD });
+    }, { domain: CONSTANTS.WILDCARD });
 };

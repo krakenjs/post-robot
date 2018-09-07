@@ -1,13 +1,8 @@
-'use strict';
+import 'cross-domain-utils/src';
 
-exports.__esModule = true;
-exports.cleanUpWindow = cleanUpWindow;
+import { global } from './global';
 
-require('cross-domain-utils/src');
-
-var _global = require('./global');
-
-function cleanUpWindow(win) {
+export function cleanUpWindow(win) {
 
     // global.tunnelWindows
     // global.bridges
@@ -15,36 +10,24 @@ function cleanUpWindow(win) {
     // global.responseListeners
     // global.requestListeners
 
-    var requestPromises = _global.global.requestPromises.get(win);
+    var requestPromises = global.requestPromises.get(win);
 
     if (requestPromises) {
-        for (var _iterator = requestPromises, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
-            var _ref;
-
-            if (_isArray) {
-                if (_i >= _iterator.length) break;
-                _ref = _iterator[_i++];
-            } else {
-                _i = _iterator.next();
-                if (_i.done) break;
-                _ref = _i.value;
-            }
-
-            var promise = _ref;
-
+        for (var _i2 = 0, _length2 = requestPromises == null ? 0 : requestPromises.length; _i2 < _length2; _i2++) {
+            var promise = requestPromises[_i2];
             promise.reject(new Error('No response from window - cleaned up'));
         }
     }
 
-    if (_global.global.popupWindowsByWin) {
-        _global.global.popupWindowsByWin['delete'](win);
+    if (global.popupWindowsByWin) {
+        global.popupWindowsByWin['delete'](win);
     }
 
-    if (_global.global.remoteWindows) {
-        _global.global.remoteWindows['delete'](win);
+    if (global.remoteWindows) {
+        global.remoteWindows['delete'](win);
     }
 
-    _global.global.requestPromises['delete'](win);
-    _global.global.methods['delete'](win);
-    _global.global.readyPromises['delete'](win);
+    global.requestPromises['delete'](win);
+    global.methods['delete'](win);
+    global.readyPromises['delete'](win);
 }

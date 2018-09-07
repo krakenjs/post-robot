@@ -1,32 +1,11 @@
-'use strict';
-
-exports.__esModule = true;
-exports.weakMapMemoize = exports.once = undefined;
-
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-exports.stringifyError = stringifyError;
-exports.noop = noop;
-exports.addEventListener = addEventListener;
-exports.uniqueID = uniqueID;
-exports.eachArray = eachArray;
-exports.eachObject = eachObject;
-exports.each = each;
-exports.replaceObject = replaceObject;
-exports.safeInterval = safeInterval;
-exports.isRegex = isRegex;
-exports.getWindowType = getWindowType;
-exports.jsonStringify = jsonStringify;
-exports.jsonParse = jsonParse;
-exports.needsGlobalMessagingForBrowser = needsGlobalMessagingForBrowser;
+import { WeakMap } from 'cross-domain-safe-weakmap/src';
+import { isPopup, isIframe, getUserAgent } from 'cross-domain-utils/src';
 
-var _src = require('cross-domain-safe-weakmap/src');
+import { CONFIG, CONSTANTS } from '../conf';
 
-var _src2 = require('cross-domain-utils/src');
-
-var _conf = require('../conf');
-
-function stringifyError(err) {
+export function stringifyError(err) {
     var level = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
 
 
@@ -72,7 +51,7 @@ function stringifyError(err) {
 }
 
 // eslint-disable-next-line flowtype/no-weak-types
-var once = exports.once = function once(method) {
+export var once = function once(method) {
     if (!method) {
         return method;
     }
@@ -86,11 +65,11 @@ var once = exports.once = function once(method) {
 };
 
 // eslint-disable-next-line no-unused-vars
-function noop() {
+export function noop() {
     // pass
 }
 
-function addEventListener(obj, event, handler) {
+export function addEventListener(obj, event, handler) {
     if (obj.addEventListener) {
         obj.addEventListener(event, handler);
     } else {
@@ -108,7 +87,7 @@ function addEventListener(obj, event, handler) {
     };
 }
 
-function uniqueID() {
+export function uniqueID() {
 
     var chars = '0123456789abcdef';
 
@@ -117,13 +96,13 @@ function uniqueID() {
     });
 }
 
-function eachArray(item, callback) {
+export function eachArray(item, callback) {
     for (var i = 0; i < item.length; i++) {
         callback(item[i], i);
     }
 }
 
-function eachObject(item, callback) {
+export function eachObject(item, callback) {
     for (var _key in item) {
         if (item.hasOwnProperty(_key)) {
             callback(item[_key], _key);
@@ -131,7 +110,7 @@ function eachObject(item, callback) {
     }
 }
 
-function each(item, callback) {
+export function each(item, callback) {
     if (Array.isArray(item)) {
         eachArray(item, callback);
     } else if ((typeof item === 'undefined' ? 'undefined' : _typeof(item)) === 'object' && item !== null) {
@@ -139,7 +118,7 @@ function each(item, callback) {
     }
 }
 
-function replaceObject(item, callback) {
+export function replaceObject(item, callback) {
     var depth = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 1;
 
 
@@ -177,7 +156,7 @@ function replaceObject(item, callback) {
     return newobj;
 }
 
-function safeInterval(method, time) {
+export function safeInterval(method, time) {
     var timeout = void 0;
 
     function runInterval() {
@@ -194,14 +173,14 @@ function safeInterval(method, time) {
     };
 }
 
-function isRegex(item) {
+export function isRegex(item) {
     return Object.prototype.toString.call(item) === '[object RegExp]';
 }
 
 // eslint-disable-next-line flowtype/no-weak-types
-var weakMapMemoize = exports.weakMapMemoize = function weakMapMemoize(method) {
+export var weakMapMemoize = function weakMapMemoize(method) {
 
-    var weakmap = new _src.WeakMap();
+    var weakmap = new WeakMap();
 
     // eslint-disable-next-line flowtype/no-weak-types
     return function weakmapMemoized(arg) {
@@ -221,17 +200,17 @@ var weakMapMemoize = exports.weakMapMemoize = function weakMapMemoize(method) {
     };
 };
 
-function getWindowType() {
-    if ((0, _src2.isPopup)()) {
-        return _conf.CONSTANTS.WINDOW_TYPES.POPUP;
+export function getWindowType() {
+    if (isPopup()) {
+        return CONSTANTS.WINDOW_TYPES.POPUP;
     }
-    if ((0, _src2.isIframe)()) {
-        return _conf.CONSTANTS.WINDOW_TYPES.IFRAME;
+    if (isIframe()) {
+        return CONSTANTS.WINDOW_TYPES.IFRAME;
     }
-    return _conf.CONSTANTS.WINDOW_TYPES.FULLPAGE;
+    return CONSTANTS.WINDOW_TYPES.FULLPAGE;
 }
 
-function jsonStringify(obj, replacer, indent) {
+export function jsonStringify(obj, replacer, indent) {
 
     var objectToJSON = void 0;
     var arrayToJSON = void 0;
@@ -281,17 +260,17 @@ function jsonStringify(obj, replacer, indent) {
     return result;
 }
 
-function jsonParse(item) {
+export function jsonParse(item) {
     return JSON.parse(item);
 }
 
-function needsGlobalMessagingForBrowser() {
+export function needsGlobalMessagingForBrowser() {
 
-    if ((0, _src2.getUserAgent)(window).match(/MSIE|trident|edge\/12|edge\/13/i)) {
+    if (getUserAgent(window).match(/MSIE|trident|edge\/12|edge\/13/i)) {
         return true;
     }
 
-    if (!_conf.CONFIG.ALLOW_POSTMESSAGE_POPUP) {
+    if (!CONFIG.ALLOW_POSTMESSAGE_POPUP) {
         return true;
     }
 

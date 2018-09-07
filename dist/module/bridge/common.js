@@ -1,59 +1,40 @@
-'use strict';
+import { WeakMap } from 'cross-domain-safe-weakmap/src';
+import { ZalgoPromise } from 'zalgo-promise/src';
+import { getDomain, isSameDomain, isOpener, isSameTopWindow, matchDomain, getUserAgent, getDomainFromUrl } from 'cross-domain-utils/src';
 
-exports.__esModule = true;
-exports.documentBodyReady = undefined;
-exports.needsBridgeForBrowser = needsBridgeForBrowser;
-exports.needsBridgeForWin = needsBridgeForWin;
-exports.needsBridgeForDomain = needsBridgeForDomain;
-exports.needsBridge = needsBridge;
-exports.getBridgeName = getBridgeName;
-exports.isBridge = isBridge;
-exports.registerRemoteWindow = registerRemoteWindow;
-exports.findRemoteWindow = findRemoteWindow;
-exports.registerRemoteSendMessage = registerRemoteSendMessage;
-exports.rejectRemoteSendMessage = rejectRemoteSendMessage;
-exports.sendBridgeMessage = sendBridgeMessage;
+import { CONFIG, CONSTANTS } from '../conf';
+import { global } from '../global';
 
-var _src = require('cross-domain-safe-weakmap/src');
+export function needsBridgeForBrowser() {
 
-var _src2 = require('zalgo-promise/src');
-
-var _src3 = require('cross-domain-utils/src');
-
-var _conf = require('../conf');
-
-var _global = require('../global');
-
-function needsBridgeForBrowser() {
-
-    if ((0, _src3.getUserAgent)(window).match(/MSIE|trident|edge\/12|edge\/13/i)) {
+    if (getUserAgent(window).match(/MSIE|trident|edge\/12|edge\/13/i)) {
         return true;
     }
 
-    if (!_conf.CONFIG.ALLOW_POSTMESSAGE_POPUP) {
+    if (!CONFIG.ALLOW_POSTMESSAGE_POPUP) {
         return true;
     }
 
     return false;
 }
 
-function needsBridgeForWin(win) {
+export function needsBridgeForWin(win) {
 
-    if (!(0, _src3.isSameTopWindow)(window, win)) {
+    if (!isSameTopWindow(window, win)) {
         return true;
     }
 
     return false;
 }
 
-function needsBridgeForDomain(domain, win) {
+export function needsBridgeForDomain(domain, win) {
 
     if (domain) {
-        if ((0, _src3.getDomain)() !== (0, _src3.getDomainFromUrl)(domain)) {
+        if (getDomain() !== getDomainFromUrl(domain)) {
             return true;
         }
     } else if (win) {
-        if (!(0, _src3.isSameDomain)(win)) {
+        if (!isSameDomain(win)) {
             return true;
         }
     }
@@ -61,7 +42,7 @@ function needsBridgeForDomain(domain, win) {
     return false;
 }
 
-function needsBridge(_ref) {
+export function needsBridge(_ref) {
     var win = _ref.win,
         domain = _ref.domain;
 
@@ -81,22 +62,22 @@ function needsBridge(_ref) {
     return true;
 }
 
-function getBridgeName(domain) {
+export function getBridgeName(domain) {
 
-    domain = domain || (0, _src3.getDomainFromUrl)(domain);
+    domain = domain || getDomainFromUrl(domain);
 
     var sanitizedDomain = domain.replace(/[^a-zA-Z0-9]+/g, '_');
 
-    var id = _conf.CONSTANTS.BRIDGE_NAME_PREFIX + '_' + sanitizedDomain;
+    var id = CONSTANTS.BRIDGE_NAME_PREFIX + '_' + sanitizedDomain;
 
     return id;
 }
 
-function isBridge() {
-    return Boolean(window.name && window.name === getBridgeName((0, _src3.getDomain)()));
+export function isBridge() {
+    return Boolean(window.name && window.name === getBridgeName(getDomain()));
 }
 
-var documentBodyReady = exports.documentBodyReady = new _src2.ZalgoPromise(function (resolve) {
+export var documentBodyReady = new ZalgoPromise(function (resolve) {
 
     if (window.document && window.document.body) {
         return resolve(window.document.body);
@@ -110,17 +91,17 @@ var documentBodyReady = exports.documentBodyReady = new _src2.ZalgoPromise(funct
     }, 10);
 });
 
-_global.global.remoteWindows = _global.global.remoteWindows || new _src.WeakMap();
+global.remoteWindows = global.remoteWindows || new WeakMap();
 
-function registerRemoteWindow(win) {
-    _global.global.remoteWindows.set(win, { sendMessagePromise: new _src2.ZalgoPromise() });
+export function registerRemoteWindow(win) {
+    global.remoteWindows.set(win, { sendMessagePromise: new ZalgoPromise() });
 }
 
-function findRemoteWindow(win) {
-    return _global.global.remoteWindows.get(win);
+export function findRemoteWindow(win) {
+    return global.remoteWindows.get(win);
 }
 
-function registerRemoteSendMessage(win, domain, sendMessage) {
+export function registerRemoteSendMessage(win, domain, sendMessage) {
 
     var remoteWindow = findRemoteWindow(win);
 
@@ -134,7 +115,7 @@ function registerRemoteSendMessage(win, domain, sendMessage) {
             throw new Error('Remote window does not match window');
         }
 
-        if (!(0, _src3.matchDomain)(remoteDomain, domain)) {
+        if (!matchDomain(remoteDomain, domain)) {
             throw new Error('Remote domain ' + remoteDomain + ' does not match domain ' + domain);
         }
 
@@ -142,10 +123,10 @@ function registerRemoteSendMessage(win, domain, sendMessage) {
     };
 
     remoteWindow.sendMessagePromise.resolve(sendMessageWrapper);
-    remoteWindow.sendMessagePromise = _src2.ZalgoPromise.resolve(sendMessageWrapper);
+    remoteWindow.sendMessagePromise = ZalgoPromise.resolve(sendMessageWrapper);
 }
 
-function rejectRemoteSendMessage(win, err) {
+export function rejectRemoteSendMessage(win, err) {
 
     var remoteWindow = findRemoteWindow(win);
 
@@ -156,10 +137,10 @@ function rejectRemoteSendMessage(win, err) {
     remoteWindow.sendMessagePromise.asyncReject(err);
 }
 
-function sendBridgeMessage(win, message, domain) {
+export function sendBridgeMessage(win, message, domain) {
 
-    var messagingChild = (0, _src3.isOpener)(window, win);
-    var messagingParent = (0, _src3.isOpener)(win, window);
+    var messagingChild = isOpener(window, win);
+    var messagingParent = isOpener(win, window);
 
     if (!messagingChild && !messagingParent) {
         throw new Error('Can only send messages to and from parent and popup windows');

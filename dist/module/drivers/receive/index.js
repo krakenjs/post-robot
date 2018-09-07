@@ -1,31 +1,21 @@
-'use strict';
-
-exports.__esModule = true;
-
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-exports.receiveMessage = receiveMessage;
-exports.messageListener = messageListener;
-exports.listenForMessages = listenForMessages;
+import { isWindowClosed } from 'cross-domain-utils/src';
 
-var _src = require('cross-domain-utils/src');
+import { CONSTANTS, POST_MESSAGE_NAMES_LIST } from '../../conf';
+import { deserializeMethods, jsonParse, addEventListener, noop } from '../../lib';
+import { global } from '../../global';
 
-var _conf = require('../../conf');
+import { RECEIVE_MESSAGE_TYPES } from './types';
 
-var _lib = require('../../lib');
-
-var _global = require('../../global');
-
-var _types = require('./types');
-
-_global.global.receivedMessages = _global.global.receivedMessages || [];
+global.receivedMessages = global.receivedMessages || [];
 
 function parseMessage(message) {
 
     var parsedMessage = void 0;
 
     try {
-        parsedMessage = (0, _lib.jsonParse)(message);
+        parsedMessage = jsonParse(message);
     } catch (err) {
         return;
     }
@@ -38,7 +28,7 @@ function parseMessage(message) {
         return;
     }
 
-    parsedMessage = parsedMessage[_conf.CONSTANTS.WINDOW_PROPS.POSTROBOT];
+    parsedMessage = parsedMessage[CONSTANTS.WINDOW_PROPS.POSTROBOT];
 
     if (!parsedMessage || (typeof parsedMessage === 'undefined' ? 'undefined' : _typeof(parsedMessage)) !== 'object' || parsedMessage === null) {
         return;
@@ -48,14 +38,14 @@ function parseMessage(message) {
         return;
     }
 
-    if (!_types.RECEIVE_MESSAGE_TYPES[parsedMessage.type]) {
+    if (!RECEIVE_MESSAGE_TYPES[parsedMessage.type]) {
         return;
     }
 
     return parsedMessage;
 }
 
-function receiveMessage(event) {
+export function receiveMessage(event) {
 
     if (!window || window.closed) {
         throw new Error('Message recieved in closed window');
@@ -84,44 +74,46 @@ function receiveMessage(event) {
         throw new Error('Expected message to have sourceDomain');
     }
 
-    if (message.sourceDomain.indexOf(_conf.CONSTANTS.MOCK_PROTOCOL) === 0 || message.sourceDomain.indexOf(_conf.CONSTANTS.FILE_PROTOCOL) === 0) {
+    if (message.sourceDomain.indexOf(CONSTANTS.MOCK_PROTOCOL) === 0 || message.sourceDomain.indexOf(CONSTANTS.FILE_PROTOCOL) === 0) {
         origin = message.sourceDomain;
     }
 
-    if (_global.global.receivedMessages.indexOf(message.id) === -1) {
-        _global.global.receivedMessages.push(message.id);
+    if (global.receivedMessages.indexOf(message.id) === -1) {
+        global.receivedMessages.push(message.id);
     } else {
         return;
     }
 
-    var level = void 0;
+    if (__DEBUG__) {
+        var level = void 0;
 
-    if (_conf.POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 || message.type === _conf.CONSTANTS.POST_MESSAGE_TYPE.ACK) {
-        level = 'debug';
-    } else if (message.ack === 'error') {
-        level = 'error';
-    } else {
-        level = 'info';
+        if (POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 || message.type === CONSTANTS.POST_MESSAGE_TYPE.ACK) {
+            level = 'debug';
+        } else if (message.ack === 'error') {
+            level = 'error';
+        } else {
+            level = 'info';
+        }
+
+        // eslint-disable-next-line no-console
+        console[level]('postrobot_receive', message.type.replace(/^postrobot_message_/, ''), '::', message.name, '::', origin, '\n\n', message);
     }
 
-    _lib.log.logLevel(level, ['\n\n\t', '#receive', message.type.replace(/^postrobot_message_/, ''), '::', message.name, '::', origin, '\n\n', message]);
-
-    if ((0, _src.isWindowClosed)(source) && !message.fireAndForget) {
-        _lib.log.debug('Source window is closed - can not send ' + message.type + ' ' + message.name);
+    if (isWindowClosed(source) && !message.fireAndForget) {
         return;
     }
 
     if (message.data) {
-        message.data = (0, _lib.deserializeMethods)(source, origin, message.data);
+        message.data = deserializeMethods(source, origin, message.data);
     }
 
-    _types.RECEIVE_MESSAGE_TYPES[message.type](source, origin, message);
+    RECEIVE_MESSAGE_TYPES[message.type](source, origin, message);
 }
 
-function messageListener(event) {
+export function messageListener(event) {
 
     try {
-        (0, _lib.noop)(event.source);
+        noop(event.source);
     } catch (err) {
         return;
     }
@@ -144,8 +136,8 @@ function messageListener(event) {
     receiveMessage(messageEvent);
 }
 
-function listenForMessages() {
-    (0, _lib.addEventListener)(window, 'message', messageListener);
+export function listenForMessages() {
+    addEventListener(window, 'message', messageListener);
 }
 
-_global.global.receiveMessage = receiveMessage;
+global.receiveMessage = receiveMessage;
