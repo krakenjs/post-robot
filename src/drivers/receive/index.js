@@ -3,7 +3,7 @@
 import { isWindowClosed, type CrossDomainWindowType } from 'cross-domain-utils/src';
 
 import { CONSTANTS, POST_MESSAGE_NAMES_LIST } from '../../conf';
-import { deserializeMethods, log, jsonParse, addEventListener, noop } from '../../lib';
+import { deserializeMethods, jsonParse, addEventListener, noop } from '../../lib';
 import { global } from '../../global';
 
 import { RECEIVE_MESSAGE_TYPES } from './types';
@@ -88,20 +88,22 @@ export function receiveMessage(event : MessageEvent) {
         return;
     }
 
-    let level;
+    if (__DEBUG__) {
+        let level;
 
-    if (POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 || message.type === CONSTANTS.POST_MESSAGE_TYPE.ACK) {
-        level = 'debug';
-    } else if (message.ack === 'error') {
-        level = 'error';
-    } else {
-        level = 'info';
+        if (POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 || message.type === CONSTANTS.POST_MESSAGE_TYPE.ACK) {
+            level = 'debug';
+        } else if (message.ack === 'error') {
+            level = 'error';
+        } else {
+            level = 'info';
+        }
+        
+        // eslint-disable-next-line no-console
+        console[level]('postrobot_receive', message.type.replace(/^postrobot_message_/, ''), '::', message.name, '::', origin, '\n\n', message);
     }
 
-    log.logLevel(level, [ '\n\n\t', '#receive', message.type.replace(/^postrobot_message_/, ''), '::', message.name, '::', origin, '\n\n', message ]);
-
     if (isWindowClosed(source) && !message.fireAndForget) {
-        log.debug(`Source window is closed - can not send ${ message.type } ${ message.name }`);
         return;
     }
 

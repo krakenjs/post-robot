@@ -14,7 +14,6 @@ postRobot.on('sendMessageToParent', ({ data }) => {
 });
 
 postRobot.on('setupListener', ({ data }) => {
-    // eslint-disable-next-line promise/catch-or-return
     postRobot.once(data.messageName, () => {
         return data.handler ? data.handler() : data.data;
     }).then((event) => event.data);

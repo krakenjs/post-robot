@@ -5,7 +5,7 @@ import { ZalgoPromise } from 'zalgo-promise/src';
 import { getDomain, getFrameByName, isWindowClosed, getDomainFromUrl, type CrossDomainWindowType } from 'cross-domain-utils/src';
 
 import { CONFIG, CONSTANTS } from '../conf';
-import { log, onChildWindowReady } from '../lib';
+import { onChildWindowReady } from '../lib';
 import { global } from '../global';
 
 import { getBridgeName, documentBodyReady, registerRemoteSendMessage, registerRemoteWindow } from './common';
@@ -73,8 +73,6 @@ function listenForRegister(source, domain) {
 }
 
 function openBridgeFrame(name : string, url : string) : HTMLIFrameElement {
-
-    log.debug(`Opening bridge:`, name, url);
 
     let iframe = document.createElement(`iframe`);
 

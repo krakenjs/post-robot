@@ -7,8 +7,7 @@ import { ZalgoPromise } from 'zalgo-promise/src';
 import { CONSTANTS } from '../conf';
 import { global } from '../global';
 
-import { log } from './log';
-import { stringifyError } from './util';
+import { noop } from './util';
 
 global.readyPromises = global.readyPromises || new WeakMap();
 
@@ -35,9 +34,7 @@ export function initOnReady() {
 
     let parent = getAncestor();
     if (parent) {
-        sayHello(parent).catch(err => {
-            log.debug(stringifyError(err));
-        });
+        sayHello(parent).catch(noop);
     }
 }
 

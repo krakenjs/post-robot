@@ -4,7 +4,7 @@ import { ZalgoPromise } from 'zalgo-promise/src';
 import { isWindowClosed, matchDomain, stringifyDomainPattern, type CrossDomainWindowType } from 'cross-domain-utils/src';
 
 import { CONSTANTS } from '../../conf';
-import { log, stringifyError, noop } from '../../lib';
+import { stringifyError, noop } from '../../lib';
 import { sendMessage } from '../send';
 import { getRequestListener, getResponseListener, deleteResponseListener, isResponseListenerErrored } from '../listeners';
 
@@ -94,7 +94,7 @@ export let RECEIVE_MESSAGE_TYPES = {
             if (options && options.handleError) {
                 return options.handleError(err);
             } else {
-                log.error(stringifyError(err));
+                throw err;
             }
         });
     },

@@ -4,7 +4,7 @@ import { getDomain, isWindowClosed, type CrossDomainWindowType } from 'cross-dom
 import { ZalgoPromise } from 'zalgo-promise/src';
 
 import { CONSTANTS, CONFIG, POST_MESSAGE_NAMES_LIST } from '../../conf';
-import { uniqueID, serializeMethods, log, getWindowType, jsonStringify, stringifyError } from '../../lib';
+import { uniqueID, serializeMethods, getWindowType, jsonStringify, stringifyError } from '../../lib';
 
 import { SEND_MESSAGE_STRATEGIES } from './strategies';
 
@@ -35,15 +35,18 @@ export function sendMessage(win : CrossDomainWindowType, message : Object, domai
 
         let level;
 
-        if (POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 || message.type === CONSTANTS.POST_MESSAGE_TYPE.ACK) {
-            level = 'debug';
-        } else if (message.ack === 'error') {
-            level = 'error';
-        } else {
-            level = 'info';
-        }
+        if (__DEBUG__) {
+            if (POST_MESSAGE_NAMES_LIST.indexOf(message.name) !== -1 || message.type === CONSTANTS.POST_MESSAGE_TYPE.ACK) {
+                level = 'debug';
+            } else if (message.ack === 'error') {
+                level = 'error';
+            } else {
+                level = 'info';
+            }
 
-        log.logLevel(level, [ '\n\n\t', '#send', message.type.replace(/^postrobot_message_/, ''), '::', message.name, '::', domain || CONSTANTS.WILDCARD, '\n\n', message ]);
+            // eslint-disable-next-line no-console
+            console[level]('postrobot_send', message.type.replace(/^postrobot_message_/, ''), '::', message.name, '::', domain || CONSTANTS.WILDCARD, '\n\n', message);
+        }
 
         if (win === window && !CONFIG.ALLOW_SAME_ORIGIN) {
             throw new Error('Attemping to send message to self');
@@ -52,8 +55,6 @@ export function sendMessage(win : CrossDomainWindowType, message : Object, domai
         if (isWindowClosed(win)) {
             throw new Error('Window is closed');
         }
-
-        log.debug('Running send message strategies', message);
 
         let messages = [];
 
@@ -83,8 +84,6 @@ export function sendMessage(win : CrossDomainWindowType, message : Object, domai
 
             let success = results.some(Boolean);
             let status = `${ message.type } ${ message.name } ${ success ? 'success' : 'error' }:\n  - ${ messages.join('\n  - ') }\n`;
-
-            log.debug(status);
 
             if (!success) {
                 throw new Error(status);

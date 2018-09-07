@@ -8,7 +8,6 @@ import { CONSTANTS } from '../conf';
 import { global } from '../global';
 
 import { once, uniqueID, replaceObject, stringifyError, isRegex } from './util';
-import { log } from './log';
 
 global.methods = global.methods || new WeakMap();
 
@@ -30,8 +29,6 @@ export let listenForMethods = once(() => {
         if (!matchDomain(meth.domain, origin)) {
             throw new Error(`Method domain ${ meth.domain } does not match origin ${ origin }`);
         }
-
-        log.debug('Call local method', data.name, data.args);
 
         return ZalgoPromise.try(() => {
             return meth.method.apply({ source, origin, data }, data.args);
@@ -153,18 +150,14 @@ export function deserializeMethod(source : CrossDomainWindowType, origin : strin
 
     function wrapper() : ZalgoPromise<mixed> {
         let args = Array.prototype.slice.call(arguments);
-        log.debug('Call foreign method', obj.__name__, args);
         return global.send(source, CONSTANTS.POST_MESSAGE_NAMES.METHOD, {
             id:   obj.__id__,
             name: obj.__name__,
             args
 
         }, { domain: origin, timeout: -1 }).then(({ data }) => {
-
-            log.debug('Got foreign method result', obj.__name__, data.result);
             return data.result;
         }, err => {
-            log.debug('Got foreign method error', stringifyError(err));
             throw err;
         });
     }

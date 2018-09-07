@@ -136,8 +136,6 @@ describe('[post-robot] happy cases', () => {
     });
 
     it('should pass a function across windows and be able to call it later', (done) => {
-
-        // eslint-disable-next-line promise/catch-or-return
         postRobot.send(childFrame, 'setupListener', {
 
             messageName: 'foo',
@@ -416,7 +414,6 @@ describe('[post-robot] error cases', () => {
             done(new Error(`Expected handler to not be called`));
         });
 
-        // eslint-disable-next-line promise/catch-or-return
         postRobot.send(childFrame, 'sendMessageToParent', {
             messageName: 'foobuzzzzz'
         }).then(() => {
