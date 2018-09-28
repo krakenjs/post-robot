@@ -1,8 +1,8 @@
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { isSameDomain, getOpener, getFrames, getDomain, getFrameByName } from 'cross-domain-utils/src';
+import { weakMapMemoize, noop } from 'belter/src';
 
 import { CONSTANTS } from '../conf';
-import { weakMapMemoize, noop } from '../lib';
 import { global } from '../global';
 
 import { needsBridge, registerRemoteWindow, rejectRemoteSendMessage, registerRemoteSendMessage, getBridgeName } from './common';

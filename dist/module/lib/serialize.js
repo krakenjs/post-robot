@@ -3,11 +3,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
 import { matchDomain } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
+import { once, uniqueID, replaceObject, stringifyError, isRegex } from 'belter/src';
 
 import { CONSTANTS } from '../conf';
 import { global } from '../global';
-
-import { once, uniqueID, replaceObject, stringifyError, isRegex } from './util';
 
 global.methods = global.methods || new WeakMap();
 
@@ -129,6 +128,8 @@ export function serializeMethods(destination, domain, obj) {
             // $FlowFixMe
             return serializeRegex(item);
         }
+
+        return item;
     }).obj;
 }
 
@@ -193,7 +194,7 @@ export function deserializeMethods(source, origin, obj) {
 
     return replaceObject({ obj: obj }, function (item) {
         if ((typeof item === 'undefined' ? 'undefined' : _typeof(item)) !== 'object' || item === null) {
-            return;
+            return item;
         }
 
         if (isSerialized(item, CONSTANTS.SERIALIZATION_TYPES.METHOD)) {
@@ -215,5 +216,7 @@ export function deserializeMethods(source, origin, obj) {
         if (isSerialized(item, CONSTANTS.SERIALIZATION_TYPES.REGEX)) {
             return deserializeRegex(source, origin, item);
         }
+
+        return item;
     }).obj;
 }

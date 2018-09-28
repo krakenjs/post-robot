@@ -4,8 +4,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 import { isWindowClosed } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
+import { once as onceFunction, safeInterval } from 'belter/src';
 
-import { once as onceFunction, safeInterval } from '../lib';
 import { addRequestListener } from '../drivers';
 import { CONSTANTS } from '../conf';
 import { global } from '../global';

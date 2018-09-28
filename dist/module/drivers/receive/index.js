@@ -1,9 +1,10 @@
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 import { isWindowClosed } from 'cross-domain-utils/src';
+import { addEventListener, noop } from 'belter/src';
 
 import { CONSTANTS, POST_MESSAGE_NAMES_LIST } from '../../conf';
-import { deserializeMethods, jsonParse, addEventListener, noop } from '../../lib';
+import { deserializeMethods } from '../../lib';
 import { global } from '../../global';
 
 import { RECEIVE_MESSAGE_TYPES } from './types';
@@ -15,7 +16,7 @@ function parseMessage(message) {
     var parsedMessage = void 0;
 
     try {
-        parsedMessage = jsonParse(message);
+        parsedMessage = JSON.parse(message);
     } catch (err) {
         return;
     }
@@ -137,6 +138,7 @@ export function messageListener(event) {
 }
 
 export function listenForMessages() {
+    // $FlowFixMe
     addEventListener(window, 'message', messageListener);
 }
 

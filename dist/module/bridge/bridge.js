@@ -1,8 +1,8 @@
 import 'zalgo-promise/src';
 import { getParent, isWindowClosed } from 'cross-domain-utils/src';
+import { noop } from 'belter/src';
 
 import { CONSTANTS } from '../conf';
-import { noop } from '../lib';
 import { global } from '../global';
 
 /*

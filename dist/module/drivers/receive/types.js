@@ -4,9 +4,9 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { isWindowClosed, matchDomain, stringifyDomainPattern } from 'cross-domain-utils/src';
+import { stringifyError, noop } from 'belter/src';
 
 import { CONSTANTS } from '../../conf';
-import { stringifyError, noop } from '../../lib';
 import { sendMessage } from '../send';
 import { getRequestListener, getResponseListener, deleteResponseListener, isResponseListenerErrored } from '../listeners';
 

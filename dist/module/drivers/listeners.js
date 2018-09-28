@@ -1,9 +1,9 @@
 import 'zalgo-promise/src';
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
 import { matchDomain } from 'cross-domain-utils/src';
+import { isRegex } from 'belter/src';
 
 import { global } from '../global';
-import { isRegex } from '../lib';
 import { CONSTANTS } from '../conf';
 
 export function resetListeners() {

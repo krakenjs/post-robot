@@ -1,11 +1,10 @@
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
 import { getAncestor } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
+import { noop } from 'belter/src';
 
 import { CONSTANTS } from '../conf';
 import { global } from '../global';
-
-import { noop } from './util';
 
 global.readyPromises = global.readyPromises || new WeakMap();
 

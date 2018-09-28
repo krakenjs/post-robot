@@ -2,9 +2,10 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 
 import { getDomain, isWindowClosed } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
+import { uniqueID, stringifyError } from 'belter/src';
 
 import { CONSTANTS, CONFIG, POST_MESSAGE_NAMES_LIST } from '../../conf';
-import { uniqueID, serializeMethods, getWindowType, jsonStringify, stringifyError } from '../../lib';
+import { serializeMethods, getWindowType } from '../../lib';
 
 import { SEND_MESSAGE_STRATEGIES } from './strategies';
 
@@ -25,7 +26,7 @@ function buildMessage(win, message) {
 
 export function sendMessage(win, message, domain) {
     return ZalgoPromise['try'](function () {
-        var _jsonStringify;
+        var _JSON$stringify;
 
         message = buildMessage(win, message, {
             data: serializeMethods(win, domain, message.data),
@@ -57,7 +58,7 @@ export function sendMessage(win, message, domain) {
 
         var messages = [];
 
-        var serializedMessage = jsonStringify((_jsonStringify = {}, _jsonStringify[CONSTANTS.WINDOW_PROPS.POSTROBOT] = message, _jsonStringify), null, 2);
+        var serializedMessage = JSON.stringify((_JSON$stringify = {}, _JSON$stringify[CONSTANTS.WINDOW_PROPS.POSTROBOT] = message, _JSON$stringify), null, 2);
 
         return ZalgoPromise.map(Object.keys(SEND_MESSAGE_STRATEGIES), function (strategyName) {
 
