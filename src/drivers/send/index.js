@@ -2,9 +2,10 @@
 
 import { getDomain, isWindowClosed, type CrossDomainWindowType } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
+import { uniqueID, stringifyError } from 'belter/src';
 
 import { CONSTANTS, CONFIG, POST_MESSAGE_NAMES_LIST } from '../../conf';
-import { uniqueID, serializeMethods, getWindowType, jsonStringify, stringifyError } from '../../lib';
+import { serializeMethods, getWindowType } from '../../lib';
 
 import { SEND_MESSAGE_STRATEGIES } from './strategies';
 
@@ -58,7 +59,7 @@ export function sendMessage(win : CrossDomainWindowType, message : Object, domai
 
         let messages = [];
 
-        let serializedMessage = jsonStringify({
+        let serializedMessage = JSON.stringify({
             [ CONSTANTS.WINDOW_PROPS.POSTROBOT ]: message
         }, null, 2);
 

@@ -2,9 +2,9 @@
 
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { isWindowClosed, matchDomain, stringifyDomainPattern, type CrossDomainWindowType } from 'cross-domain-utils/src';
+import { stringifyError, noop } from 'belter/src';
 
 import { CONSTANTS } from '../../conf';
-import { stringifyError, noop } from '../../lib';
 import { sendMessage } from '../send';
 import { getRequestListener, getResponseListener, deleteResponseListener, isResponseListenerErrored } from '../listeners';
 

@@ -3,10 +3,12 @@
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { getAncestor, isAncestor, isWindowClosed, getDomain, matchDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
+import { uniqueID, isRegex } from 'belter/src';
+
 
 import { CONFIG, CONSTANTS } from '../conf';
 import { sendMessage, addResponseListener, deleteResponseListener, markResponseListenerErrored, type ResponseListenerType } from '../drivers';
-import { uniqueID, onChildWindowReady, sayHello, isRegex } from '../lib';
+import { onChildWindowReady, sayHello } from '../lib';
 import { global } from '../global';
 
 global.requestPromises = global.requestPromises || new WeakMap();

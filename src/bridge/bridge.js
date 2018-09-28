@@ -2,9 +2,9 @@
 
 import { type ZalgoPromise } from 'zalgo-promise/src';
 import { getParent, isWindowClosed, type CrossDomainWindowType } from 'cross-domain-utils/src';
+import { noop } from 'belter/src';
 
 import { CONSTANTS } from '../conf';
-import { noop } from '../lib';
 import { global } from '../global';
 
 /*

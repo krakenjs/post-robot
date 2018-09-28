@@ -3,11 +3,11 @@
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
 import { matchDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
+import { once, uniqueID, replaceObject, stringifyError, isRegex } from 'belter/src';
 
 import { CONSTANTS } from '../conf';
 import { global } from '../global';
 
-import { once, uniqueID, replaceObject, stringifyError, isRegex } from './util';
 
 global.methods = global.methods || new WeakMap();
 
@@ -143,6 +143,8 @@ export function serializeMethods(destination : CrossDomainWindowType, domain : s
             // $FlowFixMe
             return serializeRegex(item);
         }
+
+        return item;
     }).obj;
 }
 
@@ -201,7 +203,7 @@ export function deserializeMethods(source : CrossDomainWindowType, origin : stri
 
     return replaceObject({ obj }, (item) => {
         if (typeof item !== 'object' || item === null) {
-            return;
+            return item;
         }
 
         if (isSerialized(item, CONSTANTS.SERIALIZATION_TYPES.METHOD)) {
@@ -224,5 +226,6 @@ export function deserializeMethods(source : CrossDomainWindowType, origin : stri
             return deserializeRegex(source, origin, item);
         }
 
+        return item;
     }).obj;
 }

@@ -1,9 +1,10 @@
 /* @flow */
 
 import { isWindowClosed, type CrossDomainWindowType } from 'cross-domain-utils/src';
+import { addEventListener, noop } from 'belter/src';
 
 import { CONSTANTS, POST_MESSAGE_NAMES_LIST } from '../../conf';
-import { deserializeMethods, jsonParse, addEventListener, noop } from '../../lib';
+import { deserializeMethods } from '../../lib';
 import { global } from '../../global';
 
 import { RECEIVE_MESSAGE_TYPES } from './types';
@@ -21,7 +22,7 @@ function parseMessage(message : string) : ?Object {
     let parsedMessage;
 
     try {
-        parsedMessage = jsonParse(message);
+        parsedMessage = JSON.parse(message);
     } catch (err) {
         return;
     }
@@ -141,6 +142,7 @@ export function messageListener(event : { source : CrossDomainWindowType, origin
 }
 
 export function listenForMessages() {
+    // $FlowFixMe
     addEventListener(window, 'message', messageListener);
 }
 

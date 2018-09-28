@@ -53,6 +53,7 @@
     "mocha": "^4"
   },
   "dependencies": {
+    "belter": "^1.0.41",
     "cross-domain-safe-weakmap": "^1.0.1",
     "cross-domain-utils": "^2.0.0",
     "zalgo-promise": "^1.0.3"
