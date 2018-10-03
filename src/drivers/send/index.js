@@ -49,10 +49,6 @@ export function sendMessage(win : CrossDomainWindowType, message : Object, domai
             console[level]('postrobot_send', message.type.replace(/^postrobot_message_/, ''), '::', message.name, '::', domain || CONSTANTS.WILDCARD, '\n\n', message);
         }
 
-        if (win === window && !CONFIG.ALLOW_SAME_ORIGIN) {
-            throw new Error('Attemping to send message to self');
-        }
-
         if (isWindowClosed(win)) {
             throw new Error('Window is closed');
         }

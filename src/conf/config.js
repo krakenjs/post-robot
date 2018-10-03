@@ -19,8 +19,6 @@ export let CONFIG : Object = {
         [ CONSTANTS.SEND_STRATEGIES.BRIDGE ]:       true,
         [ CONSTANTS.SEND_STRATEGIES.GLOBAL ]:       true
     },
-
-    ALLOW_SAME_ORIGIN: false
 };
 
 if (window.location.href.indexOf(CONSTANTS.FILE_PROTOCOL) === 0) {
