@@ -18,7 +18,7 @@ export let CONFIG : Object = {
         [ CONSTANTS.SEND_STRATEGIES.POST_MESSAGE ]: true,
         [ CONSTANTS.SEND_STRATEGIES.BRIDGE ]:       true,
         [ CONSTANTS.SEND_STRATEGIES.GLOBAL ]:       true
-    },
+    }
 };
 
 if (window.location.href.indexOf(CONSTANTS.FILE_PROTOCOL) === 0) {
