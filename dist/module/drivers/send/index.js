@@ -45,7 +45,10 @@ export function sendMessage(win, message, domain) {
             }
 
             // eslint-disable-next-line no-console
-            console[level]('postrobot_send', message.type.replace(/^postrobot_message_/, ''), '::', message.name, '::', domain || CONSTANTS.WILDCARD, '\n\n', message);
+            if (typeof console !== 'undefined' && typeof console[level] === 'function') {
+                // eslint-disable-next-line no-console
+                console[level]('postrobot_send', message.type.replace(/^postrobot_message_/, ''), '::', message.name, '::', domain || CONSTANTS.WILDCARD, '\n\n', message);
+            }
         }
 
         if (win === window && !CONFIG.ALLOW_SAME_ORIGIN) {
