@@ -46,7 +46,10 @@ export function sendMessage(win : CrossDomainWindowType, message : Object, domai
             }
 
             // eslint-disable-next-line no-console
-            console[level]('postrobot_send', message.type.replace(/^postrobot_message_/, ''), '::', message.name, '::', domain || CONSTANTS.WILDCARD, '\n\n', message);
+            if (typeof console !== 'undefined' && typeof console[level] === 'function') {
+                // eslint-disable-next-line no-console
+                console[level]('postrobot_send', message.type.replace(/^postrobot_message_/, ''), '::', message.name, '::', domain || CONSTANTS.WILDCARD, '\n\n', message);
+            }
         }
 
         if (isWindowClosed(win)) {
