@@ -99,9 +99,12 @@ export function receiveMessage(event : MessageEvent) {
         } else {
             level = 'info';
         }
-        
+
         // eslint-disable-next-line no-console
-        console[level]('postrobot_receive', message.type.replace(/^postrobot_message_/, ''), '::', message.name, '::', origin, '\n\n', message);
+        if (typeof console !== 'undefined' && typeof console[level] === 'function') {
+            // eslint-disable-next-line no-console
+            console[level]('postrobot_receive', message.type.replace(/^postrobot_message_/, ''), '::', message.name, '::', origin, '\n\n', message);
+        }
     }
 
     if (isWindowClosed(source) && !message.fireAndForget) {
