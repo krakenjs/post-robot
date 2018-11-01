@@ -7,6 +7,7 @@ import { CONSTANTS } from '../conf';
 import { global } from '../global';
 
 global.readyPromises = global.readyPromises || new WeakMap();
+global.knownWindows = global.knownWindows || new WeakMap();
 
 export function onHello(handler) {
     global.on(CONSTANTS.POST_MESSAGE_NAMES.HELLO, { domain: CONSTANTS.WILDCARD }, function (_ref) {
@@ -23,6 +24,14 @@ export function sayHello(win) {
 
         return { origin: origin };
     });
+}
+
+export function markWindowKnown(win) {
+    global.knownWindows.set(win, true);
+}
+
+export function isWindowKnown(win) {
+    return global.knownWindows.get(win);
 }
 
 export function initOnReady() {

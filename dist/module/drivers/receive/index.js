@@ -4,7 +4,7 @@ import { isWindowClosed } from 'cross-domain-utils/src';
 import { addEventListener, noop } from 'belter/src';
 
 import { CONSTANTS, POST_MESSAGE_NAMES_LIST } from '../../conf';
-import { deserializeMethods } from '../../lib';
+import { deserializeMethods, markWindowKnown } from '../../lib';
 import { global } from '../../global';
 
 import { RECEIVE_MESSAGE_TYPES } from './types';
@@ -70,6 +70,8 @@ export function receiveMessage(event) {
     if (!message) {
         return;
     }
+
+    markWindowKnown(source);
 
     if (!message.sourceDomain || typeof message.sourceDomain !== 'string') {
         throw new Error('Expected message to have sourceDomain');

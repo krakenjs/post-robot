@@ -1043,7 +1043,7 @@
                 if (!frame.contentWindow) return !0;
                 if (!frame.parentNode) return !0;
                 var doc = frame.ownerDocument;
-                return !(!doc || !doc.body || doc.body.contains(frame));
+                return !(!doc || !doc.documentElement || doc.documentElement.contains(frame));
             }
             var iframeWindows = [], iframeFrames = [];
             function isWindowClosed(win) {
@@ -1644,7 +1644,7 @@
                             iframe.onload = resolve;
                             iframe.onerror = reject;
                         }).then(function() {
-                            return Object(lib.f)(bridge, conf.a.BRIDGE_TIMEOUT, "Bridge " + url);
+                            return Object(lib.h)(bridge, conf.a.BRIDGE_TIMEOUT, "Bridge " + url);
                         }).then(function() {
                             return bridge;
                         });
@@ -1847,12 +1847,12 @@
                 ALLOW_POSTMESSAGE_POPUP: !("__ALLOW_POSTMESSAGE_POPUP__" in window) || window.__ALLOW_POSTMESSAGE_POPUP__,
                 BRIDGE_TIMEOUT: 5e3,
                 CHILD_WINDOW_TIMEOUT: 5e3,
-                ACK_TIMEOUT: -1 !== window.navigator.userAgent.match(/MSIE/i) ? 2e3 : 1e3,
+                ACK_TIMEOUT: 2e3,
+                ACK_TIMEOUT_KNOWN: 1e4,
                 RES_TIMEOUT: -1,
                 ALLOWED_POST_MESSAGE_METHODS: (_ALLOWED_POST_MESSAGE = {}, _ALLOWED_POST_MESSAGE[CONSTANTS.SEND_STRATEGIES.POST_MESSAGE] = !0, 
                 _ALLOWED_POST_MESSAGE[CONSTANTS.SEND_STRATEGIES.BRIDGE] = !0, _ALLOWED_POST_MESSAGE[CONSTANTS.SEND_STRATEGIES.GLOBAL] = !0, 
-                _ALLOWED_POST_MESSAGE),
-                ALLOW_SAME_ORIGIN: !1
+                _ALLOWED_POST_MESSAGE)
             };
             0 === window.location.href.indexOf(CONSTANTS.FILE_PROTOCOL) && (CONFIG.ALLOW_POSTMESSAGE_POPUP = !0);
             __webpack_require__.d(__webpack_exports__, "a", function() {
@@ -1882,6 +1882,9 @@
                 value: !0
             });
             var interface_namespaceObject = {};
+            __webpack_require__.d(interface_namespaceObject, "markWindowKnown", function() {
+                return lib.f;
+            });
             __webpack_require__.d(interface_namespaceObject, "cleanUpWindow", function() {
                 return cleanUpWindow;
             });
@@ -1957,7 +1960,7 @@
                 }
             };
             SEND_MESSAGE_STRATEGIES[conf.b.SEND_STRATEGIES.GLOBAL] = function(win, serializedMessage) {
-                if (Object(lib.e)()) {
+                if (Object(lib.g)()) {
                     if (!Object(src.isSameDomain)(win)) throw new Error("Post message through global disabled between different domain windows");
                     if (!1 !== Object(src.isSameTopWindow)(window, win)) throw new Error("Can only use global to communicate between two different windows, not between frames");
                     var foreignGlobal = win[conf.b.WINDOW_PROPS.POSTROBOT];
@@ -1987,10 +1990,9 @@
                             windowType: type
                         });
                     }(win, message, {
-                        data: Object(lib.h)(win, domain, message.data),
+                        data: Object(lib.j)(win, domain, message.data),
                         domain: domain
                     });
-                    if (win === window && !conf.a.ALLOW_SAME_ORIGIN) throw new Error("Attemping to send message to self");
                     if (Object(src.isWindowClosed)(win)) throw new Error("Window is closed");
                     var messages = [], serializedMessage = JSON.stringify(((_JSON$stringify = {})[conf.b.WINDOW_PROPS.POSTROBOT] = message, 
                     _JSON$stringify), null, 2);
@@ -2144,6 +2146,7 @@
                     if (parsedMessage && "object" === (void 0 === parsedMessage ? "undefined" : _typeof(parsedMessage)) && null !== parsedMessage && (parsedMessage = parsedMessage[conf.b.WINDOW_PROPS.POSTROBOT]) && "object" === (void 0 === parsedMessage ? "undefined" : _typeof(parsedMessage)) && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
                 }(event.data);
                 if (message) {
+                    Object(lib.f)(source);
                     if (!message.sourceDomain || "string" != typeof message.sourceDomain) throw new Error("Expected message to have sourceDomain");
                     0 !== message.sourceDomain.indexOf(conf.b.MOCK_PROTOCOL) && 0 !== message.sourceDomain.indexOf(conf.b.FILE_PROTOCOL) || (origin = message.sourceDomain);
                     if (-1 === global.a.receivedMessages.indexOf(message.id)) {
@@ -2201,10 +2204,10 @@
                         global.a.requestPromises.set(win, requestPromises);
                     }
                     var requestPromise = zalgo_promise_src.a.try(function() {
-                        if (Object(src.isAncestor)(window, win)) return Object(lib.f)(win, options.timeout || conf.a.CHILD_WINDOW_TIMEOUT);
+                        if (Object(src.isAncestor)(window, win)) return Object(lib.h)(win, options.timeout || conf.a.CHILD_WINDOW_TIMEOUT);
                     }).then(function() {
                         var origin = (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}).origin;
-                        if (Object(belter_src.isRegex)(domain) && !origin) return Object(lib.g)(win);
+                        if (Object(belter_src.isRegex)(domain) && !origin) return Object(lib.i)(win);
                     }).then(function() {
                         var origin = (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}).origin;
                         if (Object(belter_src.isRegex)(domain)) {
@@ -2237,7 +2240,7 @@
                                 fireAndForget: options.fireAndForget
                             }, actualDomain).catch(reject);
                             if (options.fireAndForget) return resolve();
-                            var ackTimeout = conf.a.ACK_TIMEOUT, resTimeout = options.timeout || conf.a.RES_TIMEOUT, cycleTime = 100;
+                            var totalAckTimeout = Object(lib.d)(win) ? conf.a.ACK_TIMEOUT_KNOWN : conf.a.ACK_TIMEOUT, totalResTimeout = options.timeout || conf.a.RES_TIMEOUT, ackTimeout = totalAckTimeout, resTimeout = totalResTimeout, cycleTime = 100;
                             setTimeout(function cycle() {
                                 if (!hasResult) {
                                     if (Object(src.isWindowClosed)(win)) return responseListener.ack ? reject(new Error("Window closed for " + name + " before response")) : reject(new Error("Window closed for " + name + " before ack"));
@@ -2247,8 +2250,8 @@
                                         if (-1 === resTimeout) return;
                                         cycleTime = Math.min(resTimeout, 2e3);
                                     } else {
-                                        if (0 === ackTimeout) return reject(new Error("No ack for postMessage " + name + " in " + Object(src.getDomain)() + " in " + conf.a.ACK_TIMEOUT + "ms"));
-                                        if (0 === resTimeout) return reject(new Error("No response for postMessage " + name + " in " + Object(src.getDomain)() + " in " + (options.timeout || conf.a.RES_TIMEOUT) + "ms"));
+                                        if (0 === ackTimeout) return reject(new Error("No ack for postMessage " + name + " in " + Object(src.getDomain)() + " in " + totalAckTimeout + "ms"));
+                                        if (0 === resTimeout) return reject(new Error("No response for postMessage " + name + " in " + Object(src.getDomain)() + " in " + totalResTimeout + "ms"));
                                     }
                                     setTimeout(cycle, cycleTime);
                                 }
@@ -2461,7 +2464,7 @@
                     Object(belter_src.addEventListener)(window, "message", messageListener);
                     __webpack_require__("./src/bridge/index.js").openTunnelToOpener();
                     Object(lib.c)();
-                    Object(lib.d)({
+                    Object(lib.e)({
                         on: _on,
                         send: _send
                     });
@@ -2469,6 +2472,9 @@
                 global.a.initialized = !0;
             }
             init();
+            __webpack_require__.d(__webpack_exports__, "markWindowKnown", function() {
+                return lib.f;
+            });
             __webpack_require__.d(__webpack_exports__, "cleanUpWindow", function() {
                 return cleanUpWindow;
             });
@@ -2656,6 +2662,7 @@
                 }).obj;
             }
             global.a.readyPromises = global.a.readyPromises || new cross_domain_safe_weakmap_src.a();
+            global.a.knownWindows = global.a.knownWindows || new cross_domain_safe_weakmap_src.a();
             function onHello(handler) {
                 global.a.on(conf.b.POST_MESSAGE_NAMES.HELLO, {
                     domain: conf.b.WILDCARD
@@ -2676,6 +2683,12 @@
                         origin: _ref2.origin
                     };
                 });
+            }
+            function markWindowKnown(win) {
+                global.a.knownWindows.set(win, !0);
+            }
+            function isWindowKnown(win) {
+                return global.a.knownWindows.get(win);
             }
             function initOnReady() {
                 onHello(function(_ref3) {
@@ -2701,16 +2714,16 @@
             __webpack_require__.d(__webpack_exports__, "b", function() {
                 return getWindowType;
             });
-            __webpack_require__.d(__webpack_exports__, "e", function() {
+            __webpack_require__.d(__webpack_exports__, "g", function() {
                 return needsGlobalMessagingForBrowser;
             });
-            __webpack_require__.d(__webpack_exports__, "d", function() {
+            __webpack_require__.d(__webpack_exports__, "e", function() {
                 return listenForMethods;
             });
             __webpack_require__.d(__webpack_exports__, !1, function() {
                 return serializeMethod;
             });
-            __webpack_require__.d(__webpack_exports__, "h", function() {
+            __webpack_require__.d(__webpack_exports__, "j", function() {
                 return serializeMethods;
             });
             __webpack_require__.d(__webpack_exports__, !1, function() {
@@ -2734,13 +2747,19 @@
             __webpack_require__.d(__webpack_exports__, !1, function() {
                 return onHello;
             });
-            __webpack_require__.d(__webpack_exports__, "g", function() {
+            __webpack_require__.d(__webpack_exports__, "i", function() {
                 return sayHello;
+            });
+            __webpack_require__.d(__webpack_exports__, "f", function() {
+                return markWindowKnown;
+            });
+            __webpack_require__.d(__webpack_exports__, "d", function() {
+                return isWindowKnown;
             });
             __webpack_require__.d(__webpack_exports__, "c", function() {
                 return initOnReady;
             });
-            __webpack_require__.d(__webpack_exports__, "f", function() {
+            __webpack_require__.d(__webpack_exports__, "h", function() {
                 return onChildWindowReady;
             });
         }

@@ -6,7 +6,7 @@ import { uniqueID, isRegex } from 'belter/src';
 
 import { CONFIG, CONSTANTS } from '../conf';
 import { sendMessage, addResponseListener, deleteResponseListener, markResponseListenerErrored } from '../drivers';
-import { onChildWindowReady, sayHello } from '../lib';
+import { onChildWindowReady, sayHello, isWindowKnown } from '../lib';
 import { global } from '../global';
 
 global.requestPromises = global.requestPromises || new WeakMap();
@@ -150,8 +150,11 @@ export function request(options) {
                     return resolve();
                 }
 
-                var ackTimeout = CONFIG.ACK_TIMEOUT;
-                var resTimeout = options.timeout || CONFIG.RES_TIMEOUT;
+                var totalAckTimeout = isWindowKnown(win) ? CONFIG.ACK_TIMEOUT_KNOWN : CONFIG.ACK_TIMEOUT;
+                var totalResTimeout = options.timeout || CONFIG.RES_TIMEOUT;
+
+                var ackTimeout = totalAckTimeout;
+                var resTimeout = totalResTimeout;
 
                 var cycleTime = 100;
 
@@ -185,9 +188,9 @@ export function request(options) {
 
                         cycleTime = Math.min(resTimeout, 2000);
                     } else if (ackTimeout === 0) {
-                        return reject(new Error('No ack for postMessage ' + name + ' in ' + getDomain() + ' in ' + CONFIG.ACK_TIMEOUT + 'ms'));
+                        return reject(new Error('No ack for postMessage ' + name + ' in ' + getDomain() + ' in ' + totalAckTimeout + 'ms'));
                     } else if (resTimeout === 0) {
-                        return reject(new Error('No response for postMessage ' + name + ' in ' + getDomain() + ' in ' + (options.timeout || CONFIG.RES_TIMEOUT) + 'ms'));
+                        return reject(new Error('No response for postMessage ' + name + ' in ' + getDomain() + ' in ' + totalResTimeout + 'ms'));
                     }
 
                     setTimeout(cycle, cycleTime);

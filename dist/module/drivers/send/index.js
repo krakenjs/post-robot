@@ -51,10 +51,6 @@ export function sendMessage(win, message, domain) {
             }
         }
 
-        if (win === window && !CONFIG.ALLOW_SAME_ORIGIN) {
-            throw new Error('Attemping to send message to self');
-        }
-
         if (isWindowClosed(win)) {
             throw new Error('Window is closed');
         }

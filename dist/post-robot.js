@@ -953,7 +953,7 @@
                 if (!frame.contentWindow) return !0;
                 if (!frame.parentNode) return !0;
                 var doc = frame.ownerDocument;
-                return !(!doc || !doc.body || doc.body.contains(frame));
+                return !(!doc || !doc.documentElement || doc.documentElement.contains(frame));
             }
             var iframeWindows = [], iframeFrames = [];
             function isWindowClosed(win) {
@@ -1286,6 +1286,9 @@
                 value: !0
             });
             var interface_namespaceObject = {};
+            __webpack_require__.d(interface_namespaceObject, "markWindowKnown", function() {
+                return markWindowKnown;
+            });
             __webpack_require__.d(interface_namespaceObject, "cleanUpWindow", function() {
                 return cleanUpWindow;
             });
@@ -1384,12 +1387,12 @@
                 ALLOW_POSTMESSAGE_POPUP: !("__ALLOW_POSTMESSAGE_POPUP__" in window) || window.__ALLOW_POSTMESSAGE_POPUP__,
                 BRIDGE_TIMEOUT: 5e3,
                 CHILD_WINDOW_TIMEOUT: 5e3,
-                ACK_TIMEOUT: -1 !== window.navigator.userAgent.match(/MSIE/i) ? 2e3 : 1e3,
+                ACK_TIMEOUT: 2e3,
+                ACK_TIMEOUT_KNOWN: 1e4,
                 RES_TIMEOUT: -1,
                 ALLOWED_POST_MESSAGE_METHODS: (_ALLOWED_POST_MESSAGE = {}, _ALLOWED_POST_MESSAGE[constants_CONSTANTS.SEND_STRATEGIES.POST_MESSAGE] = !0, 
                 _ALLOWED_POST_MESSAGE[constants_CONSTANTS.SEND_STRATEGIES.BRIDGE] = !0, _ALLOWED_POST_MESSAGE[constants_CONSTANTS.SEND_STRATEGIES.GLOBAL] = !0, 
-                _ALLOWED_POST_MESSAGE),
-                ALLOW_SAME_ORIGIN: !1
+                _ALLOWED_POST_MESSAGE)
             });
             0 === window.location.href.indexOf(constants_CONSTANTS.FILE_PROTOCOL) && (CONFIG.ALLOW_POSTMESSAGE_POPUP = !0);
             var cross_domain_safe_weakmap_src = __webpack_require__("./node_modules/cross-domain-safe-weakmap/src/index.js"), zalgo_promise_src = __webpack_require__("./node_modules/zalgo-promise/src/index.js"), belter_src = __webpack_require__("./node_modules/belter/src/index.js"), global = window[constants_CONSTANTS.WINDOW_PROPS.POSTROBOT] = window[constants_CONSTANTS.WINDOW_PROPS.POSTROBOT] || {};
@@ -1471,6 +1474,7 @@
                 });
             }
             global.readyPromises = global.readyPromises || new cross_domain_safe_weakmap_src.a();
+            global.knownWindows = global.knownWindows || new cross_domain_safe_weakmap_src.a();
             function sayHello(win) {
                 return global.send(win, constants_CONSTANTS.POST_MESSAGE_NAMES.HELLO, {}, {
                     domain: constants_CONSTANTS.WILDCARD,
@@ -1480,6 +1484,9 @@
                         origin: _ref2.origin
                     };
                 });
+            }
+            function markWindowKnown(win) {
+                global.knownWindows.set(win, !0);
             }
             var SEND_MESSAGE_STRATEGIES = {};
             SEND_MESSAGE_STRATEGIES[constants_CONSTANTS.SEND_STRATEGIES.POST_MESSAGE] = function(win, serializedMessage, domain) {
@@ -1545,7 +1552,6 @@
                         }(win, domain, message.data),
                         domain: domain
                     });
-                    if (win === window && !CONFIG.ALLOW_SAME_ORIGIN) throw new Error("Attemping to send message to self");
                     if (Object(src.isWindowClosed)(win)) throw new Error("Window is closed");
                     var messages = [], serializedMessage = JSON.stringify(((_JSON$stringify = {})[constants_CONSTANTS.WINDOW_PROPS.POSTROBOT] = message, 
                     _JSON$stringify), null, 2);
@@ -1698,6 +1704,7 @@
                     if (parsedMessage && "object" === (void 0 === parsedMessage ? "undefined" : receive__typeof(parsedMessage)) && null !== parsedMessage && (parsedMessage = parsedMessage[constants_CONSTANTS.WINDOW_PROPS.POSTROBOT]) && "object" === (void 0 === parsedMessage ? "undefined" : receive__typeof(parsedMessage)) && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
                 }(event.data);
                 if (message) {
+                    markWindowKnown(source);
                     if (!message.sourceDomain || "string" != typeof message.sourceDomain) throw new Error("Expected message to have sourceDomain");
                     0 !== message.sourceDomain.indexOf(constants_CONSTANTS.MOCK_PROTOCOL) && 0 !== message.sourceDomain.indexOf(constants_CONSTANTS.FILE_PROTOCOL) || (origin = message.sourceDomain);
                     if (-1 === global.receivedMessages.indexOf(message.id)) {
@@ -1810,7 +1817,9 @@
                                 fireAndForget: options.fireAndForget
                             }, actualDomain).catch(reject);
                             if (options.fireAndForget) return resolve();
-                            var ackTimeout = CONFIG.ACK_TIMEOUT, resTimeout = options.timeout || CONFIG.RES_TIMEOUT, cycleTime = 100;
+                            var totalAckTimeout = function(win) {
+                                return global.knownWindows.get(win);
+                            }(win) ? CONFIG.ACK_TIMEOUT_KNOWN : CONFIG.ACK_TIMEOUT, totalResTimeout = options.timeout || CONFIG.RES_TIMEOUT, ackTimeout = totalAckTimeout, resTimeout = totalResTimeout, cycleTime = 100;
                             setTimeout(function cycle() {
                                 if (!hasResult) {
                                     if (Object(src.isWindowClosed)(win)) return responseListener.ack ? reject(new Error("Window closed for " + name + " before response")) : reject(new Error("Window closed for " + name + " before ack"));
@@ -1820,8 +1829,8 @@
                                         if (-1 === resTimeout) return;
                                         cycleTime = Math.min(resTimeout, 2e3);
                                     } else {
-                                        if (0 === ackTimeout) return reject(new Error("No ack for postMessage " + name + " in " + Object(src.getDomain)() + " in " + CONFIG.ACK_TIMEOUT + "ms"));
-                                        if (0 === resTimeout) return reject(new Error("No response for postMessage " + name + " in " + Object(src.getDomain)() + " in " + (options.timeout || CONFIG.RES_TIMEOUT) + "ms"));
+                                        if (0 === ackTimeout) return reject(new Error("No ack for postMessage " + name + " in " + Object(src.getDomain)() + " in " + totalAckTimeout + "ms"));
+                                        if (0 === resTimeout) return reject(new Error("No response for postMessage " + name + " in " + Object(src.getDomain)() + " in " + totalResTimeout + "ms"));
                                     }
                                     setTimeout(cycle, cycleTime);
                                 }
@@ -2059,6 +2068,9 @@
                 global.initialized = !0;
             }
             init();
+            __webpack_require__.d(__webpack_exports__, "markWindowKnown", function() {
+                return markWindowKnown;
+            });
             __webpack_require__.d(__webpack_exports__, "cleanUpWindow", function() {
                 return cleanUpWindow;
             });
