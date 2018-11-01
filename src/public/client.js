@@ -8,7 +8,7 @@ import { uniqueID, isRegex } from 'belter/src';
 
 import { CONFIG, CONSTANTS } from '../conf';
 import { sendMessage, addResponseListener, deleteResponseListener, markResponseListenerErrored, type ResponseListenerType } from '../drivers';
-import { onChildWindowReady, sayHello } from '../lib';
+import { onChildWindowReady, sayHello, isWindowKnown } from '../lib';
 import { global } from '../global';
 
 global.requestPromises = global.requestPromises || new WeakMap();
@@ -168,8 +168,11 @@ export function request(options : RequestOptionsType) : ZalgoPromise<ResponseMes
                     return resolve();
                 }
 
-                let ackTimeout = CONFIG.ACK_TIMEOUT;
-                let resTimeout = options.timeout || CONFIG.RES_TIMEOUT;
+                let totalAckTimeout = isWindowKnown(win) ? CONFIG.ACK_TIMEOUT_KNOWN : CONFIG.ACK_TIMEOUT;
+                let totalResTimeout = options.timeout || CONFIG.RES_TIMEOUT;
+
+                let ackTimeout = totalAckTimeout;
+                let resTimeout = totalResTimeout;
 
                 let cycleTime = 100;
 
@@ -204,10 +207,10 @@ export function request(options : RequestOptionsType) : ZalgoPromise<ResponseMes
                         cycleTime = Math.min(resTimeout, 2000);
 
                     } else if (ackTimeout === 0) {
-                        return reject(new Error(`No ack for postMessage ${ name } in ${ getDomain() } in ${ CONFIG.ACK_TIMEOUT }ms`));
+                        return reject(new Error(`No ack for postMessage ${ name } in ${ getDomain() } in ${ totalAckTimeout }ms`));
 
                     } else if (resTimeout === 0) {
-                        return reject(new Error(`No response for postMessage ${ name } in ${ getDomain() } in ${ options.timeout || CONFIG.RES_TIMEOUT }ms`));
+                        return reject(new Error(`No response for postMessage ${ name } in ${ getDomain() } in ${ totalResTimeout }ms`));
                     }
 
                     setTimeout(cycle, cycleTime);

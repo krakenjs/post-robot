@@ -10,6 +10,7 @@ import { global } from '../global';
 
 
 global.readyPromises = global.readyPromises || new WeakMap();
+global.knownWindows = global.knownWindows || new WeakMap();
 
 export function onHello(handler : ({ source? : CrossDomainWindowType, origin? : string }) => void) {
     global.on(CONSTANTS.POST_MESSAGE_NAMES.HELLO, { domain: CONSTANTS.WILDCARD }, ({ source, origin }) => {
@@ -22,6 +23,14 @@ export function sayHello(win : CrossDomainWindowType) : ZalgoPromise<{ origin : 
         .then(({ origin }) => {
             return { origin };
         });
+}
+
+export function markWindowKnown(win : CrossDomainWindowType) {
+    global.knownWindows.set(win, true);
+}
+
+export function isWindowKnown(win : CrossDomainWindowType) : boolean {
+    return global.knownWindows.get(win);
 }
 
 export function initOnReady() {
