@@ -1,7 +1,7 @@
 /* @flow */
 
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { isSameDomain, getOpener, getFrames, getDomain, getFrameByName, type CrossDomainWindowType } from 'cross-domain-utils/src';
+import { isSameDomain, getOpener, getDomain, getFrameByName, type CrossDomainWindowType } from 'cross-domain-utils/src';
 import { weakMapMemoize, noop } from 'belter/src';
 
 import { CONSTANTS } from '../conf';
@@ -11,18 +11,6 @@ import { needsBridge, registerRemoteWindow, rejectRemoteSendMessage, registerRem
 
 let awaitRemoteBridgeForWindow = weakMapMemoize((win : CrossDomainWindowType) : ZalgoPromise<?CrossDomainWindowType> => {
     return ZalgoPromise.try(() => {
-        for (let frame of getFrames(win)) {
-            try {
-                // $FlowFixMe
-                if (frame && frame !== window && isSameDomain(frame) && frame[CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
-                    return frame;
-                }
-
-            } catch (err) {
-                continue;
-            }
-        }
-
         try {
             let frame = getFrameByName(win, getBridgeName(getDomain()));
 
