@@ -22,6 +22,6 @@ export let CONFIG : Object = {
     }
 };
 
-if (window.location.href.indexOf(CONSTANTS.FILE_PROTOCOL) === 0) {
+if (window && window.location && window.location.href && window.location.href.indexOf(CONSTANTS.FILE_PROTOCOL) === 0) {
     CONFIG.ALLOW_POSTMESSAGE_POPUP = true;
 }
