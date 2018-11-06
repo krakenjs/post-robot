@@ -10,7 +10,7 @@ export { ZalgoPromise as Promise } from 'zalgo-promise/src';
 export var bridge = __POST_ROBOT__.__IE_POPUP_SUPPORT__ ? require('./bridge/interface') : null;
 
 export function init() {
-    if (!global.initialized) {
+    if (window && window.document && !global.initialized) {
         listenForMessages();
 
         if (__POST_ROBOT__.__IE_POPUP_SUPPORT__) {

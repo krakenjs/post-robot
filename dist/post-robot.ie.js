@@ -1854,7 +1854,7 @@
                 _ALLOWED_POST_MESSAGE[CONSTANTS.SEND_STRATEGIES.BRIDGE] = !0, _ALLOWED_POST_MESSAGE[CONSTANTS.SEND_STRATEGIES.GLOBAL] = !0, 
                 _ALLOWED_POST_MESSAGE)
             };
-            0 === window.location.href.indexOf(CONSTANTS.FILE_PROTOCOL) && (CONFIG.ALLOW_POSTMESSAGE_POPUP = !0);
+            window && window.location && window.location.href && 0 === window.location.href.indexOf(CONSTANTS.FILE_PROTOCOL) && (CONFIG.ALLOW_POSTMESSAGE_POPUP = !0);
             __webpack_require__.d(__webpack_exports__, "a", function() {
                 return CONFIG;
             });
@@ -2460,7 +2460,7 @@
             }
             var bridge = __webpack_require__("./src/bridge/interface.js");
             function init() {
-                if (!global.a.initialized) {
+                if (window && window.document && !global.a.initialized) {
                     Object(belter_src.addEventListener)(window, "message", messageListener);
                     __webpack_require__("./src/bridge/index.js").openTunnelToOpener();
                     Object(lib.c)();
