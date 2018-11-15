@@ -57,7 +57,7 @@
             __webpack_require__("./node_modules/cross-domain-safe-weakmap/src/index.js");
             var util = __webpack_require__("./node_modules/belter/src/util.js");
             __webpack_require__("./node_modules/belter/src/device.js");
-            __webpack_exports__.d = function isLocalStorageEnabled() {
+            __webpack_exports__.b = function isLocalStorageEnabled() {
                 return Object(util.e)(isLocalStorageEnabled, function() {
                     try {
                         if ("undefined" == typeof window) return !1;
@@ -72,30 +72,6 @@
                     return !1;
                 });
             };
-            __webpack_exports__.b = function(container, child) {
-                container.appendChild(child);
-            };
-            __webpack_exports__.g = function(win, html) {
-                try {
-                    win.document.open();
-                    win.document.write(html);
-                    win.document.close();
-                } catch (err) {
-                    try {
-                        win.location = "javascript: document.open(); document.write(" + JSON.stringify(html) + "); document.close();";
-                    } catch (err2) {}
-                }
-            };
-            __webpack_exports__.f = function(win, el) {
-                var tag = el.tagName.toLowerCase();
-                if ("html" !== tag) throw new Error("Expected element to be html, got " + tag);
-                for (var documentElement = win.document.documentElement; documentElement.children && documentElement.children.length; ) documentElement.removeChild(documentElement.children[0]);
-                for (;el.children.length; ) documentElement.appendChild(el.children[0]);
-            };
-            __webpack_exports__.e = function(el, styleText) {
-                var doc = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : window.document;
-                el.styleSheet ? el.styleSheet.cssText = styleText : el.appendChild(doc.createTextNode(styleText));
-            };
             __webpack_exports__.a = function(obj, event, handler) {
                 obj.addEventListener(event, handler);
                 return {
@@ -103,19 +79,6 @@
                         obj.removeEventListener(event, handler);
                     }
                 };
-            };
-            __webpack_exports__.c = function(el) {
-                for (var doc = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : window.document, _i14 = 0, _querySelectorAll2 = function(selector) {
-                    var doc = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : window.document;
-                    return Array.prototype.slice.call(doc.querySelectorAll(selector));
-                }("script", el), _length14 = null == _querySelectorAll2 ? 0 : _querySelectorAll2.length; _i14 < _length14; _i14++) {
-                    var script = _querySelectorAll2[_i14], parentNode = script.parentNode;
-                    if (parentNode) {
-                        var newScript = doc.createElement("script");
-                        newScript.text = script.textContent;
-                        parentNode.replaceChild(newScript, script);
-                    }
-                }
             };
             "function" == typeof Symbol && Symbol.iterator, Object.assign;
             Object.create(Error.prototype);
@@ -140,108 +103,36 @@
                 return __WEBPACK_IMPORTED_MODULE_1__dom__.a;
             });
             __webpack_require__("./node_modules/belter/src/experiment.js"), __webpack_require__("./node_modules/belter/src/global.js"), 
-            __webpack_require__("./node_modules/belter/src/jsx.jsx"), __webpack_require__("./node_modules/belter/src/storage.js");
-            var __WEBPACK_IMPORTED_MODULE_6__util__ = __webpack_require__("./node_modules/belter/src/util.js");
+            __webpack_require__("./node_modules/belter/src/storage.js");
+            var __WEBPACK_IMPORTED_MODULE_5__util__ = __webpack_require__("./node_modules/belter/src/util.js");
             __webpack_require__.d(__webpack_exports__, "isRegex", function() {
-                return __WEBPACK_IMPORTED_MODULE_6__util__.f;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.f;
             });
             __webpack_require__.d(__webpack_exports__, "noop", function() {
-                return __WEBPACK_IMPORTED_MODULE_6__util__.h;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.h;
             });
             __webpack_require__.d(__webpack_exports__, "once", function() {
-                return __WEBPACK_IMPORTED_MODULE_6__util__.i;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.i;
             });
             __webpack_require__.d(__webpack_exports__, "replaceObject", function() {
-                return __WEBPACK_IMPORTED_MODULE_6__util__.m;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.k;
             });
             __webpack_require__.d(__webpack_exports__, "safeInterval", function() {
-                return __WEBPACK_IMPORTED_MODULE_6__util__.n;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.l;
             });
             __webpack_require__.d(__webpack_exports__, "stringifyError", function() {
-                return __WEBPACK_IMPORTED_MODULE_6__util__.p;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.n;
             });
             __webpack_require__.d(__webpack_exports__, "uniqueID", function() {
-                return __WEBPACK_IMPORTED_MODULE_6__util__.r;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.o;
             });
             __webpack_require__.d(__webpack_exports__, "weakMapMemoize", function() {
-                return __WEBPACK_IMPORTED_MODULE_6__util__.s;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.p;
             });
             __webpack_require__("./node_modules/belter/src/http.js");
-            var __WEBPACK_IMPORTED_MODULE_8__types__ = __webpack_require__("./node_modules/belter/src/types.js");
-            __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_8__types__), __webpack_require__("./node_modules/belter/src/decorators.js"), 
+            var __WEBPACK_IMPORTED_MODULE_7__types__ = __webpack_require__("./node_modules/belter/src/types.js");
+            __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_7__types__), __webpack_require__("./node_modules/belter/src/decorators.js"), 
             __webpack_require__("./node_modules/belter/src/css.js");
-        },
-        "./node_modules/belter/src/jsx.jsx": function(module, __webpack_exports__, __webpack_require__) {
-            "use strict";
-            __webpack_require__("./node_modules/belter/src/util.js"), __webpack_require__("./node_modules/belter/src/dom.js"), 
-            "function" == typeof Symbol && Symbol.iterator, Object.assign;
-            function _classCallCheck(instance, Constructor) {
-                if (!(instance instanceof Constructor)) throw new TypeError("Cannot call a class as a function");
-            }
-            function htmlEncode() {
-                return (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : "").toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#x27;").replace(/\//g, "&#x2F;");
-            }
-            !function(_JsxHTMLNode) {
-                !function(subClass, superClass) {
-                    if ("function" != typeof superClass && null !== superClass) throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
-                    subClass.prototype = Object.create(superClass && superClass.prototype, {
-                        constructor: {
-                            value: subClass,
-                            enumerable: !1,
-                            writable: !0,
-                            configurable: !0
-                        }
-                    });
-                    superClass && (Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass);
-                }(JsxHTMLNodeContainer, _JsxHTMLNode);
-                function JsxHTMLNodeContainer(children) {
-                    _classCallCheck(this, JsxHTMLNodeContainer);
-                    return function(self, call) {
-                        if (!self) throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-                        return !call || "object" != typeof call && "function" != typeof call ? self : call;
-                    }(this, _JsxHTMLNode.call(this, "", {}, children));
-                }
-                JsxHTMLNodeContainer.prototype.toString = function() {
-                    return this.childrenToString();
-                };
-            }(function() {
-                function JsxHTMLNode(name, props, children) {
-                    _classCallCheck(this, JsxHTMLNode);
-                    this.name = name;
-                    this.props = props;
-                    this.children = children;
-                }
-                JsxHTMLNode.prototype.toString = function() {
-                    var name = this.name, props = this.propsToString(), children = this.childrenToString();
-                    return "<" + name + (props ? " " : "") + props + ">" + children + "</" + name + ">";
-                };
-                JsxHTMLNode.prototype.propsToString = function() {
-                    var props = this.props;
-                    return props ? Object.keys(props).filter(function(key) {
-                        return "innerHTML" !== key && props && !1 !== props[key];
-                    }).map(function(key) {
-                        if (props) {
-                            var val = props[key];
-                            if (!0 === val) return "" + htmlEncode(key);
-                            if ("string" == typeof val) return htmlEncode(key) + '="' + htmlEncode(val) + '"';
-                        }
-                        return "";
-                    }).filter(Boolean).join(" ") : "";
-                };
-                JsxHTMLNode.prototype.childrenToString = function() {
-                    if (this.props && this.props.innerHTML) return this.props.innerHTML;
-                    if (!this.children) return "";
-                    var result = "";
-                    !function iterate(children) {
-                        for (var _i2 = 0, _length2 = null == children ? 0 : children.length; _i2 < _length2; _i2++) {
-                            var child = children[_i2];
-                            null !== child && void 0 !== child && (Array.isArray(child) ? iterate(child) : result += child instanceof JsxHTMLNode ? child.toString() : htmlEncode(child));
-                        }
-                    }(this.children);
-                    return result;
-                };
-                return JsxHTMLNode;
-            }());
         },
         "./node_modules/belter/src/storage.js": function(module, __webpack_exports__, __webpack_require__) {
             "use strict";
@@ -250,7 +141,7 @@
                 return Object(__WEBPACK_IMPORTED_MODULE_0__util__.e)(getStorage, function() {
                     var STORAGE_KEY = "__" + name + "_" + version + "_storage__", accessedStorage = void 0;
                     function getState(handler) {
-                        var localStorageEnabled = Object(__WEBPACK_IMPORTED_MODULE_1__dom__.d)(), storage = void 0;
+                        var localStorageEnabled = Object(__WEBPACK_IMPORTED_MODULE_1__dom__.b)(), storage = void 0;
                         accessedStorage && (storage = accessedStorage);
                         if (!storage && localStorageEnabled) {
                             var rawStorage = window.localStorage.getItem(STORAGE_KEY);
@@ -258,9 +149,9 @@
                         }
                         storage || (storage = Object(__WEBPACK_IMPORTED_MODULE_0__util__.d)()[STORAGE_KEY]);
                         storage || (storage = {
-                            id: Object(__WEBPACK_IMPORTED_MODULE_0__util__.r)()
+                            id: Object(__WEBPACK_IMPORTED_MODULE_0__util__.o)()
                         });
-                        storage.id || (storage.id = Object(__WEBPACK_IMPORTED_MODULE_0__util__.r)());
+                        storage.id || (storage.id = Object(__WEBPACK_IMPORTED_MODULE_0__util__.o)());
                         accessedStorage = storage;
                         var result = handler(storage);
                         localStorageEnabled ? window.localStorage.setItem(STORAGE_KEY, JSON.stringify(storage)) : Object(__WEBPACK_IMPORTED_MODULE_0__util__.d)()[STORAGE_KEY] = storage;
@@ -272,7 +163,7 @@
                             var session = storage.__session__, now = Date.now();
                             session && now - session.created > lifetime && (session = null);
                             session || (session = {
-                                guid: Object(__WEBPACK_IMPORTED_MODULE_0__util__.r)(),
+                                guid: Object(__WEBPACK_IMPORTED_MODULE_0__util__.o)(),
                                 created: now
                             });
                             storage.__session__ = session;
@@ -309,7 +200,7 @@
         "./node_modules/belter/src/types.js": function(module, exports) {},
         "./node_modules/belter/src/util.js": function(module, __webpack_exports__, __webpack_require__) {
             "use strict";
-            __webpack_exports__.r = uniqueID;
+            __webpack_exports__.o = uniqueID;
             __webpack_exports__.d = function() {
                 if ("undefined" != typeof window) return window;
                 if ("undefined" != typeof window) return window;
@@ -362,7 +253,7 @@
                     }
                 };
             };
-            __webpack_exports__.p = function stringifyError(err) {
+            __webpack_exports__.n = function stringifyError(err) {
                 var level = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 1;
                 if (level >= 3) return "stringifyError stack overflow";
                 try {
@@ -379,7 +270,7 @@
                     return "Error while stringifying error: " + stringifyError(newErr, level + 1);
                 }
             };
-            __webpack_exports__.o = function(item) {
+            __webpack_exports__.m = function(item) {
                 return "string" == typeof item ? item : item && "function" == typeof item.toString ? item.toString() : Object.prototype.toString.call(item);
             };
             __webpack_exports__.c = function(obj, source) {
@@ -388,25 +279,7 @@
                 for (var key in source) source.hasOwnProperty(key) && (obj[key] = source[key]);
                 return obj;
             };
-            __webpack_exports__.k = function(str, regexp, handler) {
-                var results = [];
-                str.replace(regexp, function(item) {
-                    results.push(handler ? handler.apply(null, arguments) : item);
-                });
-                return results;
-            };
-            __webpack_exports__.q = function(svg) {
-                return "data:image/svg+xml;base64," + base64encode(svg);
-            };
-            __webpack_exports__.l = function(text, regexp) {
-                var result = [];
-                text.replace(regexp, function(token) {
-                    result.push(token);
-                    return "";
-                });
-                return result;
-            };
-            __webpack_exports__.n = function(method, time) {
+            __webpack_exports__.l = function(method, time) {
                 var timeout = void 0;
                 !function loop() {
                     timeout = setTimeout(function() {
@@ -423,7 +296,7 @@
             __webpack_exports__.a = function(string) {
                 return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
             };
-            __webpack_exports__.m = function replaceObject(item, replacer) {
+            __webpack_exports__.k = function replaceObject(item, replacer) {
                 var fullKey = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : "";
                 if (Array.isArray(item)) {
                     for (var _length3 = item.length, result = [], _loop = function(i) {
@@ -462,7 +335,7 @@
             __webpack_exports__.f = function(item) {
                 return "[object RegExp]" === Object.prototype.toString.call(item);
             };
-            __webpack_require__.d(__webpack_exports__, "s", function() {
+            __webpack_require__.d(__webpack_exports__, "p", function() {
                 return weakMapMemoize;
             });
             var __WEBPACK_IMPORTED_MODULE_0_zalgo_promise_src__ = __webpack_require__("./node_modules/zalgo-promise/src/index.js"), __WEBPACK_IMPORTED_MODULE_1_cross_domain_safe_weakmap_src__ = __webpack_require__("./node_modules/cross-domain-safe-weakmap/src/index.js"), _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
@@ -470,14 +343,11 @@
             } : function(obj) {
                 return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
             };
-            function base64encode(str) {
-                return window.btoa(str);
-            }
             function uniqueID() {
-                var chars = "0123456789abcdef";
+                var str, chars = "0123456789abcdef";
                 return "xxxxxxxxxx".replace(/./g, function() {
                     return chars.charAt(Math.floor(Math.random() * chars.length));
-                }) + "_" + base64encode(new Date().toISOString().slice(11, 19).replace("T", ".")).replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+                }) + "_" + (str = new Date().toISOString().slice(11, 19).replace("T", "."), window.btoa(str)).replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
             }
             var objectIDs = void 0;
             function serializeArgs(args) {
@@ -702,53 +572,50 @@
             __webpack_require__.d(__webpack_exports__, "getFrameByName", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.e;
             });
-            __webpack_require__.d(__webpack_exports__, "getFrames", function() {
+            __webpack_require__.d(__webpack_exports__, "getOpener", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.f;
             });
-            __webpack_require__.d(__webpack_exports__, "getOpener", function() {
+            __webpack_require__.d(__webpack_exports__, "getParent", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.g;
             });
-            __webpack_require__.d(__webpack_exports__, "getParent", function() {
+            __webpack_require__.d(__webpack_exports__, "getUserAgent", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.h;
             });
-            __webpack_require__.d(__webpack_exports__, "getUserAgent", function() {
+            __webpack_require__.d(__webpack_exports__, "isActuallySameDomain", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.i;
             });
-            __webpack_require__.d(__webpack_exports__, "isActuallySameDomain", function() {
+            __webpack_require__.d(__webpack_exports__, "isAncestor", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.j;
             });
-            __webpack_require__.d(__webpack_exports__, "isAncestor", function() {
+            __webpack_require__.d(__webpack_exports__, "isIframe", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.k;
             });
-            __webpack_require__.d(__webpack_exports__, "isIframe", function() {
+            __webpack_require__.d(__webpack_exports__, "isOpener", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.l;
             });
-            __webpack_require__.d(__webpack_exports__, "isOpener", function() {
+            __webpack_require__.d(__webpack_exports__, "isPopup", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.m;
             });
-            __webpack_require__.d(__webpack_exports__, "isPopup", function() {
+            __webpack_require__.d(__webpack_exports__, "isSameDomain", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.n;
             });
-            __webpack_require__.d(__webpack_exports__, "isSameDomain", function() {
+            __webpack_require__.d(__webpack_exports__, "isSameTopWindow", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.o;
             });
-            __webpack_require__.d(__webpack_exports__, "isSameTopWindow", function() {
+            __webpack_require__.d(__webpack_exports__, "isWindow", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.p;
             });
-            __webpack_require__.d(__webpack_exports__, "isWindow", function() {
+            __webpack_require__.d(__webpack_exports__, "isWindowClosed", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.q;
             });
-            __webpack_require__.d(__webpack_exports__, "isWindowClosed", function() {
+            __webpack_require__.d(__webpack_exports__, "linkFrameWindow", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.r;
             });
-            __webpack_require__.d(__webpack_exports__, "linkFrameWindow", function() {
+            __webpack_require__.d(__webpack_exports__, "matchDomain", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.s;
             });
-            __webpack_require__.d(__webpack_exports__, "matchDomain", function() {
-                return __WEBPACK_IMPORTED_MODULE_0__utils__.t;
-            });
             __webpack_require__.d(__webpack_exports__, "stringifyDomainPattern", function() {
-                return __WEBPACK_IMPORTED_MODULE_0__utils__.u;
+                return __WEBPACK_IMPORTED_MODULE_0__utils__.t;
             });
             var __WEBPACK_IMPORTED_MODULE_1__types__ = __webpack_require__("./node_modules/cross-domain-utils/src/types.js");
             __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__types__);
@@ -759,15 +626,14 @@
             function isRegex(item) {
                 return "[object RegExp]" === Object.prototype.toString.call(item);
             }
-            __webpack_exports__.h = getParent;
-            __webpack_exports__.g = getOpener;
+            __webpack_exports__.g = getParent;
+            __webpack_exports__.f = getOpener;
             __webpack_exports__.a = getActualDomain;
             __webpack_exports__.c = getDomain;
-            __webpack_exports__.j = isActuallySameDomain;
-            __webpack_exports__.o = isSameDomain;
-            __webpack_exports__.f = getFrames;
-            __webpack_exports__.r = isWindowClosed;
-            __webpack_exports__.s = function(frame) {
+            __webpack_exports__.i = isActuallySameDomain;
+            __webpack_exports__.n = isSameDomain;
+            __webpack_exports__.q = isWindowClosed;
+            __webpack_exports__.r = function(frame) {
                 !function() {
                     for (var i = 0; i < iframeFrames.length; i++) if (isFrameWindowClosed(iframeFrames[i])) {
                         iframeFrames.splice(i, 1);
@@ -783,7 +649,7 @@
                     iframeFrames.push(frame);
                 } catch (err) {}
             };
-            __webpack_exports__.i = function(win) {
+            __webpack_exports__.h = function(win) {
                 return (win = win || window).navigator.mockUserAgent || win.navigator.userAgent;
             };
             __webpack_exports__.e = function(win, name) {
@@ -800,11 +666,11 @@
                     if (-1 !== winFrames.indexOf(win[name])) return win[name];
                 } catch (err) {}
             };
-            __webpack_exports__.m = function(parent, child) {
+            __webpack_exports__.l = function(parent, child) {
                 return parent === getOpener(child);
             };
             __webpack_exports__.b = getAncestor;
-            __webpack_exports__.k = function(parent, child) {
+            __webpack_exports__.j = function(parent, child) {
                 var actualParent = getAncestor(child);
                 if (actualParent) return actualParent === parent;
                 if (child === parent) return !1;
@@ -812,13 +678,13 @@
                 for (var _i16 = 0, _getFrames8 = getFrames(parent), _length14 = null == _getFrames8 ? 0 : _getFrames8.length; _i16 < _length14; _i16++) if (_getFrames8[_i16] === child) return !0;
                 return !1;
             };
-            __webpack_exports__.n = function() {
+            __webpack_exports__.m = function() {
                 return Boolean(getOpener(window));
             };
-            __webpack_exports__.l = function() {
+            __webpack_exports__.k = function() {
                 return Boolean(getParent(window));
             };
-            __webpack_exports__.p = function(win1, win2) {
+            __webpack_exports__.o = function(win1, win2) {
                 var top1 = getTop(win1) || win1, top2 = getTop(win2) || win2;
                 try {
                     if (top1 && top2) return top1 === top2;
@@ -829,7 +695,7 @@
                 return !(opener1 && anyMatch(getAllFramesInWindow(opener1), allFrames2) || (opener2 && anyMatch(getAllFramesInWindow(opener2), allFrames1), 
                 1));
             };
-            __webpack_exports__.t = function matchDomain(pattern, origin) {
+            __webpack_exports__.s = function matchDomain(pattern, origin) {
                 if ("string" == typeof pattern) {
                     if ("string" == typeof origin) return pattern === CONSTANTS.WILDCARD || origin === pattern;
                     if (isRegex(origin)) return !1;
@@ -839,13 +705,13 @@
                     return matchDomain(subpattern, origin);
                 }));
             };
-            __webpack_exports__.u = function(pattern) {
+            __webpack_exports__.t = function(pattern) {
                 return Array.isArray(pattern) ? "(" + pattern.join(" | ") + ")" : isRegex(pattern) ? "RegExp(" + pattern.toString() : pattern.toString();
             };
             __webpack_exports__.d = function(url) {
                 return url.match(/^(https?|mock|file):\/\//) ? url.split("/").slice(0, 3).join("/") : getDomain();
             };
-            __webpack_exports__.q = function(obj) {
+            __webpack_exports__.p = function(obj) {
                 try {
                     if (obj === window) return !0;
                 } catch (err) {
@@ -1505,24 +1371,16 @@
             }
             var awaitRemoteBridgeForWindow = Object(belter_src.weakMapMemoize)(function(win) {
                 return src.a.try(function() {
-                    for (var _i2 = 0, _getFrames2 = Object(cross_domain_utils_src.getFrames)(win), _length2 = null == _getFrames2 ? 0 : _getFrames2.length; _i2 < _length2; _i2++) {
-                        var frame = _getFrames2[_i2];
-                        try {
-                            if (frame && frame !== window && Object(cross_domain_utils_src.isSameDomain)(frame) && frame[conf.b.WINDOW_PROPS.POSTROBOT]) return frame;
-                        } catch (err) {
-                            continue;
-                        }
-                    }
                     try {
-                        var _frame = Object(cross_domain_utils_src.getFrameByName)(win, getBridgeName(Object(cross_domain_utils_src.getDomain)()));
-                        if (!_frame) return;
-                        return Object(cross_domain_utils_src.isSameDomain)(_frame) && _frame[conf.b.WINDOW_PROPS.POSTROBOT] ? _frame : new src.a(function(resolve) {
+                        var frame = Object(cross_domain_utils_src.getFrameByName)(win, getBridgeName(Object(cross_domain_utils_src.getDomain)()));
+                        if (!frame) return;
+                        return Object(cross_domain_utils_src.isSameDomain)(frame) && frame[conf.b.WINDOW_PROPS.POSTROBOT] ? frame : new src.a(function(resolve) {
                             var interval = void 0, timeout = void 0;
                             interval = setInterval(function() {
-                                if (_frame && Object(cross_domain_utils_src.isSameDomain)(_frame) && _frame[conf.b.WINDOW_PROPS.POSTROBOT]) {
+                                if (frame && Object(cross_domain_utils_src.isSameDomain)(frame) && frame[conf.b.WINDOW_PROPS.POSTROBOT]) {
                                     clearInterval(interval);
                                     clearTimeout(timeout);
-                                    return resolve(_frame);
+                                    return resolve(frame);
                                 }
                             }, 100);
                             timeout = setTimeout(function() {
@@ -2765,5 +2623,4 @@
         }
     });
 });
-//# sourceMappingURL=post-robot.ie.js.map
 //# sourceMappingURL=post-robot.ie.js.map

@@ -1,5 +1,5 @@
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { isSameDomain, getOpener, getFrames, getDomain, getFrameByName } from 'cross-domain-utils/src';
+import { isSameDomain, getOpener, getDomain, getFrameByName } from 'cross-domain-utils/src';
 import { weakMapMemoize, noop } from 'belter/src';
 
 import { CONSTANTS } from '../conf';
@@ -9,28 +9,16 @@ import { needsBridge, registerRemoteWindow, rejectRemoteSendMessage, registerRem
 
 var awaitRemoteBridgeForWindow = weakMapMemoize(function (win) {
     return ZalgoPromise['try'](function () {
-        for (var _i2 = 0, _getFrames2 = getFrames(win), _length2 = _getFrames2 == null ? 0 : _getFrames2.length; _i2 < _length2; _i2++) {
-            var frame = _getFrames2[_i2];
-            try {
-                // $FlowFixMe
-                if (frame && frame !== window && isSameDomain(frame) && frame[CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
-                    return frame;
-                }
-            } catch (err) {
-                continue;
-            }
-        }
-
         try {
-            var _frame = getFrameByName(win, getBridgeName(getDomain()));
+            var frame = getFrameByName(win, getBridgeName(getDomain()));
 
-            if (!_frame) {
+            if (!frame) {
                 return;
             }
 
             // $FlowFixMe
-            if (isSameDomain(_frame) && _frame[CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
-                return _frame;
+            if (isSameDomain(frame) && frame[CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
+                return frame;
             }
 
             return new ZalgoPromise(function (resolve) {
@@ -40,10 +28,10 @@ var awaitRemoteBridgeForWindow = weakMapMemoize(function (win) {
 
                 interval = setInterval(function () {
                     // $FlowFixMe
-                    if (_frame && isSameDomain(_frame) && _frame[CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
+                    if (frame && isSameDomain(frame) && frame[CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
                         clearInterval(interval);
                         clearTimeout(timeout);
-                        return resolve(_frame);
+                        return resolve(frame);
                     }
                 }, 100);
 
