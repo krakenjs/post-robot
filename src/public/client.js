@@ -6,7 +6,7 @@ import { getAncestor, isAncestor, isWindowClosed, getDomain, matchDomain, type C
 import { uniqueID, isRegex } from 'belter/src';
 
 
-import { CONFIG, CONSTANTS } from '../conf';
+import { CONFIG, MESSAGE_TYPE, WILDCARD } from '../conf';
 import { sendMessage, addResponseListener, deleteResponseListener, markResponseListenerErrored, type ResponseListenerType } from '../drivers';
 import { onChildWindowReady, sayHello, isWindowKnown } from '../lib';
 import { global } from '../global';
@@ -85,7 +85,7 @@ export function request(options : RequestOptionsType) : ZalgoPromise<ResponseMes
 
         const win = targetWindow;
 
-        domain = options.domain || CONSTANTS.WILDCARD;
+        domain = options.domain || WILDCARD;
 
         let hash = `${ options.name }_${ uniqueID() }`;
 
@@ -156,13 +156,13 @@ export function request(options : RequestOptionsType) : ZalgoPromise<ResponseMes
                     addResponseListener(hash, responseListener);
                 }
 
-                sendMessage(win, {
-                    type:          CONSTANTS.POST_MESSAGE_TYPE.REQUEST,
+                sendMessage(win, actualDomain, {
+                    type:          MESSAGE_TYPE.REQUEST,
                     hash,
                     name,
                     data:          options.data,
-                    fireAndForget: options.fireAndForget
-                }, actualDomain).catch(reject);
+                    fireAndForget: Boolean(options.fireAndForget)
+                }).catch(reject);
 
                 if (options.fireAndForget) {
                     return resolve();

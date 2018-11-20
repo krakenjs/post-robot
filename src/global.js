@@ -1,8 +1,8 @@
 /* @flow */
 
-import { CONSTANTS } from './conf';
+import { WINDOW_PROP } from './conf';
 
-export let global : Object = window[CONSTANTS.WINDOW_PROPS.POSTROBOT] = window[CONSTANTS.WINDOW_PROPS.POSTROBOT] || {};
+export let global : Object = window[WINDOW_PROP.POSTROBOT] = window[WINDOW_PROP.POSTROBOT] || {};
 
 // Backwards compatibility
 

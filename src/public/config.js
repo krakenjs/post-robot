@@ -1,11 +1,11 @@
 /* @flow */
 
-import { CONSTANTS } from '../conf';
+import { WINDOW_PROP } from '../conf';
 import { messageListener } from '../drivers';
 
-export { CONFIG, CONSTANTS } from '../conf';
+export { CONFIG } from '../conf';
 
 export function disable() {
-    delete window[CONSTANTS.WINDOW_PROPS.POSTROBOT];
+    delete window[WINDOW_PROP.POSTROBOT];
     window.removeEventListener('message', messageListener);
 }

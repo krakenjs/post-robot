@@ -5,11 +5,11 @@ import { ZalgoPromise } from 'zalgo-promise/src';
 import { once as onceFunction, safeInterval } from 'belter/src';
 
 import { addRequestListener, type RequestListenerType } from '../drivers';
-import { CONSTANTS } from '../conf';
+import { WILDCARD } from '../conf';
 import { global } from '../global';
 
 type ErrorHandlerType = (err : mixed) => void;
-type HandlerType = ({ source : CrossDomainWindowType, origin : string, data : Object }) => (void | mixed | ZalgoPromise<mixed>);
+type HandlerType = ({ source : CrossDomainWindowType, origin : string, data : mixed }) => (void | mixed | ZalgoPromise<mixed>);
 
 type ServerOptionsType = {
     handler? : ?HandlerType,
@@ -41,7 +41,7 @@ export function listen(options : ServerOptionsType) : { cancel : () => void } {
             throw err;
         }),
         window: win,
-        domain: domain || CONSTANTS.WILDCARD,
+        domain: domain || WILDCARD,
         name
     };
 

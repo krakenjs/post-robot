@@ -5,7 +5,7 @@ import { getAncestor, type CrossDomainWindowType } from 'cross-domain-utils/src'
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { noop } from 'belter/src';
 
-import { CONSTANTS } from '../conf';
+import { MESSAGE_NAME, WILDCARD } from '../conf';
 import { global } from '../global';
 
 
@@ -13,13 +13,13 @@ global.readyPromises = global.readyPromises || new WeakMap();
 global.knownWindows = global.knownWindows || new WeakMap();
 
 export function onHello(handler : ({ source? : CrossDomainWindowType, origin? : string }) => void) {
-    global.on(CONSTANTS.POST_MESSAGE_NAMES.HELLO, { domain: CONSTANTS.WILDCARD }, ({ source, origin }) => {
+    global.on(MESSAGE_NAME.HELLO, { domain: WILDCARD }, ({ source, origin }) => {
         return handler({ source, origin });
     });
 }
 
 export function sayHello(win : CrossDomainWindowType) : ZalgoPromise<{ origin : string }> {
-    return global.send(win, CONSTANTS.POST_MESSAGE_NAMES.HELLO, {}, { domain: CONSTANTS.WILDCARD, timeout: -1 })
+    return global.send(win, MESSAGE_NAME.HELLO, {}, { domain: WILDCARD, timeout: -1 })
         .then(({ origin }) => {
             return { origin };
         });

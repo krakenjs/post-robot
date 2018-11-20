@@ -7,6 +7,7 @@ import { assert } from 'chai';
 
 import postRobot from '../src';
 import { onChildWindowReady } from '../src/lib';
+import { SEND_STRATEGY } from '../src/conf';
 
 import { enableIE8Mode } from './common';
 
@@ -392,7 +393,7 @@ describe('[post-robot] error cases', () => {
         let allowedStrategies = postRobot.CONFIG.ALLOWED_POST_MESSAGE_METHODS;
 
         postRobot.CONFIG.ALLOWED_POST_MESSAGE_METHODS = {
-            [ postRobot.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE ]: true
+            [ SEND_STRATEGY.POST_MESSAGE ]: true
         };
 
         postRobot.CONFIG.ALLOW_POSTMESSAGE_POPUP = false;

@@ -4,7 +4,7 @@ import { ZalgoPromise } from 'zalgo-promise/src';
 import { isSameDomain, getOpener, getDomain, getFrameByName, type CrossDomainWindowType } from 'cross-domain-utils/src';
 import { weakMapMemoize, noop } from 'belter/src';
 
-import { CONSTANTS } from '../conf';
+import { WINDOW_PROP } from '../conf';
 import { global } from '../global';
 
 import { needsBridge, registerRemoteWindow, rejectRemoteSendMessage, registerRemoteSendMessage, getBridgeName } from './common';
@@ -19,7 +19,7 @@ let awaitRemoteBridgeForWindow = weakMapMemoize((win : CrossDomainWindowType) : 
             }
 
             // $FlowFixMe
-            if (isSameDomain(frame) && frame[CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
+            if (isSameDomain(frame) && frame[WINDOW_PROP.POSTROBOT]) {
                 return frame;
             }
 
@@ -30,7 +30,7 @@ let awaitRemoteBridgeForWindow = weakMapMemoize((win : CrossDomainWindowType) : 
 
                 interval = setInterval(() => {
                     // $FlowFixMe
-                    if (frame && isSameDomain(frame) && frame[CONSTANTS.WINDOW_PROPS.POSTROBOT]) {
+                    if (frame && isSameDomain(frame) && frame[WINDOW_PROP.POSTROBOT]) {
                         clearInterval(interval);
                         clearTimeout(timeout);
                         return resolve(frame);
@@ -74,7 +74,7 @@ export function openTunnelToOpener() : ZalgoPromise<void> {
                 return rejectRemoteSendMessage(opener, new Error(`Can not register with opener: window does not have a name`));
             }
 
-            return bridge[CONSTANTS.WINDOW_PROPS.POSTROBOT].openTunnelToParent({
+            return bridge[WINDOW_PROP.POSTROBOT].openTunnelToParent({
 
                 name: window.name,
 

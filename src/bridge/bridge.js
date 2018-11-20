@@ -4,7 +4,7 @@ import { type ZalgoPromise } from 'zalgo-promise/src';
 import { getParent, isWindowClosed, type CrossDomainWindowType } from 'cross-domain-utils/src';
 import { noop } from 'belter/src';
 
-import { CONSTANTS } from '../conf';
+import { MESSAGE_NAME, WILDCARD } from '../conf';
 import { global } from '../global';
 
 /*
@@ -83,7 +83,7 @@ global.openTunnelToParent = function openTunnelToParent({ name, source, canary, 
 
     let id = addTunnelWindow({ name, source, canary, sendMessage });
 
-    return global.send(parentWindow, CONSTANTS.POST_MESSAGE_NAMES.OPEN_TUNNEL, {
+    return global.send(parentWindow, MESSAGE_NAME.OPEN_TUNNEL, {
 
         name,
 
@@ -112,5 +112,5 @@ global.openTunnelToParent = function openTunnelToParent({ name, source, canary, 
             tunnelWindow.sendMessage.apply(this, arguments);
         }
 
-    }, { domain: CONSTANTS.WILDCARD });
+    }, { domain: WILDCARD });
 };

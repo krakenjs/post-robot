@@ -3,17 +3,16 @@
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
 import { matchDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { once, uniqueID, replaceObject, stringifyError, isRegex } from 'belter/src';
+import { once, uniqueID } from 'belter/src';
+import { TYPE, serialize, serializeType, deserialize, type CustomSerializedType, type Thenable } from 'universal-serialize/src';
 
-import { CONSTANTS } from '../conf';
+import { MESSAGE_NAME, WILDCARD } from '../conf';
 import { global } from '../global';
-
 
 global.methods = global.methods || new WeakMap();
 
-export let listenForMethods = once(() => {
-    global.on(CONSTANTS.POST_MESSAGE_NAMES.METHOD, { origin: CONSTANTS.WILDCARD }, ({ source, origin, data } : { source : CrossDomainWindowType, origin : string, data : Object }) => {
-
+const listenForFunctionCalls = once(() => {
+    global.on(MESSAGE_NAME.METHOD, { origin: WILDCARD }, ({ source, origin, data } : { source : CrossDomainWindowType, origin : string, data : Object }) => {
         let methods = global.methods.get(source);
 
         if (!methods) {
@@ -29,33 +28,27 @@ export let listenForMethods = once(() => {
         if (!matchDomain(meth.domain, origin)) {
             throw new Error(`Method domain ${ meth.domain } does not match origin ${ origin }`);
         }
-
+        
         return ZalgoPromise.try(() => {
-            return meth.method.apply({ source, origin, data }, data.args);
-
+            return meth.val.apply({ source, origin, data }, data.args);
         }).then(result => {
-
-            return {
-                result,
-                id:   data.id,
-                name: data.name
-            };
+            const { id, name } = data;
+            return { result, id, name };
         });
     });
 });
 
-function isSerialized(item : mixed, type : string) : boolean {
-    return typeof item === 'object' && item !== null && item.__type__ === type;
-}
-
-type SerializedMethod = {
-    __type__ : string,
-    __id__ : string,
-    __name__ : string
+const CUSTOM_TYPE = {
+    CROSS_DOMAIN_ZALGO_PROMISE: ('cross_domain_zalgo_promise' : 'cross_domain_zalgo_promise'),
+    CROSS_DOMAIN_FUNCTION:      ('cross_domain_function' : 'cross_domain_function')
 };
 
-export function serializeMethod(destination : CrossDomainWindowType, domain : string | Array<string>, method : Function, name : string) : SerializedMethod {
+type SerializedFunction = CustomSerializedType<typeof CUSTOM_TYPE.CROSS_DOMAIN_FUNCTION, {
+    id : string,
+    name : string
+}>;
 
+function serializeFunction<T>(destination : CrossDomainWindowType, domain : string | Array<string>, val : () => ZalgoPromise<T> | T, key : string) : SerializedFunction {
     let id = uniqueID();
 
     let methods = global.methods.get(destination);
@@ -65,167 +58,56 @@ export function serializeMethod(destination : CrossDomainWindowType, domain : st
         global.methods.set(destination, methods);
     }
 
-    methods[id] = { domain, method };
+    methods[id] = { domain, val };
 
-    return {
-        __type__: CONSTANTS.SERIALIZATION_TYPES.METHOD,
-        __id__:   id,
-        __name__: name
-    };
+    listenForFunctionCalls();
+
+    return serializeType(CUSTOM_TYPE.CROSS_DOMAIN_FUNCTION, { id, name: val.name || key });
 }
 
-type SerializedError = {
-    __type__ : string,
-    __message__ : string
-};
+function deserializeFunction<T>(source, origin, { id, name }) : (...args : $ReadOnlyArray<mixed>) => ZalgoPromise<T> {
 
-function serializeError(err : mixed) : SerializedError {
-    return {
-        __type__:    CONSTANTS.SERIALIZATION_TYPES.ERROR,
-        __message__: stringifyError(err),
-        // $FlowFixMe
-        __code__:    err.code
-    };
-}
-
-type SerializePromise = {
-    __type__ : string,
-    __then__ : SerializedMethod
-};
-
-function serializePromise(destination : CrossDomainWindowType, domain : string | Array<string>, promise : ZalgoPromise<mixed>, name : string) : SerializePromise {
-    return {
-        __type__: CONSTANTS.SERIALIZATION_TYPES.PROMISE,
-        __then__: serializeMethod(destination, domain, (resolve, reject) => promise.then(resolve, reject), `${ name }.then`)
-    };
-}
-
-function serializeZalgoPromise(destination : CrossDomainWindowType, domain : string | Array<string>, promise : ZalgoPromise<mixed>, name : string) : SerializePromise {
-    return {
-        __type__: CONSTANTS.SERIALIZATION_TYPES.ZALGO_PROMISE,
-        __then__: serializeMethod(destination, domain, (resolve, reject) => promise.then(resolve, reject), `${ name }.then`)
-    };
-}
-
-type SerializedRegex = {
-    __type__ : string,
-    __source__ : string
-};
-
-function serializeRegex(regex : RegExp) : SerializedRegex {
-    return {
-        __type__:   CONSTANTS.SERIALIZATION_TYPES.REGEX,
-        __source__: regex.source
-    };
-}
-
-export function serializeMethods(destination : CrossDomainWindowType, domain : string | Array<string>, obj : Object) : Object {
-
-    return replaceObject({ obj }, (item, key) => {
-        if (typeof item === 'function') {
-            return serializeMethod(destination, domain, item, key.toString());
-        }
-
-        if (item instanceof Error) {
-            return serializeError(item);
-        }
-
-        if (window.Promise && item instanceof window.Promise) {
-            return serializePromise(destination, domain, item, key.toString());
-        }
-
-        if (ZalgoPromise.isPromise(item)) {
-            // $FlowFixMe
-            return serializeZalgoPromise(destination, domain, item, key.toString());
-        }
-
-        if (isRegex(item)) {
-            // $FlowFixMe
-            return serializeRegex(item);
-        }
-
-        return item;
-    }).obj;
-}
-
-export function deserializeMethod(source : CrossDomainWindowType, origin : string, obj : Object) : Function {
-
-    function wrapper() : ZalgoPromise<mixed> {
+    function crossDomainFunctionWrapper<X : mixed>() : ZalgoPromise<X> {
         let args = Array.prototype.slice.call(arguments);
-        return global.send(source, CONSTANTS.POST_MESSAGE_NAMES.METHOD, {
-            id:   obj.__id__,
-            name: obj.__name__,
-            args
-
-        }, { domain: origin, timeout: -1 }).then(({ data }) => {
-            return data.result;
-        }, err => {
-            throw err;
-        });
+        return global.send(source, MESSAGE_NAME.METHOD, { id, name, args }, { domain: origin })
+            .then(({ data }) => data.result);
     }
 
-    wrapper.__name__ = obj.__name__;
-    wrapper.__xdomain__ = true;
+    crossDomainFunctionWrapper.__name__ = name;
+    crossDomainFunctionWrapper.__xdomain__ = true;
 
-    wrapper.source = source;
-    wrapper.origin = origin;
+    crossDomainFunctionWrapper.source = source;
+    crossDomainFunctionWrapper.origin = origin;
 
-    return wrapper;
+    return crossDomainFunctionWrapper;
 }
 
-export function deserializeError(source : CrossDomainWindowType, origin : string, obj : Object) : Error {
-    let err = new Error(obj.__message__);
-    if (obj.__code__) {
-        // $FlowFixMe
-        err.code = obj.__code__;
-    }
-    return err;
+type SerializedPromise = CustomSerializedType<typeof CUSTOM_TYPE.CROSS_DOMAIN_ZALGO_PROMISE, {
+    then : SerializedFunction
+}>;
+
+function serializePromise(destination : CrossDomainWindowType, domain : string | Array<string>, val : Thenable, key : string) : SerializedPromise {
+    return serializeType(CUSTOM_TYPE.CROSS_DOMAIN_ZALGO_PROMISE, {
+        then: serializeFunction(destination, domain, (resolve, reject) => val.then(resolve, reject), key)
+    });
 }
 
-export function deserializeZalgoPromise(source : CrossDomainWindowType, origin : string, prom : Object) : ZalgoPromise<mixed> {
-    return new ZalgoPromise((resolve, reject) => deserializeMethod(source, origin, prom.__then__)(resolve, reject));
+function deserializePromise<T>(source : CrossDomainWindowType, origin : string, { then } : { then : Function }) : ZalgoPromise<T> {
+    return new ZalgoPromise((resolve, reject) => {
+        deserializeFunction(source, origin, then)(resolve, reject);
+    });
 }
 
-export function deserializePromise(source : CrossDomainWindowType, origin : string, prom : Object) : ZalgoPromise<mixed> {
-    if (!window.Promise) {
-        return deserializeZalgoPromise(source, origin, prom);
-    }
-
-    return new window.Promise((resolve, reject) => deserializeMethod(source, origin, prom.__then__)(resolve, reject));
+export function serializeMessage<T : mixed>(destination : CrossDomainWindowType, domain : string | Array<string>, obj : T) : string {
+    return serialize(obj, {
+        [ TYPE.PROMISE ]:  (val : Thenable, key : string) : SerializedPromise => serializePromise(destination, domain, val, key),
+        [ TYPE.FUNCTION ]: (val : Function, key : string) : SerializedFunction => serializeFunction(destination, domain, val, key)
+    });
 }
 
-export function deserializeRegex(source : CrossDomainWindowType, origin : string, item : Object) : RegExp {
-    // eslint-disable-next-line security/detect-non-literal-regexp
-    return new RegExp(item.__source__);
-}
-
-export function deserializeMethods(source : CrossDomainWindowType, origin : string, obj : Object) : Object {
-
-    return replaceObject({ obj }, (item) => {
-        if (typeof item !== 'object' || item === null) {
-            return item;
-        }
-
-        if (isSerialized(item, CONSTANTS.SERIALIZATION_TYPES.METHOD)) {
-            return deserializeMethod(source, origin, item);
-        }
-
-        if (isSerialized(item, CONSTANTS.SERIALIZATION_TYPES.ERROR)) {
-            return deserializeError(source, origin, item);
-        }
-
-        if (isSerialized(item, CONSTANTS.SERIALIZATION_TYPES.PROMISE)) {
-            return deserializePromise(source, origin, item);
-        }
-
-        if (isSerialized(item, CONSTANTS.SERIALIZATION_TYPES.ZALGO_PROMISE)) {
-            return deserializeZalgoPromise(source, origin, item);
-        }
-
-        if (isSerialized(item, CONSTANTS.SERIALIZATION_TYPES.REGEX)) {
-            return deserializeRegex(source, origin, item);
-        }
-
-        return item;
-    }).obj;
+export function deserializeMessage<T : mixed>(source : CrossDomainWindowType, origin : string, message : string) : T {
+    return deserialize(message, {
+        [ CUSTOM_TYPE.CROSS_DOMAIN_ZALGO_PROMISE ]: ({ then })     => deserializePromise(source, origin, { then }),
+        [ CUSTOM_TYPE.CROSS_DOMAIN_FUNCTION ]:      ({ id, name }) => deserializeFunction(source, origin, { id, name })
+    });
 }

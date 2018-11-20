@@ -2,13 +2,13 @@
 
 import { isSameDomain, isSameTopWindow, isActuallySameDomain, getActualDomain, getDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
 
-import { CONSTANTS } from '../../conf';
+import { SEND_STRATEGY, PROTOCOL, WILDCARD, WINDOW_PROP } from '../../conf';
 import { needsGlobalMessagingForBrowser } from '../../lib';
 
 export let SEND_MESSAGE_STRATEGIES = {};
 
 
-SEND_MESSAGE_STRATEGIES[CONSTANTS.SEND_STRATEGIES.POST_MESSAGE] = (win : CrossDomainWindowType, serializedMessage : string, domain : (string | Array<string>)) => {
+SEND_MESSAGE_STRATEGIES[SEND_STRATEGY.POST_MESSAGE] = (win : CrossDomainWindowType, serializedMessage : string, domain : (string | Array<string>)) => {
 
     if (__POST_ROBOT__.__IE_POPUP_SUPPORT__) {
         try {
@@ -25,15 +25,15 @@ SEND_MESSAGE_STRATEGIES[CONSTANTS.SEND_STRATEGIES.POST_MESSAGE] = (win : CrossDo
     } else if (typeof domain === 'string') {
         domains = [ domain ];
     } else {
-        domains = [ CONSTANTS.WILDCARD ];
+        domains = [ WILDCARD ];
     }
 
     domains = domains.map(dom => {
 
-        if (dom.indexOf(CONSTANTS.MOCK_PROTOCOL) === 0) {
+        if (dom.indexOf(PROTOCOL.MOCK) === 0) {
 
-            if (window.location.protocol === CONSTANTS.FILE_PROTOCOL) {
-                return CONSTANTS.WILDCARD;
+            if (window.location.protocol === PROTOCOL.FILE) {
+                return WILDCARD;
             }
 
             if (!isActuallySameDomain(win)) {
@@ -44,8 +44,8 @@ SEND_MESSAGE_STRATEGIES[CONSTANTS.SEND_STRATEGIES.POST_MESSAGE] = (win : CrossDo
             return getActualDomain(win);
         }
 
-        if (dom.indexOf(CONSTANTS.FILE_PROTOCOL) === 0) {
-            return CONSTANTS.WILDCARD;
+        if (dom.indexOf(PROTOCOL.FILE) === 0) {
+            return WILDCARD;
         }
 
         return dom;
@@ -60,7 +60,7 @@ if (__POST_ROBOT__.__IE_POPUP_SUPPORT__) {
 
     let { sendBridgeMessage, needsBridgeForBrowser, isBridge } = require('../../bridge');
 
-    SEND_MESSAGE_STRATEGIES[CONSTANTS.SEND_STRATEGIES.BRIDGE] = (win : CrossDomainWindowType, serializedMessage : string, domain : string) => {
+    SEND_MESSAGE_STRATEGIES[SEND_STRATEGY.BRIDGE] = (win : CrossDomainWindowType, serializedMessage : string, domain : string) => {
 
         if (!needsBridgeForBrowser() && !isBridge()) {
             return;
@@ -74,13 +74,13 @@ if (__POST_ROBOT__.__IE_POPUP_SUPPORT__) {
             throw new Error(`Can only use bridge to communicate between two different windows, not between frames`);
         }
 
-        return sendBridgeMessage(win, serializedMessage, domain);
+        return sendBridgeMessage(win, domain, serializedMessage);
     };
 }
 
 if (__POST_ROBOT__.__IE_POPUP_SUPPORT__ || __POST_ROBOT__.__GLOBAL_MESSAGE_SUPPORT__) {
     
-    SEND_MESSAGE_STRATEGIES[CONSTANTS.SEND_STRATEGIES.GLOBAL] = (win : CrossDomainWindowType, serializedMessage : string) => {
+    SEND_MESSAGE_STRATEGIES[SEND_STRATEGY.GLOBAL] = (win : CrossDomainWindowType, serializedMessage : string) => {
 
         if (!needsGlobalMessagingForBrowser()) {
             return;
@@ -95,7 +95,7 @@ if (__POST_ROBOT__.__IE_POPUP_SUPPORT__ || __POST_ROBOT__.__GLOBAL_MESSAGE_SUPPO
         }
 
         // $FlowFixMe
-        let foreignGlobal = win[CONSTANTS.WINDOW_PROPS.POSTROBOT];
+        let foreignGlobal = win[WINDOW_PROP.POSTROBOT];
 
         if (!foreignGlobal) {
             throw new Error(`Can not find postRobot global on foreign window`);

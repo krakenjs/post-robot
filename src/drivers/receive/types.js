@@ -2,15 +2,16 @@
 
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { isWindowClosed, matchDomain, stringifyDomainPattern, type CrossDomainWindowType } from 'cross-domain-utils/src';
-import { stringifyError, noop } from 'belter/src';
+import { noop } from 'belter/src';
 
-import { CONSTANTS } from '../../conf';
+import { MESSAGE_TYPE, MESSAGE_ACK } from '../../conf';
 import { sendMessage } from '../send';
 import { getRequestListener, getResponseListener, deleteResponseListener, isResponseListenerErrored } from '../listeners';
+import type { RequestMessage, AckResponseMessage, SuccessResponseMessage, ErrorResponseMessage } from '../types';
 
 export let RECEIVE_MESSAGE_TYPES = {
 
-    [ CONSTANTS.POST_MESSAGE_TYPE.ACK ](source : CrossDomainWindowType, origin : string, message : Object) {
+    [ MESSAGE_TYPE.ACK ](source : CrossDomainWindowType, origin : string, message : AckResponseMessage) {
 
         if (isResponseListenerErrored(message.hash)) {
             return;
@@ -29,29 +30,28 @@ export let RECEIVE_MESSAGE_TYPES = {
         options.ack = true;
     },
 
-    [ CONSTANTS.POST_MESSAGE_TYPE.REQUEST ](source : CrossDomainWindowType, origin : string, message : Object) : ZalgoPromise<void> {
+    [ MESSAGE_TYPE.REQUEST ](source : CrossDomainWindowType, origin : string, message : RequestMessage) : ZalgoPromise<void> {
 
         let options = getRequestListener({ name: message.name, win: source, domain: origin });
 
-        function respond(data) : ZalgoPromise<void> {
+        function sendResponse(type : $Values<typeof MESSAGE_TYPE>, data = {}) : ZalgoPromise<void> {
 
             if (message.fireAndForget || isWindowClosed(source)) {
                 return ZalgoPromise.resolve();
             }
 
-            return sendMessage(source, {
-                target: message.originalSource,
+            // $FlowFixMe
+            return sendMessage(source, origin, {
+                type,
                 hash:   message.hash,
                 name:   message.name,
                 ...data
-            }, origin);
+            });
         }
 
         return ZalgoPromise.all([
 
-            respond({
-                type: CONSTANTS.POST_MESSAGE_TYPE.ACK
-            }),
+            sendResponse(MESSAGE_TYPE.ACK),
 
             ZalgoPromise.try(() => {
 
@@ -68,29 +68,19 @@ export let RECEIVE_MESSAGE_TYPES = {
                 return options.handler({ source, origin, data });
 
             }).then(data => {
-
-                return respond({
-                    type: CONSTANTS.POST_MESSAGE_TYPE.RESPONSE,
-                    ack:  CONSTANTS.POST_MESSAGE_ACK.SUCCESS,
+                return sendResponse(MESSAGE_TYPE.RESPONSE, {
+                    ack:  MESSAGE_ACK.SUCCESS,
                     data
                 });
 
-            }, err => {
-
-                let error = stringifyError(err).replace(/^Error: /, '');
-                // $FlowFixMe
-                let code = err.code;
-
-                return respond({
-                    type: CONSTANTS.POST_MESSAGE_TYPE.RESPONSE,
-                    ack:  CONSTANTS.POST_MESSAGE_ACK.ERROR,
-                    error,
-                    code
+            }, error => {
+                return sendResponse(MESSAGE_TYPE.RESPONSE, {
+                    ack:  MESSAGE_ACK.ERROR,
+                    error
                 });
             })
 
         ]).then(noop).catch(err => {
-
             if (options && options.handleError) {
                 return options.handleError(err);
             } else {
@@ -99,7 +89,7 @@ export let RECEIVE_MESSAGE_TYPES = {
         });
     },
 
-    [ CONSTANTS.POST_MESSAGE_TYPE.RESPONSE ](source : CrossDomainWindowType, origin : string, message : Object) : void | ZalgoPromise<void> {
+    [ MESSAGE_TYPE.RESPONSE ](source : CrossDomainWindowType, origin : string, message : SuccessResponseMessage | ErrorResponseMessage) : void | ZalgoPromise<void> {
 
         if (isResponseListenerErrored(message.hash)) {
             return;
@@ -117,16 +107,10 @@ export let RECEIVE_MESSAGE_TYPES = {
 
         deleteResponseListener(message.hash);
 
-        if (message.ack === CONSTANTS.POST_MESSAGE_ACK.ERROR) {
-            let err = new Error(message.error);
-            if (message.code) {
-                // $FlowFixMe
-                err.code = message.code;
-            }
-            return options.respond(err, null);
-        } else if (message.ack === CONSTANTS.POST_MESSAGE_ACK.SUCCESS) {
-            let data = message.data || message.response;
-
+        if (message.ack === MESSAGE_ACK.ERROR) {
+            return options.respond(message.error, null);
+        } else if (message.ack === MESSAGE_ACK.SUCCESS) {
+            let data = message.data;
             return options.respond(null, { source, origin, data });
         }
     }

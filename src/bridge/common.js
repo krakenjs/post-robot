@@ -4,7 +4,7 @@ import { WeakMap } from 'cross-domain-safe-weakmap/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { getDomain, isSameDomain, isOpener, isSameTopWindow, matchDomain, getUserAgent, getDomainFromUrl, type CrossDomainWindowType } from 'cross-domain-utils/src';
 
-import { CONFIG, CONSTANTS } from '../conf';
+import { CONFIG, BRIDGE_NAME_PREFIX } from '../conf';
 import { global } from '../global';
 
 export function needsBridgeForBrowser() : boolean {
@@ -67,7 +67,7 @@ export function getBridgeName(domain : string) : string {
 
     let sanitizedDomain = domain.replace(/[^a-zA-Z0-9]+/g, '_');
 
-    let id = `${ CONSTANTS.BRIDGE_NAME_PREFIX }_${ sanitizedDomain }`;
+    let id = `${ BRIDGE_NAME_PREFIX }_${ sanitizedDomain }`;
 
     return id;
 }
@@ -108,7 +108,7 @@ export function registerRemoteSendMessage(win : CrossDomainWindowType, domain : 
         throw new Error(`Window not found to register sendMessage to`);
     }
 
-    let sendMessageWrapper = (remoteWin : CrossDomainWindowType, message : string, remoteDomain : string) => {
+    let sendMessageWrapper = (remoteWin : CrossDomainWindowType, remoteDomain : string, message : string) => {
 
         if (remoteWin !== win) {
             throw new Error(`Remote window does not match window`);
@@ -136,7 +136,7 @@ export function rejectRemoteSendMessage(win : CrossDomainWindowType, err : Error
     remoteWindow.sendMessagePromise.asyncReject(err);
 }
 
-export function sendBridgeMessage(win : CrossDomainWindowType, message : string, domain : string) : ZalgoPromise<void> {
+export function sendBridgeMessage(win : CrossDomainWindowType, domain : string, message : string) : ZalgoPromise<void> {
 
     let messagingChild  = isOpener(window, win);
     let messagingParent = isOpener(win, window);
@@ -152,6 +152,6 @@ export function sendBridgeMessage(win : CrossDomainWindowType, message : string,
     }
 
     return remoteWindow.sendMessagePromise.then(sendMessage => {
-        return sendMessage(win, message, domain);
+        return sendMessage(win, domain, message);
     });
 }

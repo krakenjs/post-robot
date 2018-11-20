@@ -1,9 +1,8 @@
 /* @flow */
 
-import { initOnReady, listenForMethods } from './lib';
+import { initOnReady } from './lib';
 import { listenForMessages } from './drivers';
 import { global } from './global';
-import { on, send } from './public';
 
 export * from './public';
 export { markWindowKnown } from './lib';
@@ -20,7 +19,6 @@ export function init() {
         }
 
         initOnReady();
-        listenForMethods({ on, send });
     }
 
     global.initialized = true;

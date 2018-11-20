@@ -1,6 +1,6 @@
 /* @flow */
 
-import { CONSTANTS } from './constants';
+import { SEND_STRATEGY, PROTOCOL } from './constants';
 
 export let CONFIG : Object = {
 
@@ -16,12 +16,12 @@ export let CONFIG : Object = {
     RES_TIMEOUT:       __TEST__ ? 2000 : -1,
     
     ALLOWED_POST_MESSAGE_METHODS: {
-        [ CONSTANTS.SEND_STRATEGIES.POST_MESSAGE ]: true,
-        [ CONSTANTS.SEND_STRATEGIES.BRIDGE ]:       true,
-        [ CONSTANTS.SEND_STRATEGIES.GLOBAL ]:       true
+        [ SEND_STRATEGY.POST_MESSAGE ]: true,
+        [ SEND_STRATEGY.BRIDGE ]:       true,
+        [ SEND_STRATEGY.GLOBAL ]:       true
     }
 };
 
-if (window.location.href.indexOf(CONSTANTS.FILE_PROTOCOL) === 0) {
+if (window.location.href.indexOf(PROTOCOL.FILE) === 0) {
     CONFIG.ALLOW_POSTMESSAGE_POPUP = true;
 }

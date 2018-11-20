@@ -6,7 +6,7 @@ import { matchDomain, type CrossDomainWindowType } from 'cross-domain-utils/src'
 import { isRegex } from 'belter/src';
 
 import { global } from '../global';
-import { CONSTANTS } from '../conf';
+import { WILDCARD } from '../conf';
 
 export function resetListeners() {
     global.responseListeners = {};
@@ -22,7 +22,7 @@ global.erroredResponseListeners = global.erroredResponseListeners || {};
 const __DOMAIN_REGEX__ = '__domain_regex__';
 
 export type RequestListenerType = {
-    handler : ({ source : CrossDomainWindowType, origin : string, data : Object }) => (mixed | ZalgoPromise<mixed>),
+    handler : ({ source : CrossDomainWindowType, origin : string, data : mixed }) => (mixed | ZalgoPromise<mixed>),
     handleError : (err : mixed) => void,
     window : ?CrossDomainWindowType,
     name : string,
@@ -33,7 +33,7 @@ export type ResponseListenerType = {
     name : string,
     window : CrossDomainWindowType,
     domain : (string | Array<string> | RegExp),
-    respond : (err : ?mixed, result : ?Object) => void,
+    respond : (err : ?mixed, result : ?mixed) => void,
     ack? : ?boolean
 };
 
@@ -59,11 +59,11 @@ export function isResponseListenerErrored(hash : string) : boolean {
 
 export function getRequestListener({ name, win, domain } : { name : string, win : ?CrossDomainWindowType, domain : ?(string | RegExp) }) : ?RequestListenerType {
 
-    if (win === CONSTANTS.WILDCARD) {
+    if (win === WILDCARD) {
         win = null;
     }
 
-    if (domain === CONSTANTS.WILDCARD) {
+    if (domain === WILDCARD) {
         domain = null;
     }
 
@@ -99,8 +99,8 @@ export function getRequestListener({ name, win, domain } : { name : string, win 
             }
         }
 
-        if (winListeners[CONSTANTS.WILDCARD]) {
-            return winListeners[CONSTANTS.WILDCARD];
+        if (winListeners[WILDCARD]) {
+            return winListeners[WILDCARD];
         }
     }
 }
@@ -146,11 +146,11 @@ export function addRequestListener({ name, win, domain } : { name : string, win 
 
     let existingListener = getRequestListener({ name, win, domain });
 
-    if (!win || win === CONSTANTS.WILDCARD) {
+    if (!win || win === WILDCARD) {
         win = global.WINDOW_WILDCARD;
     }
 
-    domain = domain || CONSTANTS.WILDCARD;
+    domain = domain || WILDCARD;
 
     if (existingListener) {
         if (win && domain) {
