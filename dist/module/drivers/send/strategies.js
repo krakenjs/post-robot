@@ -1,11 +1,11 @@
 import { isSameDomain, isSameTopWindow, isActuallySameDomain, getActualDomain, getDomain } from 'cross-domain-utils/src';
 
-import { CONSTANTS } from '../../conf';
+import { SEND_STRATEGY, PROTOCOL, WILDCARD, WINDOW_PROP } from '../../conf';
 import { needsGlobalMessagingForBrowser } from '../../lib';
 
 export var SEND_MESSAGE_STRATEGIES = {};
 
-SEND_MESSAGE_STRATEGIES[CONSTANTS.SEND_STRATEGIES.POST_MESSAGE] = function (win, serializedMessage, domain) {
+SEND_MESSAGE_STRATEGIES[SEND_STRATEGY.POST_MESSAGE] = function (win, serializedMessage, domain) {
 
     if (__POST_ROBOT__.__IE_POPUP_SUPPORT__) {
         try {
@@ -22,15 +22,15 @@ SEND_MESSAGE_STRATEGIES[CONSTANTS.SEND_STRATEGIES.POST_MESSAGE] = function (win,
     } else if (typeof domain === 'string') {
         domains = [domain];
     } else {
-        domains = [CONSTANTS.WILDCARD];
+        domains = [WILDCARD];
     }
 
     domains = domains.map(function (dom) {
 
-        if (dom.indexOf(CONSTANTS.MOCK_PROTOCOL) === 0) {
+        if (dom.indexOf(PROTOCOL.MOCK) === 0) {
 
-            if (window.location.protocol === CONSTANTS.FILE_PROTOCOL) {
-                return CONSTANTS.WILDCARD;
+            if (window.location.protocol === PROTOCOL.FILE) {
+                return WILDCARD;
             }
 
             if (!isActuallySameDomain(win)) {
@@ -41,8 +41,8 @@ SEND_MESSAGE_STRATEGIES[CONSTANTS.SEND_STRATEGIES.POST_MESSAGE] = function (win,
             return getActualDomain(win);
         }
 
-        if (dom.indexOf(CONSTANTS.FILE_PROTOCOL) === 0) {
-            return CONSTANTS.WILDCARD;
+        if (dom.indexOf(PROTOCOL.FILE) === 0) {
+            return WILDCARD;
         }
 
         return dom;
@@ -59,7 +59,7 @@ if (__POST_ROBOT__.__IE_POPUP_SUPPORT__) {
         needsBridgeForBrowser = _require.needsBridgeForBrowser,
         isBridge = _require.isBridge;
 
-    SEND_MESSAGE_STRATEGIES[CONSTANTS.SEND_STRATEGIES.BRIDGE] = function (win, serializedMessage, domain) {
+    SEND_MESSAGE_STRATEGIES[SEND_STRATEGY.BRIDGE] = function (win, serializedMessage, domain) {
 
         if (!needsBridgeForBrowser() && !isBridge()) {
             return;
@@ -73,13 +73,13 @@ if (__POST_ROBOT__.__IE_POPUP_SUPPORT__) {
             throw new Error('Can only use bridge to communicate between two different windows, not between frames');
         }
 
-        return sendBridgeMessage(win, serializedMessage, domain);
+        return sendBridgeMessage(win, domain, serializedMessage);
     };
 }
 
 if (__POST_ROBOT__.__IE_POPUP_SUPPORT__ || __POST_ROBOT__.__GLOBAL_MESSAGE_SUPPORT__) {
 
-    SEND_MESSAGE_STRATEGIES[CONSTANTS.SEND_STRATEGIES.GLOBAL] = function (win, serializedMessage) {
+    SEND_MESSAGE_STRATEGIES[SEND_STRATEGY.GLOBAL] = function (win, serializedMessage) {
 
         if (!needsGlobalMessagingForBrowser()) {
             return;
@@ -94,7 +94,7 @@ if (__POST_ROBOT__.__IE_POPUP_SUPPORT__ || __POST_ROBOT__.__GLOBAL_MESSAGE_SUPPO
         }
 
         // $FlowFixMe
-        var foreignGlobal = win[CONSTANTS.WINDOW_PROPS.POSTROBOT];
+        var foreignGlobal = win[WINDOW_PROP.POSTROBOT];
 
         if (!foreignGlobal) {
             throw new Error('Can not find postRobot global on foreign window');

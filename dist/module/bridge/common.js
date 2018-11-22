@@ -2,7 +2,7 @@ import { WeakMap } from 'cross-domain-safe-weakmap/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { getDomain, isSameDomain, isOpener, isSameTopWindow, matchDomain, getUserAgent, getDomainFromUrl } from 'cross-domain-utils/src';
 
-import { CONFIG, CONSTANTS } from '../conf';
+import { CONFIG, BRIDGE_NAME_PREFIX } from '../conf';
 import { global } from '../global';
 
 export function needsBridgeForBrowser() {
@@ -68,7 +68,7 @@ export function getBridgeName(domain) {
 
     var sanitizedDomain = domain.replace(/[^a-zA-Z0-9]+/g, '_');
 
-    var id = CONSTANTS.BRIDGE_NAME_PREFIX + '_' + sanitizedDomain;
+    var id = BRIDGE_NAME_PREFIX + '_' + sanitizedDomain;
 
     return id;
 }
@@ -109,7 +109,7 @@ export function registerRemoteSendMessage(win, domain, sendMessage) {
         throw new Error('Window not found to register sendMessage to');
     }
 
-    var sendMessageWrapper = function sendMessageWrapper(remoteWin, message, remoteDomain) {
+    var sendMessageWrapper = function sendMessageWrapper(remoteWin, remoteDomain, message) {
 
         if (remoteWin !== win) {
             throw new Error('Remote window does not match window');
@@ -137,7 +137,7 @@ export function rejectRemoteSendMessage(win, err) {
     remoteWindow.sendMessagePromise.asyncReject(err);
 }
 
-export function sendBridgeMessage(win, message, domain) {
+export function sendBridgeMessage(win, domain, message) {
 
     var messagingChild = isOpener(window, win);
     var messagingParent = isOpener(win, window);
@@ -153,6 +153,6 @@ export function sendBridgeMessage(win, message, domain) {
     }
 
     return remoteWindow.sendMessagePromise.then(function (sendMessage) {
-        return sendMessage(win, message, domain);
+        return sendMessage(win, domain, message);
     });
 }

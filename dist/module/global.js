@@ -1,6 +1,6 @@
-import { CONSTANTS } from './conf';
+import { WINDOW_PROP } from './conf';
 
-export var global = window[CONSTANTS.WINDOW_PROPS.POSTROBOT] = window[CONSTANTS.WINDOW_PROPS.POSTROBOT] || {};
+export var global = window[WINDOW_PROP.POSTROBOT] = window[WINDOW_PROP.POSTROBOT] || {};
 
 // Backwards compatibility
 

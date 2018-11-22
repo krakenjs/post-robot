@@ -4,7 +4,7 @@ import { ZalgoPromise } from 'zalgo-promise/src';
 import { getAncestor, isAncestor, isWindowClosed, getDomain, matchDomain } from 'cross-domain-utils/src';
 import { uniqueID, isRegex } from 'belter/src';
 
-import { CONFIG, CONSTANTS } from '../conf';
+import { CONFIG, MESSAGE_TYPE, WILDCARD } from '../conf';
 import { sendMessage, addResponseListener, deleteResponseListener, markResponseListenerErrored } from '../drivers';
 import { onChildWindowReady, sayHello, isWindowKnown } from '../lib';
 import { global } from '../global';
@@ -65,7 +65,7 @@ export function request(options) {
 
         var win = targetWindow;
 
-        domain = options.domain || CONSTANTS.WILDCARD;
+        domain = options.domain || WILDCARD;
 
         var hash = options.name + '_' + uniqueID();
 
@@ -138,13 +138,13 @@ export function request(options) {
                     addResponseListener(hash, responseListener);
                 }
 
-                sendMessage(win, {
-                    type: CONSTANTS.POST_MESSAGE_TYPE.REQUEST,
+                sendMessage(win, actualDomain, {
+                    type: MESSAGE_TYPE.REQUEST,
                     hash: hash,
                     name: name,
                     data: options.data,
-                    fireAndForget: options.fireAndForget
-                }, actualDomain)['catch'](reject);
+                    fireAndForget: Boolean(options.fireAndForget)
+                })['catch'](reject);
 
                 if (options.fireAndForget) {
                     return resolve();

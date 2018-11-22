@@ -1,21 +1,19 @@
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
 import { matchDomain } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { once, uniqueID, replaceObject, stringifyError, isRegex } from 'belter/src';
+import { once, uniqueID } from 'belter/src';
+import { TYPE, serialize, serializeType, deserialize } from 'universal-serialize/src';
 
-import { CONSTANTS } from '../conf';
+import { MESSAGE_NAME, WILDCARD } from '../conf';
 import { global } from '../global';
 
 global.methods = global.methods || new WeakMap();
 
-export var listenForMethods = once(function () {
-    global.on(CONSTANTS.POST_MESSAGE_NAMES.METHOD, { origin: CONSTANTS.WILDCARD }, function (_ref) {
+var listenForFunctionCalls = once(function () {
+    global.on(MESSAGE_NAME.METHOD, { origin: WILDCARD }, function (_ref) {
         var source = _ref.source,
             origin = _ref.origin,
             data = _ref.data;
-
 
         var methods = global.methods.get(source);
 
@@ -34,24 +32,22 @@ export var listenForMethods = once(function () {
         }
 
         return ZalgoPromise['try'](function () {
-            return meth.method.apply({ source: source, origin: origin, data: data }, data.args);
+            return meth.val.apply({ source: source, origin: origin, data: data }, data.args);
         }).then(function (result) {
+            var id = data.id,
+                name = data.name;
 
-            return {
-                result: result,
-                id: data.id,
-                name: data.name
-            };
+            return { result: result, id: id, name: name };
         });
     });
 });
 
-function isSerialized(item, type) {
-    return (typeof item === 'undefined' ? 'undefined' : _typeof(item)) === 'object' && item !== null && item.__type__ === type;
-}
+var CUSTOM_TYPE = {
+    CROSS_DOMAIN_ZALGO_PROMISE: 'cross_domain_zalgo_promise',
+    CROSS_DOMAIN_FUNCTION: 'cross_domain_function'
+};
 
-export function serializeMethod(destination, domain, method, name) {
-
+function serializeFunction(destination, domain, val, key) {
     var id = uniqueID();
 
     var methods = global.methods.get(destination);
@@ -61,162 +57,70 @@ export function serializeMethod(destination, domain, method, name) {
         global.methods.set(destination, methods);
     }
 
-    methods[id] = { domain: domain, method: method };
+    methods[id] = { domain: domain, val: val };
 
-    return {
-        __type__: CONSTANTS.SERIALIZATION_TYPES.METHOD,
-        __id__: id,
-        __name__: name
-    };
+    listenForFunctionCalls();
+
+    return serializeType(CUSTOM_TYPE.CROSS_DOMAIN_FUNCTION, { id: id, name: val.name || key });
 }
 
-function serializeError(err) {
-    return {
-        __type__: CONSTANTS.SERIALIZATION_TYPES.ERROR,
-        __message__: stringifyError(err),
-        // $FlowFixMe
-        __code__: err.code
-    };
-}
+function deserializeFunction(source, origin, _ref2) {
+    var id = _ref2.id,
+        name = _ref2.name;
 
-function serializePromise(destination, domain, promise, name) {
-    return {
-        __type__: CONSTANTS.SERIALIZATION_TYPES.PROMISE,
-        __then__: serializeMethod(destination, domain, function (resolve, reject) {
-            return promise.then(resolve, reject);
-        }, name + '.then')
-    };
-}
 
-function serializeZalgoPromise(destination, domain, promise, name) {
-    return {
-        __type__: CONSTANTS.SERIALIZATION_TYPES.ZALGO_PROMISE,
-        __then__: serializeMethod(destination, domain, function (resolve, reject) {
-            return promise.then(resolve, reject);
-        }, name + '.then')
-    };
-}
-
-function serializeRegex(regex) {
-    return {
-        __type__: CONSTANTS.SERIALIZATION_TYPES.REGEX,
-        __source__: regex.source
-    };
-}
-
-export function serializeMethods(destination, domain, obj) {
-
-    return replaceObject({ obj: obj }, function (item, key) {
-        if (typeof item === 'function') {
-            return serializeMethod(destination, domain, item, key.toString());
-        }
-
-        if (item instanceof Error) {
-            return serializeError(item);
-        }
-
-        if (window.Promise && item instanceof window.Promise) {
-            return serializePromise(destination, domain, item, key.toString());
-        }
-
-        if (ZalgoPromise.isPromise(item)) {
-            // $FlowFixMe
-            return serializeZalgoPromise(destination, domain, item, key.toString());
-        }
-
-        if (isRegex(item)) {
-            // $FlowFixMe
-            return serializeRegex(item);
-        }
-
-        return item;
-    }).obj;
-}
-
-export function deserializeMethod(source, origin, obj) {
-
-    function wrapper() {
+    function crossDomainFunctionWrapper() {
         var args = Array.prototype.slice.call(arguments);
-        return global.send(source, CONSTANTS.POST_MESSAGE_NAMES.METHOD, {
-            id: obj.__id__,
-            name: obj.__name__,
-            args: args
-
-        }, { domain: origin, timeout: -1 }).then(function (_ref2) {
-            var data = _ref2.data;
-
+        return global.send(source, MESSAGE_NAME.METHOD, { id: id, name: name, args: args }, { domain: origin }).then(function (_ref3) {
+            var data = _ref3.data;
             return data.result;
-        }, function (err) {
-            throw err;
         });
     }
 
-    wrapper.__name__ = obj.__name__;
-    wrapper.__xdomain__ = true;
+    crossDomainFunctionWrapper.__name__ = name;
+    crossDomainFunctionWrapper.__xdomain__ = true;
 
-    wrapper.source = source;
-    wrapper.origin = origin;
+    crossDomainFunctionWrapper.source = source;
+    crossDomainFunctionWrapper.origin = origin;
 
-    return wrapper;
+    return crossDomainFunctionWrapper;
 }
 
-export function deserializeError(source, origin, obj) {
-    var err = new Error(obj.__message__);
-    if (obj.__code__) {
-        // $FlowFixMe
-        err.code = obj.__code__;
-    }
-    return err;
+function serializePromise(destination, domain, val, key) {
+    return serializeType(CUSTOM_TYPE.CROSS_DOMAIN_ZALGO_PROMISE, {
+        then: serializeFunction(destination, domain, function (resolve, reject) {
+            return val.then(resolve, reject);
+        }, key)
+    });
 }
 
-export function deserializeZalgoPromise(source, origin, prom) {
+function deserializePromise(source, origin, _ref4) {
+    var then = _ref4.then;
+
     return new ZalgoPromise(function (resolve, reject) {
-        return deserializeMethod(source, origin, prom.__then__)(resolve, reject);
+        deserializeFunction(source, origin, then)(resolve, reject);
     });
 }
 
-export function deserializePromise(source, origin, prom) {
-    if (!window.Promise) {
-        return deserializeZalgoPromise(source, origin, prom);
-    }
+export function serializeMessage(destination, domain, obj) {
+    var _serialize;
 
-    return new window.Promise(function (resolve, reject) {
-        return deserializeMethod(source, origin, prom.__then__)(resolve, reject);
-    });
+    return serialize(obj, (_serialize = {}, _serialize[TYPE.PROMISE] = function (val, key) {
+        return serializePromise(destination, domain, val, key);
+    }, _serialize[TYPE.FUNCTION] = function (val, key) {
+        return serializeFunction(destination, domain, val, key);
+    }, _serialize));
 }
 
-export function deserializeRegex(source, origin, item) {
-    // eslint-disable-next-line security/detect-non-literal-regexp
-    return new RegExp(item.__source__);
-}
+export function deserializeMessage(source, origin, message) {
+    var _deserialize;
 
-export function deserializeMethods(source, origin, obj) {
-
-    return replaceObject({ obj: obj }, function (item) {
-        if ((typeof item === 'undefined' ? 'undefined' : _typeof(item)) !== 'object' || item === null) {
-            return item;
-        }
-
-        if (isSerialized(item, CONSTANTS.SERIALIZATION_TYPES.METHOD)) {
-            return deserializeMethod(source, origin, item);
-        }
-
-        if (isSerialized(item, CONSTANTS.SERIALIZATION_TYPES.ERROR)) {
-            return deserializeError(source, origin, item);
-        }
-
-        if (isSerialized(item, CONSTANTS.SERIALIZATION_TYPES.PROMISE)) {
-            return deserializePromise(source, origin, item);
-        }
-
-        if (isSerialized(item, CONSTANTS.SERIALIZATION_TYPES.ZALGO_PROMISE)) {
-            return deserializeZalgoPromise(source, origin, item);
-        }
-
-        if (isSerialized(item, CONSTANTS.SERIALIZATION_TYPES.REGEX)) {
-            return deserializeRegex(source, origin, item);
-        }
-
-        return item;
-    }).obj;
+    return deserialize(message, (_deserialize = {}, _deserialize[CUSTOM_TYPE.CROSS_DOMAIN_ZALGO_PROMISE] = function (_ref5) {
+        var then = _ref5.then;
+        return deserializePromise(source, origin, { then: then });
+    }, _deserialize[CUSTOM_TYPE.CROSS_DOMAIN_FUNCTION] = function (_ref6) {
+        var id = _ref6.id,
+            name = _ref6.name;
+        return deserializeFunction(source, origin, { id: id, name: name });
+    }, _deserialize));
 }

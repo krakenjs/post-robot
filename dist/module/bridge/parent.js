@@ -2,7 +2,7 @@ import { WeakMap } from 'cross-domain-safe-weakmap/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { getDomain, getFrameByName, isWindowClosed, getDomainFromUrl } from 'cross-domain-utils/src';
 
-import { CONFIG, CONSTANTS } from '../conf';
+import { CONFIG, PROTOCOL, MESSAGE_NAME } from '../conf';
 import { onChildWindowReady } from '../lib';
 import { global } from '../global';
 
@@ -15,7 +15,7 @@ global.popupWindowsByWin = global.popupWindowsByWin || new WeakMap();
 global.popupWindowsByName = global.popupWindowsByName || {};
 
 function listenForRegister(source, domain) {
-    global.on(CONSTANTS.POST_MESSAGE_NAMES.OPEN_TUNNEL, { window: source, domain: domain }, function (_ref) {
+    global.on(MESSAGE_NAME.OPEN_TUNNEL, { window: source, domain: domain }, function (_ref) {
         var origin = _ref.origin,
             data = _ref.data;
 
@@ -156,7 +156,7 @@ window.open = function windowOpenWrapper(url, name, options, last) {
 
     var domain = url;
 
-    if (url && url.indexOf(CONSTANTS.MOCK_PROTOCOL) === 0) {
+    if (url && url.indexOf(PROTOCOL.MOCK) === 0) {
         var _url$split = url.split('|');
 
         domain = _url$split[0];

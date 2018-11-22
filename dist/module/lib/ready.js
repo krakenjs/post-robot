@@ -3,14 +3,14 @@ import { getAncestor } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { noop } from 'belter/src';
 
-import { CONSTANTS } from '../conf';
+import { MESSAGE_NAME, WILDCARD } from '../conf';
 import { global } from '../global';
 
 global.readyPromises = global.readyPromises || new WeakMap();
 global.knownWindows = global.knownWindows || new WeakMap();
 
 export function onHello(handler) {
-    global.on(CONSTANTS.POST_MESSAGE_NAMES.HELLO, { domain: CONSTANTS.WILDCARD }, function (_ref) {
+    global.on(MESSAGE_NAME.HELLO, { domain: WILDCARD }, function (_ref) {
         var source = _ref.source,
             origin = _ref.origin;
 
@@ -19,7 +19,7 @@ export function onHello(handler) {
 }
 
 export function sayHello(win) {
-    return global.send(win, CONSTANTS.POST_MESSAGE_NAMES.HELLO, {}, { domain: CONSTANTS.WILDCARD, timeout: -1 }).then(function (_ref2) {
+    return global.send(win, MESSAGE_NAME.HELLO, {}, { domain: WILDCARD, timeout: -1 }).then(function (_ref2) {
         var origin = _ref2.origin;
 
         return { origin: origin };

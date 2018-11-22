@@ -4,7 +4,7 @@ import { matchDomain } from 'cross-domain-utils/src';
 import { isRegex } from 'belter/src';
 
 import { global } from '../global';
-import { CONSTANTS } from '../conf';
+import { WILDCARD } from '../conf';
 
 export function resetListeners() {
     global.responseListeners = {};
@@ -45,11 +45,11 @@ export function getRequestListener(_ref) {
         domain = _ref.domain;
 
 
-    if (win === CONSTANTS.WILDCARD) {
+    if (win === WILDCARD) {
         win = null;
     }
 
-    if (domain === CONSTANTS.WILDCARD) {
+    if (domain === WILDCARD) {
         domain = null;
     }
 
@@ -90,8 +90,8 @@ export function getRequestListener(_ref) {
             }
         }
 
-        if (winListeners[CONSTANTS.WILDCARD]) {
-            return winListeners[CONSTANTS.WILDCARD];
+        if (winListeners[WILDCARD]) {
+            return winListeners[WILDCARD];
         }
     }
 }
@@ -145,11 +145,11 @@ export function addRequestListener(_ref6, listener) {
 
     var existingListener = getRequestListener({ name: name, win: win, domain: domain });
 
-    if (!win || win === CONSTANTS.WILDCARD) {
+    if (!win || win === WILDCARD) {
         win = global.WINDOW_WILDCARD;
     }
 
-    domain = domain || CONSTANTS.WILDCARD;
+    domain = domain || WILDCARD;
 
     if (existingListener) {
         if (win && domain) {

@@ -114,20 +114,17 @@
             __webpack_require__.d(__webpack_exports__, "once", function() {
                 return __WEBPACK_IMPORTED_MODULE_5__util__.i;
             });
-            __webpack_require__.d(__webpack_exports__, "replaceObject", function() {
+            __webpack_require__.d(__webpack_exports__, "safeInterval", function() {
                 return __WEBPACK_IMPORTED_MODULE_5__util__.k;
             });
-            __webpack_require__.d(__webpack_exports__, "safeInterval", function() {
-                return __WEBPACK_IMPORTED_MODULE_5__util__.l;
-            });
             __webpack_require__.d(__webpack_exports__, "stringifyError", function() {
-                return __WEBPACK_IMPORTED_MODULE_5__util__.n;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.m;
             });
             __webpack_require__.d(__webpack_exports__, "uniqueID", function() {
-                return __WEBPACK_IMPORTED_MODULE_5__util__.o;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.n;
             });
             __webpack_require__.d(__webpack_exports__, "weakMapMemoize", function() {
-                return __WEBPACK_IMPORTED_MODULE_5__util__.p;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.o;
             });
             __webpack_require__("./node_modules/belter/src/http.js");
             var __WEBPACK_IMPORTED_MODULE_7__types__ = __webpack_require__("./node_modules/belter/src/types.js");
@@ -149,9 +146,9 @@
                         }
                         storage || (storage = Object(__WEBPACK_IMPORTED_MODULE_0__util__.d)()[STORAGE_KEY]);
                         storage || (storage = {
-                            id: Object(__WEBPACK_IMPORTED_MODULE_0__util__.o)()
+                            id: Object(__WEBPACK_IMPORTED_MODULE_0__util__.n)()
                         });
-                        storage.id || (storage.id = Object(__WEBPACK_IMPORTED_MODULE_0__util__.o)());
+                        storage.id || (storage.id = Object(__WEBPACK_IMPORTED_MODULE_0__util__.n)());
                         accessedStorage = storage;
                         var result = handler(storage);
                         localStorageEnabled ? window.localStorage.setItem(STORAGE_KEY, JSON.stringify(storage)) : Object(__WEBPACK_IMPORTED_MODULE_0__util__.d)()[STORAGE_KEY] = storage;
@@ -163,7 +160,7 @@
                             var session = storage.__session__, now = Date.now();
                             session && now - session.created > lifetime && (session = null);
                             session || (session = {
-                                guid: Object(__WEBPACK_IMPORTED_MODULE_0__util__.o)(),
+                                guid: Object(__WEBPACK_IMPORTED_MODULE_0__util__.n)(),
                                 created: now
                             });
                             storage.__session__ = session;
@@ -200,7 +197,7 @@
         "./node_modules/belter/src/types.js": function(module, exports) {},
         "./node_modules/belter/src/util.js": function(module, __webpack_exports__, __webpack_require__) {
             "use strict";
-            __webpack_exports__.o = uniqueID;
+            __webpack_exports__.n = uniqueID;
             __webpack_exports__.d = function() {
                 if ("undefined" != typeof window) return window;
                 if ("undefined" != typeof window) return window;
@@ -253,7 +250,7 @@
                     }
                 };
             };
-            __webpack_exports__.n = function stringifyError(err) {
+            __webpack_exports__.m = function stringifyError(err) {
                 var level = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 1;
                 if (level >= 3) return "stringifyError stack overflow";
                 try {
@@ -270,7 +267,7 @@
                     return "Error while stringifying error: " + stringifyError(newErr, level + 1);
                 }
             };
-            __webpack_exports__.m = function(item) {
+            __webpack_exports__.l = function(item) {
                 return "string" == typeof item ? item : item && "function" == typeof item.toString ? item.toString() : Object.prototype.toString.call(item);
             };
             __webpack_exports__.c = function(obj, source) {
@@ -279,7 +276,7 @@
                 for (var key in source) source.hasOwnProperty(key) && (obj[key] = source[key]);
                 return obj;
             };
-            __webpack_exports__.l = function(method, time) {
+            __webpack_exports__.k = function(method, time) {
                 var timeout = void 0;
                 !function loop() {
                     timeout = setTimeout(function() {
@@ -296,32 +293,6 @@
             __webpack_exports__.a = function(string) {
                 return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
             };
-            __webpack_exports__.k = function replaceObject(item, replacer) {
-                var fullKey = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : "";
-                if (Array.isArray(item)) {
-                    for (var _length3 = item.length, result = [], _loop = function(i) {
-                        defineLazyProp(result, i, function() {
-                            var itemKey = fullKey ? fullKey + "." + i : "" + i, el = item[i], child = replacer(el, i, itemKey);
-                            (isPlainObject(child) || Array.isArray(child)) && (child = replaceObject(child, replacer, itemKey));
-                            return child;
-                        });
-                    }, i = 0; i < _length3; i++) _loop(i);
-                    return result;
-                }
-                if (isPlainObject(item)) {
-                    var _result = {}, _loop2 = function(key) {
-                        if (!item.hasOwnProperty(key)) return "continue";
-                        defineLazyProp(_result, key, function() {
-                            var itemKey = fullKey ? fullKey + "." + key : "" + key, el = item[key], child = replacer(el, key, itemKey);
-                            (isPlainObject(child) || Array.isArray(child)) && (child = replaceObject(child, replacer, itemKey));
-                            return child;
-                        });
-                    };
-                    for (var key in item) _loop2(key);
-                    return _result;
-                }
-                throw new Error("Pass an object or array");
-            };
             __webpack_exports__.b = function(method) {
                 var time = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 100, timeout = void 0;
                 return function() {
@@ -335,7 +306,7 @@
             __webpack_exports__.f = function(item) {
                 return "[object RegExp]" === Object.prototype.toString.call(item);
             };
-            __webpack_require__.d(__webpack_exports__, "p", function() {
+            __webpack_require__.d(__webpack_exports__, "o", function() {
                 return weakMapMemoize;
             });
             var __WEBPACK_IMPORTED_MODULE_0_zalgo_promise_src__ = __webpack_require__("./node_modules/zalgo-promise/src/index.js"), __WEBPACK_IMPORTED_MODULE_1_cross_domain_safe_weakmap_src__ = __webpack_require__("./node_modules/cross-domain-safe-weakmap/src/index.js"), _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
@@ -367,36 +338,6 @@
                 } catch (err) {
                     throw new Error("Arguments not serializable -- can not be used to memoize");
                 }
-            }
-            function defineLazyProp(obj, key, getter) {
-                if (Array.isArray(obj)) {
-                    if ("number" != typeof key) throw new TypeError("Array key must be number");
-                } else if ("object" === (void 0 === obj ? "undefined" : _typeof(obj)) && null !== obj && "string" != typeof key) throw new TypeError("Object key must be string");
-                Object.defineProperty(obj, key, {
-                    configurable: !0,
-                    enumerable: !0,
-                    get: function() {
-                        delete obj[key];
-                        var value = getter();
-                        obj[key] = value;
-                        return value;
-                    },
-                    set: function(value) {
-                        delete obj[key];
-                        obj[key] = value;
-                    }
-                });
-            }
-            function isObjectObject(obj) {
-                return "object" === (void 0 === (item = obj) ? "undefined" : _typeof(item)) && null !== item && "[object Object]" === Object.prototype.toString.call(obj);
-                var item;
-            }
-            function isPlainObject(obj) {
-                if (!isObjectObject(obj)) return !1;
-                var constructor = obj.constructor;
-                if ("function" != typeof constructor) return !1;
-                var prototype = constructor.prototype;
-                return !!isObjectObject(prototype) && !!prototype.hasOwnProperty("isPrototypeOf");
             }
             var weakMapMemoize = function(method) {
                 var weakmap = new __WEBPACK_IMPORTED_MODULE_1_cross_domain_safe_weakmap_src__.a();
@@ -1277,7 +1218,7 @@
                     canary: canary,
                     sendMessage: sendMessage
                 });
-                return global.a.send(parentWindow, conf.b.POST_MESSAGE_NAMES.OPEN_TUNNEL, {
+                return global.a.send(parentWindow, conf.d.OPEN_TUNNEL, {
                     name: name,
                     sendMessage: function() {
                         var tunnelWindow = function(id) {
@@ -1299,12 +1240,12 @@
                         }
                     }
                 }, {
-                    domain: conf.b.WILDCARD
+                    domain: conf.h
                 });
             };
             var cross_domain_safe_weakmap_src = __webpack_require__("./node_modules/cross-domain-safe-weakmap/src/index.js");
             function needsBridgeForBrowser() {
-                return !!Object(cross_domain_utils_src.getUserAgent)(window).match(/MSIE|trident|edge\/12|edge\/13/i) || !conf.a.ALLOW_POSTMESSAGE_POPUP;
+                return !!Object(cross_domain_utils_src.getUserAgent)(window).match(/MSIE|trident|edge\/12|edge\/13/i) || !conf.b.ALLOW_POSTMESSAGE_POPUP;
             }
             function needsBridgeForWin(win) {
                 return !Object(cross_domain_utils_src.isSameTopWindow)(window, win);
@@ -1321,7 +1262,7 @@
             }
             function getBridgeName(domain) {
                 var sanitizedDomain = (domain = domain || Object(cross_domain_utils_src.getDomainFromUrl)(domain)).replace(/[^a-zA-Z0-9]+/g, "_");
-                return conf.b.BRIDGE_NAME_PREFIX + "_" + sanitizedDomain;
+                return conf.a + "_" + sanitizedDomain;
             }
             function isBridge() {
                 return Boolean(window.name && window.name === getBridgeName(Object(cross_domain_utils_src.getDomain)()));
@@ -1347,7 +1288,7 @@
             function registerRemoteSendMessage(win, domain, sendMessage) {
                 var remoteWindow = findRemoteWindow(win);
                 if (!remoteWindow) throw new Error("Window not found to register sendMessage to");
-                var sendMessageWrapper = function(remoteWin, message, remoteDomain) {
+                var sendMessageWrapper = function(remoteWin, remoteDomain, message) {
                     if (remoteWin !== win) throw new Error("Remote window does not match window");
                     if (!Object(cross_domain_utils_src.matchDomain)(remoteDomain, domain)) throw new Error("Remote domain " + remoteDomain + " does not match domain " + domain);
                     sendMessage(message);
@@ -1360,13 +1301,13 @@
                 if (!remoteWindow) throw new Error("Window not found on which to reject sendMessage");
                 remoteWindow.sendMessagePromise.asyncReject(err);
             }
-            function sendBridgeMessage(win, message, domain) {
+            function sendBridgeMessage(win, domain, message) {
                 var messagingChild = Object(cross_domain_utils_src.isOpener)(window, win), messagingParent = Object(cross_domain_utils_src.isOpener)(win, window);
                 if (!messagingChild && !messagingParent) throw new Error("Can only send messages to and from parent and popup windows");
                 var remoteWindow = findRemoteWindow(win);
                 if (!remoteWindow) throw new Error("Window not found to send message to");
                 return remoteWindow.sendMessagePromise.then(function(sendMessage) {
-                    return sendMessage(win, message, domain);
+                    return sendMessage(win, domain, message);
                 });
             }
             var awaitRemoteBridgeForWindow = Object(belter_src.weakMapMemoize)(function(win) {
@@ -1374,10 +1315,10 @@
                     try {
                         var frame = Object(cross_domain_utils_src.getFrameByName)(win, getBridgeName(Object(cross_domain_utils_src.getDomain)()));
                         if (!frame) return;
-                        return Object(cross_domain_utils_src.isSameDomain)(frame) && frame[conf.b.WINDOW_PROPS.POSTROBOT] ? frame : new src.a(function(resolve) {
+                        return Object(cross_domain_utils_src.isSameDomain)(frame) && frame[conf.i.POSTROBOT] ? frame : new src.a(function(resolve) {
                             var interval = void 0, timeout = void 0;
                             interval = setInterval(function() {
-                                if (frame && Object(cross_domain_utils_src.isSameDomain)(frame) && frame[conf.b.WINDOW_PROPS.POSTROBOT]) {
+                                if (frame && Object(cross_domain_utils_src.isSameDomain)(frame) && frame[conf.i.POSTROBOT]) {
                                     clearInterval(interval);
                                     clearTimeout(timeout);
                                     return resolve(frame);
@@ -1399,7 +1340,7 @@
                     })) {
                         registerRemoteWindow(opener);
                         return awaitRemoteBridgeForWindow(opener).then(function(bridge) {
-                            return bridge ? window.name ? bridge[conf.b.WINDOW_PROPS.POSTROBOT].openTunnelToParent({
+                            return bridge ? window.name ? bridge[conf.i.POSTROBOT].openTunnelToParent({
                                 name: window.name,
                                 source: window,
                                 canary: function() {},
@@ -1468,7 +1409,7 @@
                         body.appendChild(iframe);
                         var bridge = iframe.contentWindow;
                         !function(source, domain) {
-                            global.a.on(conf.b.POST_MESSAGE_NAMES.OPEN_TUNNEL, {
+                            global.a.on(conf.d.OPEN_TUNNEL, {
                                 window: source,
                                 domain: domain
                             }, function(_ref) {
@@ -1502,7 +1443,7 @@
                             iframe.onload = resolve;
                             iframe.onerror = reject;
                         }).then(function() {
-                            return Object(lib.h)(bridge, conf.a.BRIDGE_TIMEOUT, "Bridge " + url);
+                            return Object(lib.g)(bridge, conf.b.BRIDGE_TIMEOUT, "Bridge " + url);
                         }).then(function() {
                             return bridge;
                         });
@@ -1513,7 +1454,7 @@
             var windowOpen = window.open;
             window.open = function(url, name, options, last) {
                 var domain = url;
-                if (url && 0 === url.indexOf(conf.b.MOCK_PROTOCOL)) {
+                if (url && 0 === url.indexOf(conf.f.MOCK)) {
                     var _url$split = url.split("|");
                     domain = _url$split[0];
                     url = _url$split[1];
@@ -1647,7 +1588,7 @@
             });
             var src = __webpack_require__("./node_modules/cross-domain-utils/src/index.js"), conf = __webpack_require__("./src/conf/index.js");
             function emulateIERestrictions(sourceWindow, targetWindow) {
-                if (!conf.a.ALLOW_POSTMESSAGE_POPUP && !1 === Object(src.isSameTopWindow)(sourceWindow, targetWindow)) throw new Error("Can not send and receive post messages between two different windows (disabled to emulate IE)");
+                if (!conf.b.ALLOW_POSTMESSAGE_POPUP && !1 === Object(src.isSameTopWindow)(sourceWindow, targetWindow)) throw new Error("Can not send and receive post messages between two different windows (disabled to emulate IE)");
             }
             __webpack_require__.d(__webpack_exports__, "emulateIERestrictions", function() {
                 return emulateIERestrictions;
@@ -1655,75 +1596,80 @@
         },
         "./src/conf/index.js": function(module, __webpack_exports__, __webpack_require__) {
             "use strict";
-            var _ALLOWED_POST_MESSAGE, CONSTANTS = {
-                POST_MESSAGE_TYPE: {
-                    REQUEST: "postrobot_message_request",
-                    RESPONSE: "postrobot_message_response",
-                    ACK: "postrobot_message_ack"
-                },
-                POST_MESSAGE_ACK: {
-                    SUCCESS: "success",
-                    ERROR: "error"
-                },
-                POST_MESSAGE_NAMES: {
-                    METHOD: "postrobot_method",
-                    HELLO: "postrobot_ready",
-                    OPEN_TUNNEL: "postrobot_open_tunnel"
-                },
-                WINDOW_TYPES: {
-                    FULLPAGE: "fullpage",
-                    POPUP: "popup",
-                    IFRAME: "iframe"
-                },
-                WINDOW_PROPS: {
-                    POSTROBOT: "__postRobot__"
-                },
-                SERIALIZATION_TYPES: {
-                    METHOD: "postrobot_method",
-                    ERROR: "postrobot_error",
-                    PROMISE: "postrobot_promise",
-                    ZALGO_PROMISE: "postrobot_zalgo_promise",
-                    REGEX: "regex"
-                },
-                SEND_STRATEGIES: {
-                    POST_MESSAGE: "postrobot_post_message",
-                    BRIDGE: "postrobot_bridge",
-                    GLOBAL: "postrobot_global"
-                },
-                MOCK_PROTOCOL: "mock:",
-                FILE_PROTOCOL: "file:",
-                BRIDGE_NAME_PREFIX: "__postrobot_bridge__",
-                POSTROBOT_PROXY: "__postrobot_proxy__",
-                WILDCARD: "*"
-            }, POST_MESSAGE_NAMES = {
+            var _ALLOWED_POST_MESSAGE, MESSAGE_TYPE = {
+                REQUEST: "postrobot_message_request",
+                RESPONSE: "postrobot_message_response",
+                ACK: "postrobot_message_ack"
+            }, MESSAGE_ACK = {
+                SUCCESS: "success",
+                ERROR: "error"
+            }, MESSAGE_NAME = {
                 METHOD: "postrobot_method",
-                HELLO: "postrobot_hello",
+                HELLO: "postrobot_ready",
                 OPEN_TUNNEL: "postrobot_open_tunnel"
-            }, POST_MESSAGE_NAMES_LIST = Object.keys(POST_MESSAGE_NAMES).map(function(key) {
-                return POST_MESSAGE_NAMES[key];
-            }), CONFIG = {
+            }, WINDOW_TYPE = {
+                FULLPAGE: "fullpage",
+                POPUP: "popup",
+                IFRAME: "iframe"
+            }, WINDOW_PROP = {
+                POSTROBOT: "__postRobot__"
+            }, SERIALIZATION_TYPE = {
+                METHOD: "postrobot_method",
+                ZALGO_PROMISE: "postrobot_zalgo_promise"
+            }, SEND_STRATEGY = {
+                POST_MESSAGE: "postrobot_post_message",
+                BRIDGE: "postrobot_bridge",
+                GLOBAL: "postrobot_global"
+            }, PROTOCOL = {
+                MOCK: "mock:",
+                FILE: "file:"
+            }, CONFIG = {
                 ALLOW_POSTMESSAGE_POPUP: !("__ALLOW_POSTMESSAGE_POPUP__" in window) || window.__ALLOW_POSTMESSAGE_POPUP__,
                 BRIDGE_TIMEOUT: 5e3,
                 CHILD_WINDOW_TIMEOUT: 5e3,
                 ACK_TIMEOUT: 2e3,
                 ACK_TIMEOUT_KNOWN: 1e4,
                 RES_TIMEOUT: -1,
-                ALLOWED_POST_MESSAGE_METHODS: (_ALLOWED_POST_MESSAGE = {}, _ALLOWED_POST_MESSAGE[CONSTANTS.SEND_STRATEGIES.POST_MESSAGE] = !0, 
-                _ALLOWED_POST_MESSAGE[CONSTANTS.SEND_STRATEGIES.BRIDGE] = !0, _ALLOWED_POST_MESSAGE[CONSTANTS.SEND_STRATEGIES.GLOBAL] = !0, 
+                ALLOWED_POST_MESSAGE_METHODS: (_ALLOWED_POST_MESSAGE = {}, _ALLOWED_POST_MESSAGE[SEND_STRATEGY.POST_MESSAGE] = !0, 
+                _ALLOWED_POST_MESSAGE[SEND_STRATEGY.BRIDGE] = !0, _ALLOWED_POST_MESSAGE[SEND_STRATEGY.GLOBAL] = !0, 
                 _ALLOWED_POST_MESSAGE)
             };
-            0 === window.location.href.indexOf(CONSTANTS.FILE_PROTOCOL) && (CONFIG.ALLOW_POSTMESSAGE_POPUP = !0);
-            __webpack_require__.d(__webpack_exports__, "a", function() {
+            0 === window.location.href.indexOf(PROTOCOL.FILE) && (CONFIG.ALLOW_POSTMESSAGE_POPUP = !0);
+            __webpack_require__.d(__webpack_exports__, "b", function() {
                 return CONFIG;
             });
-            __webpack_require__.d(__webpack_exports__, "b", function() {
-                return CONSTANTS;
+            __webpack_require__.d(__webpack_exports__, "e", function() {
+                return MESSAGE_TYPE;
+            });
+            __webpack_require__.d(__webpack_exports__, "c", function() {
+                return MESSAGE_ACK;
+            });
+            __webpack_require__.d(__webpack_exports__, "d", function() {
+                return MESSAGE_NAME;
+            });
+            __webpack_require__.d(__webpack_exports__, "j", function() {
+                return WINDOW_TYPE;
+            });
+            __webpack_require__.d(__webpack_exports__, "i", function() {
+                return WINDOW_PROP;
             });
             __webpack_require__.d(__webpack_exports__, !1, function() {
-                return POST_MESSAGE_NAMES;
+                return SERIALIZATION_TYPE;
+            });
+            __webpack_require__.d(__webpack_exports__, "g", function() {
+                return SEND_STRATEGY;
+            });
+            __webpack_require__.d(__webpack_exports__, "f", function() {
+                return PROTOCOL;
+            });
+            __webpack_require__.d(__webpack_exports__, "a", function() {
+                return "__postrobot_bridge__";
             });
             __webpack_require__.d(__webpack_exports__, !1, function() {
-                return POST_MESSAGE_NAMES_LIST;
+                return "__postrobot_proxy__";
+            });
+            __webpack_require__.d(__webpack_exports__, "h", function() {
+                return "*";
             });
         },
         "./src/global.js": function(module, __webpack_exports__, __webpack_require__) {
@@ -1731,7 +1677,7 @@
             __webpack_require__.d(__webpack_exports__, "a", function() {
                 return global;
             });
-            var __WEBPACK_IMPORTED_MODULE_0__conf__ = __webpack_require__("./src/conf/index.js"), global = window[__WEBPACK_IMPORTED_MODULE_0__conf__.b.WINDOW_PROPS.POSTROBOT] = window[__WEBPACK_IMPORTED_MODULE_0__conf__.b.WINDOW_PROPS.POSTROBOT] || {};
+            var __WEBPACK_IMPORTED_MODULE_0__conf__ = __webpack_require__("./src/conf/index.js"), global = window[__WEBPACK_IMPORTED_MODULE_0__conf__.i.POSTROBOT] = window[__WEBPACK_IMPORTED_MODULE_0__conf__.i.POSTROBOT] || {};
             global.registerSelf = function() {};
         },
         "./src/index.js": function(module, __webpack_exports__, __webpack_require__) {
@@ -1741,7 +1687,13 @@
             });
             var interface_namespaceObject = {};
             __webpack_require__.d(interface_namespaceObject, "markWindowKnown", function() {
-                return lib.f;
+                return lib.e;
+            });
+            __webpack_require__.d(interface_namespaceObject, "serializeMessage", function() {
+                return lib.i;
+            });
+            __webpack_require__.d(interface_namespaceObject, "deserializeMessage", function() {
+                return lib.a;
             });
             __webpack_require__.d(interface_namespaceObject, "cleanUpWindow", function() {
                 return cleanUpWindow;
@@ -1783,45 +1735,42 @@
                 return server_listener;
             });
             __webpack_require__.d(interface_namespaceObject, "CONFIG", function() {
-                return conf.a;
-            });
-            __webpack_require__.d(interface_namespaceObject, "CONSTANTS", function() {
                 return conf.b;
             });
             __webpack_require__.d(interface_namespaceObject, "disable", function() {
                 return disable;
             });
             var lib = __webpack_require__("./src/lib/index.js"), src = __webpack_require__("./node_modules/cross-domain-utils/src/index.js"), belter_src = __webpack_require__("./node_modules/belter/src/index.js"), conf = __webpack_require__("./src/conf/index.js"), global = __webpack_require__("./src/global.js"), zalgo_promise_src = __webpack_require__("./node_modules/zalgo-promise/src/index.js"), SEND_MESSAGE_STRATEGIES = {};
-            SEND_MESSAGE_STRATEGIES[conf.b.SEND_STRATEGIES.POST_MESSAGE] = function(win, serializedMessage, domain) {
+            SEND_MESSAGE_STRATEGIES[conf.g.POST_MESSAGE] = function(win, serializedMessage, domain) {
                 try {
                     __webpack_require__("./src/compat/index.js").emulateIERestrictions(window, win);
                 } catch (err) {
                     return;
                 }
-                (Array.isArray(domain) ? domain : "string" == typeof domain ? [ domain ] : [ conf.b.WILDCARD ]).map(function(dom) {
-                    if (0 === dom.indexOf(conf.b.MOCK_PROTOCOL)) {
-                        if (window.location.protocol === conf.b.FILE_PROTOCOL) return conf.b.WILDCARD;
+                (Array.isArray(domain) ? domain : "string" == typeof domain ? [ domain ] : [ conf.h ]).map(function(dom) {
+                    if (0 === dom.indexOf(conf.f.MOCK)) {
+                        if (window.location.protocol === conf.f.FILE) return conf.h;
                         if (!Object(src.isActuallySameDomain)(win)) throw new Error("Attempting to send messsage to mock domain " + dom + ", but window is actually cross-domain");
                         return Object(src.getActualDomain)(win);
                     }
-                    return 0 === dom.indexOf(conf.b.FILE_PROTOCOL) ? conf.b.WILDCARD : dom;
+                    return 0 === dom.indexOf(conf.f.FILE) ? conf.h : dom;
                 }).forEach(function(dom) {
                     return win.postMessage(serializedMessage, dom);
                 });
             };
             var _require = __webpack_require__("./src/bridge/index.js"), sendBridgeMessage = _require.sendBridgeMessage, needsBridgeForBrowser = _require.needsBridgeForBrowser, isBridge = _require.isBridge;
-            SEND_MESSAGE_STRATEGIES[conf.b.SEND_STRATEGIES.BRIDGE] = function(win, serializedMessage, domain) {
+            SEND_MESSAGE_STRATEGIES[conf.g.BRIDGE] = function(win, serializedMessage, domain) {
                 if (needsBridgeForBrowser() || isBridge()) {
                     if (Object(src.isSameDomain)(win)) throw new Error("Post message through bridge disabled between same domain windows");
                     if (!1 !== Object(src.isSameTopWindow)(window, win)) throw new Error("Can only use bridge to communicate between two different windows, not between frames");
-                    return sendBridgeMessage(win, serializedMessage, domain);
+                    return sendBridgeMessage(win, domain, serializedMessage);
                 }
             };
-            SEND_MESSAGE_STRATEGIES[conf.b.SEND_STRATEGIES.GLOBAL] = function(win, serializedMessage) {
-                if (Object(lib.g)()) {
+            SEND_MESSAGE_STRATEGIES[conf.g.GLOBAL] = function(win, serializedMessage) {
+                if (Object(lib.f)()) {
                     if (!Object(src.isSameDomain)(win)) throw new Error("Post message through global disabled between different domain windows");
                     if (!1 !== Object(src.isSameTopWindow)(window, win)) throw new Error("Can only use global to communicate between two different windows, not between frames");
-                    var foreignGlobal = win[conf.b.WINDOW_PROPS.POSTROBOT];
+                    var foreignGlobal = win[conf.i.POSTROBOT];
                     if (!foreignGlobal) throw new Error("Can not find postRobot global on foreign window");
                     return foreignGlobal.receiveMessage({
                         source: window,
@@ -1837,26 +1786,17 @@
                 }
                 return target;
             };
-            function sendMessage(win, message, domain) {
+            function sendMessage(win, domain, message) {
                 return zalgo_promise_src.a.try(function() {
-                    var _JSON$stringify;
-                    message = function(win, message) {
-                        var options = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : {}, id = Object(belter_src.uniqueID)(), type = Object(lib.b)(), sourceDomain = Object(src.getDomain)(window);
-                        return _extends({}, message, options, {
-                            sourceDomain: sourceDomain,
-                            id: message.id || id,
-                            windowType: type
-                        });
-                    }(win, message, {
-                        data: Object(lib.j)(win, domain, message.data),
-                        domain: domain
-                    });
+                    var _serializeMessage;
                     if (Object(src.isWindowClosed)(win)) throw new Error("Window is closed");
-                    var messages = [], serializedMessage = JSON.stringify(((_JSON$stringify = {})[conf.b.WINDOW_PROPS.POSTROBOT] = message, 
-                    _JSON$stringify), null, 2);
+                    var serializedMessage = Object(lib.i)(win, domain, ((_serializeMessage = {})[conf.i.POSTROBOT] = _extends({}, message, {
+                        id: Object(belter_src.uniqueID)(),
+                        windowType: Object(lib.b)()
+                    }), _serializeMessage)), messages = [];
                     return zalgo_promise_src.a.map(Object.keys(SEND_MESSAGE_STRATEGIES), function(strategyName) {
                         return zalgo_promise_src.a.try(function() {
-                            if (!conf.a.ALLOWED_POST_MESSAGE_METHODS[strategyName]) throw new Error("Strategy disallowed: " + strategyName);
+                            if (!conf.b.ALLOWED_POST_MESSAGE_METHODS[strategyName]) throw new Error("Strategy disallowed: " + strategyName);
                             return SEND_MESSAGE_STRATEGIES[strategyName](win, serializedMessage, domain);
                         }).then(function() {
                             messages.push(strategyName + ": success");
@@ -1888,8 +1828,8 @@
             }
             function getRequestListener(_ref) {
                 var name = _ref.name, win = _ref.win, domain = _ref.domain;
-                win === conf.b.WILDCARD && (win = null);
-                domain === conf.b.WILDCARD && (domain = null);
+                win === conf.h && (win = null);
+                domain === conf.h && (domain = null);
                 if (!name) throw new Error("Name required to get request listener");
                 var nameListeners = global.a.requestListeners[name];
                 if (nameListeners) for (var _i2 = 0, _ref3 = [ win, global.a.WINDOW_WILDCARD ], _length2 = null == _ref3 ? 0 : _ref3.length; _i2 < _length2; _i2++) {
@@ -1902,7 +1842,7 @@
                                 if (Object(src.matchDomain)(regex, domain)) return listener;
                             }
                         }
-                        if (winListeners[conf.b.WILDCARD]) return winListeners[conf.b.WILDCARD];
+                        if (winListeners[conf.h]) return winListeners[conf.h];
                     }
                 }
             }
@@ -1912,29 +1852,28 @@
                     for (var key in source) Object.prototype.hasOwnProperty.call(source, key) && (target[key] = source[key]);
                 }
                 return target;
-            }, RECEIVE_MESSAGE_TYPES = ((_RECEIVE_MESSAGE_TYPE = {})[conf.b.POST_MESSAGE_TYPE.ACK] = function(source, origin, message) {
+            }, RECEIVE_MESSAGE_TYPES = ((_RECEIVE_MESSAGE_TYPE = {})[conf.e.ACK] = function(source, origin, message) {
                 if (!isResponseListenerErrored(message.hash)) {
                     var options = getResponseListener(message.hash);
                     if (!options) throw new Error("No handler found for post message ack for message: " + message.name + " from " + origin + " in " + window.location.protocol + "//" + window.location.host + window.location.pathname);
                     if (!Object(src.matchDomain)(options.domain, origin)) throw new Error("Ack origin " + origin + " does not match domain " + options.domain.toString());
                     options.ack = !0;
                 }
-            }, _RECEIVE_MESSAGE_TYPE[conf.b.POST_MESSAGE_TYPE.REQUEST] = function(source, origin, message) {
+            }, _RECEIVE_MESSAGE_TYPE[conf.e.REQUEST] = function(source, origin, message) {
                 var options = getRequestListener({
                     name: message.name,
                     win: source,
                     domain: origin
                 });
-                function respond(data) {
-                    return message.fireAndForget || Object(src.isWindowClosed)(source) ? zalgo_promise_src.a.resolve() : sendMessage(source, types__extends({
-                        target: message.originalSource,
+                function sendResponse(type) {
+                    var data = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {};
+                    return message.fireAndForget || Object(src.isWindowClosed)(source) ? zalgo_promise_src.a.resolve() : sendMessage(source, origin, types__extends({
+                        type: type,
                         hash: message.hash,
                         name: message.name
-                    }, data), origin);
+                    }, data));
                 }
-                return zalgo_promise_src.a.all([ respond({
-                    type: conf.b.POST_MESSAGE_TYPE.ACK
-                }), zalgo_promise_src.a.try(function() {
+                return zalgo_promise_src.a.all([ sendResponse(conf.e.ACK), zalgo_promise_src.a.try(function() {
                     if (!options) throw new Error("No handler found for post message: " + message.name + " from " + origin + " in " + window.location.protocol + "//" + window.location.host + window.location.pathname);
                     if (!Object(src.matchDomain)(options.domain, origin)) throw new Error("Request origin " + origin + " does not match domain " + options.domain.toString());
                     var data = message.data;
@@ -1944,36 +1883,28 @@
                         data: data
                     });
                 }).then(function(data) {
-                    return respond({
-                        type: conf.b.POST_MESSAGE_TYPE.RESPONSE,
-                        ack: conf.b.POST_MESSAGE_ACK.SUCCESS,
+                    return sendResponse(conf.e.RESPONSE, {
+                        ack: conf.c.SUCCESS,
                         data: data
                     });
-                }, function(err) {
-                    var error = Object(belter_src.stringifyError)(err).replace(/^Error: /, ""), code = err.code;
-                    return respond({
-                        type: conf.b.POST_MESSAGE_TYPE.RESPONSE,
-                        ack: conf.b.POST_MESSAGE_ACK.ERROR,
-                        error: error,
-                        code: code
+                }, function(error) {
+                    return sendResponse(conf.e.RESPONSE, {
+                        ack: conf.c.ERROR,
+                        error: error
                     });
                 }) ]).then(belter_src.noop).catch(function(err) {
                     if (options && options.handleError) return options.handleError(err);
                     throw err;
                 });
-            }, _RECEIVE_MESSAGE_TYPE[conf.b.POST_MESSAGE_TYPE.RESPONSE] = function(source, origin, message) {
+            }, _RECEIVE_MESSAGE_TYPE[conf.e.RESPONSE] = function(source, origin, message) {
                 if (!isResponseListenerErrored(message.hash)) {
                     var options = getResponseListener(message.hash);
                     if (!options) throw new Error("No handler found for post message response for message: " + message.name + " from " + origin + " in " + window.location.protocol + "//" + window.location.host + window.location.pathname);
                     if (!Object(src.matchDomain)(options.domain, origin)) throw new Error("Response origin " + origin + " does not match domain " + Object(src.stringifyDomainPattern)(options.domain));
                     deleteResponseListener(message.hash);
-                    if (message.ack === conf.b.POST_MESSAGE_ACK.ERROR) {
-                        var err = new Error(message.error);
-                        message.code && (err.code = message.code);
-                        return options.respond(err, null);
-                    }
-                    if (message.ack === conf.b.POST_MESSAGE_ACK.SUCCESS) {
-                        var data = message.data || message.response;
+                    if (message.ack === conf.c.ERROR) return options.respond(message.error, null);
+                    if (message.ack === conf.c.SUCCESS) {
+                        var data = message.data;
                         return options.respond(null, {
                             source: source,
                             origin: origin,
@@ -1994,25 +1925,20 @@
                 } catch (err) {
                     return;
                 }
-                var source = event.source, origin = event.origin, message = function(message) {
+                var source = event.source, origin = event.origin, message = function(message, source, origin) {
                     var parsedMessage = void 0;
                     try {
-                        parsedMessage = JSON.parse(message);
+                        parsedMessage = Object(lib.a)(source, origin, message);
                     } catch (err) {
                         return;
                     }
-                    if (parsedMessage && "object" === (void 0 === parsedMessage ? "undefined" : _typeof(parsedMessage)) && null !== parsedMessage && (parsedMessage = parsedMessage[conf.b.WINDOW_PROPS.POSTROBOT]) && "object" === (void 0 === parsedMessage ? "undefined" : _typeof(parsedMessage)) && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
-                }(event.data);
+                    if (parsedMessage && "object" === (void 0 === parsedMessage ? "undefined" : _typeof(parsedMessage)) && null !== parsedMessage && (parsedMessage = parsedMessage[conf.i.POSTROBOT]) && "object" === (void 0 === parsedMessage ? "undefined" : _typeof(parsedMessage)) && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
+                }(event.data, source, origin);
                 if (message) {
-                    Object(lib.f)(source);
-                    if (!message.sourceDomain || "string" != typeof message.sourceDomain) throw new Error("Expected message to have sourceDomain");
-                    0 !== message.sourceDomain.indexOf(conf.b.MOCK_PROTOCOL) && 0 !== message.sourceDomain.indexOf(conf.b.FILE_PROTOCOL) || (origin = message.sourceDomain);
+                    Object(lib.e)(source);
                     if (-1 === global.a.receivedMessages.indexOf(message.id)) {
                         global.a.receivedMessages.push(message.id);
-                        if (!Object(src.isWindowClosed)(source) || message.fireAndForget) {
-                            message.data && (message.data = Object(lib.a)(source, origin, message.data));
-                            RECEIVE_MESSAGE_TYPES[message.type](source, origin, message);
-                        }
+                        Object(src.isWindowClosed)(source) && !message.fireAndForget || RECEIVE_MESSAGE_TYPES[message.type](source, origin, message);
                     }
                 }
             }
@@ -2053,7 +1979,7 @@
                     } else targetWindow = options.window;
                     if (!targetWindow) throw new Error("Expected options.window to be a window object, iframe, or iframe element id.");
                     var win = targetWindow;
-                    domain = options.domain || conf.b.WILDCARD;
+                    domain = options.domain || conf.h;
                     var hash = options.name + "_" + Object(belter_src.uniqueID)();
                     if (Object(src.isWindowClosed)(win)) throw new Error("Target window is closed");
                     var hasResult = !1, requestPromises = global.a.requestPromises.get(win);
@@ -2062,10 +1988,10 @@
                         global.a.requestPromises.set(win, requestPromises);
                     }
                     var requestPromise = zalgo_promise_src.a.try(function() {
-                        if (Object(src.isAncestor)(window, win)) return Object(lib.h)(win, options.timeout || conf.a.CHILD_WINDOW_TIMEOUT);
+                        if (Object(src.isAncestor)(window, win)) return Object(lib.g)(win, options.timeout || conf.b.CHILD_WINDOW_TIMEOUT);
                     }).then(function() {
                         var origin = (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}).origin;
-                        if (Object(belter_src.isRegex)(domain) && !origin) return Object(lib.i)(win);
+                        if (Object(belter_src.isRegex)(domain) && !origin) return Object(lib.h)(win);
                     }).then(function() {
                         var origin = (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}).origin;
                         if (Object(belter_src.isRegex)(domain)) {
@@ -2090,15 +2016,15 @@
                                     err ? reject(err) : resolve(result);
                                 }
                             });
-                            sendMessage(win, {
-                                type: conf.b.POST_MESSAGE_TYPE.REQUEST,
+                            sendMessage(win, actualDomain, {
+                                type: conf.e.REQUEST,
                                 hash: hash,
                                 name: name,
                                 data: options.data,
-                                fireAndForget: options.fireAndForget
-                            }, actualDomain).catch(reject);
+                                fireAndForget: Boolean(options.fireAndForget)
+                            }).catch(reject);
                             if (options.fireAndForget) return resolve();
-                            var totalAckTimeout = Object(lib.d)(win) ? conf.a.ACK_TIMEOUT_KNOWN : conf.a.ACK_TIMEOUT, totalResTimeout = options.timeout || conf.a.RES_TIMEOUT, ackTimeout = totalAckTimeout, resTimeout = totalResTimeout, cycleTime = 100;
+                            var totalAckTimeout = Object(lib.d)(win) ? conf.b.ACK_TIMEOUT_KNOWN : conf.b.ACK_TIMEOUT, totalResTimeout = options.timeout || conf.b.RES_TIMEOUT, ackTimeout = totalAckTimeout, resTimeout = totalResTimeout, cycleTime = 100;
                             setTimeout(function cycle() {
                                 if (!hasResult) {
                                     if (Object(src.isWindowClosed)(win)) return responseListener.ack ? reject(new Error("Window closed for " + name + " before response")) : reject(new Error("Window closed for " + name + " before ack"));
@@ -2163,7 +2089,7 @@
                         throw err;
                     },
                     window: win,
-                    domain: domain || conf.b.WILDCARD,
+                    domain: domain || conf.h,
                     name: name
                 }, requestListener = function addRequestListener(_ref6, listener) {
                     var name = _ref6.name, win = _ref6.win, domain = _ref6.domain;
@@ -2203,8 +2129,8 @@
                         win: win,
                         domain: domain
                     });
-                    win && win !== conf.b.WILDCARD || (win = global.a.WINDOW_WILDCARD);
-                    domain = domain || conf.b.WILDCARD;
+                    win && win !== conf.h || (win = global.a.WINDOW_WILDCARD);
+                    domain = domain || conf.h;
                     if (existingListener) throw win && domain ? new Error("Request listener already exists for " + name + " on domain " + domain.toString() + " for " + (win === global.a.WINDOW_WILDCARD ? "wildcard" : "specified") + " window") : win ? new Error("Request listener already exists for " + name + " for " + (win === global.a.WINDOW_WILDCARD ? "wildcard" : "specified") + " window") : domain ? new Error("Request listener already exists for " + name + " on domain " + domain.toString()) : new Error("Request listener already exists for " + name);
                     var requestListeners = global.a.requestListeners, nameListeners = requestListeners[name];
                     if (!nameListeners) {
@@ -2303,7 +2229,7 @@
             }
             global.a.on = _on;
             function disable() {
-                delete window[conf.b.WINDOW_PROPS.POSTROBOT];
+                delete window[conf.i.POSTROBOT];
                 window.removeEventListener("message", messageListener);
             }
             var public_parent = Object(src.getAncestor)();
@@ -2322,16 +2248,18 @@
                     Object(belter_src.addEventListener)(window, "message", messageListener);
                     __webpack_require__("./src/bridge/index.js").openTunnelToOpener();
                     Object(lib.c)();
-                    Object(lib.e)({
-                        on: _on,
-                        send: _send
-                    });
                 }
                 global.a.initialized = !0;
             }
             init();
             __webpack_require__.d(__webpack_exports__, "markWindowKnown", function() {
-                return lib.f;
+                return lib.e;
+            });
+            __webpack_require__.d(__webpack_exports__, "serializeMessage", function() {
+                return lib.i;
+            });
+            __webpack_require__.d(__webpack_exports__, "deserializeMessage", function() {
+                return lib.a;
             });
             __webpack_require__.d(__webpack_exports__, "cleanUpWindow", function() {
                 return cleanUpWindow;
@@ -2373,9 +2301,6 @@
                 return server_listener;
             });
             __webpack_require__.d(__webpack_exports__, "CONFIG", function() {
-                return conf.a;
-            });
-            __webpack_require__.d(__webpack_exports__, "CONSTANTS", function() {
                 return conf.b;
             });
             __webpack_require__.d(__webpack_exports__, "disable", function() {
@@ -2387,20 +2312,95 @@
             "use strict";
             var src = __webpack_require__("./node_modules/cross-domain-utils/src/index.js"), conf = __webpack_require__("./src/conf/index.js");
             function getWindowType() {
-                return Object(src.isPopup)() ? conf.b.WINDOW_TYPES.POPUP : Object(src.isIframe)() ? conf.b.WINDOW_TYPES.IFRAME : conf.b.WINDOW_TYPES.FULLPAGE;
+                return Object(src.isPopup)() ? conf.j.POPUP : Object(src.isIframe)() ? conf.j.IFRAME : conf.j.FULLPAGE;
             }
             function needsGlobalMessagingForBrowser() {
-                return !!Object(src.getUserAgent)(window).match(/MSIE|trident|edge\/12|edge\/13/i) || !conf.a.ALLOW_POSTMESSAGE_POPUP;
+                return !!Object(src.getUserAgent)(window).match(/MSIE|trident|edge\/12|edge\/13/i) || !conf.b.ALLOW_POSTMESSAGE_POPUP;
             }
-            var cross_domain_safe_weakmap_src = __webpack_require__("./node_modules/cross-domain-safe-weakmap/src/index.js"), zalgo_promise_src = __webpack_require__("./node_modules/zalgo-promise/src/index.js"), belter_src = __webpack_require__("./node_modules/belter/src/index.js"), global = __webpack_require__("./src/global.js"), _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
+            var _SERIALIZER, cross_domain_safe_weakmap_src = __webpack_require__("./node_modules/cross-domain-safe-weakmap/src/index.js"), zalgo_promise_src = __webpack_require__("./node_modules/zalgo-promise/src/index.js"), belter_src = __webpack_require__("./node_modules/belter/src/index.js"), TYPE = {
+                FUNCTION: "function",
+                ERROR: "error",
+                PROMISE: "promise",
+                REGEX: "regex",
+                DATE: "date",
+                ARRAY: "array",
+                OBJECT: "object",
+                STRING: "string",
+                NUMBER: "number",
+                BOOLEAN: "boolean",
+                NULL: "null",
+                UNDEFINED: "undefined"
+            }, _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
                 return typeof obj;
             } : function(obj) {
                 return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
             };
+            function isSerializedType(item) {
+                return "object" === (void 0 === item ? "undefined" : _typeof(item)) && null !== item && "string" == typeof item.__type__;
+            }
+            function determineType(val) {
+                return void 0 === val ? TYPE.UNDEFINED : null === val ? TYPE.NULL : Array.isArray(val) ? TYPE.ARRAY : "function" == typeof val ? TYPE.FUNCTION : "object" === (void 0 === val ? "undefined" : _typeof(val)) ? val instanceof Error ? TYPE.ERROR : "function" == typeof val.then ? TYPE.PROMISE : "[object RegExp]" === Object.prototype.toString.call(val) ? TYPE.REGEX : "[object Date]" === Object.prototype.toString.call(val) ? TYPE.DATE : TYPE.OBJECT : "string" == typeof val ? TYPE.STRING : "number" == typeof val ? TYPE.NUMBER : "boolean" == typeof val ? TYPE.BOOLEAN : void 0;
+            }
+            function serializeType(type, val) {
+                return {
+                    __type__: type,
+                    __val__: val
+                };
+            }
+            var _DESERIALIZER, SERIALIZER = ((_SERIALIZER = {})[TYPE.FUNCTION] = function() {}, 
+            _SERIALIZER[TYPE.ERROR] = function(_ref) {
+                var message = _ref.message, stack = _ref.stack, code = _ref.code;
+                return serializeType(TYPE.ERROR, {
+                    message: message,
+                    stack: stack,
+                    code: code
+                });
+            }, _SERIALIZER[TYPE.PROMISE] = function() {}, _SERIALIZER[TYPE.REGEX] = function(val) {
+                return serializeType(TYPE.REGEX, val.source);
+            }, _SERIALIZER[TYPE.DATE] = function(val) {
+                return serializeType(TYPE.DATE, val.toJSON());
+            }, _SERIALIZER[TYPE.ARRAY] = function(val) {
+                return val;
+            }, _SERIALIZER[TYPE.OBJECT] = function(val) {
+                return val;
+            }, _SERIALIZER[TYPE.STRING] = function(val) {
+                return val;
+            }, _SERIALIZER[TYPE.NUMBER] = function(val) {
+                return val;
+            }, _SERIALIZER[TYPE.BOOLEAN] = function(val) {
+                return val;
+            }, _SERIALIZER[TYPE.NULL] = function(val) {
+                return val;
+            }, _SERIALIZER), defaultSerializers = {}, DESERIALIZER = ((_DESERIALIZER = {})[TYPE.FUNCTION] = function() {
+                throw new Error("Function serialization is not implemented; nothing to deserialize");
+            }, _DESERIALIZER[TYPE.ERROR] = function(_ref2) {
+                var message = _ref2.message, stack = _ref2.stack, code = _ref2.code, error = new Error(message);
+                error.code = code;
+                error.stack = stack + "\n\n" + error.stack;
+                return error;
+            }, _DESERIALIZER[TYPE.PROMISE] = function() {
+                throw new Error("Promise serialization is not implemented; nothing to deserialize");
+            }, _DESERIALIZER[TYPE.REGEX] = function(val) {
+                return new RegExp(val);
+            }, _DESERIALIZER[TYPE.DATE] = function(val) {
+                return new Date(val);
+            }, _DESERIALIZER[TYPE.ARRAY] = function(val) {
+                return val;
+            }, _DESERIALIZER[TYPE.OBJECT] = function(val) {
+                return val;
+            }, _DESERIALIZER[TYPE.STRING] = function(val) {
+                return val;
+            }, _DESERIALIZER[TYPE.NUMBER] = function(val) {
+                return val;
+            }, _DESERIALIZER[TYPE.BOOLEAN] = function(val) {
+                return val;
+            }, _DESERIALIZER[TYPE.NULL] = function(val) {
+                return val;
+            }, _DESERIALIZER), defaultDeserializers = {}, global = __webpack_require__("./src/global.js");
             global.a.methods = global.a.methods || new cross_domain_safe_weakmap_src.a();
-            var listenForMethods = Object(belter_src.once)(function() {
-                global.a.on(conf.b.POST_MESSAGE_NAMES.METHOD, {
-                    origin: conf.b.WILDCARD
+            var listenForFunctionCalls = Object(belter_src.once)(function() {
+                global.a.on(conf.d.METHOD, {
+                    origin: conf.h
                 }, function(_ref) {
                     var source = _ref.source, origin = _ref.origin, data = _ref.data, methods = global.a.methods.get(source);
                     if (!methods) throw new Error("Could not find any methods this window has privileges to call");
@@ -2408,7 +2408,7 @@
                     if (!meth) throw new Error("Could not find method with id: " + data.id);
                     if (!Object(src.matchDomain)(meth.domain, origin)) throw new Error("Method domain " + meth.domain + " does not match origin " + origin);
                     return zalgo_promise_src.a.try(function() {
-                        return meth.method.apply({
+                        return meth.val.apply({
                             source: source,
                             origin: origin,
                             data: data
@@ -2421,11 +2421,11 @@
                         };
                     });
                 });
-            });
-            function isSerialized(item, type) {
-                return "object" === (void 0 === item ? "undefined" : _typeof(item)) && null !== item && item.__type__ === type;
-            }
-            function serializeMethod(destination, domain, method, name) {
+            }), CUSTOM_TYPE = {
+                CROSS_DOMAIN_ZALGO_PROMISE: "cross_domain_zalgo_promise",
+                CROSS_DOMAIN_FUNCTION: "cross_domain_function"
+            };
+            function serialize_serializeFunction(destination, domain, val, key) {
                 var id = Object(belter_src.uniqueID)(), methods = global.a.methods.get(destination);
                 if (!methods) {
                     methods = {};
@@ -2433,97 +2433,99 @@
                 }
                 methods[id] = {
                     domain: domain,
-                    method: method
+                    val: val
                 };
-                return {
-                    __type__: conf.b.SERIALIZATION_TYPES.METHOD,
-                    __id__: id,
-                    __name__: name
-                };
-            }
-            function serializeMethods(destination, domain, obj) {
-                return Object(belter_src.replaceObject)({
-                    obj: obj
-                }, function(item, key) {
-                    return "function" == typeof item ? serializeMethod(destination, domain, item, key.toString()) : item instanceof Error ? (err = item, 
-                    {
-                        __type__: conf.b.SERIALIZATION_TYPES.ERROR,
-                        __message__: Object(belter_src.stringifyError)(err),
-                        __code__: err.code
-                    }) : window.Promise && item instanceof window.Promise ? function(destination, domain, promise, name) {
-                        return {
-                            __type__: conf.b.SERIALIZATION_TYPES.PROMISE,
-                            __then__: serializeMethod(destination, domain, function(resolve, reject) {
-                                return promise.then(resolve, reject);
-                            }, name + ".then")
-                        };
-                    }(destination, domain, item, key.toString()) : zalgo_promise_src.a.isPromise(item) ? function(destination, domain, promise, name) {
-                        return {
-                            __type__: conf.b.SERIALIZATION_TYPES.ZALGO_PROMISE,
-                            __then__: serializeMethod(destination, domain, function(resolve, reject) {
-                                return promise.then(resolve, reject);
-                            }, name + ".then")
-                        };
-                    }(destination, domain, item, key.toString()) : Object(belter_src.isRegex)(item) ? (regex = item, 
-                    {
-                        __type__: conf.b.SERIALIZATION_TYPES.REGEX,
-                        __source__: regex.source
-                    }) : item;
-                    var err, regex;
-                }).obj;
-            }
-            function deserializeMethod(source, origin, obj) {
-                function wrapper() {
-                    var args = Array.prototype.slice.call(arguments);
-                    return global.a.send(source, conf.b.POST_MESSAGE_NAMES.METHOD, {
-                        id: obj.__id__,
-                        name: obj.__name__,
-                        args: args
-                    }, {
-                        domain: origin,
-                        timeout: -1
-                    }).then(function(_ref2) {
-                        return _ref2.data.result;
-                    }, function(err) {
-                        throw err;
-                    });
-                }
-                wrapper.__name__ = obj.__name__;
-                wrapper.__xdomain__ = !0;
-                wrapper.source = source;
-                wrapper.origin = origin;
-                return wrapper;
-            }
-            function deserializeError(source, origin, obj) {
-                var err = new Error(obj.__message__);
-                obj.__code__ && (err.code = obj.__code__);
-                return err;
-            }
-            function deserializeZalgoPromise(source, origin, prom) {
-                return new zalgo_promise_src.a(function(resolve, reject) {
-                    return deserializeMethod(source, origin, prom.__then__)(resolve, reject);
+                listenForFunctionCalls();
+                return serializeType(CUSTOM_TYPE.CROSS_DOMAIN_FUNCTION, {
+                    id: id,
+                    name: val.name || key
                 });
             }
-            function deserializePromise(source, origin, prom) {
-                return window.Promise ? new window.Promise(function(resolve, reject) {
-                    return deserializeMethod(source, origin, prom.__then__)(resolve, reject);
-                }) : deserializeZalgoPromise(source, origin, prom);
+            function serialize_deserializeFunction(source, origin, _ref2) {
+                var id = _ref2.id, name = _ref2.name;
+                function crossDomainFunctionWrapper() {
+                    var args = Array.prototype.slice.call(arguments);
+                    return global.a.send(source, conf.d.METHOD, {
+                        id: id,
+                        name: name,
+                        args: args
+                    }, {
+                        domain: origin
+                    }).then(function(_ref3) {
+                        return _ref3.data.result;
+                    });
+                }
+                crossDomainFunctionWrapper.__name__ = name;
+                crossDomainFunctionWrapper.__xdomain__ = !0;
+                crossDomainFunctionWrapper.source = source;
+                crossDomainFunctionWrapper.origin = origin;
+                return crossDomainFunctionWrapper;
             }
-            function deserializeRegex(source, origin, item) {
-                return new RegExp(item.__source__);
+            function serializeMessage(destination, domain, obj) {
+                var _serialize;
+                return function(obj) {
+                    var serializers = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : defaultSerializers, result = JSON.stringify(obj, function(key) {
+                        var val = this[key];
+                        if (isSerializedType(this)) return val;
+                        var type = determineType(val);
+                        if (!type) return val;
+                        var serializer = serializers[type] || SERIALIZER[type];
+                        return serializer ? serializer(val, key) : val;
+                    });
+                    return void 0 === result ? TYPE.UNDEFINED : result;
+                }(obj, ((_serialize = {})[TYPE.PROMISE] = function(val, key) {
+                    return function(destination, domain, val, key) {
+                        return serializeType(CUSTOM_TYPE.CROSS_DOMAIN_ZALGO_PROMISE, {
+                            then: serialize_serializeFunction(destination, domain, function(resolve, reject) {
+                                return val.then(resolve, reject);
+                            }, key)
+                        });
+                    }(destination, domain, val, key);
+                }, _serialize[TYPE.FUNCTION] = function(val, key) {
+                    return serialize_serializeFunction(destination, domain, val, key);
+                }, _serialize));
             }
-            function deserializeMethods(source, origin, obj) {
-                return Object(belter_src.replaceObject)({
-                    obj: obj
-                }, function(item) {
-                    return "object" !== (void 0 === item ? "undefined" : _typeof(item)) || null === item ? item : isSerialized(item, conf.b.SERIALIZATION_TYPES.METHOD) ? deserializeMethod(source, origin, item) : isSerialized(item, conf.b.SERIALIZATION_TYPES.ERROR) ? deserializeError(0, 0, item) : isSerialized(item, conf.b.SERIALIZATION_TYPES.PROMISE) ? deserializePromise(source, origin, item) : isSerialized(item, conf.b.SERIALIZATION_TYPES.ZALGO_PROMISE) ? deserializeZalgoPromise(source, origin, item) : isSerialized(item, conf.b.SERIALIZATION_TYPES.REGEX) ? deserializeRegex(0, 0, item) : item;
-                }).obj;
+            function deserializeMessage(source, origin, message) {
+                var _deserialize;
+                return function(str) {
+                    var deserializers = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : defaultDeserializers;
+                    if (str !== TYPE.UNDEFINED) return JSON.parse(str, function(key, val) {
+                        if (isSerializedType(this)) return val;
+                        var type = void 0, value = void 0;
+                        if (isSerializedType(val)) {
+                            type = val.__type__;
+                            value = val.__val__;
+                        } else {
+                            type = determineType(val);
+                            value = val;
+                        }
+                        if (!type) return value;
+                        var deserializer = deserializers[type] || DESERIALIZER[type];
+                        return deserializer ? deserializer(value, key) : value;
+                    });
+                }(message, ((_deserialize = {})[CUSTOM_TYPE.CROSS_DOMAIN_ZALGO_PROMISE] = function(_ref5) {
+                    var then = _ref5.then;
+                    return function(source, origin, _ref4) {
+                        var then = _ref4.then;
+                        return new zalgo_promise_src.a(function(resolve, reject) {
+                            serialize_deserializeFunction(source, origin, then)(resolve, reject);
+                        });
+                    }(source, origin, {
+                        then: then
+                    });
+                }, _deserialize[CUSTOM_TYPE.CROSS_DOMAIN_FUNCTION] = function(_ref6) {
+                    var id = _ref6.id, name = _ref6.name;
+                    return serialize_deserializeFunction(source, origin, {
+                        id: id,
+                        name: name
+                    });
+                }, _deserialize));
             }
             global.a.readyPromises = global.a.readyPromises || new cross_domain_safe_weakmap_src.a();
             global.a.knownWindows = global.a.knownWindows || new cross_domain_safe_weakmap_src.a();
             function onHello(handler) {
-                global.a.on(conf.b.POST_MESSAGE_NAMES.HELLO, {
-                    domain: conf.b.WILDCARD
+                global.a.on(conf.d.HELLO, {
+                    domain: conf.h
                 }, function(_ref) {
                     var source = _ref.source, origin = _ref.origin;
                     return handler({
@@ -2533,8 +2535,8 @@
                 });
             }
             function sayHello(win) {
-                return global.a.send(win, conf.b.POST_MESSAGE_NAMES.HELLO, {}, {
-                    domain: conf.b.WILDCARD,
+                return global.a.send(win, conf.d.HELLO, {}, {
+                    domain: conf.h,
                     timeout: -1
                 }).then(function(_ref2) {
                     return {
@@ -2572,43 +2574,22 @@
             __webpack_require__.d(__webpack_exports__, "b", function() {
                 return getWindowType;
             });
-            __webpack_require__.d(__webpack_exports__, "g", function() {
+            __webpack_require__.d(__webpack_exports__, "f", function() {
                 return needsGlobalMessagingForBrowser;
             });
-            __webpack_require__.d(__webpack_exports__, "e", function() {
-                return listenForMethods;
-            });
-            __webpack_require__.d(__webpack_exports__, !1, function() {
-                return serializeMethod;
-            });
-            __webpack_require__.d(__webpack_exports__, "j", function() {
-                return serializeMethods;
-            });
-            __webpack_require__.d(__webpack_exports__, !1, function() {
-                return deserializeMethod;
-            });
-            __webpack_require__.d(__webpack_exports__, !1, function() {
-                return deserializeError;
-            });
-            __webpack_require__.d(__webpack_exports__, !1, function() {
-                return deserializeZalgoPromise;
-            });
-            __webpack_require__.d(__webpack_exports__, !1, function() {
-                return deserializePromise;
-            });
-            __webpack_require__.d(__webpack_exports__, !1, function() {
-                return deserializeRegex;
+            __webpack_require__.d(__webpack_exports__, "i", function() {
+                return serializeMessage;
             });
             __webpack_require__.d(__webpack_exports__, "a", function() {
-                return deserializeMethods;
+                return deserializeMessage;
             });
             __webpack_require__.d(__webpack_exports__, !1, function() {
                 return onHello;
             });
-            __webpack_require__.d(__webpack_exports__, "i", function() {
+            __webpack_require__.d(__webpack_exports__, "h", function() {
                 return sayHello;
             });
-            __webpack_require__.d(__webpack_exports__, "f", function() {
+            __webpack_require__.d(__webpack_exports__, "e", function() {
                 return markWindowKnown;
             });
             __webpack_require__.d(__webpack_exports__, "d", function() {
@@ -2617,7 +2598,7 @@
             __webpack_require__.d(__webpack_exports__, "c", function() {
                 return initOnReady;
             });
-            __webpack_require__.d(__webpack_exports__, "h", function() {
+            __webpack_require__.d(__webpack_exports__, "g", function() {
                 return onChildWindowReady;
             });
         }

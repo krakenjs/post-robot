@@ -7,7 +7,7 @@ import { ZalgoPromise } from 'zalgo-promise/src';
 import { once as onceFunction, safeInterval } from 'belter/src';
 
 import { addRequestListener } from '../drivers';
-import { CONSTANTS } from '../conf';
+import { WILDCARD } from '../conf';
 import { global } from '../global';
 
 export function listen(options) {
@@ -30,7 +30,7 @@ export function listen(options) {
             throw err;
         },
         window: win,
-        domain: domain || CONSTANTS.WILDCARD,
+        domain: domain || WILDCARD,
         name: name
     };
 

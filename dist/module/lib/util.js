@@ -1,15 +1,15 @@
 import { isPopup, isIframe, getUserAgent } from 'cross-domain-utils/src';
 
-import { CONFIG, CONSTANTS } from '../conf';
+import { CONFIG, WINDOW_TYPE } from '../conf';
 
 export function getWindowType() {
     if (isPopup()) {
-        return CONSTANTS.WINDOW_TYPES.POPUP;
+        return WINDOW_TYPE.POPUP;
     }
     if (isIframe()) {
-        return CONSTANTS.WINDOW_TYPES.IFRAME;
+        return WINDOW_TYPE.IFRAME;
     }
-    return CONSTANTS.WINDOW_TYPES.FULLPAGE;
+    return WINDOW_TYPE.FULLPAGE;
 }
 
 export function needsGlobalMessagingForBrowser() {

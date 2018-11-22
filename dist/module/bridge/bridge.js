@@ -2,7 +2,7 @@ import 'zalgo-promise/src';
 import { getParent, isWindowClosed } from 'cross-domain-utils/src';
 import { noop } from 'belter/src';
 
-import { CONSTANTS } from '../conf';
+import { MESSAGE_NAME, WILDCARD } from '../conf';
 import { global } from '../global';
 
 /*
@@ -85,7 +85,7 @@ global.openTunnelToParent = function openTunnelToParent(_ref2) {
 
     var id = addTunnelWindow({ name: name, source: source, canary: canary, sendMessage: sendMessage });
 
-    return global.send(parentWindow, CONSTANTS.POST_MESSAGE_NAMES.OPEN_TUNNEL, {
+    return global.send(parentWindow, MESSAGE_NAME.OPEN_TUNNEL, {
 
         name: name,
 
@@ -113,5 +113,5 @@ global.openTunnelToParent = function openTunnelToParent(_ref2) {
 
             tunnelWindow.sendMessage.apply(this, arguments);
         }
-    }, { domain: CONSTANTS.WILDCARD });
+    }, { domain: WILDCARD });
 };
