@@ -5,7 +5,7 @@ import { ZalgoPromise } from 'zalgo-promise/src';
 import { uniqueID, stringifyError } from 'belter/src';
 
 import { MESSAGE_TYPE, CONFIG, MESSAGE_NAME, WILDCARD, WINDOW_PROP } from '../../conf';
-import { serializeMessage, getWindowType } from '../../lib';
+import { serializeMessage } from '../../serialize';
 import type { Message } from '../types';
 
 import { SEND_MESSAGE_STRATEGIES } from './strategies';
@@ -32,6 +32,7 @@ function logMessage(domain : string | Array<string>, message : Message) {
 
 export function sendMessage(win : CrossDomainWindowType, domain : string | Array<string>, message : Message) : ZalgoPromise<void> {
     return ZalgoPromise.try(() => {
+
         if (isWindowClosed(win)) {
             throw new Error('Window is closed');
         }
@@ -40,9 +41,8 @@ export function sendMessage(win : CrossDomainWindowType, domain : string | Array
 
         const serializedMessage = serializeMessage(win, domain, {
             [ WINDOW_PROP.POSTROBOT ]: {
-                ...message,
-                id:           uniqueID(),
-                windowType:   getWindowType()
+                id: uniqueID(),
+                ...message
             }
         });
 

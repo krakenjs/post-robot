@@ -11,25 +11,6 @@ import type { RequestMessage, AckResponseMessage, SuccessResponseMessage, ErrorR
 
 export let RECEIVE_MESSAGE_TYPES = {
 
-    [ MESSAGE_TYPE.ACK ](source : CrossDomainWindowType, origin : string, message : AckResponseMessage) {
-
-        if (isResponseListenerErrored(message.hash)) {
-            return;
-        }
-
-        let options = getResponseListener(message.hash);
-
-        if (!options) {
-            throw new Error(`No handler found for post message ack for message: ${ message.name } from ${ origin } in ${ window.location.protocol }//${ window.location.host }${ window.location.pathname }`);
-        }
-
-        if (!matchDomain(options.domain, origin)) {
-            throw new Error(`Ack origin ${ origin } does not match domain ${ options.domain.toString() }`);
-        }
-
-        options.ack = true;
-    },
-
     [ MESSAGE_TYPE.REQUEST ](source : CrossDomainWindowType, origin : string, message : RequestMessage) : ZalgoPromise<void> {
 
         let options = getRequestListener({ name: message.name, win: source, domain: origin });
@@ -87,6 +68,25 @@ export let RECEIVE_MESSAGE_TYPES = {
                 throw err;
             }
         });
+    },
+
+    [ MESSAGE_TYPE.ACK ](source : CrossDomainWindowType, origin : string, message : AckResponseMessage) {
+
+        if (isResponseListenerErrored(message.hash)) {
+            return;
+        }
+
+        let options = getResponseListener(message.hash);
+
+        if (!options) {
+            throw new Error(`No handler found for post message ack for message: ${ message.name } from ${ origin } in ${ window.location.protocol }//${ window.location.host }${ window.location.pathname }`);
+        }
+
+        if (!matchDomain(options.domain, origin)) {
+            throw new Error(`Ack origin ${ origin } does not match domain ${ options.domain.toString() }`);
+        }
+
+        options.ack = true;
     },
 
     [ MESSAGE_TYPE.RESPONSE ](source : CrossDomainWindowType, origin : string, message : SuccessResponseMessage | ErrorResponseMessage) : void | ZalgoPromise<void> {

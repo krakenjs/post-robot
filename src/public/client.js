@@ -108,13 +108,13 @@ export function request(options : RequestOptionsType) : ZalgoPromise<ResponseMes
                 return onChildWindowReady(win, options.timeout || CONFIG.CHILD_WINDOW_TIMEOUT);
             }
 
-        }).then(({ origin } = {}) => {
+        }).then(({ domain: origin } = {}) => {
 
             if (isRegex(domain) && !origin) {
                 return sayHello(win);
             }
 
-        }).then(({ origin } = {}) => {
+        }).then(({ domain: origin } = {}) => {
 
             if (isRegex(domain)) {
                 if (!matchDomain(domain, origin)) {

@@ -3,6 +3,7 @@
 
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { type CrossDomainWindowType } from 'cross-domain-utils/src';
+import { uniqueID } from 'belter/src';
 import { assert } from 'chai';
 
 import postRobot from '../src';
@@ -14,16 +15,21 @@ import { enableIE8Mode } from './common';
 postRobot.CONFIG.LOG_TO_PAGE = true;
 window.mockDomain = 'mock://test-post-robot.com';
 
+function getBody() : HTMLBodyElement {
+    let body = document.body;
+    if (!body) {
+        throw new Error(`Can not find body`);
+    }
+    return body;
+}
+
 function createIframe(name, callback) : CrossDomainWindowType {
     let frame = document.createElement('iframe');
     frame.src = `/base/test/${  name }`;
     frame.id = 'childframe';
     frame.name = `${ Math.random().toString()  }_${  name.replace(/[^a-zA-Z0-9]+/g, '_') }`;
     frame.onload = callback;
-    if (!document.body) {
-        throw new Error(`Expected document.body to be available`);
-    }
-    document.body.appendChild(frame);
+    getBody().appendChild(frame);
     return frame.contentWindow;
 }
 
@@ -132,22 +138,6 @@ describe('[post-robot] happy cases', () => {
 
             return postRobot.send(childFrame, 'foo').then(({ data }) => {
                 assert.equal(data.foo, 'bar');
-            });
-        });
-    });
-
-    it('should pass a function across windows and be able to call it later', (done) => {
-        postRobot.send(childFrame, 'setupListener', {
-
-            messageName: 'foo',
-            data:        {
-                done
-            }
-
-        }).then(() => {
-
-            return postRobot.send(childFrame, 'foo').then(({ data }) => {
-                data.done();
             });
         });
     });
@@ -338,6 +328,526 @@ describe('[post-robot] options', () => {
                 assert.ok(err);
                 assert.equal(count, 1);
             });
+        });
+    });
+});
+
+
+describe('[post-robot] serialization cases', () => {
+
+    it('should pass a function across windows and be able to call it later', (done) => {
+
+        const expectedArgument = 567;
+        let actualArgument;
+        let expectedReturn = 'hello world';
+
+        const myfunction = (val) => {
+            actualArgument = val;
+            return expectedReturn;
+        };
+
+        postRobot.send(childFrame, 'setupListener', {
+
+            messageName: 'foo',
+            data:        {
+                myfunction
+            }
+
+        }).then(() => {
+            return postRobot.send(childFrame, 'foo');
+
+        }).then(({ data }) => {
+            return data.myfunction(expectedArgument);
+
+        }).then(result => {
+            if (actualArgument !== expectedArgument) {
+                throw new Error(`Expected function to accept ${ expectedArgument }, got ${ actualArgument }`);
+            }
+
+            if (result !== expectedReturn) {
+                throw new Error(`Expected function to return ${ expectedReturn }, got ${ result }`);
+            }
+
+            done();
+        });
+    });
+
+    it('should pass a function across windows and be able to call it later and capture the exception', (done) => {
+
+        let expectedErrorMessage = 'something went wrong';
+        let expectedErrorCode = 'ERROR_567';
+        let expectedErrorStack;
+
+        const myfunction = () => {
+            let err = new Error(expectedErrorMessage);
+            // $FlowFixMe
+            err.code = expectedErrorCode;
+            expectedErrorStack = err.stack;
+            throw err;
+        };
+
+        postRobot.send(childFrame, 'setupListener', {
+
+            messageName: 'foo',
+            data:        {
+                myfunction
+            }
+
+        }).then(() => {
+            return postRobot.send(childFrame, 'foo');
+
+        }).then(({ data }) => {
+            return data.myfunction();
+
+        }).catch(err => {
+            if (!(err instanceof Error)) {
+                throw new TypeError(`Expected err to be an Error instance`);
+            }
+
+            if (err.message !== expectedErrorMessage) {
+                throw new Error(`Expected function throw error with message ${ expectedErrorMessage }, got ${ err.message }`);
+            }
+
+            // $FlowFixMe
+            if (err.code !== expectedErrorCode) {
+                // $FlowFixMe
+                throw new Error(`Expected function throw error with code ${ expectedErrorCode }, got ${ err.code }`);
+            }
+
+            if (!expectedErrorStack) {
+                throw new Error(`Expected error to have stack`);
+            }
+
+            if (err.stack.indexOf(expectedErrorStack) === -1) {
+                throw new Error(`Expected function throw error with stack ${ expectedErrorStack }, got ${ err.stack }`);
+            }
+
+            done();
+        });
+    });
+
+    it('should pass a promise across windows and be able to call it later', (done) => {
+
+        let expectedValue = 123;
+        let resolver;
+        
+        // eslint-disable-next-line compat/compat, promise/no-native, no-restricted-globals
+        const promise = new Promise((resolve) => {
+            resolver = resolve;
+        });
+
+        postRobot.send(childFrame, 'setupListener', {
+
+            messageName: 'foo',
+            data:        {
+                promise
+            }
+
+        }).then(() => {
+            return postRobot.send(childFrame, 'foo');
+
+        }).then(({ data }) => {
+            return data.promise;
+
+        }).then(result => {
+            if (result !== expectedValue) {
+                throw new Error(`Expected promise to resolve to ${ expectedValue }, got ${ result }`);
+            }
+
+            done();
+        });
+
+        if (!resolver) {
+            throw new Error(`Expected resolver to be set`);
+        }
+
+        resolver(expectedValue);
+    });
+
+    it('should pass a promise across windows and be able to reject it later', (done) => {
+
+        let expectedErrorMessage = 'Oh no!';
+        let expectedErrorCode = 'ABC123';
+        let expectedErrorStack;
+        let rejector;
+        
+        // eslint-disable-next-line compat/compat, promise/no-native, no-restricted-globals
+        const promise = new Promise((resolve, reject) => {
+            rejector = reject;
+        });
+
+        postRobot.send(childFrame, 'setupListener', {
+
+            messageName: 'foo',
+            data:        {
+                promise
+            }
+
+        }).then(() => {
+            return postRobot.send(childFrame, 'foo');
+
+        }).then(({ data }) => {
+            return data.promise;
+
+        }).catch(err => {
+            if (!(err instanceof Error)) {
+                throw new TypeError(`Expected err to be an Error instance`);
+            }
+
+            if (err.message !== expectedErrorMessage) {
+                throw new Error(`Expected function throw error with message ${ expectedErrorMessage }, got ${ err.message }`);
+            }
+
+            // $FlowFixMe
+            if (err.code !== expectedErrorCode) {
+                // $FlowFixMe
+                throw new Error(`Expected function throw error with code ${ expectedErrorCode }, got ${ err.code }`);
+            }
+
+            if (!expectedErrorStack) {
+                throw new Error(`Expected error to have stack`);
+            }
+
+            if (err.stack.indexOf(expectedErrorStack) === -1) {
+                throw new Error(`Expected function throw error with stack ${ expectedErrorStack }, got ${ err.stack }`);
+            }
+
+            done();
+        });
+
+        let err = new Error(expectedErrorMessage);
+        // $FlowFixMe
+        err.code = expectedErrorCode;
+        expectedErrorStack = err.stack;
+
+        if (!rejector) {
+            throw new Error(`Expected rejector to be set`);
+        }
+
+        rejector(err);
+    });
+
+    it('should pass a zalgo promise across windows and be able to call it later', (done) => {
+
+        let expectedValue = 123;
+        let resolver;
+        
+        const promise = new ZalgoPromise((resolve) => {
+            resolver = resolve;
+        });
+
+        postRobot.send(childFrame, 'setupListener', {
+
+            messageName: 'foo',
+            data:        {
+                promise
+            }
+
+        }).then(() => {
+            return postRobot.send(childFrame, 'foo');
+
+        }).then(({ data }) => {
+            return data.promise;
+
+        }).then(result => {
+            if (result !== expectedValue) {
+                throw new Error(`Expected promise to resolve to ${ expectedValue }, got ${ result }`);
+            }
+
+            done();
+        });
+
+        if (!resolver) {
+            throw new Error(`Expected resolver to be set`);
+        }
+
+        resolver(expectedValue);
+    });
+
+    it('should pass a zalgo promise across windows and be able to reject it later', (done) => {
+
+        let expectedErrorMessage = 'Oh no!';
+        let expectedErrorCode = 'ABC123';
+        let expectedErrorStack;
+        let rejector;
+        
+        const promise = new ZalgoPromise((resolve, reject) => {
+            rejector = reject;
+        });
+
+        postRobot.send(childFrame, 'setupListener', {
+
+            messageName: 'foo',
+            data:        {
+                promise
+            }
+
+        }).then(() => {
+            return postRobot.send(childFrame, 'foo');
+
+        }).then(({ data }) => {
+            return data.promise;
+
+        }).catch(err => {
+            if (!(err instanceof Error)) {
+                throw new TypeError(`Expected err to be an Error instance`);
+            }
+            
+            if (err.message !== expectedErrorMessage) {
+                throw new Error(`Expected function throw error with message ${ expectedErrorMessage }, got ${ err.message }`);
+            }
+
+            // $FlowFixMe
+            if (err.code !== expectedErrorCode) {
+                // $FlowFixMe
+                throw new Error(`Expected function throw error with code ${ expectedErrorCode }, got ${ err.code }`);
+            }
+
+            if (!expectedErrorStack) {
+                throw new Error(`Expected error to have stack`);
+            }
+
+            if (err.stack.indexOf(expectedErrorStack) === -1) {
+                throw new Error(`Expected function throw error with stack ${ expectedErrorStack }, got ${ err.stack }`);
+            }
+
+            done();
+        });
+
+        let err = new Error(expectedErrorMessage);
+        // $FlowFixMe
+        err.code = expectedErrorCode;
+        expectedErrorStack = err.stack;
+
+        if (!rejector) {
+            throw new Error(`Expected rejector to be set`);
+        }
+
+        rejector(err);
+    });
+
+    it('should pass an iframe across the window boundary and focus it', () => {
+
+        let iframe = document.createElement('iframe');
+        getBody().appendChild(iframe);
+        let mywindow = iframe.contentWindow;
+
+        return postRobot.send(childFrame, 'setupListener', {
+
+            messageName: 'foo',
+            data:        {
+                mywindow
+            }
+
+        }).then(() => {
+            return postRobot.send(childFrame, 'foo');
+
+        }).then(({ data }) => {
+            return data.mywindow.focus();
+        });
+    });
+
+    it('should pass an iframe across the window boundary and close it', () => {
+
+        let iframe = document.createElement('iframe');
+        getBody().appendChild(iframe);
+        let mywindow = iframe.contentWindow;
+
+        return postRobot.send(childFrame, 'setupListener', {
+
+            messageName: 'foo',
+            data:        {
+                mywindow
+            }
+
+        }).then(() => {
+            return postRobot.send(childFrame, 'foo');
+
+        }).then(({ data }) => {
+            return data.mywindow.close();
+        });
+    });
+
+
+    it('should pass an iframe across the window boundary and change its location', () => {
+
+        let iframe = document.createElement('iframe');
+        getBody().appendChild(iframe);
+        let mywindow = iframe.contentWindow;
+
+        return postRobot.send(childFrame, 'setupListener', {
+
+            messageName: 'foo',
+            data:        {
+                mywindow
+            }
+
+        }).then(() => {
+            return postRobot.send(childFrame, 'foo');
+
+        }).then(({ data }) => {
+            return data.mywindow.setLocation('/base/test/child.htm');
+
+        }).then(() => {
+            return onChildWindowReady(mywindow);
+
+        }).then(() => {
+            return postRobot.send(mywindow, 'setupListener', {
+
+                messageName: 'foo',
+                data:        {
+                    hello: 'world'
+                }
+            });
+
+        }).then(() => {
+            return postRobot.send(mywindow, 'foo');
+
+        }).then(({ data }) => {
+            if (data.hello !== 'world') {
+                throw new Error(`Expected hello to equal world, got ${ data.hello }`);
+            }
+        });
+    });
+
+    it('should pass an iframe across the window boundary and get its instance id', () => {
+
+        let iframe = document.createElement('iframe');
+        getBody().appendChild(iframe);
+        let mywindow = iframe.contentWindow;
+
+        return postRobot.send(childFrame, 'setupListener', {
+
+            messageName: 'foo',
+            data:        {
+                mywindow
+            }
+
+        }).then(() => {
+            return postRobot.send(childFrame, 'foo');
+
+        }).then(({ data }) => {
+            return data.mywindow.setLocation('/base/test/child.htm');
+
+        }).then((win) => {
+            return win.getInstanceID();
+
+        }).then(instanceID => {
+
+            if (!instanceID || typeof instanceID !== 'string') {
+                throw new Error(`Expected instance id to be returned`);
+            }
+        });
+    });
+
+    it('should pass a popup across the window boundary and focus it', () => {
+
+        let mywindow = window.open('', uniqueID(), 'width=500,height=500');
+
+        return postRobot.send(childFrame, 'setupListener', {
+
+            messageName: 'foo',
+            data:        {
+                mywindow
+            }
+
+        }).then(() => {
+            return postRobot.send(childFrame, 'foo');
+
+        }).then(({ data }) => {
+            return data.mywindow.focus();
+        });
+    });
+
+    it('should pass a popup across the window boundary and close it', () => {
+
+        let mywindow = window.open('', uniqueID(), 'width=500,height=500');
+
+        return postRobot.send(childFrame, 'setupListener', {
+
+            messageName: 'foo',
+            data:        {
+                mywindow
+            }
+
+        }).then(() => {
+            return postRobot.send(childFrame, 'foo');
+
+        }).then(({ data }) => {
+            return data.mywindow.close();
+
+        }).then(() => {
+            if (!mywindow.closed) {
+                throw new Error(`Expected window to be closed`);
+            }
+        });
+    });
+
+
+    it('should pass a popup across the window boundary and change its location', () => {
+
+        let mywindow = window.open('', uniqueID(), 'width=500,height=500');
+
+        return postRobot.send(childFrame, 'setupListener', {
+
+            messageName: 'foo',
+            data:        {
+                mywindow
+            }
+
+        }).then(() => {
+            return postRobot.send(childFrame, 'foo');
+
+        }).then(({ data }) => {
+            return data.mywindow.setLocation('/base/test/child.htm');
+
+        }).then(() => {
+            return onChildWindowReady(mywindow);
+
+        }).then(() => {
+            return postRobot.send(mywindow, 'setupListener', {
+
+                messageName: 'foo',
+                data:        {
+                    hello: 'world'
+                }
+            });
+
+        }).then(() => {
+            return postRobot.send(mywindow, 'foo');
+
+        }).then(({ data }) => {
+            if (data.hello !== 'world') {
+                throw new Error(`Expected hello to equal world, got ${ data.hello }`);
+            }
+        });
+    });
+
+    it('should pass a popup across the window boundary and get its instance id', () => {
+
+        let mywindow = window.open('', uniqueID(), 'width=500,height=500');
+
+        return postRobot.send(childFrame, 'setupListener', {
+
+            messageName: 'foo',
+            data:        {
+                mywindow
+            }
+
+        }).then(() => {
+            return postRobot.send(childFrame, 'foo');
+
+        }).then(({ data }) => {
+            return data.mywindow.setLocation('/base/test/child.htm');
+
+        }).then((win) => {
+            return win.getInstanceID();
+
+        }).then(instanceID => {
+
+            if (!instanceID || typeof instanceID !== 'string') {
+                throw new Error(`Expected instance id to be returned`);
+            }
         });
     });
 });

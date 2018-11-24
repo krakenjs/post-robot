@@ -13,23 +13,12 @@ export const MESSAGE_ACK = {
 
 export const MESSAGE_NAME = {
     METHOD:      ('postrobot_method' : 'postrobot_method'),
-    HELLO:       ('postrobot_ready' : 'postrobot_ready'),
+    HELLO:       ('postrobot_hello' : 'postrobot_hello'),
     OPEN_TUNNEL: ('postrobot_open_tunnel' : 'postrobot_open_tunnel')
-};
-
-export const WINDOW_TYPE = {
-    FULLPAGE: ('fullpage' : 'fullpage'),
-    POPUP:    ('popup' : 'popup'),
-    IFRAME:   ('iframe' : 'iframe')
 };
 
 export const WINDOW_PROP = {
     POSTROBOT: ('__postRobot__' : '__postRobot__')
-};
-
-export const SERIALIZATION_TYPE = {
-    METHOD:        ('postrobot_method' : 'postrobot_method'),
-    ZALGO_PROMISE: ('postrobot_zalgo_promise' : 'postrobot_zalgo_promise')
 };
 
 export const SEND_STRATEGY = {
@@ -47,3 +36,9 @@ export const BRIDGE_NAME_PREFIX = '__postrobot_bridge__';
 export const POSTROBOT_PROXY =    '__postrobot_proxy__';
 
 export const WILDCARD = '*';
+
+export const SERIALIZATION_TYPE = {
+    CROSS_DOMAIN_ZALGO_PROMISE: ('cross_domain_zalgo_promise' : 'cross_domain_zalgo_promise'),
+    CROSS_DOMAIN_FUNCTION:      ('cross_domain_function' : 'cross_domain_function'),
+    CROSS_DOMAIN_WINDOW:        ('cross_domain_window' : 'cross_domain_window')
+};

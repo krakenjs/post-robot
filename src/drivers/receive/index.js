@@ -4,7 +4,8 @@ import { isWindowClosed, type CrossDomainWindowType, getDomain } from 'cross-dom
 import { addEventListener, noop } from 'belter/src';
 
 import { MESSAGE_NAME, WINDOW_PROP, MESSAGE_TYPE } from '../../conf';
-import { deserializeMessage, markWindowKnown } from '../../lib';
+import { markWindowKnown } from '../../lib';
+import { deserializeMessage } from '../../serialize';
 import { global } from '../../global';
 
 import { RECEIVE_MESSAGE_TYPES } from './types';
