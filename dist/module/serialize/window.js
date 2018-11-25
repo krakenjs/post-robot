@@ -1,6 +1,6 @@
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-import 'cross-domain-utils/src';
+import { isSameDomain } from 'cross-domain-utils/src';
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { uniqueID, getOrSet, noop, memoizePromise } from 'belter/src';
@@ -51,8 +51,16 @@ export var ProxyWindow = function () {
 
         return ZalgoPromise['try'](function () {
             if (_this3.actualWindow) {
+                if (!isSameDomain(_this3.actualWindow)) {
+                    throw new Error('Can not set name for window on different domain');
+                }
                 // $FlowFixMe
                 _this3.actualWindow.name = name;
+                // $FlowFixMe
+                if (_this3.actualWindow.frameElement) {
+                    // $FlowFixMe
+                    _this3.actualWindow.frameElement.setAttribute('name', name);
+                }
             } else {
                 return _this3.serializedWindow.setName(name);
             }

@@ -561,20 +561,23 @@
             __webpack_require__.d(__webpack_exports__, "isAncestor", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.g;
             });
-            __webpack_require__.d(__webpack_exports__, "isWindow", function() {
+            __webpack_require__.d(__webpack_exports__, "isSameDomain", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.h;
             });
-            __webpack_require__.d(__webpack_exports__, "isWindowClosed", function() {
+            __webpack_require__.d(__webpack_exports__, "isWindow", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.i;
             });
-            __webpack_require__.d(__webpack_exports__, "linkFrameWindow", function() {
+            __webpack_require__.d(__webpack_exports__, "isWindowClosed", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.j;
             });
-            __webpack_require__.d(__webpack_exports__, "matchDomain", function() {
+            __webpack_require__.d(__webpack_exports__, "linkFrameWindow", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.k;
             });
-            __webpack_require__.d(__webpack_exports__, "stringifyDomainPattern", function() {
+            __webpack_require__.d(__webpack_exports__, "matchDomain", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.l;
+            });
+            __webpack_require__.d(__webpack_exports__, "stringifyDomainPattern", function() {
+                return __WEBPACK_IMPORTED_MODULE_0__utils__.m;
             });
             var __WEBPACK_IMPORTED_MODULE_1__types__ = __webpack_require__("./node_modules/cross-domain-utils/src/types.js");
             __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__types__), __webpack_require__("./node_modules/cross-domain-utils/src/constants.js");
@@ -589,6 +592,7 @@
             __webpack_exports__.a = getActualDomain;
             __webpack_exports__.d = getDomain;
             __webpack_exports__.f = isActuallySameDomain;
+            __webpack_exports__.h = isSameDomain;
             __webpack_exports__.b = function getAllWindows() {
                 var win = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window, frames = function(win) {
                     var top = getTop(win);
@@ -600,8 +604,8 @@
                 }(win);
                 return opener ? [].concat(getAllWindows(opener), frames) : frames;
             };
-            __webpack_exports__.i = isWindowClosed;
-            __webpack_exports__.j = function(frame) {
+            __webpack_exports__.j = isWindowClosed;
+            __webpack_exports__.k = function(frame) {
                 !function() {
                     for (var i = 0; i < iframeFrames.length; i++) if (isFrameWindowClosed(iframeFrames[i])) {
                         iframeFrames.splice(i, 1);
@@ -629,7 +633,7 @@
                 for (var _i16 = 0, _getFrames8 = getFrames(parent), _length14 = null == _getFrames8 ? 0 : _getFrames8.length; _i16 < _length14; _i16++) if (_getFrames8[_i16] === child) return !0;
                 return !1;
             };
-            __webpack_exports__.k = function matchDomain(pattern, origin) {
+            __webpack_exports__.l = function matchDomain(pattern, origin) {
                 if ("string" == typeof pattern) {
                     if ("string" == typeof origin) return pattern === constants.b || origin === pattern;
                     if (isRegex(origin)) return !1;
@@ -639,10 +643,10 @@
                     return matchDomain(subpattern, origin);
                 }));
             };
-            __webpack_exports__.l = function(pattern) {
+            __webpack_exports__.m = function(pattern) {
                 return Array.isArray(pattern) ? "(" + pattern.join(" | ") + ")" : isRegex(pattern) ? "RegExp(" + pattern.toString() : pattern.toString();
             };
-            __webpack_exports__.h = function(obj) {
+            __webpack_exports__.i = function(obj) {
                 try {
                     if (obj === window) return !0;
                 } catch (err) {
@@ -732,6 +736,15 @@
                 } catch (err) {}
                 try {
                     if (getActualDomain(win) === getActualDomain(window)) return !0;
+                } catch (err) {}
+                return !1;
+            }
+            function isSameDomain(win) {
+                if (!isActuallySameDomain(win)) return !1;
+                try {
+                    if (win === window) return !0;
+                    if (isAboutProtocol(win) && canReadFromWindow(win)) return !0;
+                    if (getDomain(window) === getDomain(win)) return !0;
                 } catch (err) {}
                 return !1;
             }
@@ -841,15 +854,7 @@
                 } catch (err) {
                     return !err || err.message !== IE_WIN_ACCESS_ERROR;
                 }
-                if (allowMock && function(win) {
-                    if (!isActuallySameDomain(win)) return !1;
-                    try {
-                        if (win === window) return !0;
-                        if (isAboutProtocol(win) && canReadFromWindow(win)) return !0;
-                        if (getDomain(window) === getDomain(win)) return !0;
-                    } catch (err) {}
-                    return !1;
-                }(win)) try {
+                if (allowMock && isSameDomain(win)) try {
                     if (win.mockclosed) return !0;
                 } catch (err) {}
                 try {
@@ -1163,6 +1168,9 @@
             __webpack_require__.d(interface_namespaceObject, "deserializeMessage", function() {
                 return deserializeMessage;
             });
+            __webpack_require__.d(interface_namespaceObject, "ProxyWindow", function() {
+                return window_ProxyWindow;
+            });
             __webpack_require__.d(interface_namespaceObject, "cleanUpWindow", function() {
                 return cleanUpWindow;
             });
@@ -1443,7 +1451,9 @@
                     var _this3 = this;
                     return zalgo_promise_src.a.try(function() {
                         if (!_this3.actualWindow) return _this3.serializedWindow.setName(name);
+                        if (!Object(cross_domain_utils_src.isSameDomain)(_this3.actualWindow)) throw new Error("Can not set name for window on different domain");
                         _this3.actualWindow.name = name;
+                        _this3.actualWindow.frameElement && _this3.actualWindow.frameElement.setAttribute("name", name);
                     }).then(function() {
                         return _this3;
                     });
@@ -2113,6 +2123,9 @@
             });
             __webpack_require__.d(__webpack_exports__, "deserializeMessage", function() {
                 return deserializeMessage;
+            });
+            __webpack_require__.d(__webpack_exports__, "ProxyWindow", function() {
+                return window_ProxyWindow;
             });
             __webpack_require__.d(__webpack_exports__, "cleanUpWindow", function() {
                 return cleanUpWindow;

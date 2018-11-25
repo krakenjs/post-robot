@@ -1739,6 +1739,9 @@
             __webpack_require__.d(interface_namespaceObject, "deserializeMessage", function() {
                 return deserializeMessage;
             });
+            __webpack_require__.d(interface_namespaceObject, "ProxyWindow", function() {
+                return window_ProxyWindow;
+            });
             __webpack_require__.d(interface_namespaceObject, "cleanUpWindow", function() {
                 return cleanUpWindow;
             });
@@ -1933,7 +1936,9 @@
                     var _this3 = this;
                     return zalgo_promise_src.a.try(function() {
                         if (!_this3.actualWindow) return _this3.serializedWindow.setName(name);
+                        if (!Object(src.isSameDomain)(_this3.actualWindow)) throw new Error("Can not set name for window on different domain");
                         _this3.actualWindow.name = name;
+                        _this3.actualWindow.frameElement && _this3.actualWindow.frameElement.setAttribute("name", name);
                     }).then(function() {
                         return _this3;
                     });
@@ -2623,6 +2628,9 @@
             });
             __webpack_require__.d(__webpack_exports__, "deserializeMessage", function() {
                 return deserializeMessage;
+            });
+            __webpack_require__.d(__webpack_exports__, "ProxyWindow", function() {
+                return window_ProxyWindow;
             });
             __webpack_require__.d(__webpack_exports__, "cleanUpWindow", function() {
                 return cleanUpWindow;
