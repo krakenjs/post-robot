@@ -3,7 +3,7 @@ import { ZalgoPromise } from 'zalgo-promise/src';
 import { getDomain, getFrameByName, isWindowClosed, getDomainFromUrl } from 'cross-domain-utils/src';
 
 import { CONFIG, PROTOCOL, MESSAGE_NAME } from '../conf';
-import { onChildWindowReady } from '../lib';
+import { awaitWindowHello } from '../lib';
 import { global } from '../global';
 
 import { getBridgeName, documentBodyReady, registerRemoteSendMessage, registerRemoteWindow } from './common';
@@ -139,7 +139,7 @@ export function openBridge(url, domain) {
                 iframe.onerror = reject;
             }).then(function () {
 
-                return onChildWindowReady(bridge, CONFIG.BRIDGE_TIMEOUT, 'Bridge ' + url);
+                return awaitWindowHello(bridge, CONFIG.BRIDGE_TIMEOUT, 'Bridge ' + url);
             }).then(function () {
 
                 return bridge;

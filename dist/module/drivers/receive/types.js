@@ -11,24 +11,7 @@ import { sendMessage } from '../send';
 import { getRequestListener, getResponseListener, deleteResponseListener, isResponseListenerErrored } from '../listeners';
 
 
-export var RECEIVE_MESSAGE_TYPES = (_RECEIVE_MESSAGE_TYPE = {}, _RECEIVE_MESSAGE_TYPE[MESSAGE_TYPE.ACK] = function (source, origin, message) {
-
-    if (isResponseListenerErrored(message.hash)) {
-        return;
-    }
-
-    var options = getResponseListener(message.hash);
-
-    if (!options) {
-        throw new Error('No handler found for post message ack for message: ' + message.name + ' from ' + origin + ' in ' + window.location.protocol + '//' + window.location.host + window.location.pathname);
-    }
-
-    if (!matchDomain(options.domain, origin)) {
-        throw new Error('Ack origin ' + origin + ' does not match domain ' + options.domain.toString());
-    }
-
-    options.ack = true;
-}, _RECEIVE_MESSAGE_TYPE[MESSAGE_TYPE.REQUEST] = function (source, origin, message) {
+export var RECEIVE_MESSAGE_TYPES = (_RECEIVE_MESSAGE_TYPE = {}, _RECEIVE_MESSAGE_TYPE[MESSAGE_TYPE.REQUEST] = function (source, origin, message) {
 
     var options = getRequestListener({ name: message.name, win: source, domain: origin });
 
@@ -78,6 +61,23 @@ export var RECEIVE_MESSAGE_TYPES = (_RECEIVE_MESSAGE_TYPE = {}, _RECEIVE_MESSAGE
             throw err;
         }
     });
+}, _RECEIVE_MESSAGE_TYPE[MESSAGE_TYPE.ACK] = function (source, origin, message) {
+
+    if (isResponseListenerErrored(message.hash)) {
+        return;
+    }
+
+    var options = getResponseListener(message.hash);
+
+    if (!options) {
+        throw new Error('No handler found for post message ack for message: ' + message.name + ' from ' + origin + ' in ' + window.location.protocol + '//' + window.location.host + window.location.pathname);
+    }
+
+    if (!matchDomain(options.domain, origin)) {
+        throw new Error('Ack origin ' + origin + ' does not match domain ' + options.domain.toString());
+    }
+
+    options.ack = true;
 }, _RECEIVE_MESSAGE_TYPE[MESSAGE_TYPE.RESPONSE] = function (source, origin, message) {
 
     if (isResponseListenerErrored(message.hash)) {

@@ -6,7 +6,7 @@ import { uniqueID, isRegex } from 'belter/src';
 
 import { CONFIG, MESSAGE_TYPE, WILDCARD } from '../conf';
 import { sendMessage, addResponseListener, deleteResponseListener, markResponseListenerErrored } from '../drivers';
-import { onChildWindowReady, sayHello, isWindowKnown } from '../lib';
+import { awaitWindowHello, sayHello, isWindowKnown } from '../lib';
 import { global } from '../global';
 
 global.requestPromises = global.requestPromises || new WeakMap();
@@ -85,18 +85,18 @@ export function request(options) {
         var requestPromise = ZalgoPromise['try'](function () {
 
             if (isAncestor(window, win)) {
-                return onChildWindowReady(win, options.timeout || CONFIG.CHILD_WINDOW_TIMEOUT);
+                return awaitWindowHello(win, options.timeout || CONFIG.CHILD_WINDOW_TIMEOUT);
             }
         }).then(function () {
             var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-                origin = _ref.origin;
+                origin = _ref.domain;
 
             if (isRegex(domain) && !origin) {
                 return sayHello(win);
             }
         }).then(function () {
             var _ref2 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-                origin = _ref2.origin;
+                origin = _ref2.domain;
 
             if (isRegex(domain)) {
                 if (!matchDomain(domain, origin)) {

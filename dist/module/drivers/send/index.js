@@ -5,7 +5,7 @@ import { ZalgoPromise } from 'zalgo-promise/src';
 import { uniqueID, stringifyError } from 'belter/src';
 
 import { MESSAGE_TYPE, CONFIG, MESSAGE_NAME, WILDCARD, WINDOW_PROP } from '../../conf';
-import { serializeMessage, getWindowType } from '../../lib';
+import { serializeMessage } from '../../serialize';
 
 
 import { SEND_MESSAGE_STRATEGIES } from './strategies';
@@ -42,10 +42,9 @@ export function sendMessage(win, domain, message) {
 
         logMessage(domain, message);
 
-        var serializedMessage = serializeMessage(win, domain, (_serializeMessage = {}, _serializeMessage[WINDOW_PROP.POSTROBOT] = _extends({}, message, {
-            id: uniqueID(),
-            windowType: getWindowType()
-        }), _serializeMessage));
+        var serializedMessage = serializeMessage(win, domain, (_serializeMessage = {}, _serializeMessage[WINDOW_PROP.POSTROBOT] = _extends({
+            id: uniqueID()
+        }, message), _serializeMessage));
 
         var messages = [];
 

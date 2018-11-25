@@ -58,7 +58,7 @@
             var util = __webpack_require__("./node_modules/belter/src/util.js");
             __webpack_require__("./node_modules/belter/src/device.js");
             __webpack_exports__.b = function isLocalStorageEnabled() {
-                return Object(util.e)(isLocalStorageEnabled, function() {
+                return Object(util.f)(isLocalStorageEnabled, function() {
                     try {
                         if ("undefined" == typeof window) return !1;
                         if (window.localStorage) {
@@ -105,23 +105,32 @@
             __webpack_require__("./node_modules/belter/src/experiment.js"), __webpack_require__("./node_modules/belter/src/global.js"), 
             __webpack_require__("./node_modules/belter/src/storage.js");
             var __WEBPACK_IMPORTED_MODULE_5__util__ = __webpack_require__("./node_modules/belter/src/util.js");
+            __webpack_require__.d(__webpack_exports__, "getOrSet", function() {
+                return __WEBPACK_IMPORTED_MODULE_5__util__.e;
+            });
             __webpack_require__.d(__webpack_exports__, "isRegex", function() {
-                return __WEBPACK_IMPORTED_MODULE_5__util__.f;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.g;
             });
-            __webpack_require__.d(__webpack_exports__, "noop", function() {
-                return __WEBPACK_IMPORTED_MODULE_5__util__.h;
-            });
-            __webpack_require__.d(__webpack_exports__, "once", function() {
+            __webpack_require__.d(__webpack_exports__, "memoizePromise", function() {
                 return __WEBPACK_IMPORTED_MODULE_5__util__.i;
             });
-            __webpack_require__.d(__webpack_exports__, "safeInterval", function() {
+            __webpack_require__.d(__webpack_exports__, "noop", function() {
+                return __WEBPACK_IMPORTED_MODULE_5__util__.j;
+            });
+            __webpack_require__.d(__webpack_exports__, "once", function() {
                 return __WEBPACK_IMPORTED_MODULE_5__util__.k;
             });
-            __webpack_require__.d(__webpack_exports__, "stringifyError", function() {
+            __webpack_require__.d(__webpack_exports__, "safeInterval", function() {
                 return __WEBPACK_IMPORTED_MODULE_5__util__.m;
             });
+            __webpack_require__.d(__webpack_exports__, "stringifyError", function() {
+                return __WEBPACK_IMPORTED_MODULE_5__util__.o;
+            });
             __webpack_require__.d(__webpack_exports__, "uniqueID", function() {
-                return __WEBPACK_IMPORTED_MODULE_5__util__.n;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.p;
+            });
+            __webpack_require__.d(__webpack_exports__, "weakMapMemoizePromise", function() {
+                return __WEBPACK_IMPORTED_MODULE_5__util__.q;
             });
             __webpack_require__("./node_modules/belter/src/http.js");
             var __WEBPACK_IMPORTED_MODULE_7__types__ = __webpack_require__("./node_modules/belter/src/types.js");
@@ -132,7 +141,7 @@
             "use strict";
             __webpack_exports__.a = function getStorage(_ref) {
                 var name = _ref.name, _ref$version = _ref.version, version = void 0 === _ref$version ? "latest" : _ref$version, _ref$lifetime = _ref.lifetime, lifetime = void 0 === _ref$lifetime ? 3e5 : _ref$lifetime;
-                return Object(__WEBPACK_IMPORTED_MODULE_0__util__.e)(getStorage, function() {
+                return Object(__WEBPACK_IMPORTED_MODULE_0__util__.f)(getStorage, function() {
                     var STORAGE_KEY = "__" + name + "_" + version + "_storage__", accessedStorage = void 0;
                     function getState(handler) {
                         var localStorageEnabled = Object(__WEBPACK_IMPORTED_MODULE_1__dom__.b)(), storage = void 0;
@@ -143,9 +152,9 @@
                         }
                         storage || (storage = Object(__WEBPACK_IMPORTED_MODULE_0__util__.d)()[STORAGE_KEY]);
                         storage || (storage = {
-                            id: Object(__WEBPACK_IMPORTED_MODULE_0__util__.n)()
+                            id: Object(__WEBPACK_IMPORTED_MODULE_0__util__.p)()
                         });
-                        storage.id || (storage.id = Object(__WEBPACK_IMPORTED_MODULE_0__util__.n)());
+                        storage.id || (storage.id = Object(__WEBPACK_IMPORTED_MODULE_0__util__.p)());
                         accessedStorage = storage;
                         var result = handler(storage);
                         localStorageEnabled ? window.localStorage.setItem(STORAGE_KEY, JSON.stringify(storage)) : Object(__WEBPACK_IMPORTED_MODULE_0__util__.d)()[STORAGE_KEY] = storage;
@@ -157,7 +166,7 @@
                             var session = storage.__session__, now = Date.now();
                             session && now - session.created > lifetime && (session = null);
                             session || (session = {
-                                guid: Object(__WEBPACK_IMPORTED_MODULE_0__util__.n)(),
+                                guid: Object(__WEBPACK_IMPORTED_MODULE_0__util__.p)(),
                                 created: now
                             });
                             storage.__session__ = session;
@@ -194,14 +203,14 @@
         "./node_modules/belter/src/types.js": function(module, exports) {},
         "./node_modules/belter/src/util.js": function(module, __webpack_exports__, __webpack_require__) {
             "use strict";
-            __webpack_exports__.n = uniqueID;
+            __webpack_exports__.p = uniqueID;
             __webpack_exports__.d = function() {
                 if ("undefined" != typeof window) return window;
                 if ("undefined" != typeof window) return window;
                 if ("undefined" != typeof global) return global;
                 throw new Error("No global found");
             };
-            __webpack_exports__.g = function(method) {
+            __webpack_exports__.h = function(method) {
                 var _this = this, options = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {}, cacheMap = new __WEBPACK_IMPORTED_MODULE_1_cross_domain_safe_weakmap_src__.a();
                 function memoizedFunction() {
                     for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) args[_key] = arguments[_key];
@@ -210,9 +219,7 @@
                     }), key = serializeArgs(args), cacheTime = options.time;
                     cache[key] && cacheTime && Date.now() - cache[key].time < cacheTime && delete cache[key];
                     if (cache[key]) return cache[key].value;
-                    memoizedFunction.__calling__ = !0;
                     var time = Date.now(), value = method.apply(this, arguments);
-                    memoizedFunction.__calling__ = !1;
                     cache[key] = {
                         time: time,
                         value: value
@@ -225,7 +232,23 @@
                 options.name && (memoizedFunction.displayName = options.name + ":memoized");
                 return memoizedFunction;
             };
-            __webpack_exports__.j = function(method) {
+            __webpack_exports__.i = function(method) {
+                var cache = {};
+                function memoizedPromiseFunction() {
+                    for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) args[_key2] = arguments[_key2];
+                    var key = serializeArgs(args);
+                    if (cache.hasOwnProperty(key)) return cache[key];
+                    cache[key] = method.apply(this, arguments).finally(function() {
+                        delete cache[key];
+                    });
+                    return cache[key];
+                }
+                memoizedPromiseFunction.reset = function() {
+                    cache = {};
+                };
+                return memoizedPromiseFunction;
+            };
+            __webpack_exports__.l = function(method) {
                 var options = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {};
                 function promisifiedFunction() {
                     return __WEBPACK_IMPORTED_MODULE_0_zalgo_promise_src__.a.try(method, this, arguments);
@@ -233,12 +256,12 @@
                 options.name && (promisifiedFunction.displayName = options.name + ":promisified");
                 return promisifiedFunction;
             };
-            __webpack_exports__.e = function(method, logic) {
+            __webpack_exports__.f = function(method, logic) {
                 var args = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : [], cache = method.__inline_memoize_cache__ = method.__inline_memoize_cache__ || {}, key = serializeArgs(args);
                 return cache.hasOwnProperty(key) ? cache[key] : cache[key] = logic.apply(void 0, args);
             };
-            __webpack_exports__.h = function() {};
-            __webpack_exports__.i = function(method) {
+            __webpack_exports__.j = function() {};
+            __webpack_exports__.k = function(method) {
                 var called = !1;
                 return function() {
                     if (!called) {
@@ -247,7 +270,7 @@
                     }
                 };
             };
-            __webpack_exports__.m = function stringifyError(err) {
+            __webpack_exports__.o = function stringifyError(err) {
                 var level = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 1;
                 if (level >= 3) return "stringifyError stack overflow";
                 try {
@@ -264,7 +287,7 @@
                     return "Error while stringifying error: " + stringifyError(newErr, level + 1);
                 }
             };
-            __webpack_exports__.l = function(item) {
+            __webpack_exports__.n = function(item) {
                 return "string" == typeof item ? item : item && "function" == typeof item.toString ? item.toString() : Object.prototype.toString.call(item);
             };
             __webpack_exports__.c = function(obj, source) {
@@ -273,7 +296,7 @@
                 for (var key in source) source.hasOwnProperty(key) && (obj[key] = source[key]);
                 return obj;
             };
-            __webpack_exports__.k = function(method, time) {
+            __webpack_exports__.m = function(method, time) {
                 var timeout = void 0;
                 !function loop() {
                     timeout = setTimeout(function() {
@@ -300,8 +323,17 @@
                     }, time);
                 };
             };
-            __webpack_exports__.f = function(item) {
+            __webpack_exports__.g = function(item) {
                 return "[object RegExp]" === Object.prototype.toString.call(item);
+            };
+            __webpack_require__.d(__webpack_exports__, "q", function() {
+                return weakMapMemoizePromise;
+            });
+            __webpack_exports__.e = function(obj, key, getter) {
+                if (obj.hasOwnProperty(key)) return obj[key];
+                var val = getter();
+                obj[key] = val;
+                return val;
             };
             var __WEBPACK_IMPORTED_MODULE_0_zalgo_promise_src__ = __webpack_require__("./node_modules/zalgo-promise/src/index.js"), __WEBPACK_IMPORTED_MODULE_1_cross_domain_safe_weakmap_src__ = __webpack_require__("./node_modules/cross-domain-safe-weakmap/src/index.js"), _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
                 return typeof obj;
@@ -333,6 +365,17 @@
                     throw new Error("Arguments not serializable -- can not be used to memoize");
                 }
             }
+            var weakMapMemoizePromise = function(method) {
+                var weakmap = new __WEBPACK_IMPORTED_MODULE_1_cross_domain_safe_weakmap_src__.a();
+                return function(arg) {
+                    var _this5 = this;
+                    return weakmap.getOrSet(arg, function() {
+                        return method.call(_this5, arg).finally(function() {
+                            weakmap.delete(arg);
+                        });
+                    });
+                };
+            };
         },
         "./node_modules/cross-domain-safe-weakmap/src/index.js": function(module, __webpack_exports__, __webpack_require__) {
             "use strict";
@@ -480,50 +523,61 @@
                 return weakmap_CrossDomainSafeWeakMap;
             });
         },
+        "./node_modules/cross-domain-utils/src/constants.js": function(module, __webpack_exports__, __webpack_require__) {
+            "use strict";
+            __webpack_require__.d(__webpack_exports__, "a", function() {
+                return PROTOCOL;
+            });
+            __webpack_require__.d(__webpack_exports__, "b", function() {
+                return WILDCARD;
+            });
+            var PROTOCOL = {
+                MOCK: "mock:",
+                FILE: "file:",
+                ABOUT: "about:"
+            }, WILDCARD = "*";
+        },
         "./node_modules/cross-domain-utils/src/index.js": function(module, __webpack_exports__, __webpack_require__) {
             "use strict";
             var __WEBPACK_IMPORTED_MODULE_0__utils__ = __webpack_require__("./node_modules/cross-domain-utils/src/utils.js");
             __webpack_require__.d(__webpack_exports__, "getActualDomain", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.a;
             });
-            __webpack_require__.d(__webpack_exports__, "getAncestor", function() {
+            __webpack_require__.d(__webpack_exports__, "getAllWindows", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.b;
             });
-            __webpack_require__.d(__webpack_exports__, "getDomain", function() {
+            __webpack_require__.d(__webpack_exports__, "getAncestor", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.c;
             });
-            __webpack_require__.d(__webpack_exports__, "getUserAgent", function() {
+            __webpack_require__.d(__webpack_exports__, "getDomain", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.d;
             });
-            __webpack_require__.d(__webpack_exports__, "isActuallySameDomain", function() {
+            __webpack_require__.d(__webpack_exports__, "getUserAgent", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.e;
             });
-            __webpack_require__.d(__webpack_exports__, "isAncestor", function() {
+            __webpack_require__.d(__webpack_exports__, "isActuallySameDomain", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.f;
             });
-            __webpack_require__.d(__webpack_exports__, "isIframe", function() {
+            __webpack_require__.d(__webpack_exports__, "isAncestor", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.g;
             });
-            __webpack_require__.d(__webpack_exports__, "isPopup", function() {
+            __webpack_require__.d(__webpack_exports__, "isWindow", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.h;
             });
-            __webpack_require__.d(__webpack_exports__, "isWindow", function() {
+            __webpack_require__.d(__webpack_exports__, "isWindowClosed", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.i;
             });
-            __webpack_require__.d(__webpack_exports__, "isWindowClosed", function() {
+            __webpack_require__.d(__webpack_exports__, "linkFrameWindow", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.j;
             });
-            __webpack_require__.d(__webpack_exports__, "linkFrameWindow", function() {
+            __webpack_require__.d(__webpack_exports__, "matchDomain", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.k;
             });
-            __webpack_require__.d(__webpack_exports__, "matchDomain", function() {
+            __webpack_require__.d(__webpack_exports__, "stringifyDomainPattern", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.l;
             });
-            __webpack_require__.d(__webpack_exports__, "stringifyDomainPattern", function() {
-                return __WEBPACK_IMPORTED_MODULE_0__utils__.m;
-            });
             var __WEBPACK_IMPORTED_MODULE_1__types__ = __webpack_require__("./node_modules/cross-domain-utils/src/types.js");
-            __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__types__);
+            __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__types__), __webpack_require__("./node_modules/cross-domain-utils/src/constants.js");
         },
         "./node_modules/cross-domain-utils/src/types.js": function(module, exports) {},
         "./node_modules/cross-domain-utils/src/utils.js": function(module, __webpack_exports__, __webpack_require__) {
@@ -531,11 +585,23 @@
             function isRegex(item) {
                 return "[object RegExp]" === Object.prototype.toString.call(item);
             }
+            var constants = __webpack_require__("./node_modules/cross-domain-utils/src/constants.js");
             __webpack_exports__.a = getActualDomain;
-            __webpack_exports__.c = getDomain;
-            __webpack_exports__.e = isActuallySameDomain;
-            __webpack_exports__.j = isWindowClosed;
-            __webpack_exports__.k = function(frame) {
+            __webpack_exports__.d = getDomain;
+            __webpack_exports__.f = isActuallySameDomain;
+            __webpack_exports__.b = function getAllWindows() {
+                var win = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window, frames = function(win) {
+                    var top = getTop(win);
+                    if (!top) throw new Error("Can not determine top window");
+                    return [].concat(getAllChildFrames(top), [ top ]);
+                }(win), opener = function() {
+                    var win = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window;
+                    return getOpener(getTop(win) || win);
+                }(win);
+                return opener ? [].concat(getAllWindows(opener), frames) : frames;
+            };
+            __webpack_exports__.i = isWindowClosed;
+            __webpack_exports__.j = function(frame) {
                 !function() {
                     for (var i = 0; i < iframeFrames.length; i++) if (isFrameWindowClosed(iframeFrames[i])) {
                         iframeFrames.splice(i, 1);
@@ -551,57 +617,21 @@
                     iframeFrames.push(frame);
                 } catch (err) {}
             };
-            __webpack_exports__.d = function(win) {
+            __webpack_exports__.e = function(win) {
                 return (win = win || window).navigator.mockUserAgent || win.navigator.userAgent;
             };
-            __webpack_exports__.b = getAncestor;
-            __webpack_exports__.f = function(parent, child) {
+            __webpack_exports__.c = getAncestor;
+            __webpack_exports__.g = function(parent, child) {
                 var actualParent = getAncestor(child);
                 if (actualParent) return actualParent === parent;
                 if (child === parent) return !1;
-                if (function(win) {
-                    if (win) {
-                        try {
-                            if (win.top) return win.top;
-                        } catch (err) {}
-                        if (getParent(win) === win) return win;
-                        try {
-                            if (isAncestorParent(window, win) && window.top) return window.top;
-                        } catch (err) {}
-                        try {
-                            if (isAncestorParent(win, window) && window.top) return window.top;
-                        } catch (err) {}
-                        for (var _i7 = 0, _getAllChildFrames4 = function getAllChildFrames(win) {
-                            for (var result = [], _i3 = 0, _getFrames2 = getFrames(win), _length2 = null == _getFrames2 ? 0 : _getFrames2.length; _i3 < _length2; _i3++) {
-                                var frame = _getFrames2[_i3];
-                                result.push(frame);
-                                for (var _i5 = 0, _getAllChildFrames2 = getAllChildFrames(frame), _length4 = null == _getAllChildFrames2 ? 0 : _getAllChildFrames2.length; _i5 < _length4; _i5++) {
-                                    var childFrame = _getAllChildFrames2[_i5];
-                                    result.push(childFrame);
-                                }
-                            }
-                            return result;
-                        }(win), _length6 = null == _getAllChildFrames4 ? 0 : _getAllChildFrames4.length; _i7 < _length6; _i7++) {
-                            var frame = _getAllChildFrames4[_i7];
-                            try {
-                                if (frame.top) return frame.top;
-                            } catch (err) {}
-                            if (getParent(frame) === frame) return frame;
-                        }
-                    }
-                }(child) === child) return !1;
+                if (getTop(child) === child) return !1;
                 for (var _i16 = 0, _getFrames8 = getFrames(parent), _length14 = null == _getFrames8 ? 0 : _getFrames8.length; _i16 < _length14; _i16++) if (_getFrames8[_i16] === child) return !0;
                 return !1;
             };
-            __webpack_exports__.h = function() {
-                return Boolean(getOpener(window));
-            };
-            __webpack_exports__.g = function() {
-                return Boolean(getParent(window));
-            };
-            __webpack_exports__.l = function matchDomain(pattern, origin) {
+            __webpack_exports__.k = function matchDomain(pattern, origin) {
                 if ("string" == typeof pattern) {
-                    if ("string" == typeof origin) return pattern === CONSTANTS.WILDCARD || origin === pattern;
+                    if ("string" == typeof origin) return pattern === constants.b || origin === pattern;
                     if (isRegex(origin)) return !1;
                     if (Array.isArray(origin)) return !1;
                 }
@@ -609,10 +639,10 @@
                     return matchDomain(subpattern, origin);
                 }));
             };
-            __webpack_exports__.m = function(pattern) {
+            __webpack_exports__.l = function(pattern) {
                 return Array.isArray(pattern) ? "(" + pattern.join(" | ") + ")" : isRegex(pattern) ? "RegExp(" + pattern.toString() : pattern.toString();
             };
-            __webpack_exports__.i = function(obj) {
+            __webpack_exports__.h = function(obj) {
                 try {
                     if (obj === window) return !0;
                 } catch (err) {
@@ -650,14 +680,9 @@
                 }
                 return !1;
             };
-            var CONSTANTS = {
-                MOCK_PROTOCOL: "mock:",
-                FILE_PROTOCOL: "file:",
-                ABOUT_PROTOCOL: "about:",
-                WILDCARD: "*"
-            }, IE_WIN_ACCESS_ERROR = "Call was rejected by callee.\r\n";
+            var IE_WIN_ACCESS_ERROR = "Call was rejected by callee.\r\n";
             function isAboutProtocol() {
-                return (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window).location.protocol === CONSTANTS.ABOUT_PROTOCOL;
+                return (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window).location.protocol === constants.a.ABOUT;
             }
             function getParent(win) {
                 if (win) try {
@@ -681,10 +706,10 @@
                 if (!location) throw new Error("Can not read window location");
                 var protocol = location.protocol;
                 if (!protocol) throw new Error("Can not read window protocol");
-                if (protocol === CONSTANTS.FILE_PROTOCOL) return CONSTANTS.FILE_PROTOCOL + "//";
-                if (protocol === CONSTANTS.ABOUT_PROTOCOL) {
+                if (protocol === constants.a.FILE) return constants.a.FILE + "//";
+                if (protocol === constants.a.ABOUT) {
                     var parent = getParent(win);
-                    return parent && canReadFromWindow(parent) ? getActualDomain(parent) : CONSTANTS.ABOUT_PROTOCOL + "//";
+                    return parent && canReadFromWindow(parent) ? getActualDomain(parent) : constants.a.ABOUT + "//";
                 }
                 var host = location.host;
                 if (!host) throw new Error("Can not read window host");
@@ -692,7 +717,7 @@
             }
             function getDomain(win) {
                 var domain = getActualDomain(win = win || window);
-                return domain && win.mockDomain && 0 === win.mockDomain.indexOf(CONSTANTS.MOCK_PROTOCOL) ? win.mockDomain : domain;
+                return domain && win.mockDomain && 0 === win.mockDomain.indexOf(constants.a.MOCK) ? win.mockDomain : domain;
             }
             function isActuallySameDomain(win) {
                 try {
@@ -759,6 +784,38 @@
                     result.push(_frame);
                 }
                 return result;
+            }
+            function getAllChildFrames(win) {
+                for (var result = [], _i3 = 0, _getFrames2 = getFrames(win), _length2 = null == _getFrames2 ? 0 : _getFrames2.length; _i3 < _length2; _i3++) {
+                    var frame = _getFrames2[_i3];
+                    result.push(frame);
+                    for (var _i5 = 0, _getAllChildFrames2 = getAllChildFrames(frame), _length4 = null == _getAllChildFrames2 ? 0 : _getAllChildFrames2.length; _i5 < _length4; _i5++) {
+                        var childFrame = _getAllChildFrames2[_i5];
+                        result.push(childFrame);
+                    }
+                }
+                return result;
+            }
+            function getTop(win) {
+                if (win) {
+                    try {
+                        if (win.top) return win.top;
+                    } catch (err) {}
+                    if (getParent(win) === win) return win;
+                    try {
+                        if (isAncestorParent(window, win) && window.top) return window.top;
+                    } catch (err) {}
+                    try {
+                        if (isAncestorParent(win, window) && window.top) return window.top;
+                    } catch (err) {}
+                    for (var _i7 = 0, _getAllChildFrames4 = getAllChildFrames(win), _length6 = null == _getAllChildFrames4 ? 0 : _getAllChildFrames4.length; _i7 < _length6; _i7++) {
+                        var frame = _getAllChildFrames4[_i7];
+                        try {
+                            if (frame.top) return frame.top;
+                        } catch (err) {}
+                        if (getParent(frame) === frame) return frame;
+                    }
+                }
             }
             function isFrameWindowClosed(frame) {
                 if (!frame.contentWindow) return !0;
@@ -1115,9 +1172,6 @@
             __webpack_require__.d(interface_namespaceObject, "bridge", function() {
                 return bridge;
             });
-            __webpack_require__.d(interface_namespaceObject, "init", function() {
-                return init;
-            });
             __webpack_require__.d(interface_namespaceObject, "parent", function() {
                 return public_parent;
             });
@@ -1151,21 +1205,21 @@
             __webpack_require__.d(interface_namespaceObject, "disable", function() {
                 return disable;
             });
-            var _ALLOWED_POST_MESSAGE, src = __webpack_require__("./node_modules/cross-domain-utils/src/index.js"), constants_MESSAGE_TYPE = {
+            var _ALLOWED_POST_MESSAGE, src = __webpack_require__("./node_modules/cross-domain-safe-weakmap/src/index.js"), cross_domain_utils_src = __webpack_require__("./node_modules/cross-domain-utils/src/index.js"), zalgo_promise_src = __webpack_require__("./node_modules/zalgo-promise/src/index.js"), belter_src = __webpack_require__("./node_modules/belter/src/index.js"), constants_MESSAGE_TYPE = {
                 REQUEST: "postrobot_message_request",
                 RESPONSE: "postrobot_message_response",
                 ACK: "postrobot_message_ack"
             }, constants_MESSAGE_NAME = {
                 METHOD: "postrobot_method",
-                HELLO: "postrobot_ready",
+                HELLO: "postrobot_hello",
                 OPEN_TUNNEL: "postrobot_open_tunnel"
-            }, WINDOW_TYPE = {
-                FULLPAGE: "fullpage",
-                POPUP: "popup",
-                IFRAME: "iframe"
             }, constants_WINDOW_PROP = {
                 POSTROBOT: "__postRobot__"
-            }, constants_WILDCARD = "*", CONFIG = {
+            }, constants_WILDCARD = "*", SERIALIZATION_TYPE = {
+                CROSS_DOMAIN_ZALGO_PROMISE: "cross_domain_zalgo_promise",
+                CROSS_DOMAIN_FUNCTION: "cross_domain_function",
+                CROSS_DOMAIN_WINDOW: "cross_domain_window"
+            }, CONFIG = {
                 ALLOW_POSTMESSAGE_POPUP: !("__ALLOW_POSTMESSAGE_POPUP__" in window) || window.__ALLOW_POSTMESSAGE_POPUP__,
                 BRIDGE_TIMEOUT: 5e3,
                 CHILD_WINDOW_TIMEOUT: 5e3,
@@ -1177,7 +1231,64 @@
                 _ALLOWED_POST_MESSAGE)
             };
             0 === window.location.href.indexOf("file:") && (CONFIG.ALLOW_POSTMESSAGE_POPUP = !0);
-            var _SERIALIZER, cross_domain_safe_weakmap_src = __webpack_require__("./node_modules/cross-domain-safe-weakmap/src/index.js"), zalgo_promise_src = __webpack_require__("./node_modules/zalgo-promise/src/index.js"), belter_src = __webpack_require__("./node_modules/belter/src/index.js"), TYPE = {
+            var global = window[constants_WINDOW_PROP.POSTROBOT] = window[constants_WINDOW_PROP.POSTROBOT] || {};
+            global.registerSelf = function() {};
+            global.instanceID = global.instanceID || Object(belter_src.uniqueID)();
+            global.helloPromises = global.helloPromises || new src.a();
+            function getHelloPromise(win) {
+                return global.helloPromises.getOrSet(win, function() {
+                    return new zalgo_promise_src.a();
+                });
+            }
+            var listenForHello = Object(belter_src.once)(function() {
+                global.on(constants_MESSAGE_NAME.HELLO, {
+                    domain: constants_WILDCARD
+                }, function(_ref) {
+                    var source = _ref.source, origin = _ref.origin;
+                    getHelloPromise(source).resolve({
+                        win: source,
+                        domain: origin
+                    });
+                    return {
+                        instanceID: global.instanceID
+                    };
+                });
+            });
+            function sayHello(win) {
+                return global.send(win, constants_MESSAGE_NAME.HELLO, {}, {
+                    domain: constants_WILDCARD,
+                    timeout: -1
+                }).then(function(_ref2) {
+                    var origin = _ref2.origin, instanceID = _ref2.data.instanceID;
+                    getHelloPromise(win).resolve({
+                        win: win,
+                        domain: origin
+                    });
+                    return {
+                        win: win,
+                        domain: origin,
+                        instanceID: instanceID
+                    };
+                });
+            }
+            var getWindowInstanceID = Object(belter_src.weakMapMemoizePromise)(function(win) {
+                return sayHello(win).then(function(_ref3) {
+                    return _ref3.instanceID;
+                });
+            });
+            window.knownWindows = window.knownWindows || [];
+            window.onKnownWindow = window.onKnownWindow || [];
+            function markWindowKnown(win) {
+                window.knownWindows = window.knownWindows.filter(function(knownWindow) {
+                    return !Object(cross_domain_utils_src.isWindowClosed)(knownWindow);
+                });
+                if (-1 === window.knownWindows.indexOf(win)) {
+                    window.knownWindows.push(win);
+                    for (var _i2 = 0, _global$onKnownWindow2 = window.onKnownWindow, _length2 = null == _global$onKnownWindow2 ? 0 : _global$onKnownWindow2.length; _i2 < _length2; _i2++) (0, 
+                    _global$onKnownWindow2[_i2])(win);
+                }
+            }
+            var _SERIALIZER, TYPE = {
                 FUNCTION: "function",
                 ERROR: "error",
                 PROMISE: "promise",
@@ -1256,9 +1367,8 @@
                 return val;
             }, _DESERIALIZER[TYPE.NULL] = function(val) {
                 return val;
-            }, _DESERIALIZER), defaultDeserializers = {}, global = window[constants_WINDOW_PROP.POSTROBOT] = window[constants_WINDOW_PROP.POSTROBOT] || {};
-            global.registerSelf = function() {};
-            global.methods = global.methods || new cross_domain_safe_weakmap_src.a();
+            }, _DESERIALIZER), defaultDeserializers = {};
+            global.methods = global.methods || new src.a();
             var listenForFunctionCalls = Object(belter_src.once)(function() {
                 global.on(constants_MESSAGE_NAME.METHOD, {
                     origin: constants_WILDCARD
@@ -1267,7 +1377,7 @@
                     if (!methods) throw new Error("Could not find any methods this window has privileges to call");
                     var meth = methods[data.id];
                     if (!meth) throw new Error("Could not find method with id: " + data.id);
-                    if (!Object(src.matchDomain)(meth.domain, origin)) throw new Error("Method domain " + meth.domain + " does not match origin " + origin);
+                    if (!Object(cross_domain_utils_src.matchDomain)(meth.domain, origin)) throw new Error("Method domain " + meth.domain + " does not match origin " + origin);
                     return zalgo_promise_src.a.try(function() {
                         return meth.val.apply({
                             source: source,
@@ -1282,11 +1392,8 @@
                         };
                     });
                 });
-            }), CUSTOM_TYPE = {
-                CROSS_DOMAIN_ZALGO_PROMISE: "cross_domain_zalgo_promise",
-                CROSS_DOMAIN_FUNCTION: "cross_domain_function"
-            };
-            function serialize_serializeFunction(destination, domain, val, key) {
+            });
+            function function_serializeFunction(destination, domain, val, key) {
                 var id = Object(belter_src.uniqueID)(), methods = global.methods.get(destination);
                 if (!methods) {
                     methods = {};
@@ -1297,31 +1404,99 @@
                     val: val
                 };
                 listenForFunctionCalls();
-                return serializeType(CUSTOM_TYPE.CROSS_DOMAIN_FUNCTION, {
+                return serializeType(SERIALIZATION_TYPE.CROSS_DOMAIN_FUNCTION, {
                     id: id,
                     name: val.name || key
                 });
             }
-            function serialize_deserializeFunction(source, origin, _ref2) {
-                var id = _ref2.id, name = _ref2.name;
-                function crossDomainFunctionWrapper() {
-                    var args = Array.prototype.slice.call(arguments);
-                    return global.send(source, constants_MESSAGE_NAME.METHOD, {
-                        id: id,
-                        name: name,
-                        args: args
-                    }, {
-                        domain: origin
-                    }).then(function(_ref3) {
-                        return _ref3.data.result;
-                    });
+            var window_ProxyWindow = function() {
+                function ProxyWindow(serializedWindow) {
+                    !function(instance, Constructor) {
+                        if (!(instance instanceof ProxyWindow)) throw new TypeError("Cannot call a class as a function");
+                    }(this);
+                    this.serializedWindow = serializedWindow;
+                    this.actualWindowPromise = new zalgo_promise_src.a();
+                    this.serializedWindow.getInstanceID = Object(belter_src.memoizePromise)(this.serializedWindow.getInstanceID);
+                    this.waitForWindows();
                 }
-                crossDomainFunctionWrapper.__name__ = name;
-                crossDomainFunctionWrapper.__xdomain__ = !0;
-                crossDomainFunctionWrapper.source = source;
-                crossDomainFunctionWrapper.origin = origin;
-                return crossDomainFunctionWrapper;
-            }
+                ProxyWindow.prototype.waitForWindows = function() {
+                    var _this = this;
+                    !function(handler) {
+                        window.onKnownWindow.push(handler);
+                        for (var _i4 = 0, _global$knownWindows2 = window.knownWindows, _length4 = null == _global$knownWindows2 ? 0 : _global$knownWindows2.length; _i4 < _length4; _i4++) handler(_global$knownWindows2[_i4]);
+                    }(function(win) {
+                        _this.matchWindow(win).then(function(match) {
+                            match && _this.setWindow(win);
+                        }).catch(belter_src.noop);
+                    });
+                };
+                ProxyWindow.prototype.setLocation = function(href) {
+                    var _this2 = this;
+                    return zalgo_promise_src.a.try(function() {
+                        if (!_this2.actualWindow) return _this2.serializedWindow.setLocation(href);
+                        _this2.actualWindow.location = href;
+                    }).then(function() {
+                        return _this2;
+                    });
+                };
+                ProxyWindow.prototype.setName = function(name) {
+                    var _this3 = this;
+                    return zalgo_promise_src.a.try(function() {
+                        if (!_this3.actualWindow) return _this3.serializedWindow.setName(name);
+                        _this3.actualWindow.name = name;
+                    }).then(function() {
+                        return _this3;
+                    });
+                };
+                ProxyWindow.prototype.close = function() {
+                    var _this4 = this;
+                    return zalgo_promise_src.a.try(function() {
+                        if (!_this4.actualWindow) return _this4.serializedWindow.close();
+                        _this4.actualWindow.close();
+                    }).then(function() {
+                        return _this4;
+                    });
+                };
+                ProxyWindow.prototype.focus = function() {
+                    var _this5 = this;
+                    return zalgo_promise_src.a.try(function() {
+                        if (!_this5.actualWindow) return _this5.serializedWindow.focus();
+                        _this5.actualWindow.focus();
+                    }).then(function() {
+                        return _this5;
+                    });
+                };
+                ProxyWindow.prototype.setWindow = function(win) {
+                    this.actualWindow = win;
+                    this.actualWindowPromise.resolve(win);
+                };
+                ProxyWindow.prototype.matchWindow = function(win) {
+                    var _this6 = this;
+                    return zalgo_promise_src.a.try(function() {
+                        return _this6.actualWindow ? win === _this6.actualWindow : zalgo_promise_src.a.all([ _this6.getInstanceID(), getWindowInstanceID(win) ]).then(function(_ref) {
+                            return _ref[0] === _ref[1];
+                        });
+                    });
+                };
+                ProxyWindow.prototype.hasWindow = function() {
+                    return Boolean(this.actualWindow);
+                };
+                ProxyWindow.prototype.awaitWindow = function() {
+                    return this.actualWindowPromise;
+                };
+                ProxyWindow.prototype.getSerializedID = function() {
+                    return this.serializedWindow.serializedID;
+                };
+                ProxyWindow.prototype.getInstanceID = function() {
+                    return this.actualWindow ? getWindowInstanceID(this.actualWindow) : this.serializedWindow.getInstanceID();
+                };
+                ProxyWindow.isProxyWindow = function(obj) {
+                    return obj instanceof ProxyWindow;
+                };
+                return ProxyWindow;
+            }();
+            global.serializedWindows = global.serializedWindows || new src.a();
+            global.deseserializedWindows = {};
             function serializeMessage(destination, domain, obj) {
                 var _serialize;
                 return function(obj) {
@@ -1336,14 +1511,62 @@
                     return void 0 === result ? TYPE.UNDEFINED : result;
                 }(obj, ((_serialize = {})[TYPE.PROMISE] = function(val, key) {
                     return function(destination, domain, val, key) {
-                        return serializeType(CUSTOM_TYPE.CROSS_DOMAIN_ZALGO_PROMISE, {
-                            then: serialize_serializeFunction(destination, domain, function(resolve, reject) {
+                        return serializeType(SERIALIZATION_TYPE.CROSS_DOMAIN_ZALGO_PROMISE, {
+                            then: function_serializeFunction(destination, domain, function(resolve, reject) {
                                 return val.then(resolve, reject);
                             }, key)
                         });
                     }(destination, domain, val, key);
                 }, _serialize[TYPE.FUNCTION] = function(val, key) {
-                    return serialize_serializeFunction(destination, domain, val, key);
+                    return function_serializeFunction(destination, domain, val, key);
+                }, _serialize[TYPE.OBJECT] = function(val) {
+                    return Object(cross_domain_utils_src.isWindow)(val) || window_ProxyWindow.isProxyWindow(val) ? (win = val, 
+                    global.serializedWindows.getOrSet(win, function() {
+                        return serializeType(SERIALIZATION_TYPE.CROSS_DOMAIN_WINDOW, window_ProxyWindow.isProxyWindow(win) ? {
+                            serializedID: win.getSerializedID(),
+                            getInstanceID: function() {
+                                return win.getInstanceID();
+                            },
+                            close: function() {
+                                return win.close();
+                            },
+                            focus: function() {
+                                return win.focus();
+                            },
+                            setLocation: function(href) {
+                                return win.setLocation(href);
+                            },
+                            setName: function(name) {
+                                return win.setName(name);
+                            }
+                        } : {
+                            serializedID: Object(belter_src.uniqueID)(),
+                            getInstanceID: function() {
+                                return getWindowInstanceID(win);
+                            },
+                            close: function() {
+                                return zalgo_promise_src.a.try(function() {
+                                    return win.close();
+                                });
+                            },
+                            focus: function() {
+                                return zalgo_promise_src.a.try(function() {
+                                    return win.focus();
+                                });
+                            },
+                            setLocation: function(href) {
+                                return zalgo_promise_src.a.try(function() {
+                                    win.location = href;
+                                });
+                            },
+                            setName: function(name) {
+                                return zalgo_promise_src.a.try(function() {
+                                    win.name = name;
+                                });
+                            }
+                        });
+                    })) : val;
+                    var win;
                 }, _serialize));
             }
             function deserializeMessage(source, origin, message) {
@@ -1364,46 +1587,44 @@
                         var deserializer = deserializers[type] || DESERIALIZER[type];
                         return deserializer ? deserializer(value, key) : value;
                     });
-                }(message, ((_deserialize = {})[CUSTOM_TYPE.CROSS_DOMAIN_ZALGO_PROMISE] = function(_ref5) {
-                    var then = _ref5.then;
-                    return function(source, origin, _ref4) {
-                        var then = _ref4.then;
-                        return new zalgo_promise_src.a(function(resolve, reject) {
-                            serialize_deserializeFunction(source, origin, then)(resolve, reject);
-                        });
-                    }(source, origin, {
-                        then: then
+                }(message, ((_deserialize = {})[SERIALIZATION_TYPE.CROSS_DOMAIN_ZALGO_PROMISE] = function(serializedPromise) {
+                    return then = serializedPromise.then, new zalgo_promise_src.a(then);
+                    var then;
+                }, _deserialize[SERIALIZATION_TYPE.CROSS_DOMAIN_FUNCTION] = function(serializedFunction) {
+                    return function(source, origin, _ref2) {
+                        var id = _ref2.id, name = _ref2.name;
+                        function crossDomainFunctionWrapper() {
+                            var args = Array.prototype.slice.call(arguments);
+                            return global.send(source, constants_MESSAGE_NAME.METHOD, {
+                                id: id,
+                                name: name,
+                                args: args
+                            }, {
+                                domain: origin
+                            }).then(function(_ref3) {
+                                return _ref3.data.result;
+                            });
+                        }
+                        crossDomainFunctionWrapper.__name__ = name;
+                        crossDomainFunctionWrapper.__xdomain__ = !0;
+                        crossDomainFunctionWrapper.source = source;
+                        crossDomainFunctionWrapper.origin = origin;
+                        return crossDomainFunctionWrapper;
+                    }(source, origin, serializedFunction);
+                }, _deserialize[SERIALIZATION_TYPE.CROSS_DOMAIN_WINDOW] = function(serializedWindow) {
+                    return win = serializedWindow, Object(belter_src.getOrSet)(global.deseserializedWindows, win.serializedID, function() {
+                        return new window_ProxyWindow(win);
                     });
-                }, _deserialize[CUSTOM_TYPE.CROSS_DOMAIN_FUNCTION] = function(_ref6) {
-                    var id = _ref6.id, name = _ref6.name;
-                    return serialize_deserializeFunction(source, origin, {
-                        id: id,
-                        name: name
-                    });
+                    var win;
                 }, _deserialize));
-            }
-            global.readyPromises = global.readyPromises || new cross_domain_safe_weakmap_src.a();
-            global.knownWindows = global.knownWindows || new cross_domain_safe_weakmap_src.a();
-            function sayHello(win) {
-                return global.send(win, constants_MESSAGE_NAME.HELLO, {}, {
-                    domain: constants_WILDCARD,
-                    timeout: -1
-                }).then(function(_ref2) {
-                    return {
-                        origin: _ref2.origin
-                    };
-                });
-            }
-            function markWindowKnown(win) {
-                global.knownWindows.set(win, !0);
             }
             var SEND_MESSAGE_STRATEGIES = {
                 postrobot_post_message: function(win, serializedMessage, domain) {
                     (Array.isArray(domain) ? domain : "string" == typeof domain ? [ domain ] : [ constants_WILDCARD ]).map(function(dom) {
                         if (0 === dom.indexOf("mock:")) {
                             if ("file:" === window.location.protocol) return constants_WILDCARD;
-                            if (!Object(src.isActuallySameDomain)(win)) throw new Error("Attempting to send messsage to mock domain " + dom + ", but window is actually cross-domain");
-                            return Object(src.getActualDomain)(win);
+                            if (!Object(cross_domain_utils_src.isActuallySameDomain)(win)) throw new Error("Attempting to send messsage to mock domain " + dom + ", but window is actually cross-domain");
+                            return Object(cross_domain_utils_src.getActualDomain)(win);
                         }
                         return 0 === dom.indexOf("file:") ? constants_WILDCARD : dom;
                     }).forEach(function(dom) {
@@ -1420,11 +1641,10 @@
             function sendMessage(win, domain, message) {
                 return zalgo_promise_src.a.try(function() {
                     var _serializeMessage;
-                    if (Object(src.isWindowClosed)(win)) throw new Error("Window is closed");
-                    var serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {})[constants_WINDOW_PROP.POSTROBOT] = _extends({}, message, {
-                        id: Object(belter_src.uniqueID)(),
-                        windowType: Object(src.isPopup)() ? WINDOW_TYPE.POPUP : Object(src.isIframe)() ? WINDOW_TYPE.IFRAME : WINDOW_TYPE.FULLPAGE
-                    }), _serializeMessage)), messages = [];
+                    if (Object(cross_domain_utils_src.isWindowClosed)(win)) throw new Error("Window is closed");
+                    var serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {})[constants_WINDOW_PROP.POSTROBOT] = _extends({
+                        id: Object(belter_src.uniqueID)()
+                    }, message), _serializeMessage)), messages = [];
                     return zalgo_promise_src.a.map(Object.keys(SEND_MESSAGE_STRATEGIES), function(strategyName) {
                         return zalgo_promise_src.a.try(function() {
                             if (!CONFIG.ALLOWED_POST_MESSAGE_METHODS[strategyName]) throw new Error("Strategy disallowed: " + strategyName);
@@ -1469,7 +1689,7 @@
                             if (winListeners[domain]) return winListeners[domain];
                             if (winListeners[__DOMAIN_REGEX__]) for (var _i4 = 0, _winListeners$__DOMAI2 = winListeners[__DOMAIN_REGEX__], _length4 = null == _winListeners$__DOMAI2 ? 0 : _winListeners$__DOMAI2.length; _i4 < _length4; _i4++) {
                                 var _ref5 = _winListeners$__DOMAI2[_i4], regex = _ref5.regex, listener = _ref5.listener;
-                                if (Object(src.matchDomain)(regex, domain)) return listener;
+                                if (Object(cross_domain_utils_src.matchDomain)(regex, domain)) return listener;
                             }
                         }
                         if (winListeners[constants_WILDCARD]) return winListeners[constants_WILDCARD];
@@ -1482,14 +1702,7 @@
                     for (var key in source) Object.prototype.hasOwnProperty.call(source, key) && (target[key] = source[key]);
                 }
                 return target;
-            }, RECEIVE_MESSAGE_TYPES = ((_RECEIVE_MESSAGE_TYPE = {})[constants_MESSAGE_TYPE.ACK] = function(source, origin, message) {
-                if (!isResponseListenerErrored(message.hash)) {
-                    var options = getResponseListener(message.hash);
-                    if (!options) throw new Error("No handler found for post message ack for message: " + message.name + " from " + origin + " in " + window.location.protocol + "//" + window.location.host + window.location.pathname);
-                    if (!Object(src.matchDomain)(options.domain, origin)) throw new Error("Ack origin " + origin + " does not match domain " + options.domain.toString());
-                    options.ack = !0;
-                }
-            }, _RECEIVE_MESSAGE_TYPE[constants_MESSAGE_TYPE.REQUEST] = function(source, origin, message) {
+            }, RECEIVE_MESSAGE_TYPES = ((_RECEIVE_MESSAGE_TYPE = {})[constants_MESSAGE_TYPE.REQUEST] = function(source, origin, message) {
                 var options = getRequestListener({
                     name: message.name,
                     win: source,
@@ -1497,7 +1710,7 @@
                 });
                 function sendResponse(type) {
                     var data = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {};
-                    return message.fireAndForget || Object(src.isWindowClosed)(source) ? zalgo_promise_src.a.resolve() : sendMessage(source, origin, types__extends({
+                    return message.fireAndForget || Object(cross_domain_utils_src.isWindowClosed)(source) ? zalgo_promise_src.a.resolve() : sendMessage(source, origin, types__extends({
                         type: type,
                         hash: message.hash,
                         name: message.name
@@ -1505,7 +1718,7 @@
                 }
                 return zalgo_promise_src.a.all([ sendResponse(constants_MESSAGE_TYPE.ACK), zalgo_promise_src.a.try(function() {
                     if (!options) throw new Error("No handler found for post message: " + message.name + " from " + origin + " in " + window.location.protocol + "//" + window.location.host + window.location.pathname);
-                    if (!Object(src.matchDomain)(options.domain, origin)) throw new Error("Request origin " + origin + " does not match domain " + options.domain.toString());
+                    if (!Object(cross_domain_utils_src.matchDomain)(options.domain, origin)) throw new Error("Request origin " + origin + " does not match domain " + options.domain.toString());
                     var data = message.data;
                     return options.handler({
                         source: source,
@@ -1526,11 +1739,18 @@
                     if (options && options.handleError) return options.handleError(err);
                     throw err;
                 });
+            }, _RECEIVE_MESSAGE_TYPE[constants_MESSAGE_TYPE.ACK] = function(source, origin, message) {
+                if (!isResponseListenerErrored(message.hash)) {
+                    var options = getResponseListener(message.hash);
+                    if (!options) throw new Error("No handler found for post message ack for message: " + message.name + " from " + origin + " in " + window.location.protocol + "//" + window.location.host + window.location.pathname);
+                    if (!Object(cross_domain_utils_src.matchDomain)(options.domain, origin)) throw new Error("Ack origin " + origin + " does not match domain " + options.domain.toString());
+                    options.ack = !0;
+                }
             }, _RECEIVE_MESSAGE_TYPE[constants_MESSAGE_TYPE.RESPONSE] = function(source, origin, message) {
                 if (!isResponseListenerErrored(message.hash)) {
                     var options = getResponseListener(message.hash);
                     if (!options) throw new Error("No handler found for post message response for message: " + message.name + " from " + origin + " in " + window.location.protocol + "//" + window.location.host + window.location.pathname);
-                    if (!Object(src.matchDomain)(options.domain, origin)) throw new Error("Response origin " + origin + " does not match domain " + Object(src.stringifyDomainPattern)(options.domain));
+                    if (!Object(cross_domain_utils_src.matchDomain)(options.domain, origin)) throw new Error("Response origin " + origin + " does not match domain " + Object(cross_domain_utils_src.stringifyDomainPattern)(options.domain));
                     deleteResponseListener(message.hash);
                     if ("error" === message.ack) return options.respond(message.error, null);
                     if ("success" === message.ack) {
@@ -1568,7 +1788,7 @@
                     markWindowKnown(source);
                     if (-1 === global.receivedMessages.indexOf(message.id)) {
                         global.receivedMessages.push(message.id);
-                        Object(src.isWindowClosed)(source) && !message.fireAndForget || RECEIVE_MESSAGE_TYPES[message.type](source, origin, message);
+                        Object(cross_domain_utils_src.isWindowClosed)(source) && !message.fireAndForget || RECEIVE_MESSAGE_TYPES[message.type](source, origin, message);
                     }
                 }
             }
@@ -1585,7 +1805,7 @@
                 });
             }
             global.receiveMessage = receiveMessage;
-            global.requestPromises = global.requestPromises || new cross_domain_safe_weakmap_src.a();
+            global.requestPromises = global.requestPromises || new src.a();
             function request(options) {
                 return zalgo_promise_src.a.try(function() {
                     if (!options.name) throw new Error("Expected options.name");
@@ -1605,30 +1825,25 @@
                     var win = targetWindow;
                     domain = options.domain || constants_WILDCARD;
                     var hash = options.name + "_" + Object(belter_src.uniqueID)();
-                    if (Object(src.isWindowClosed)(win)) throw new Error("Target window is closed");
+                    if (Object(cross_domain_utils_src.isWindowClosed)(win)) throw new Error("Target window is closed");
                     var hasResult = !1, requestPromises = global.requestPromises.get(win);
                     if (!requestPromises) {
                         requestPromises = [];
                         global.requestPromises.set(win, requestPromises);
                     }
                     var requestPromise = zalgo_promise_src.a.try(function() {
-                        if (Object(src.isAncestor)(window, win)) return function(win) {
-                            var timeout = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 5e3, name = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : "Window", promise = global.readyPromises.get(win);
-                            if (promise) return promise;
-                            promise = new zalgo_promise_src.a();
-                            global.readyPromises.set(win, promise);
-                            -1 !== timeout && setTimeout(function() {
-                                return promise.reject(new Error(name + " did not load after " + timeout + "ms"));
-                            }, timeout);
+                        if (Object(cross_domain_utils_src.isAncestor)(window, win)) return function(win) {
+                            var timeout = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 5e3, name = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : "Window", promise = getHelloPromise(win);
+                            -1 !== timeout && (promise = promise.timeout(timeout, new Error(name + " did not load after " + timeout + "ms")));
                             return promise;
                         }(win, options.timeout || CONFIG.CHILD_WINDOW_TIMEOUT);
                     }).then(function() {
-                        var origin = (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}).origin;
+                        var origin = (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}).domain;
                         if (Object(belter_src.isRegex)(domain) && !origin) return sayHello(win);
                     }).then(function() {
-                        var origin = (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}).origin;
+                        var origin = (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}).domain;
                         if (Object(belter_src.isRegex)(domain)) {
-                            if (!Object(src.matchDomain)(domain, origin)) throw new Error("Remote window domain " + origin + " does not match regex: " + domain.toString());
+                            if (!Object(cross_domain_utils_src.matchDomain)(domain, origin)) throw new Error("Remote window domain " + origin + " does not match regex: " + domain.toString());
                             domain = origin;
                         }
                         if ("string" != typeof domain && !Array.isArray(domain)) throw new TypeError("Expected domain to be a string or array");
@@ -1658,19 +1873,19 @@
                             }).catch(reject);
                             if (options.fireAndForget) return resolve();
                             var totalAckTimeout = function(win) {
-                                return global.knownWindows.get(win);
+                                return -1 !== window.knownWindows.indexOf(win);
                             }(win) ? CONFIG.ACK_TIMEOUT_KNOWN : CONFIG.ACK_TIMEOUT, totalResTimeout = options.timeout || CONFIG.RES_TIMEOUT, ackTimeout = totalAckTimeout, resTimeout = totalResTimeout, cycleTime = 100;
                             setTimeout(function cycle() {
                                 if (!hasResult) {
-                                    if (Object(src.isWindowClosed)(win)) return responseListener.ack ? reject(new Error("Window closed for " + name + " before response")) : reject(new Error("Window closed for " + name + " before ack"));
+                                    if (Object(cross_domain_utils_src.isWindowClosed)(win)) return responseListener.ack ? reject(new Error("Window closed for " + name + " before response")) : reject(new Error("Window closed for " + name + " before ack"));
                                     ackTimeout = Math.max(ackTimeout - cycleTime, 0);
                                     -1 !== resTimeout && (resTimeout = Math.max(resTimeout - cycleTime, 0));
                                     if (responseListener.ack) {
                                         if (-1 === resTimeout) return;
                                         cycleTime = Math.min(resTimeout, 2e3);
                                     } else {
-                                        if (0 === ackTimeout) return reject(new Error("No ack for postMessage " + name + " in " + Object(src.getDomain)() + " in " + totalAckTimeout + "ms"));
-                                        if (0 === resTimeout) return reject(new Error("No response for postMessage " + name + " in " + Object(src.getDomain)() + " in " + totalResTimeout + "ms"));
+                                        if (0 === ackTimeout) return reject(new Error("No ack for postMessage " + name + " in " + Object(cross_domain_utils_src.getDomain)() + " in " + totalAckTimeout + "ms"));
+                                        if (0 === resTimeout) return reject(new Error("No response for postMessage " + name + " in " + Object(cross_domain_utils_src.getDomain)() + " in " + totalResTimeout + "ms"));
                                     }
                                     setTimeout(cycle, cycleTime);
                                 }
@@ -1694,7 +1909,7 @@
                 return request(options);
             }
             function sendToParent(name, data, options) {
-                var win = Object(src.getAncestor)();
+                var win = Object(cross_domain_utils_src.getAncestor)();
                 return win ? _send(win, name, data, options) : new zalgo_promise_src.a(function(resolve, reject) {
                     return reject(new Error("Window does not have a parent"));
                 });
@@ -1769,7 +1984,7 @@
                     if (existingListener) throw win && domain ? new Error("Request listener already exists for " + name + " on domain " + domain.toString() + " for " + (win === global.WINDOW_WILDCARD ? "wildcard" : "specified") + " window") : win ? new Error("Request listener already exists for " + name + " for " + (win === global.WINDOW_WILDCARD ? "wildcard" : "specified") + " window") : domain ? new Error("Request listener already exists for " + name + " on domain " + domain.toString()) : new Error("Request listener already exists for " + name);
                     var requestListeners = global.requestListeners, nameListeners = requestListeners[name];
                     if (!nameListeners) {
-                        nameListeners = new cross_domain_safe_weakmap_src.a();
+                        nameListeners = new src.a();
                         requestListeners[name] = nameListeners;
                     }
                     var winListeners = nameListeners.get(win);
@@ -1811,7 +2026,7 @@
                     });
                 }
                 if (listenerOptions.window && options.errorOnClose) var interval = Object(belter_src.safeInterval)(function() {
-                    if (win && "object" === (void 0 === win ? "undefined" : server__typeof(win)) && Object(src.isWindowClosed)(win)) {
+                    if (win && "object" === (void 0 === win ? "undefined" : server__typeof(win)) && Object(cross_domain_utils_src.isWindowClosed)(win)) {
                         interval.cancel();
                         listenerOptions.handleError(new Error("Post message target window is closed"));
                     }
@@ -1867,7 +2082,7 @@
                 delete window[constants_WINDOW_PROP.POSTROBOT];
                 window.removeEventListener("message", messageListener);
             }
-            var public_parent = Object(src.getAncestor)();
+            var public_parent = Object(cross_domain_utils_src.getAncestor)();
             function cleanUpWindow(win) {
                 var requestPromises = global.requestPromises.get(win);
                 if (requestPromises) for (var _i2 = 0, _length2 = null == requestPromises ? 0 : requestPromises.length; _i2 < _length2; _i2++) requestPromises[_i2].reject(new Error("No response from window - cleaned up"));
@@ -1878,32 +2093,18 @@
                 global.readyPromises.delete(win);
             }
             var bridge = null;
-            function init() {
-                if (!global.initialized) {
-                    Object(belter_src.addEventListener)(window, "message", messageListener);
-                    !function() {
-                        handler = function(_ref3) {
-                            var source = _ref3.source, origin = _ref3.origin, promise = global.readyPromises.get(source) || new zalgo_promise_src.a();
-                            promise.resolve({
-                                origin: origin
-                            });
-                            global.readyPromises.set(source, promise);
-                        }, global.on(constants_MESSAGE_NAME.HELLO, {
-                            domain: constants_WILDCARD
-                        }, function(_ref) {
-                            var source = _ref.source, origin = _ref.origin;
-                            return handler({
-                                source: source,
-                                origin: origin
-                            });
-                        });
-                        var handler, parent = Object(src.getAncestor)();
-                        parent && sayHello(parent).catch(belter_src.noop);
-                    }();
-                }
+            if (!global.initialized) {
                 global.initialized = !0;
+                Object(belter_src.addEventListener)(window, "message", messageListener);
+                bridge && bridge.openTunnelToOpener();
+                !function() {
+                    listenForHello();
+                    for (var _i2 = 0, _getAllWindows2 = Object(cross_domain_utils_src.getAllWindows)(), _length2 = null == _getAllWindows2 ? 0 : _getAllWindows2.length; _i2 < _length2; _i2++) {
+                        var win = _getAllWindows2[_i2];
+                        win !== window && sayHello(win).catch(belter_src.noop);
+                    }
+                }();
             }
-            init();
             __webpack_require__.d(__webpack_exports__, "markWindowKnown", function() {
                 return markWindowKnown;
             });
@@ -1921,9 +2122,6 @@
             });
             __webpack_require__.d(__webpack_exports__, "bridge", function() {
                 return bridge;
-            });
-            __webpack_require__.d(__webpack_exports__, "init", function() {
-                return init;
             });
             __webpack_require__.d(__webpack_exports__, "parent", function() {
                 return public_parent;
