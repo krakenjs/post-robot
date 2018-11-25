@@ -7,7 +7,7 @@ import { uniqueID } from 'belter/src';
 import { assert } from 'chai';
 
 import postRobot from '../src';
-import { onChildWindowReady } from '../src/lib';
+import { awaitWindowHello } from '../src/lib';
 import { SEND_STRATEGY } from '../src/conf';
 
 import { enableIE8Mode } from './common';
@@ -65,9 +65,9 @@ before(() : ZalgoPromise<mixed> => {
         frameElement = document.getElementById('childframe');
 
         return ZalgoPromise.all([
-            onChildWindowReady(childWindow),
-            onChildWindowReady(childFrame),
-            onChildWindowReady(otherChildFrame)
+            awaitWindowHello(childWindow),
+            awaitWindowHello(childFrame),
+            awaitWindowHello(otherChildFrame)
         ]);
     }).then(() => {
         // pass
@@ -592,7 +592,7 @@ describe('[post-robot] serialization cases', () => {
             if (!(err instanceof Error)) {
                 throw new TypeError(`Expected err to be an Error instance`);
             }
-            
+
             if (err.message !== expectedErrorMessage) {
                 throw new Error(`Expected function throw error with message ${ expectedErrorMessage }, got ${ err.message }`);
             }
@@ -689,7 +689,7 @@ describe('[post-robot] serialization cases', () => {
             return data.mywindow.setLocation('/base/test/child.htm');
 
         }).then(() => {
-            return onChildWindowReady(mywindow);
+            return awaitWindowHello(mywindow);
 
         }).then(() => {
             return postRobot.send(mywindow, 'setupListener', {
@@ -802,7 +802,7 @@ describe('[post-robot] serialization cases', () => {
             return data.mywindow.setLocation('/base/test/child.htm');
 
         }).then(() => {
-            return onChildWindowReady(mywindow);
+            return awaitWindowHello(mywindow);
 
         }).then(() => {
             return postRobot.send(mywindow, 'setupListener', {

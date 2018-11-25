@@ -1,60 +1,53 @@
 /* @flow */
 
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
-import { getAncestor, type CrossDomainWindowType } from 'cross-domain-utils/src';
+import { getAllWindows, type CrossDomainWindowType } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { noop, uniqueID, once } from 'belter/src';
+import { noop, uniqueID, once, weakMapMemoizePromise } from 'belter/src';
 
 import { MESSAGE_NAME, WILDCARD } from '../conf';
 import { global } from '../global';
 
-global.helloPromises = global.helloPromises || new WeakMap();
-global.knownWindows = global.knownWindows || new WeakMap();
-global.uid = global.uid || uniqueID();
-
-type Hello = {
-    win : CrossDomainWindowType,
-    domain : string,
-    instanceID : string
-};
-
 global.instanceID = global.instanceID || uniqueID();
+global.helloPromises = global.helloPromises || new WeakMap();
+
+function getHelloPromise(win : CrossDomainWindowType) : ZalgoPromise<{ win : CrossDomainWindowType, domain : string }> {
+    return global.helloPromises.getOrSet(win, () => new ZalgoPromise());
+}
 
 const listenForHello = once(() => {
     global.on(MESSAGE_NAME.HELLO, { domain: WILDCARD }, ({ source, origin }) => {
-        global.helloPromises.getOrSet(source, () => new ZalgoPromise()).resolve({ win: source, domain: origin });
+        getHelloPromise(source).resolve({ win: source, domain: origin });
         return {
             instanceID: global.instanceID
         };
     });
 });
 
-export function sayHello(win : CrossDomainWindowType) : ZalgoPromise<Hello> {
+export function sayHello(win : CrossDomainWindowType) : ZalgoPromise<{ win : CrossDomainWindowType, domain : string, instanceID : string }> {
     return global.send(win, MESSAGE_NAME.HELLO, {}, { domain: WILDCARD, timeout: -1 })
         .then(({ origin, data: { instanceID } }) => {
+            getHelloPromise(win).resolve({ win, domain: origin });
             return { win, domain: origin, instanceID };
         });
 }
 
-export function markWindowKnown(win : CrossDomainWindowType) {
-    global.knownWindows.set(win, true);
-}
+export let getWindowInstanceID = weakMapMemoizePromise((win : CrossDomainWindowType) : ZalgoPromise<string> => {
+    return sayHello(win).then(({ instanceID }) => instanceID);
+});
 
-export function isWindowKnown(win : CrossDomainWindowType) : boolean {
-    return global.knownWindows.get(win);
-}
-
-export function initOnReady() {
+export function initHello() {
     listenForHello();
 
-    let parent = getAncestor();
-    if (parent) {
-        sayHello(parent).catch(noop);
+    for (let win of getAllWindows()) {
+        if (win !== window) {
+            sayHello(win).catch(noop);
+        }
     }
 }
 
-export function onChildWindowReady(win : mixed, timeout : number = 5000, name : string = 'Window') : ZalgoPromise<Hello> {
-    let promise = global.helloPromises.getOrSet(win, () => new ZalgoPromise());
+export function awaitWindowHello(win : CrossDomainWindowType, timeout : number = 5000, name : string = 'Window') : ZalgoPromise<{ win : CrossDomainWindowType, domain : string }> {
+    let promise = getHelloPromise(win);
 
     if (timeout !== -1) {
         promise = promise.timeout(timeout, new Error(`${ name } did not load after ${ timeout }ms`));
