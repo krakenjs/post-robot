@@ -1,6 +1,6 @@
 /* @flow */
 
-import { type CrossDomainWindowType } from 'cross-domain-utils/src';
+import { isSameDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { uniqueID, getOrSet, noop, memoizePromise } from 'belter/src';
@@ -55,8 +55,16 @@ export class ProxyWindow {
     setName(name : string) : ZalgoPromise<ProxyWindow> {
         return ZalgoPromise.try(() => {
             if (this.actualWindow) {
+                if (!isSameDomain(this.actualWindow)) {
+                    throw new Error(`Can not set name for window on different domain`);
+                }
                 // $FlowFixMe
                 this.actualWindow.name = name;
+                // $FlowFixMe
+                if (this.actualWindow.frameElement) {
+                    // $FlowFixMe
+                    this.actualWindow.frameElement.setAttribute('name', name);
+                }
             } else {
                 return this.serializedWindow.setName(name);
             }
