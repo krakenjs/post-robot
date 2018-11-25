@@ -61,7 +61,7 @@ export class ProxyWindow {
                 // $FlowFixMe
                 this.actualWindow.name = name;
                 // $FlowFixMe
-                if (this.actualWindow.frameElement) {
+                if (this.actualWindow.c) {
                     // $FlowFixMe
                     this.actualWindow.frameElement.setAttribute('name', name);
                 }
@@ -131,8 +131,46 @@ export class ProxyWindow {
         }
     }
 
+    serialize() : SerializedProxyWindow {
+        return this.serializedWindow;
+    }
+
+    static serialize(win : CrossDomainWindowType | ProxyWindow) : SerializedProxyWindow {
+        if (ProxyWindow.isProxyWindow(win)) {
+            // $FlowFixMe
+            return win.serialize();
+        }
+        
+        return {
+            serializedID:  uniqueID(),
+            getInstanceID: () => getWindowInstanceID(win),
+            close:         () => ZalgoPromise.try(() => {
+                win.close();
+            }),
+            focus:         () => ZalgoPromise.try(() => {
+                win.focus();
+            }),
+            setLocation:   (href) => ZalgoPromise.try(() => {
+                // $FlowFixMe
+                win.location = href;
+            }),
+            setName:       (name) => ZalgoPromise.try(() => {
+                // $FlowFixMe
+                win.name = name;
+            })
+        };
+    }
+
+    static deserialize(serializedWindow : SerializedProxyWindow) : ProxyWindow {
+        return new ProxyWindow(serializedWindow);
+    }
+
     static isProxyWindow(obj : mixed) : boolean {
         return obj instanceof ProxyWindow;
+    }
+
+    static toProxyWindow(win : CrossDomainWindowType) : ProxyWindow {
+        return ProxyWindow.deserialize(ProxyWindow.serialize(win));
     }
 }
 
@@ -141,41 +179,13 @@ export type SerializedWindow = CustomSerializedType<typeof SERIALIZATION_TYPE.CR
 global.serializedWindows = global.serializedWindows || new WeakMap();
 
 export function serializeWindow(destination : CrossDomainWindowType, domain : string | Array<string>, win : CrossDomainWindowType) : SerializedWindow {
-    return global.serializedWindows.getOrSet(win, () => {
-        return serializeType(SERIALIZATION_TYPE.CROSS_DOMAIN_WINDOW, ProxyWindow.isProxyWindow(win)
-            ? {
-                // $FlowFixMe
-                serializedID:  win.getSerializedID(),
-                // $FlowFixMe
-                getInstanceID: () => win.getInstanceID(),
-                close:         () => win.close(),
-                focus:         () => win.focus(),
-                // $FlowFixMe
-                setLocation:   (href) => win.setLocation(href),
-                // $FlowFixMe
-                setName:       (name) => win.setName(name)
-            }
-            : {
-                serializedID:  uniqueID(),
-                getInstanceID: () => getWindowInstanceID(win),
-                close:         () => ZalgoPromise.try(() => win.close()),
-                focus:         () => ZalgoPromise.try(() => win.focus()),
-                setLocation:   (href) => ZalgoPromise.try(() => {
-                    win.location = href;
-                }),
-                setName:       (name) => ZalgoPromise.try(() => {
-                    // $FlowFixMe
-                    win.name = name;
-                })
-            }
-        );
-    });
+    return global.serializedWindows.getOrSet(win, () =>
+        serializeType(SERIALIZATION_TYPE.CROSS_DOMAIN_WINDOW, ProxyWindow.serialize(win))
+    );
 }
 
 global.deseserializedWindows = {};
 
 export function deserializeWindow(source : CrossDomainWindowType, origin : string, win : SerializedProxyWindow) : ProxyWindow {
-    return getOrSet(global.deseserializedWindows, win.serializedID, () => {
-        return new ProxyWindow(win);
-    });
+    return getOrSet(global.deseserializedWindows, win.serializedID, () => ProxyWindow.deserialize(win));
 }
