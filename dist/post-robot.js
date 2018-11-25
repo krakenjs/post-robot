@@ -1453,7 +1453,7 @@
                         if (!_this3.actualWindow) return _this3.serializedWindow.setName(name);
                         if (!Object(cross_domain_utils_src.isSameDomain)(_this3.actualWindow)) throw new Error("Can not set name for window on different domain");
                         _this3.actualWindow.name = name;
-                        _this3.actualWindow.frameElement && _this3.actualWindow.frameElement.setAttribute("name", name);
+                        _this3.actualWindow.c && _this3.actualWindow.frameElement.setAttribute("name", name);
                     }).then(function() {
                         return _this3;
                     });
@@ -1500,8 +1500,45 @@
                 ProxyWindow.prototype.getInstanceID = function() {
                     return this.actualWindow ? getWindowInstanceID(this.actualWindow) : this.serializedWindow.getInstanceID();
                 };
+                ProxyWindow.prototype.serialize = function() {
+                    return this.serializedWindow;
+                };
+                ProxyWindow.serialize = function(win) {
+                    return ProxyWindow.isProxyWindow(win) ? win.serialize() : {
+                        serializedID: Object(belter_src.uniqueID)(),
+                        getInstanceID: function() {
+                            return getWindowInstanceID(win);
+                        },
+                        close: function() {
+                            return zalgo_promise_src.a.try(function() {
+                                win.close();
+                            });
+                        },
+                        focus: function() {
+                            return zalgo_promise_src.a.try(function() {
+                                win.focus();
+                            });
+                        },
+                        setLocation: function(href) {
+                            return zalgo_promise_src.a.try(function() {
+                                win.location = href;
+                            });
+                        },
+                        setName: function(name) {
+                            return zalgo_promise_src.a.try(function() {
+                                win.name = name;
+                            });
+                        }
+                    };
+                };
+                ProxyWindow.deserialize = function(serializedWindow) {
+                    return new ProxyWindow(serializedWindow);
+                };
                 ProxyWindow.isProxyWindow = function(obj) {
                     return obj instanceof ProxyWindow;
+                };
+                ProxyWindow.toProxyWindow = function(win) {
+                    return ProxyWindow.deserialize(ProxyWindow.serialize(win));
                 };
                 return ProxyWindow;
             }();
@@ -1532,49 +1569,7 @@
                 }, _serialize[TYPE.OBJECT] = function(val) {
                     return Object(cross_domain_utils_src.isWindow)(val) || window_ProxyWindow.isProxyWindow(val) ? (win = val, 
                     global.serializedWindows.getOrSet(win, function() {
-                        return serializeType(SERIALIZATION_TYPE.CROSS_DOMAIN_WINDOW, window_ProxyWindow.isProxyWindow(win) ? {
-                            serializedID: win.getSerializedID(),
-                            getInstanceID: function() {
-                                return win.getInstanceID();
-                            },
-                            close: function() {
-                                return win.close();
-                            },
-                            focus: function() {
-                                return win.focus();
-                            },
-                            setLocation: function(href) {
-                                return win.setLocation(href);
-                            },
-                            setName: function(name) {
-                                return win.setName(name);
-                            }
-                        } : {
-                            serializedID: Object(belter_src.uniqueID)(),
-                            getInstanceID: function() {
-                                return getWindowInstanceID(win);
-                            },
-                            close: function() {
-                                return zalgo_promise_src.a.try(function() {
-                                    return win.close();
-                                });
-                            },
-                            focus: function() {
-                                return zalgo_promise_src.a.try(function() {
-                                    return win.focus();
-                                });
-                            },
-                            setLocation: function(href) {
-                                return zalgo_promise_src.a.try(function() {
-                                    win.location = href;
-                                });
-                            },
-                            setName: function(name) {
-                                return zalgo_promise_src.a.try(function() {
-                                    win.name = name;
-                                });
-                            }
-                        });
+                        return serializeType(SERIALIZATION_TYPE.CROSS_DOMAIN_WINDOW, window_ProxyWindow.serialize(win));
                     })) : val;
                     var win;
                 }, _serialize));
@@ -1623,7 +1618,7 @@
                     }(source, origin, serializedFunction);
                 }, _deserialize[SERIALIZATION_TYPE.CROSS_DOMAIN_WINDOW] = function(serializedWindow) {
                     return win = serializedWindow, Object(belter_src.getOrSet)(global.deseserializedWindows, win.serializedID, function() {
-                        return new window_ProxyWindow(win);
+                        return window_ProxyWindow.deserialize(win);
                     });
                     var win;
                 }, _deserialize));

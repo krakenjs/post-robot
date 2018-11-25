@@ -57,7 +57,7 @@ export var ProxyWindow = function () {
                 // $FlowFixMe
                 _this3.actualWindow.name = name;
                 // $FlowFixMe
-                if (_this3.actualWindow.frameElement) {
+                if (_this3.actualWindow.c) {
                     // $FlowFixMe
                     _this3.actualWindow.frameElement.setAttribute('name', name);
                 }
@@ -139,55 +139,34 @@ export var ProxyWindow = function () {
         }
     };
 
-    ProxyWindow.isProxyWindow = function isProxyWindow(obj) {
-        return obj instanceof ProxyWindow;
+    ProxyWindow.prototype.serialize = function serialize() {
+        return this.serializedWindow;
     };
 
-    return ProxyWindow;
-}();
+    ProxyWindow.serialize = function serialize(win) {
+        if (ProxyWindow.isProxyWindow(win)) {
+            // $FlowFixMe
+            return win.serialize();
+        }
 
-global.serializedWindows = global.serializedWindows || new WeakMap();
-
-export function serializeWindow(destination, domain, win) {
-    return global.serializedWindows.getOrSet(win, function () {
-        return serializeType(SERIALIZATION_TYPE.CROSS_DOMAIN_WINDOW, ProxyWindow.isProxyWindow(win) ? {
-            // $FlowFixMe
-            serializedID: win.getSerializedID(),
-            // $FlowFixMe
-            getInstanceID: function getInstanceID() {
-                return win.getInstanceID();
-            },
-            close: function close() {
-                return win.close();
-            },
-            focus: function focus() {
-                return win.focus();
-            },
-            // $FlowFixMe
-            setLocation: function setLocation(href) {
-                return win.setLocation(href);
-            },
-            // $FlowFixMe
-            setName: function setName(name) {
-                return win.setName(name);
-            }
-        } : {
+        return {
             serializedID: uniqueID(),
             getInstanceID: function getInstanceID() {
                 return getWindowInstanceID(win);
             },
             close: function close() {
                 return ZalgoPromise['try'](function () {
-                    return win.close();
+                    win.close();
                 });
             },
             focus: function focus() {
                 return ZalgoPromise['try'](function () {
-                    return win.focus();
+                    win.focus();
                 });
             },
             setLocation: function setLocation(href) {
                 return ZalgoPromise['try'](function () {
+                    // $FlowFixMe
                     win.location = href;
                 });
             },
@@ -197,7 +176,29 @@ export function serializeWindow(destination, domain, win) {
                     win.name = name;
                 });
             }
-        });
+        };
+    };
+
+    ProxyWindow.deserialize = function deserialize(serializedWindow) {
+        return new ProxyWindow(serializedWindow);
+    };
+
+    ProxyWindow.isProxyWindow = function isProxyWindow(obj) {
+        return obj instanceof ProxyWindow;
+    };
+
+    ProxyWindow.toProxyWindow = function toProxyWindow(win) {
+        return ProxyWindow.deserialize(ProxyWindow.serialize(win));
+    };
+
+    return ProxyWindow;
+}();
+
+global.serializedWindows = global.serializedWindows || new WeakMap();
+
+export function serializeWindow(destination, domain, win) {
+    return global.serializedWindows.getOrSet(win, function () {
+        return serializeType(SERIALIZATION_TYPE.CROSS_DOMAIN_WINDOW, ProxyWindow.serialize(win));
     });
 }
 
@@ -205,6 +206,6 @@ global.deseserializedWindows = {};
 
 export function deserializeWindow(source, origin, win) {
     return getOrSet(global.deseserializedWindows, win.serializedID, function () {
-        return new ProxyWindow(win);
+        return ProxyWindow.deserialize(win);
     });
 }
