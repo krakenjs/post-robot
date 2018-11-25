@@ -72,6 +72,14 @@ export function deserializeFunction(source, origin, _ref2) {
         });
     }
 
+    crossDomainFunctionWrapper.fireAndForget = function crossDomainFireAndForgetFunctionWrapper() {
+        var args = Array.prototype.slice.call(arguments);
+        return global.send(source, MESSAGE_NAME.METHOD, { id: id, name: name, args: args }, { domain: origin, fireAndForget: true }).then(function (_ref4) {
+            var data = _ref4.data;
+            return data.result;
+        });
+    };
+
     crossDomainFunctionWrapper.__name__ = name;
     crossDomainFunctionWrapper.__xdomain__ = true;
 

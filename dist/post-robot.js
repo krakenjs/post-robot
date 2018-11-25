@@ -1619,6 +1619,19 @@
                                 return _ref3.data.result;
                             });
                         }
+                        crossDomainFunctionWrapper.fireAndForget = function() {
+                            var args = Array.prototype.slice.call(arguments);
+                            return global.send(source, constants_MESSAGE_NAME.METHOD, {
+                                id: id,
+                                name: name,
+                                args: args
+                            }, {
+                                domain: origin,
+                                fireAndForget: !0
+                            }).then(function(_ref4) {
+                                return _ref4.data.result;
+                            });
+                        };
                         crossDomainFunctionWrapper.__name__ = name;
                         crossDomainFunctionWrapper.__xdomain__ = !0;
                         crossDomainFunctionWrapper.source = source;
