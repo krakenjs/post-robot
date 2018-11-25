@@ -169,8 +169,16 @@ export class ProxyWindow {
         return obj instanceof ProxyWindow;
     }
 
-    static toProxyWindow(win : CrossDomainWindowType) : ProxyWindow {
-        return ProxyWindow.deserialize(ProxyWindow.serialize(win));
+    static toProxyWindow(win : CrossDomainWindowType | ProxyWindow) : ProxyWindow {
+        if (ProxyWindow.isProxyWindow(win)) {
+            // $FlowFixMe
+            return win;
+        }
+
+        let proxyWin = ProxyWindow.deserialize(ProxyWindow.serialize(win));
+        // $FlowFixMe
+        proxyWin.setWindow(win);
+        return proxyWin;
     }
 }
 
