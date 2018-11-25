@@ -167,6 +167,19 @@ export var ProxyWindow = function () {
             setLocation: function setLocation(href) {
                 return ZalgoPromise['try'](function () {
                     // $FlowFixMe
+                    if (isSameDomain(win)) {
+                        try {
+                            if (win.location && typeof win.location.replace === 'function') {
+                                // $FlowFixMe
+                                win.location.replace(href);
+                                return;
+                            }
+                        } catch (err) {
+                            // pass
+                        }
+                    }
+
+                    // $FlowFixMe
                     win.location = href;
                 });
             },

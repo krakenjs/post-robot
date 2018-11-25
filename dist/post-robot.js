@@ -1521,6 +1521,12 @@
                         },
                         setLocation: function(href) {
                             return zalgo_promise_src.a.try(function() {
+                                if (Object(cross_domain_utils_src.isSameDomain)(win)) try {
+                                    if (win.location && "function" == typeof win.location.replace) {
+                                        win.location.replace(href);
+                                        return;
+                                    }
+                                } catch (err) {}
                                 win.location = href;
                             });
                         },
