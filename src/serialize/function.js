@@ -68,6 +68,12 @@ export function deserializeFunction<T>(source : CrossDomainWindowType, origin : 
             .then(({ data }) => data.result);
     }
 
+    crossDomainFunctionWrapper.fireAndForget = function crossDomainFireAndForgetFunctionWrapper<X : mixed>() : ZalgoPromise<X> {
+        let args = Array.prototype.slice.call(arguments);
+        return global.send(source, MESSAGE_NAME.METHOD, { id, name, args }, { domain: origin, fireAndForget: true })
+            .then(({ data }) => data.result);
+    };
+
     crossDomainFunctionWrapper.__name__ = name;
     crossDomainFunctionWrapper.__xdomain__ = true;
 
