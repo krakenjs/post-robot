@@ -2606,7 +2606,7 @@
                 global.a.remoteWindows && global.a.remoteWindows.delete(win);
                 global.a.requestPromises.delete(win);
                 global.a.methods.delete(win);
-                global.a.readyPromises.delete(win);
+                global.a.helloPromises.delete(win);
             }
             var bridge = __webpack_require__("./src/bridge/interface.js");
             if (!global.a.initialized) {

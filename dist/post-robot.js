@@ -2090,7 +2090,7 @@
                 global.remoteWindows && global.remoteWindows.delete(win);
                 global.requestPromises.delete(win);
                 global.methods.delete(win);
-                global.readyPromises.delete(win);
+                global.helloPromises.delete(win);
             }
             var bridge = null;
             if (!global.initialized) {
