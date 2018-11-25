@@ -30,5 +30,5 @@ export function cleanUpWindow(win : CrossDomainWindowType) {
 
     global.requestPromises.delete(win);
     global.methods.delete(win);
-    global.readyPromises.delete(win);
+    global.helloPromises.delete(win);
 }
