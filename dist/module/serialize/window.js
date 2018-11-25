@@ -188,7 +188,15 @@ export var ProxyWindow = function () {
     };
 
     ProxyWindow.toProxyWindow = function toProxyWindow(win) {
-        return ProxyWindow.deserialize(ProxyWindow.serialize(win));
+        if (ProxyWindow.isProxyWindow(win)) {
+            // $FlowFixMe
+            return win;
+        }
+
+        var proxyWin = ProxyWindow.deserialize(ProxyWindow.serialize(win));
+        // $FlowFixMe
+        proxyWin.setWindow(win);
+        return proxyWin;
     };
 
     return ProxyWindow;

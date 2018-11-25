@@ -2023,7 +2023,10 @@
                     return obj instanceof ProxyWindow;
                 };
                 ProxyWindow.toProxyWindow = function(win) {
-                    return ProxyWindow.deserialize(ProxyWindow.serialize(win));
+                    if (ProxyWindow.isProxyWindow(win)) return win;
+                    var proxyWin = ProxyWindow.deserialize(ProxyWindow.serialize(win));
+                    proxyWin.setWindow(win);
+                    return proxyWin;
                 };
                 return ProxyWindow;
             }();
