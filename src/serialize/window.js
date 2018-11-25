@@ -152,6 +152,19 @@ export class ProxyWindow {
             }),
             setLocation:   (href) => ZalgoPromise.try(() => {
                 // $FlowFixMe
+                if (isSameDomain(win)) {
+                    try {
+                        if (win.location && typeof win.location.replace === 'function') {
+                            // $FlowFixMe
+                            win.location.replace(href);
+                            return;
+                        }
+                    } catch (err) {
+                        // pass
+                    }
+                }
+
+                // $FlowFixMe
                 win.location = href;
             }),
             setName:       (name) => ZalgoPromise.try(() => {
