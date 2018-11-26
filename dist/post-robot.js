@@ -1243,6 +1243,7 @@
             global.registerSelf = function() {};
             global.instanceID = global.instanceID || Object(belter_src.uniqueID)();
             global.helloPromises = global.helloPromises || new src.a();
+            global.onHello = global.onHello || [];
             function getHelloPromise(win) {
                 return global.helloPromises.getOrSet(win, function() {
                     return new zalgo_promise_src.a();
@@ -1263,7 +1264,9 @@
                 });
             });
             function sayHello(win) {
-                return global.send(win, constants_MESSAGE_NAME.HELLO, {}, {
+                return global.send(win, constants_MESSAGE_NAME.HELLO, {
+                    instanceID: global.instanceID
+                }, {
                     domain: constants_WILDCARD,
                     timeout: -1
                 }).then(function(_ref2) {
@@ -1284,17 +1287,9 @@
                     return _ref3.instanceID;
                 });
             });
-            window.knownWindows = window.knownWindows || [];
-            window.onKnownWindow = window.onKnownWindow || [];
+            window.knownWindows = window.knownWindows || new src.a();
             function markWindowKnown(win) {
-                window.knownWindows = window.knownWindows.filter(function(knownWindow) {
-                    return !Object(cross_domain_utils_src.isWindowClosed)(knownWindow);
-                });
-                if (-1 === window.knownWindows.indexOf(win)) {
-                    window.knownWindows.push(win);
-                    for (var _i2 = 0, _global$onKnownWindow2 = window.onKnownWindow, _length2 = null == _global$onKnownWindow2 ? 0 : _global$onKnownWindow2.length; _i2 < _length2; _i2++) (0, 
-                    _global$onKnownWindow2[_i2])(win);
-                }
+                window.knownWindows.set(win, !0);
             }
             var _SERIALIZER, TYPE = {
                 FUNCTION: "function",
@@ -1376,104 +1371,60 @@
             }, _DESERIALIZER[TYPE.NULL] = function(val) {
                 return val;
             }, _DESERIALIZER), defaultDeserializers = {};
-            global.methods = global.methods || new src.a();
-            var listenForFunctionCalls = Object(belter_src.once)(function() {
-                global.on(constants_MESSAGE_NAME.METHOD, {
-                    origin: constants_WILDCARD
-                }, function(_ref) {
-                    var source = _ref.source, origin = _ref.origin, data = _ref.data, methods = global.methods.get(source);
-                    if (!methods) throw new Error("Could not find any methods this window has privileges to call");
-                    var meth = methods[data.id];
-                    if (!meth) throw new Error("Could not find method with id: " + data.id);
-                    if (!Object(cross_domain_utils_src.matchDomain)(meth.domain, origin)) throw new Error("Method domain " + meth.domain + " does not match origin " + origin);
-                    return zalgo_promise_src.a.try(function() {
-                        return meth.val.apply({
-                            source: source,
-                            origin: origin,
-                            data: data
-                        }, data.args);
-                    }).then(function(result) {
-                        return {
-                            result: result,
-                            id: data.id,
-                            name: data.name
-                        };
-                    });
-                });
-            });
-            function function_serializeFunction(destination, domain, val, key) {
-                var id = Object(belter_src.uniqueID)(), methods = global.methods.get(destination);
-                if (!methods) {
-                    methods = {};
-                    global.methods.set(destination, methods);
-                }
-                methods[id] = {
-                    domain: domain,
-                    val: val
-                };
-                listenForFunctionCalls();
-                return serializeType(SERIALIZATION_TYPE.CROSS_DOMAIN_FUNCTION, {
-                    id: id,
-                    name: val.name || key
-                });
-            }
+            global.winToProxyWindow = global.winToProxyWindow || new src.a();
+            global.idToProxyWindow = global.idToProxyWindow || {};
             var window_ProxyWindow = function() {
-                function ProxyWindow(serializedWindow) {
+                function ProxyWindow(serializedWindow, actualWindow) {
                     !function(instance, Constructor) {
                         if (!(instance instanceof ProxyWindow)) throw new TypeError("Cannot call a class as a function");
                     }(this);
                     this.serializedWindow = serializedWindow;
                     this.actualWindowPromise = new zalgo_promise_src.a();
+                    actualWindow && this.setWindow(actualWindow);
                     this.serializedWindow.getInstanceID = Object(belter_src.memoizePromise)(this.serializedWindow.getInstanceID);
-                    this.waitForWindows();
                 }
-                ProxyWindow.prototype.waitForWindows = function() {
+                ProxyWindow.prototype.setLocation = function(href) {
                     var _this = this;
-                    !function(handler) {
-                        window.onKnownWindow.push(handler);
-                        for (var _i4 = 0, _global$knownWindows2 = window.knownWindows, _length4 = null == _global$knownWindows2 ? 0 : _global$knownWindows2.length; _i4 < _length4; _i4++) handler(_global$knownWindows2[_i4]);
-                    }(function(win) {
-                        _this.matchWindow(win).then(function(match) {
-                            match && _this.setWindow(win);
-                        }).catch(belter_src.noop);
+                    return zalgo_promise_src.a.try(function() {
+                        if (!_this.actualWindow) return _this.serializedWindow.setLocation(href);
+                        _this.actualWindow.location = href;
+                    }).then(function() {
+                        return _this;
                     });
                 };
-                ProxyWindow.prototype.setLocation = function(href) {
+                ProxyWindow.prototype.setName = function(name) {
                     var _this2 = this;
                     return zalgo_promise_src.a.try(function() {
-                        if (!_this2.actualWindow) return _this2.serializedWindow.setLocation(href);
-                        _this2.actualWindow.location = href;
+                        if (!_this2.actualWindow) return _this2.serializedWindow.setName(name);
+                        if (!Object(cross_domain_utils_src.isSameDomain)(_this2.actualWindow)) throw new Error("Can not set name for window on different domain");
+                        _this2.actualWindow.name = name;
+                        _this2.actualWindow.frameElement && _this2.actualWindow.frameElement.setAttribute("name", name);
                     }).then(function() {
                         return _this2;
                     });
                 };
-                ProxyWindow.prototype.setName = function(name) {
+                ProxyWindow.prototype.close = function() {
                     var _this3 = this;
                     return zalgo_promise_src.a.try(function() {
-                        if (!_this3.actualWindow) return _this3.serializedWindow.setName(name);
-                        if (!Object(cross_domain_utils_src.isSameDomain)(_this3.actualWindow)) throw new Error("Can not set name for window on different domain");
-                        _this3.actualWindow.name = name;
-                        _this3.actualWindow.c && _this3.actualWindow.frameElement.setAttribute("name", name);
+                        if (!_this3.actualWindow) return _this3.serializedWindow.close();
+                        _this3.actualWindow.close();
                     }).then(function() {
                         return _this3;
                     });
                 };
-                ProxyWindow.prototype.close = function() {
+                ProxyWindow.prototype.focus = function() {
                     var _this4 = this;
                     return zalgo_promise_src.a.try(function() {
-                        if (!_this4.actualWindow) return _this4.serializedWindow.close();
-                        _this4.actualWindow.close();
+                        if (!_this4.actualWindow) return _this4.serializedWindow.focus();
+                        _this4.actualWindow.focus();
                     }).then(function() {
                         return _this4;
                     });
                 };
-                ProxyWindow.prototype.focus = function() {
+                ProxyWindow.prototype.isClosed = function() {
                     var _this5 = this;
                     return zalgo_promise_src.a.try(function() {
-                        if (!_this5.actualWindow) return _this5.serializedWindow.focus();
-                        _this5.actualWindow.focus();
-                    }).then(function() {
-                        return _this5;
+                        return _this5.actualWindow ? Object(cross_domain_utils_src.isWindowClosed)(_this5.actualWindow) : _this5.serializedWindow.isClosed();
                     });
                 };
                 ProxyWindow.prototype.setWindow = function(win) {
@@ -1484,18 +1435,17 @@
                     var _this6 = this;
                     return zalgo_promise_src.a.try(function() {
                         return _this6.actualWindow ? win === _this6.actualWindow : zalgo_promise_src.a.all([ _this6.getInstanceID(), getWindowInstanceID(win) ]).then(function(_ref) {
-                            return _ref[0] === _ref[1];
+                            var match = _ref[0] === _ref[1];
+                            match && _this6.setWindow(win);
+                            return match;
                         });
                     });
                 };
-                ProxyWindow.prototype.hasWindow = function() {
-                    return Boolean(this.actualWindow);
+                ProxyWindow.prototype.unwrap = function() {
+                    return this.actualWindow || this;
                 };
                 ProxyWindow.prototype.awaitWindow = function() {
                     return this.actualWindowPromise;
-                };
-                ProxyWindow.prototype.getSerializedID = function() {
-                    return this.serializedWindow.serializedID;
                 };
                 ProxyWindow.prototype.getInstanceID = function() {
                     return this.actualWindow ? getWindowInstanceID(this.actualWindow) : this.serializedWindow.getInstanceID();
@@ -1503,56 +1453,116 @@
                 ProxyWindow.prototype.serialize = function() {
                     return this.serializedWindow;
                 };
+                ProxyWindow.unwrap = function(win) {
+                    return ProxyWindow.isProxyWindow(win) ? win.unwrap() : win;
+                };
                 ProxyWindow.serialize = function(win) {
-                    return ProxyWindow.isProxyWindow(win) ? win.serialize() : {
-                        serializedID: Object(belter_src.uniqueID)(),
-                        getInstanceID: function() {
-                            return getWindowInstanceID(win);
-                        },
-                        close: function() {
-                            return zalgo_promise_src.a.try(function() {
-                                win.close();
-                            });
-                        },
-                        focus: function() {
-                            return zalgo_promise_src.a.try(function() {
-                                win.focus();
-                            });
-                        },
-                        setLocation: function(href) {
-                            return zalgo_promise_src.a.try(function() {
-                                if (Object(cross_domain_utils_src.isSameDomain)(win)) try {
-                                    if (win.location && "function" == typeof win.location.replace) {
-                                        win.location.replace(href);
-                                        return;
-                                    }
-                                } catch (err) {}
-                                win.location = href;
-                            });
-                        },
-                        setName: function(name) {
-                            return zalgo_promise_src.a.try(function() {
-                                win.name = name;
-                            });
-                        }
-                    };
+                    return ProxyWindow.toProxyWindow(win).serialize();
                 };
                 ProxyWindow.deserialize = function(serializedWindow) {
-                    return new ProxyWindow(serializedWindow);
+                    return Object(belter_src.getOrSet)(global.idToProxyWindow, serializedWindow.id, function() {
+                        return new ProxyWindow(serializedWindow);
+                    });
                 };
                 ProxyWindow.isProxyWindow = function(obj) {
                     return obj instanceof ProxyWindow;
                 };
                 ProxyWindow.toProxyWindow = function(win) {
-                    if (ProxyWindow.isProxyWindow(win)) return win;
-                    var proxyWin = ProxyWindow.deserialize(ProxyWindow.serialize(win));
-                    proxyWin.setWindow(win);
-                    return proxyWin;
+                    return ProxyWindow.isProxyWindow(win) ? win : global.winToProxyWindow.getOrSet(win, function() {
+                        var id = Object(belter_src.uniqueID)();
+                        global.idToProxyWindow[id] = new ProxyWindow({
+                            id: id,
+                            getInstanceID: function() {
+                                return getWindowInstanceID(win);
+                            },
+                            close: function() {
+                                return zalgo_promise_src.a.try(function() {
+                                    win.close();
+                                });
+                            },
+                            focus: function() {
+                                return zalgo_promise_src.a.try(function() {
+                                    win.focus();
+                                });
+                            },
+                            isClosed: function() {
+                                return zalgo_promise_src.a.try(function() {
+                                    return Object(cross_domain_utils_src.isWindowClosed)(win);
+                                });
+                            },
+                            setLocation: function(href) {
+                                return zalgo_promise_src.a.try(function() {
+                                    if (Object(cross_domain_utils_src.isSameDomain)(win)) try {
+                                        if (win.location && "function" == typeof win.location.replace) {
+                                            win.location.replace(href);
+                                            return;
+                                        }
+                                    } catch (err) {}
+                                    win.location = href;
+                                });
+                            },
+                            setName: function(name) {
+                                return zalgo_promise_src.a.try(function() {
+                                    win.name = name;
+                                });
+                            }
+                        }, win);
+                        return global.idToProxyWindow[id];
+                    });
                 };
                 return ProxyWindow;
             }();
-            global.serializedWindows = global.serializedWindows || new src.a();
-            global.deseserializedWindows = {};
+            global.methods = global.methods || new src.a();
+            global.proxyWindowMethods = global.proxyWindowMethods || {};
+            var listenForFunctionCalls = Object(belter_src.once)(function() {
+                global.on(constants_MESSAGE_NAME.METHOD, {
+                    origin: constants_WILDCARD
+                }, function(_ref) {
+                    var source = _ref.source, origin = _ref.origin, data = _ref.data, id = data.id, name = data.name;
+                    return zalgo_promise_src.a.try(function() {
+                        var meth = (global.methods.get(source) || {})[data.id] || global.proxyWindowMethods[id];
+                        if (!meth) throw new Error("Could not find method with id: " + data.id);
+                        var proxy = meth.proxy, domain = meth.domain, val = meth.val;
+                        if (!Object(cross_domain_utils_src.matchDomain)(domain, origin)) throw new Error("Method domain " + meth.domain + " does not match origin " + origin);
+                        return proxy ? proxy.matchWindow(source).then(function(match) {
+                            if (!match) throw new Error("Proxy window does not match source");
+                            delete global.proxyWindowMethods[id];
+                            return val;
+                        }) : val;
+                    }).then(function(method) {
+                        return method.apply({
+                            source: source,
+                            origin: origin,
+                            data: data
+                        }, data.args);
+                    }).then(function(result) {
+                        return {
+                            result: result,
+                            id: id,
+                            name: name
+                        };
+                    });
+                });
+            });
+            function function_serializeFunction(destination, domain, val, key) {
+                listenForFunctionCalls();
+                var id = Object(belter_src.uniqueID)();
+                destination = window_ProxyWindow.unwrap(destination);
+                window_ProxyWindow.isProxyWindow(destination) ? global.proxyWindowMethods[id] = {
+                    proxy: destination,
+                    domain: domain,
+                    val: val
+                } : global.methods.getOrSet(destination, function() {
+                    return {};
+                })[id] = {
+                    domain: domain,
+                    val: val
+                };
+                return serializeType(SERIALIZATION_TYPE.CROSS_DOMAIN_FUNCTION, {
+                    id: id,
+                    name: val.name || key
+                });
+            }
             function serializeMessage(destination, domain, obj) {
                 var _serialize;
                 return function(obj) {
@@ -1577,9 +1587,7 @@
                     return function_serializeFunction(destination, domain, val, key);
                 }, _serialize[TYPE.OBJECT] = function(val) {
                     return Object(cross_domain_utils_src.isWindow)(val) || window_ProxyWindow.isProxyWindow(val) ? (win = val, 
-                    global.serializedWindows.getOrSet(win, function() {
-                        return serializeType(SERIALIZATION_TYPE.CROSS_DOMAIN_WINDOW, window_ProxyWindow.serialize(win));
-                    })) : val;
+                    serializeType(SERIALIZATION_TYPE.CROSS_DOMAIN_WINDOW, window_ProxyWindow.serialize(win))) : val;
                     var win;
                 }, _serialize));
             }
@@ -1639,9 +1647,7 @@
                         return crossDomainFunctionWrapper;
                     }(source, origin, serializedFunction);
                 }, _deserialize[SERIALIZATION_TYPE.CROSS_DOMAIN_WINDOW] = function(serializedWindow) {
-                    return win = serializedWindow, Object(belter_src.getOrSet)(global.deseserializedWindows, win.serializedID, function() {
-                        return window_ProxyWindow.deserialize(win);
-                    });
+                    return win = serializedWindow, window_ProxyWindow.deserialize(win);
                     var win;
                 }, _deserialize));
             }
@@ -1900,7 +1906,7 @@
                             }).catch(reject);
                             if (options.fireAndForget) return resolve();
                             var totalAckTimeout = function(win) {
-                                return -1 !== window.knownWindows.indexOf(win);
+                                return window.knownWindows.get(win, !1);
                             }(win) ? CONFIG.ACK_TIMEOUT_KNOWN : CONFIG.ACK_TIMEOUT, totalResTimeout = options.timeout || CONFIG.RES_TIMEOUT, ackTimeout = totalAckTimeout, resTimeout = totalResTimeout, cycleTime = 100;
                             setTimeout(function cycle() {
                                 if (!hasResult) {

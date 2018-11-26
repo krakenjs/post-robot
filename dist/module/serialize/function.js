@@ -7,54 +7,71 @@ import { serializeType } from 'universal-serialize/src';
 import { MESSAGE_NAME, WILDCARD, SERIALIZATION_TYPE } from '../conf';
 import { global } from '../global';
 
+import { ProxyWindow } from './window';
+
 global.methods = global.methods || new WeakMap();
+global.proxyWindowMethods = global.proxyWindowMethods || {};
 
 var listenForFunctionCalls = once(function () {
     global.on(MESSAGE_NAME.METHOD, { origin: WILDCARD }, function (_ref) {
         var source = _ref.source,
             origin = _ref.origin,
             data = _ref.data;
+        var id = data.id,
+            name = data.name;
 
-        var methods = global.methods.get(source);
-
-        if (!methods) {
-            throw new Error('Could not find any methods this window has privileges to call');
-        }
-
-        var meth = methods[data.id];
-
-        if (!meth) {
-            throw new Error('Could not find method with id: ' + data.id);
-        }
-
-        if (!matchDomain(meth.domain, origin)) {
-            throw new Error('Method domain ' + meth.domain + ' does not match origin ' + origin);
-        }
 
         return ZalgoPromise['try'](function () {
-            return meth.val.apply({ source: source, origin: origin, data: data }, data.args);
-        }).then(function (result) {
-            var id = data.id,
-                name = data.name;
+            var methods = global.methods.get(source) || {};
+            var meth = methods[data.id] || global.proxyWindowMethods[id];
 
+            if (!meth) {
+                throw new Error('Could not find method with id: ' + data.id);
+            }
+
+            var proxy = meth.proxy,
+                domain = meth.domain,
+                val = meth.val;
+
+
+            if (!matchDomain(domain, origin)) {
+                throw new Error('Method domain ' + meth.domain + ' does not match origin ' + origin);
+            }
+
+            if (proxy) {
+                return proxy.matchWindow(source).then(function (match) {
+                    if (!match) {
+                        throw new Error('Proxy window does not match source');
+                    }
+
+                    delete global.proxyWindowMethods[id];
+                    return val;
+                });
+            }
+
+            return val;
+        }).then(function (method) {
+            return method.apply({ source: source, origin: origin, data: data }, data.args);
+        }).then(function (result) {
             return { result: result, id: id, name: name };
         });
     });
 });
 
 export function serializeFunction(destination, domain, val, key) {
-    var id = uniqueID();
-
-    var methods = global.methods.get(destination);
-
-    if (!methods) {
-        methods = {};
-        global.methods.set(destination, methods);
-    }
-
-    methods[id] = { domain: domain, val: val };
-
     listenForFunctionCalls();
+
+    var id = uniqueID();
+    destination = ProxyWindow.unwrap(destination);
+
+    if (ProxyWindow.isProxyWindow(destination)) {
+        global.proxyWindowMethods[id] = { proxy: destination, domain: domain, val: val };
+    } else {
+        var methods = global.methods.getOrSet(destination, function () {
+            return {};
+        });
+        methods[id] = { domain: domain, val: val };
+    }
 
     return serializeType(SERIALIZATION_TYPE.CROSS_DOMAIN_FUNCTION, { id: id, name: val.name || key });
 }

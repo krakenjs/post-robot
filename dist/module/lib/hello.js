@@ -8,6 +8,7 @@ import { global } from '../global';
 
 global.instanceID = global.instanceID || uniqueID();
 global.helloPromises = global.helloPromises || new WeakMap();
+global.onHello = global.onHello || [];
 
 function getHelloPromise(win) {
     return global.helloPromises.getOrSet(win, function () {
@@ -21,14 +22,12 @@ var listenForHello = once(function () {
             origin = _ref.origin;
 
         getHelloPromise(source).resolve({ win: source, domain: origin });
-        return {
-            instanceID: global.instanceID
-        };
+        return { instanceID: global.instanceID };
     });
 });
 
 export function sayHello(win) {
-    return global.send(win, MESSAGE_NAME.HELLO, {}, { domain: WILDCARD, timeout: -1 }).then(function (_ref2) {
+    return global.send(win, MESSAGE_NAME.HELLO, { instanceID: global.instanceID }, { domain: WILDCARD, timeout: -1 }).then(function (_ref2) {
         var origin = _ref2.origin,
             instanceID = _ref2.data.instanceID;
 
