@@ -9,30 +9,46 @@ import { serializeType, type CustomSerializedType } from 'universal-serialize/sr
 import { MESSAGE_NAME, WILDCARD, SERIALIZATION_TYPE } from '../conf';
 import { global } from '../global';
 
+import { ProxyWindow } from './window';
+
 global.methods = global.methods || new WeakMap();
+global.proxyWindowMethods = global.proxyWindowMethods || {};
 
 const listenForFunctionCalls = once(() => {
     global.on(MESSAGE_NAME.METHOD, { origin: WILDCARD }, ({ source, origin, data } : { source : CrossDomainWindowType, origin : string, data : Object }) => {
-        let methods = global.methods.get(source);
-
-        if (!methods) {
-            throw new Error(`Could not find any methods this window has privileges to call`);
-        }
-
-        let meth = methods[data.id];
-
-        if (!meth) {
-            throw new Error(`Could not find method with id: ${ data.id }`);
-        }
-
-        if (!matchDomain(meth.domain, origin)) {
-            throw new Error(`Method domain ${ meth.domain } does not match origin ${ origin }`);
-        }
-
+        let { id, name } = data;
+        
         return ZalgoPromise.try(() => {
-            return meth.val.apply({ source, origin, data }, data.args);
+            let methods = global.methods.get(source) || {};
+            let meth = methods[data.id] || global.proxyWindowMethods[id];
+
+            if (!meth) {
+                throw new Error(`Could not find method with id: ${ data.id }`);
+            }
+
+            let { proxy, domain, val } = meth;
+
+            if (!matchDomain(domain, origin)) {
+                throw new Error(`Method domain ${ meth.domain } does not match origin ${ origin }`);
+            }
+            
+            if (proxy) {
+                return proxy.matchWindow(source).then(match => {
+                    if (!match) {
+                        throw new Error(`Proxy window does not match source`);
+                    }
+
+                    delete global.proxyWindowMethods[id];
+                    return val;
+                });
+            }
+
+            return val;
+
+        }).then(method => {
+            return method.apply({ source, origin, data }, data.args);
+
         }).then(result => {
-            const { id, name } = data;
             return { result, id, name };
         });
     });
@@ -43,19 +59,18 @@ export type SerializedFunction = CustomSerializedType<typeof SERIALIZATION_TYPE.
     name : string
 }>;
 
-export function serializeFunction<T>(destination : CrossDomainWindowType, domain : string | Array<string>, val : () => ZalgoPromise<T> | T, key : string) : SerializedFunction {
-    let id = uniqueID();
-
-    let methods = global.methods.get(destination);
-
-    if (!methods) {
-        methods = {};
-        global.methods.set(destination, methods);
-    }
-
-    methods[id] = { domain, val };
-
+export function serializeFunction<T>(destination : CrossDomainWindowType | ProxyWindow, domain : string | Array<string>, val : () => ZalgoPromise<T> | T, key : string) : SerializedFunction {
     listenForFunctionCalls();
+    
+    let id = uniqueID();
+    destination = ProxyWindow.unwrap(destination);
+
+    if (ProxyWindow.isProxyWindow(destination)) {
+        global.proxyWindowMethods[id] = { proxy: destination, domain, val };
+    } else {
+        let methods = global.methods.getOrSet(destination, () => ({}));
+        methods[id] = { domain, val };
+    }
 
     return serializeType(SERIALIZATION_TYPE.CROSS_DOMAIN_FUNCTION, { id, name: val.name || key });
 }

@@ -10,6 +10,7 @@ import { global } from '../global';
 
 global.instanceID = global.instanceID || uniqueID();
 global.helloPromises = global.helloPromises || new WeakMap();
+global.onHello = global.onHello || [];
 
 function getHelloPromise(win : CrossDomainWindowType) : ZalgoPromise<{ win : CrossDomainWindowType, domain : string }> {
     return global.helloPromises.getOrSet(win, () => new ZalgoPromise());
@@ -18,14 +19,12 @@ function getHelloPromise(win : CrossDomainWindowType) : ZalgoPromise<{ win : Cro
 const listenForHello = once(() => {
     global.on(MESSAGE_NAME.HELLO, { domain: WILDCARD }, ({ source, origin }) => {
         getHelloPromise(source).resolve({ win: source, domain: origin });
-        return {
-            instanceID: global.instanceID
-        };
+        return { instanceID: global.instanceID };
     });
 });
 
 export function sayHello(win : CrossDomainWindowType) : ZalgoPromise<{ win : CrossDomainWindowType, domain : string, instanceID : string }> {
-    return global.send(win, MESSAGE_NAME.HELLO, {}, { domain: WILDCARD, timeout: -1 })
+    return global.send(win, MESSAGE_NAME.HELLO, { instanceID: global.instanceID }, { domain: WILDCARD, timeout: -1 })
         .then(({ origin, data: { instanceID } }) => {
             getHelloPromise(win).resolve({ win, domain: origin });
             return { win, domain: origin, instanceID };

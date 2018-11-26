@@ -9,14 +9,12 @@ import { serializeFunction, deserializeFunction, type SerializedFunction } from 
 import { serializePromise, deserializePromise, type SerializedPromise } from './promise';
 import { serializeWindow, deserializeWindow, type SerializedWindow, ProxyWindow } from './window';
 
-export function serializeMessage<T : mixed>(destination : CrossDomainWindowType, domain : string | Array<string>, obj : T) : string {
+export function serializeMessage<T : mixed>(destination : CrossDomainWindowType | ProxyWindow, domain : string | Array<string>, obj : T) : string {
     return serialize(obj, {
         [ TYPE.PROMISE ]:  (val : Thenable, key : string) : SerializedPromise => serializePromise(destination, domain, val, key),
         [ TYPE.FUNCTION ]: (val : Function, key : string) : SerializedFunction => serializeFunction(destination, domain, val, key),
         [ TYPE.OBJECT ]:   (val : CrossDomainWindowType) : Object | SerializedWindow => {
-            return (isWindow(val) || ProxyWindow.isProxyWindow(val))
-                ? serializeWindow(destination, domain, val)
-                : val;
+            return (isWindow(val) || ProxyWindow.isProxyWindow(val)) ? serializeWindow(destination, domain, val) : val;
         }
     });
 }

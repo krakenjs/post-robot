@@ -7,12 +7,13 @@ import { serializeType, type CustomSerializedType, type Thenable } from 'univers
 import { SERIALIZATION_TYPE } from '../conf';
 
 import { serializeFunction, type SerializedFunction } from './function';
+import { ProxyWindow } from './window';
 
 export type SerializedPromise = CustomSerializedType<typeof SERIALIZATION_TYPE.CROSS_DOMAIN_ZALGO_PROMISE, {
     then : SerializedFunction
 }>;
 
-export function serializePromise(destination : CrossDomainWindowType, domain : string | Array<string>, val : Thenable, key : string) : SerializedPromise {
+export function serializePromise(destination : CrossDomainWindowType | ProxyWindow, domain : string | Array<string>, val : Thenable, key : string) : SerializedPromise {
     return serializeType(SERIALIZATION_TYPE.CROSS_DOMAIN_ZALGO_PROMISE, {
         then: serializeFunction(destination, domain, (resolve, reject) => val.then(resolve, reject), key)
     });
