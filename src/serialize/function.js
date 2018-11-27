@@ -13,8 +13,15 @@ import { ProxyWindow } from './window';
 
 global.methods = global.methods || new WeakMap();
 global.proxyWindowMethods = global.proxyWindowMethods || {};
+global.listeningForFunctions = global.listeningForFunctions || false;
 
 const listenForFunctionCalls = once(() => {
+    if (global.listeningForFunctions) {
+        return;
+    }
+
+    global.listeningForFunctions = true;
+
     global.on(MESSAGE_NAME.METHOD, { origin: WILDCARD }, ({ source, origin, data } : { source : CrossDomainWindowType, origin : string, data : Object }) => {
         let { id, name } = data;
         
@@ -85,8 +92,7 @@ export function deserializeFunction<T>(source : CrossDomainWindowType, origin : 
 
     crossDomainFunctionWrapper.fireAndForget = function crossDomainFireAndForgetFunctionWrapper<X : mixed>() : ZalgoPromise<X> {
         let args = Array.prototype.slice.call(arguments);
-        return global.send(source, MESSAGE_NAME.METHOD, { id, name, args }, { domain: origin, fireAndForget: true })
-            .then(({ data }) => data.result);
+        return global.send(source, MESSAGE_NAME.METHOD, { id, name, args }, { domain: origin, fireAndForget: true });
     };
 
     crossDomainFunctionWrapper.__name__ = name;
