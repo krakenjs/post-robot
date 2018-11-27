@@ -1,20 +1,18 @@
 /* @flow */
 
-import { WeakMap } from 'cross-domain-safe-weakmap/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { getDomain, getFrameByName, isWindowClosed, getDomainFromUrl, type CrossDomainWindowType } from 'cross-domain-utils/src';
 
 import { CONFIG, PROTOCOL, MESSAGE_NAME } from '../conf';
 import { awaitWindowHello } from '../lib';
-import { global } from '../global';
+import { global, windowStore, globalStore } from '../global';
 
 import { getBridgeName, documentBodyReady, registerRemoteSendMessage, registerRemoteWindow } from './common';
 
-global.bridges = global.bridges || {};
-global.bridgeFrames = global.bridgeFrames || {};
-
-global.popupWindowsByWin = global.popupWindowsByWin || new WeakMap();
-global.popupWindowsByName = global.popupWindowsByName || {};
+let bridges = globalStore('bridges');
+let bridgeFrames = globalStore('bridgeFrames');
+let popupWindowsByName = globalStore('popupWindowsByName');
+let popupWindowsByWin = windowStore('popupWindowsByWin');
 
 function listenForRegister(source, domain) {
     global.on(MESSAGE_NAME.OPEN_TUNNEL, { window: source, domain }, ({ origin, data }) => {
@@ -31,19 +29,23 @@ function listenForRegister(source, domain) {
             throw new Error(`Register window expected to be passed sendMessage method`);
         }
 
-        if (!global.popupWindowsByName[data.name]) {
+        if (!popupWindowsByName.has(data.name)) {
             throw new Error(`Window with name ${ data.name } does not exist, or was not opened by this window`);
         }
 
-        if (!global.popupWindowsByName[data.name].domain) {
+        // $FlowFixMe
+        if (!popupWindowsByName.get(data.name).domain) {
             throw new Error(`We do not have a registered domain for window ${ data.name }`);
         }
 
-        if (global.popupWindowsByName[data.name].domain !== origin) {
-            throw new Error(`Message origin ${ origin } does not matched registered window origin ${ global.popupWindowsByName[data.name].domain }`);
+        // $FlowFixMe
+        if (popupWindowsByName.get(data.name).domain !== origin) {
+            // $FlowFixMe
+            throw new Error(`Message origin ${ origin } does not matched registered window origin ${ popupWindowsByName.get(data.name).domain }`);
         }
 
-        registerRemoteSendMessage(global.popupWindowsByName[data.name].win, domain, data.sendMessage);
+        // $FlowFixMe
+        registerRemoteSendMessage(popupWindowsByName.get(data.name).win, domain, data.sendMessage);
 
         return {
             sendMessage(message) {
@@ -52,7 +54,7 @@ function listenForRegister(source, domain) {
                     return;
                 }
 
-                let winDetails = global.popupWindowsByName[data.name];
+                let winDetails = popupWindowsByName.get(data.name);
 
                 if (!winDetails) {
                     return;
@@ -96,19 +98,13 @@ function openBridgeFrame(name : string, url : string) : HTMLIFrameElement {
 }
 
 export function hasBridge(url : string, domain : string) : boolean {
-    domain = domain || getDomainFromUrl(url);
-    return Boolean(global.bridges[domain]);
+    return bridges.has(domain || getDomainFromUrl(url));
 }
 
 export function openBridge(url : string, domain : string) : ZalgoPromise<CrossDomainWindowType> {
-
     domain = domain || getDomainFromUrl(url);
-
-    if (global.bridges[domain]) {
-        return global.bridges[domain];
-    }
-
-    global.bridges[domain] = ZalgoPromise.try(() => {
+    
+    return bridges.getOrSet(domain, () => ZalgoPromise.try(() => {
 
         if (getDomain() === domain) {
             throw new Error(`Can not open bridge on the same domain as current domain: ${ domain }`);
@@ -122,7 +118,7 @@ export function openBridge(url : string, domain : string) : ZalgoPromise<CrossDo
         }
 
         let iframe = openBridgeFrame(name, url);
-        global.bridgeFrames[domain] = iframe;
+        bridgeFrames.set(domain, iframe);
 
         return documentBodyReady.then(body => {
 
@@ -146,9 +142,7 @@ export function openBridge(url : string, domain : string) : ZalgoPromise<CrossDo
                 return bridge;
             });
         });
-    });
-
-    return global.bridges[domain];
+    }));
 }
 
 let windowOpen = window.open;
@@ -175,44 +169,45 @@ window.open = function windowOpenWrapper(url : string, name : string, options : 
         registerRemoteWindow(win);
     }
 
-    for (let winName of Object.keys(global.popupWindowsByName)) {
-        if (isWindowClosed(global.popupWindowsByName[winName].win)) {
-            delete global.popupWindowsByName[winName];
+    for (let winName of popupWindowsByName.keys()) {
+        // $FlowFixMe
+        if (isWindowClosed(popupWindowsByName.get(winName).win)) {
+            popupWindowsByName.del(winName);
         }
     }
 
     if (name && win) {
-        let winOptions = global.popupWindowsByWin.get(win) ||
-                         global.popupWindowsByName[name] || {};
+        let winOptions = popupWindowsByWin.getOrSet(win, () => ({}));
 
+        // $FlowFixMe
         winOptions.name = winOptions.name || name;
+        // $FlowFixMe
         winOptions.win = winOptions.win || win;
+        // $FlowFixMes
         winOptions.domain = winOptions.domain || domain;
 
-        global.popupWindowsByWin.set(win, winOptions);
-        global.popupWindowsByName[name] = winOptions;
+        popupWindowsByWin.set(win, winOptions);
+        popupWindowsByName.set(name, winOptions);
     }
 
     return win;
 };
 
 export function linkUrl(win : CrossDomainWindowType, url : string) {
-
-    let winOptions = global.popupWindowsByWin.get(win);
-
-    if (winOptions) {
-        winOptions.domain = getDomainFromUrl(url);
+    if (popupWindowsByWin.has(win)) {
+        // $FlowFixMe
+        popupWindowsByWin.get(win).domain = getDomainFromUrl(url);
         registerRemoteWindow(win);
     }
 }
 
 export function destroyBridges() {
-    for (let domain of Object.keys(global.bridgeFrames)) {
-        let frame = global.bridgeFrames[domain];
-        if (frame.parentNode) {
+    for (let domain of bridgeFrames.keys()) {
+        let frame = bridgeFrames.get(domain);
+        if (frame && frame.parentNode) {
             frame.parentNode.removeChild(frame);
         }
     }
-    global.bridgeFrames = {};
-    global.bridges = {};
+    bridgeFrames.reset();
+    bridges.reset();
 }

@@ -1,18 +1,17 @@
 /* @flow */
 
-import { WeakMap } from 'cross-domain-safe-weakmap/src';
 import { matchDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { once, uniqueID } from 'belter/src';
 import { serializeType, type CustomSerializedType } from 'universal-serialize/src';
 
 import { MESSAGE_NAME, WILDCARD, SERIALIZATION_TYPE } from '../conf';
-import { global } from '../global';
+import { global, windowStore, globalStore } from '../global';
 
 import { ProxyWindow } from './window';
 
-global.methods = global.methods || new WeakMap();
-global.proxyWindowMethods = global.proxyWindowMethods || {};
+let methodStore = windowStore('methodStore');
+let proxyWindowMethods = globalStore('proxyWindowMethods');
 global.listeningForFunctions = global.listeningForFunctions || false;
 
 const listenForFunctionCalls = once(() => {
@@ -26,8 +25,8 @@ const listenForFunctionCalls = once(() => {
         let { id, name } = data;
         
         return ZalgoPromise.try(() => {
-            let methods = global.methods.get(source) || {};
-            let meth = methods[data.id] || global.proxyWindowMethods[id];
+            let methods = methodStore.get(source, () => ({}));
+            let meth = methods[data.id] || proxyWindowMethods.get(id);
 
             if (!meth) {
                 throw new Error(`Could not find method with id: ${ data.id }`);
@@ -36,16 +35,17 @@ const listenForFunctionCalls = once(() => {
             let { proxy, domain, val } = meth;
 
             if (!matchDomain(domain, origin)) {
-                throw new Error(`Method domain ${ meth.domain } does not match origin ${ origin }`);
+                throw new Error(`Method domain ${ JSON.stringify(meth.domain) } does not match origin ${ origin }`);
             }
             
             if (proxy) {
+                // $FlowFixMe
                 return proxy.matchWindow(source).then(match => {
                     if (!match) {
                         throw new Error(`Proxy window does not match source`);
                     }
 
-                    delete global.proxyWindowMethods[id];
+                    proxyWindowMethods.del(id);
                     return val;
                 });
             }
@@ -73,9 +73,10 @@ export function serializeFunction<T>(destination : CrossDomainWindowType | Proxy
     destination = ProxyWindow.unwrap(destination);
 
     if (ProxyWindow.isProxyWindow(destination)) {
-        global.proxyWindowMethods[id] = { proxy: destination, domain, val };
+        proxyWindowMethods.set(id, { proxy: destination, domain, val });
     } else {
-        let methods = global.methods.getOrSet(destination, () => ({}));
+        // $FlowFixMe
+        let methods = methodStore.getOrSet(destination, () => ({}));
         methods[id] = { domain, val };
     }
 

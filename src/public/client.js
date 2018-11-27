@@ -1,6 +1,5 @@
 /* @flow */
 
-import { WeakMap } from 'cross-domain-safe-weakmap/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { getAncestor, isAncestor, isWindowClosed, getDomain, matchDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
 import { uniqueID, isRegex } from 'belter/src';
@@ -9,9 +8,9 @@ import { uniqueID, isRegex } from 'belter/src';
 import { CONFIG, MESSAGE_TYPE, WILDCARD } from '../conf';
 import { sendMessage, addResponseListener, deleteResponseListener, markResponseListenerErrored, type ResponseListenerType } from '../drivers';
 import { awaitWindowHello, sayHello, isWindowKnown } from '../lib';
-import { global } from '../global';
+import { global, windowStore } from '../global';
 
-global.requestPromises = global.requestPromises || new WeakMap();
+export let requestPromises = windowStore('requestPromises');
 
 type WindowResolverType = CrossDomainWindowType | string | HTMLIFrameElement;
 
@@ -95,12 +94,7 @@ export function request(options : RequestOptionsType) : ZalgoPromise<ResponseMes
 
         let hasResult = false;
 
-        let requestPromises = global.requestPromises.get(win);
-
-        if (!requestPromises) {
-            requestPromises = [];
-            global.requestPromises.set(win, requestPromises);
-        }
+        let reqPromises = requestPromises.getOrSet(win, () => []);
 
         let requestPromise = ZalgoPromise.try(() => {
 
@@ -142,7 +136,7 @@ export function request(options : RequestOptionsType) : ZalgoPromise<ResponseMes
                         respond(err, result) {
                             if (!err) {
                                 hasResult = true;
-                                requestPromises.splice(requestPromises.indexOf(requestPromise, 1));
+                                reqPromises.splice(reqPromises.indexOf(requestPromise, 1));
                             }
 
                             if (err) {
@@ -225,7 +219,7 @@ export function request(options : RequestOptionsType) : ZalgoPromise<ResponseMes
             deleteResponseListener(hash);
         });
 
-        requestPromises.push(requestPromise);
+        reqPromises.push(requestPromise);
 
         return requestPromise;
     });

@@ -1,17 +1,16 @@
 /* @flow */
 
 import { isSameDomain, isWindowClosed, type CrossDomainWindowType } from 'cross-domain-utils/src';
-import { WeakMap } from 'cross-domain-safe-weakmap/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { uniqueID, getOrSet, memoizePromise } from 'belter/src';
+import { uniqueID, memoizePromise } from 'belter/src';
 import { serializeType, type CustomSerializedType } from 'universal-serialize/src';
 
 import { SERIALIZATION_TYPE } from '../conf';
-import { global } from '../global';
+import { windowStore, globalStore } from '../global';
 import { getWindowInstanceID } from '../lib';
 
-global.winToProxyWindow = global.winToProxyWindow || new WeakMap();
-global.idToProxyWindow = global.idToProxyWindow || {};
+let winToProxyWindow = windowStore('winToProxyWindow');
+let idToProxyWindow = globalStore('idToProxyWindow');
 
 type SerializedProxyWindow = {|
     close : () => ZalgoPromise<void>,
@@ -155,7 +154,7 @@ export class ProxyWindow {
     }
 
     static deserialize(serializedWindow : SerializedProxyWindow) : ProxyWindow {
-        return getOrSet(global.idToProxyWindow, serializedWindow.id, () => {
+        return idToProxyWindow.getOrSet(serializedWindow.id, () => {
             return new ProxyWindow(serializedWindow);
         });
     }
@@ -170,10 +169,11 @@ export class ProxyWindow {
             return win;
         }
 
-        return global.winToProxyWindow.getOrSet(win, () => {
+        // $FlowFixMe
+        return winToProxyWindow.getOrSet(win, () => {
             let id = uniqueID();
 
-            global.idToProxyWindow[id] = new ProxyWindow({
+            return idToProxyWindow.set(id, new ProxyWindow({
                 id,
                 getInstanceID: () => getWindowInstanceID(win),
                 close:         () => ZalgoPromise.try(() => {
@@ -208,9 +208,7 @@ export class ProxyWindow {
                     win.name = name;
                 })
             // $FlowFixMe
-            }, win);
-
-            return global.idToProxyWindow[id];
+            }, win));
         });
     }
 }

@@ -1,19 +1,17 @@
 /* @flow */
 
-import { WeakMap } from 'cross-domain-safe-weakmap/src';
 import { getAllWindows, type CrossDomainWindowType } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { noop, uniqueID, once, weakMapMemoizePromise } from 'belter/src';
 
 import { MESSAGE_NAME, WILDCARD } from '../conf';
-import { global } from '../global';
+import { global, windowStore } from '../global';
 
 global.instanceID = global.instanceID || uniqueID();
-global.helloPromises = global.helloPromises || new WeakMap();
-global.onHello = global.onHello || [];
+let helloPromises = windowStore('helloPromises');
 
 function getHelloPromise(win : CrossDomainWindowType) : ZalgoPromise<{ win : CrossDomainWindowType, domain : string }> {
-    return global.helloPromises.getOrSet(win, () => new ZalgoPromise());
+    return helloPromises.getOrSet(win, () => new ZalgoPromise());
 }
 
 const listenForHello = once(() => {

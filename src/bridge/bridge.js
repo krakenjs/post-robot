@@ -2,10 +2,10 @@
 
 import { type ZalgoPromise } from 'zalgo-promise/src';
 import { getParent, isWindowClosed, type CrossDomainWindowType } from 'cross-domain-utils/src';
-import { noop } from 'belter/src';
+import { noop, uniqueID } from 'belter/src';
 
 import { MESSAGE_NAME, WILDCARD } from '../conf';
-import { global } from '../global';
+import { global, globalStore } from '../global';
 
 /*
     HERE BE DRAGONS
@@ -20,37 +20,21 @@ import { global } from '../global';
     If you're editing this file, be sure to run significant memory / GC tests afterwards.
 */
 
-global.tunnelWindows = global.tunnelWindows || {};
-global.tunnelWindowId = 0;
-
-function deleteTunnelWindow(id) {
-
-    try {
-        if (global.tunnelWindows[id]) {
-            delete global.tunnelWindows[id].source;
-        }
-    } catch (err) {
-        // pass
-    }
-
-    delete global.tunnelWindows[id];
-}
+let tunnelWindows = globalStore('tunnelWindows');
 
 function cleanTunnelWindows() {
-    let tunnelWindows = global.tunnelWindows;
-
-    for (let key of Object.keys(tunnelWindows)) {
+    for (let key of tunnelWindows.keys()) {
         let tunnelWindow = tunnelWindows[key];
 
         try {
             noop(tunnelWindow.source);
         } catch (err) {
-            deleteTunnelWindow(key);
+            tunnelWindows.del(key);
             continue;
         }
 
         if (isWindowClosed(tunnelWindow.source)) {
-            deleteTunnelWindow(key);
+            tunnelWindows.del(key);
         }
     }
 }
@@ -62,15 +46,11 @@ type TunnelWindowDataType = {
     sendMessage : (message : string) => void
 };
 
-function addTunnelWindow({ name, source, canary, sendMessage } : TunnelWindowDataType) : number {
+function addTunnelWindow({ name, source, canary, sendMessage } : TunnelWindowDataType) : string {
     cleanTunnelWindows();
-    global.tunnelWindowId += 1;
-    global.tunnelWindows[global.tunnelWindowId] = { name, source, canary, sendMessage };
-    return global.tunnelWindowId;
-}
-
-function getTunnelWindow(id : number) : TunnelWindowDataType {
-    return global.tunnelWindows[id];
+    let id = uniqueID();
+    tunnelWindows.set(id, { name, source, canary, sendMessage });
+    return id;
 }
 
 global.openTunnelToParent = function openTunnelToParent({ name, source, canary, sendMessage } : TunnelWindowDataType) : ZalgoPromise<{ source : CrossDomainWindowType, origin : string, data : Object }> {
@@ -89,13 +69,13 @@ global.openTunnelToParent = function openTunnelToParent({ name, source, canary, 
 
         sendMessage() {
 
-            let tunnelWindow = getTunnelWindow(id);
+            let tunnelWindow = tunnelWindows.get(id);
 
             try {
                 // IE gets antsy if you try to even reference a closed window
                 noop(tunnelWindow && tunnelWindow.source);
             } catch (err) {
-                deleteTunnelWindow(id);
+                tunnelWindows.del(id);
                 return;
             }
 
