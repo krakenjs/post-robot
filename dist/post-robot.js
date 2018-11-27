@@ -1514,35 +1514,39 @@
             }();
             global.methods = global.methods || new src.a();
             global.proxyWindowMethods = global.proxyWindowMethods || {};
+            global.listeningForFunctions = global.listeningForFunctions || !1;
             var listenForFunctionCalls = Object(belter_src.once)(function() {
-                global.on(constants_MESSAGE_NAME.METHOD, {
-                    origin: constants_WILDCARD
-                }, function(_ref) {
-                    var source = _ref.source, origin = _ref.origin, data = _ref.data, id = data.id, name = data.name;
-                    return zalgo_promise_src.a.try(function() {
-                        var meth = (global.methods.get(source) || {})[data.id] || global.proxyWindowMethods[id];
-                        if (!meth) throw new Error("Could not find method with id: " + data.id);
-                        var proxy = meth.proxy, domain = meth.domain, val = meth.val;
-                        if (!Object(cross_domain_utils_src.matchDomain)(domain, origin)) throw new Error("Method domain " + meth.domain + " does not match origin " + origin);
-                        return proxy ? proxy.matchWindow(source).then(function(match) {
-                            if (!match) throw new Error("Proxy window does not match source");
-                            delete global.proxyWindowMethods[id];
-                            return val;
-                        }) : val;
-                    }).then(function(method) {
-                        return method.apply({
-                            source: source,
-                            origin: origin,
-                            data: data
-                        }, data.args);
-                    }).then(function(result) {
-                        return {
-                            result: result,
-                            id: id,
-                            name: name
-                        };
+                if (!global.listeningForFunctions) {
+                    global.listeningForFunctions = !0;
+                    global.on(constants_MESSAGE_NAME.METHOD, {
+                        origin: constants_WILDCARD
+                    }, function(_ref) {
+                        var source = _ref.source, origin = _ref.origin, data = _ref.data, id = data.id, name = data.name;
+                        return zalgo_promise_src.a.try(function() {
+                            var meth = (global.methods.get(source) || {})[data.id] || global.proxyWindowMethods[id];
+                            if (!meth) throw new Error("Could not find method with id: " + data.id);
+                            var proxy = meth.proxy, domain = meth.domain, val = meth.val;
+                            if (!Object(cross_domain_utils_src.matchDomain)(domain, origin)) throw new Error("Method domain " + meth.domain + " does not match origin " + origin);
+                            return proxy ? proxy.matchWindow(source).then(function(match) {
+                                if (!match) throw new Error("Proxy window does not match source");
+                                delete global.proxyWindowMethods[id];
+                                return val;
+                            }) : val;
+                        }).then(function(method) {
+                            return method.apply({
+                                source: source,
+                                origin: origin,
+                                data: data
+                            }, data.args);
+                        }).then(function(result) {
+                            return {
+                                result: result,
+                                id: id,
+                                name: name
+                            };
+                        });
                     });
-                });
+                }
             });
             function function_serializeFunction(destination, domain, val, key) {
                 listenForFunctionCalls();
@@ -1636,8 +1640,6 @@
                             }, {
                                 domain: origin,
                                 fireAndForget: !0
-                            }).then(function(_ref4) {
-                                return _ref4.data.result;
                             });
                         };
                         crossDomainFunctionWrapper.__name__ = name;

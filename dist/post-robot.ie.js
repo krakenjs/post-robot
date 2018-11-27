@@ -2007,35 +2007,39 @@
             }();
             global.a.methods = global.a.methods || new cross_domain_safe_weakmap_src.a();
             global.a.proxyWindowMethods = global.a.proxyWindowMethods || {};
+            global.a.listeningForFunctions = global.a.listeningForFunctions || !1;
             var listenForFunctionCalls = Object(belter_src.once)(function() {
-                global.a.on(conf.d.METHOD, {
-                    origin: conf.i
-                }, function(_ref) {
-                    var source = _ref.source, origin = _ref.origin, data = _ref.data, id = data.id, name = data.name;
-                    return zalgo_promise_src.a.try(function() {
-                        var meth = (global.a.methods.get(source) || {})[data.id] || global.a.proxyWindowMethods[id];
-                        if (!meth) throw new Error("Could not find method with id: " + data.id);
-                        var proxy = meth.proxy, domain = meth.domain, val = meth.val;
-                        if (!Object(src.matchDomain)(domain, origin)) throw new Error("Method domain " + meth.domain + " does not match origin " + origin);
-                        return proxy ? proxy.matchWindow(source).then(function(match) {
-                            if (!match) throw new Error("Proxy window does not match source");
-                            delete global.a.proxyWindowMethods[id];
-                            return val;
-                        }) : val;
-                    }).then(function(method) {
-                        return method.apply({
-                            source: source,
-                            origin: origin,
-                            data: data
-                        }, data.args);
-                    }).then(function(result) {
-                        return {
-                            result: result,
-                            id: id,
-                            name: name
-                        };
+                if (!global.a.listeningForFunctions) {
+                    global.a.listeningForFunctions = !0;
+                    global.a.on(conf.d.METHOD, {
+                        origin: conf.i
+                    }, function(_ref) {
+                        var source = _ref.source, origin = _ref.origin, data = _ref.data, id = data.id, name = data.name;
+                        return zalgo_promise_src.a.try(function() {
+                            var meth = (global.a.methods.get(source) || {})[data.id] || global.a.proxyWindowMethods[id];
+                            if (!meth) throw new Error("Could not find method with id: " + data.id);
+                            var proxy = meth.proxy, domain = meth.domain, val = meth.val;
+                            if (!Object(src.matchDomain)(domain, origin)) throw new Error("Method domain " + meth.domain + " does not match origin " + origin);
+                            return proxy ? proxy.matchWindow(source).then(function(match) {
+                                if (!match) throw new Error("Proxy window does not match source");
+                                delete global.a.proxyWindowMethods[id];
+                                return val;
+                            }) : val;
+                        }).then(function(method) {
+                            return method.apply({
+                                source: source,
+                                origin: origin,
+                                data: data
+                            }, data.args);
+                        }).then(function(result) {
+                            return {
+                                result: result,
+                                id: id,
+                                name: name
+                            };
+                        });
                     });
-                });
+                }
             });
             function function_serializeFunction(destination, domain, val, key) {
                 listenForFunctionCalls();
@@ -2129,8 +2133,6 @@
                             }, {
                                 domain: origin,
                                 fireAndForget: !0
-                            }).then(function(_ref4) {
-                                return _ref4.data.result;
                             });
                         };
                         crossDomainFunctionWrapper.__name__ = name;

@@ -11,8 +11,15 @@ import { ProxyWindow } from './window';
 
 global.methods = global.methods || new WeakMap();
 global.proxyWindowMethods = global.proxyWindowMethods || {};
+global.listeningForFunctions = global.listeningForFunctions || false;
 
 var listenForFunctionCalls = once(function () {
+    if (global.listeningForFunctions) {
+        return;
+    }
+
+    global.listeningForFunctions = true;
+
     global.on(MESSAGE_NAME.METHOD, { origin: WILDCARD }, function (_ref) {
         var source = _ref.source,
             origin = _ref.origin,
@@ -91,10 +98,7 @@ export function deserializeFunction(source, origin, _ref2) {
 
     crossDomainFunctionWrapper.fireAndForget = function crossDomainFireAndForgetFunctionWrapper() {
         var args = Array.prototype.slice.call(arguments);
-        return global.send(source, MESSAGE_NAME.METHOD, { id: id, name: name, args: args }, { domain: origin, fireAndForget: true }).then(function (_ref4) {
-            var data = _ref4.data;
-            return data.result;
-        });
+        return global.send(source, MESSAGE_NAME.METHOD, { id: id, name: name, args: args }, { domain: origin, fireAndForget: true });
     };
 
     crossDomainFunctionWrapper.__name__ = name;
