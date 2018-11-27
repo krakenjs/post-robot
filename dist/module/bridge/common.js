@@ -1,9 +1,9 @@
-import { WeakMap } from 'cross-domain-safe-weakmap/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { getDomain, isSameDomain, isOpener, isSameTopWindow, matchDomain, getUserAgent, getDomainFromUrl } from 'cross-domain-utils/src';
+import { noop } from 'belter/src';
 
 import { CONFIG, BRIDGE_NAME_PREFIX } from '../conf';
-import { global } from '../global';
+import { windowStore } from '../global';
 
 export function needsBridgeForBrowser() {
 
@@ -91,26 +91,26 @@ export var documentBodyReady = new ZalgoPromise(function (resolve) {
     }, 10);
 });
 
-global.remoteWindows = global.remoteWindows || new WeakMap();
+var remoteWindows = windowStore('remoteWindows');
 
 export function registerRemoteWindow(win) {
-    global.remoteWindows.set(win, { sendMessagePromise: new ZalgoPromise() });
+    remoteWindows.getOrSet(win, function () {
+        return new ZalgoPromise();
+    });
 }
 
 export function findRemoteWindow(win) {
-    return global.remoteWindows.get(win);
+    var remoteWin = remoteWindows.get(win);
+
+    if (!remoteWin) {
+        throw new Error('Remote window not found');
+    }
+
+    return remoteWin;
 }
 
 export function registerRemoteSendMessage(win, domain, sendMessage) {
-
-    var remoteWindow = findRemoteWindow(win);
-
-    if (!remoteWindow) {
-        throw new Error('Window not found to register sendMessage to');
-    }
-
     var sendMessageWrapper = function sendMessageWrapper(remoteWin, remoteDomain, message) {
-
         if (remoteWin !== win) {
             throw new Error('Remote window does not match window');
         }
@@ -122,19 +122,11 @@ export function registerRemoteSendMessage(win, domain, sendMessage) {
         sendMessage(message);
     };
 
-    remoteWindow.sendMessagePromise.resolve(sendMessageWrapper);
-    remoteWindow.sendMessagePromise = ZalgoPromise.resolve(sendMessageWrapper);
+    findRemoteWindow(win).resolve(sendMessageWrapper);
 }
 
 export function rejectRemoteSendMessage(win, err) {
-
-    var remoteWindow = findRemoteWindow(win);
-
-    if (!remoteWindow) {
-        throw new Error('Window not found on which to reject sendMessage');
-    }
-
-    remoteWindow.sendMessagePromise.asyncReject(err);
+    findRemoteWindow(win).reject(err)['catch'](noop);
 }
 
 export function sendBridgeMessage(win, domain, message) {
@@ -146,13 +138,7 @@ export function sendBridgeMessage(win, domain, message) {
         throw new Error('Can only send messages to and from parent and popup windows');
     }
 
-    var remoteWindow = findRemoteWindow(win);
-
-    if (!remoteWindow) {
-        throw new Error('Window not found to send message to');
-    }
-
-    return remoteWindow.sendMessagePromise.then(function (sendMessage) {
+    return findRemoteWindow(win).then(function (sendMessage) {
         return sendMessage(win, domain, message);
     });
 }

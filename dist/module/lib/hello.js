@@ -1,17 +1,15 @@
-import { WeakMap } from 'cross-domain-safe-weakmap/src';
 import { getAllWindows } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { noop, uniqueID, once, weakMapMemoizePromise } from 'belter/src';
 
 import { MESSAGE_NAME, WILDCARD } from '../conf';
-import { global } from '../global';
+import { global, windowStore } from '../global';
 
 global.instanceID = global.instanceID || uniqueID();
-global.helloPromises = global.helloPromises || new WeakMap();
-global.onHello = global.onHello || [];
+var helloPromises = windowStore('helloPromises');
 
 function getHelloPromise(win) {
-    return global.helloPromises.getOrSet(win, function () {
+    return helloPromises.getOrSet(win, function () {
         return new ZalgoPromise();
     });
 }

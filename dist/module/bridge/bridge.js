@@ -1,9 +1,9 @@
 import 'zalgo-promise/src';
 import { getParent, isWindowClosed } from 'cross-domain-utils/src';
-import { noop } from 'belter/src';
+import { noop, uniqueID } from 'belter/src';
 
 import { MESSAGE_NAME, WILDCARD } from '../conf';
-import { global } from '../global';
+import { global, globalStore } from '../global';
 
 /*
     HERE BE DRAGONS
@@ -18,38 +18,22 @@ import { global } from '../global';
     If you're editing this file, be sure to run significant memory / GC tests afterwards.
 */
 
-global.tunnelWindows = global.tunnelWindows || {};
-global.tunnelWindowId = 0;
-
-function deleteTunnelWindow(id) {
-
-    try {
-        if (global.tunnelWindows[id]) {
-            delete global.tunnelWindows[id].source;
-        }
-    } catch (err) {
-        // pass
-    }
-
-    delete global.tunnelWindows[id];
-}
+var tunnelWindows = globalStore('tunnelWindows');
 
 function cleanTunnelWindows() {
-    var tunnelWindows = global.tunnelWindows;
-
-    for (var _i2 = 0, _Object$keys2 = Object.keys(tunnelWindows), _length2 = _Object$keys2 == null ? 0 : _Object$keys2.length; _i2 < _length2; _i2++) {
-        var key = _Object$keys2[_i2];
+    for (var _i2 = 0, _tunnelWindows$keys2 = tunnelWindows.keys(), _length2 = _tunnelWindows$keys2 == null ? 0 : _tunnelWindows$keys2.length; _i2 < _length2; _i2++) {
+        var key = _tunnelWindows$keys2[_i2];
         var tunnelWindow = tunnelWindows[key];
 
         try {
             noop(tunnelWindow.source);
         } catch (err) {
-            deleteTunnelWindow(key);
+            tunnelWindows.del(key);
             continue;
         }
 
         if (isWindowClosed(tunnelWindow.source)) {
-            deleteTunnelWindow(key);
+            tunnelWindows.del(key);
         }
     }
 }
@@ -61,13 +45,9 @@ function addTunnelWindow(_ref) {
         sendMessage = _ref.sendMessage;
 
     cleanTunnelWindows();
-    global.tunnelWindowId += 1;
-    global.tunnelWindows[global.tunnelWindowId] = { name: name, source: source, canary: canary, sendMessage: sendMessage };
-    return global.tunnelWindowId;
-}
-
-function getTunnelWindow(id) {
-    return global.tunnelWindows[id];
+    var id = uniqueID();
+    tunnelWindows.set(id, { name: name, source: source, canary: canary, sendMessage: sendMessage });
+    return id;
 }
 
 global.openTunnelToParent = function openTunnelToParent(_ref2) {
@@ -91,13 +71,13 @@ global.openTunnelToParent = function openTunnelToParent(_ref2) {
 
         sendMessage: function sendMessage() {
 
-            var tunnelWindow = getTunnelWindow(id);
+            var tunnelWindow = tunnelWindows.get(id);
 
             try {
                 // IE gets antsy if you try to even reference a closed window
                 noop(tunnelWindow && tunnelWindow.source);
             } catch (err) {
-                deleteTunnelWindow(id);
+                tunnelWindows.del(id);
                 return;
             }
 

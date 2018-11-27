@@ -1,17 +1,26 @@
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 import { isSameDomain, isWindowClosed } from 'cross-domain-utils/src';
-import { WeakMap } from 'cross-domain-safe-weakmap/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { uniqueID, getOrSet, memoizePromise } from 'belter/src';
+import { uniqueID, memoizePromise } from 'belter/src';
 import { serializeType } from 'universal-serialize/src';
 
 import { SERIALIZATION_TYPE } from '../conf';
-import { global } from '../global';
+import { windowStore, globalStore } from '../global';
 import { getWindowInstanceID } from '../lib';
 
-global.winToProxyWindow = global.winToProxyWindow || new WeakMap();
-global.idToProxyWindow = global.idToProxyWindow || {};
+var winToProxyWindow = windowStore('winToProxyWindow');
+var idToProxyWindow = globalStore('idToProxyWindow');
+
+function cleanupProxyWindows() {
+    for (var _i2 = 0, _idToProxyWindow$keys2 = idToProxyWindow.keys(), _length2 = _idToProxyWindow$keys2 == null ? 0 : _idToProxyWindow$keys2.length; _i2 < _length2; _i2++) {
+        var _id = _idToProxyWindow$keys2[_i2];
+        // $FlowFixMe
+        if (idToProxyWindow.get(_id).shouldClean()) {
+            delete idToProxyWindow[_id];
+        }
+    }
+}
 
 export var ProxyWindow = function () {
     function ProxyWindow(serializedWindow, actualWindow) {
@@ -150,6 +159,10 @@ export var ProxyWindow = function () {
         return this.serializedWindow;
     };
 
+    ProxyWindow.prototype.shouldClean = function shouldClean() {
+        return this.actualWindow && isWindowClosed(this.actualWindow);
+    };
+
     ProxyWindow.unwrap = function unwrap(win) {
         return ProxyWindow.isProxyWindow(win)
         // $FlowFixMe
@@ -157,11 +170,15 @@ export var ProxyWindow = function () {
     };
 
     ProxyWindow.serialize = function serialize(win) {
+        cleanupProxyWindows();
+
         return ProxyWindow.toProxyWindow(win).serialize();
     };
 
     ProxyWindow.deserialize = function deserialize(serializedWindow) {
-        return getOrSet(global.idToProxyWindow, serializedWindow.id, function () {
+        cleanupProxyWindows();
+
+        return idToProxyWindow.getOrSet(serializedWindow.id, function () {
             return new ProxyWindow(serializedWindow);
         });
     };
@@ -171,15 +188,18 @@ export var ProxyWindow = function () {
     };
 
     ProxyWindow.toProxyWindow = function toProxyWindow(win) {
+        cleanupProxyWindows();
+
         if (ProxyWindow.isProxyWindow(win)) {
             // $FlowFixMe
             return win;
         }
 
-        return global.winToProxyWindow.getOrSet(win, function () {
+        // $FlowFixMe
+        return winToProxyWindow.getOrSet(win, function () {
             var id = uniqueID();
 
-            global.idToProxyWindow[id] = new ProxyWindow({
+            return idToProxyWindow.set(id, new ProxyWindow({
                 id: id,
                 getInstanceID: function getInstanceID() {
                     return getWindowInstanceID(win);
@@ -226,9 +246,7 @@ export var ProxyWindow = function () {
                     });
                 }
                 // $FlowFixMe
-            }, win);
-
-            return global.idToProxyWindow[id];
+            }, win));
         });
     };
 

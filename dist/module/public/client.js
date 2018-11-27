@@ -1,5 +1,4 @@
 export { _send as send };
-import { WeakMap } from 'cross-domain-safe-weakmap/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { getAncestor, isAncestor, isWindowClosed, getDomain, matchDomain } from 'cross-domain-utils/src';
 import { uniqueID, isRegex } from 'belter/src';
@@ -7,9 +6,9 @@ import { uniqueID, isRegex } from 'belter/src';
 import { CONFIG, MESSAGE_TYPE, WILDCARD } from '../conf';
 import { sendMessage, addResponseListener, deleteResponseListener, markResponseListenerErrored } from '../drivers';
 import { awaitWindowHello, sayHello, isWindowKnown } from '../lib';
-import { global } from '../global';
+import { global, windowStore } from '../global';
 
-global.requestPromises = global.requestPromises || new WeakMap();
+export var requestPromises = windowStore('requestPromises');
 
 export function request(options) {
 
@@ -75,12 +74,9 @@ export function request(options) {
 
         var hasResult = false;
 
-        var requestPromises = global.requestPromises.get(win);
-
-        if (!requestPromises) {
-            requestPromises = [];
-            global.requestPromises.set(win, requestPromises);
-        }
+        var reqPromises = requestPromises.getOrSet(win, function () {
+            return [];
+        });
 
         var requestPromise = ZalgoPromise['try'](function () {
 
@@ -124,7 +120,7 @@ export function request(options) {
                         respond: function respond(err, result) {
                             if (!err) {
                                 hasResult = true;
-                                requestPromises.splice(requestPromises.indexOf(requestPromise, 1));
+                                reqPromises.splice(reqPromises.indexOf(requestPromise, 1));
                             }
 
                             if (err) {
@@ -205,7 +201,7 @@ export function request(options) {
             deleteResponseListener(hash);
         });
 
-        requestPromises.push(requestPromise);
+        reqPromises.push(requestPromise);
 
         return requestPromise;
     });

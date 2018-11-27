@@ -1,42 +1,41 @@
 import 'zalgo-promise/src';
-import { WeakMap } from 'cross-domain-safe-weakmap/src';
 import { matchDomain } from 'cross-domain-utils/src';
-import { isRegex } from 'belter/src';
+import { isRegex, getOrSet } from 'belter/src';
 
-import { global } from '../global';
+import { global, globalStore, windowStore } from '../global';
 import { WILDCARD } from '../conf';
 
+var responseListeners = globalStore('responseListeners');
+var requestListeners = windowStore('requestListeners');
+var erroredResponseListeners = globalStore('erroredResponseListeners');
+
 export function resetListeners() {
-    global.responseListeners = {};
-    global.requestListeners = {};
+    responseListeners.reset();
+    erroredResponseListeners.reset();
 }
 
-global.responseListeners = global.responseListeners || {};
-global.requestListeners = global.requestListeners || {};
 global.WINDOW_WILDCARD = global.WINDOW_WILDCARD || new function WindowWildcard() {/* pass */}();
-
-global.erroredResponseListeners = global.erroredResponseListeners || {};
 
 var __DOMAIN_REGEX__ = '__domain_regex__';
 
 export function addResponseListener(hash, listener) {
-    global.responseListeners[hash] = listener;
+    responseListeners.set(hash, listener);
 }
 
 export function getResponseListener(hash) {
-    return global.responseListeners[hash];
+    return responseListeners.get(hash);
 }
 
 export function deleteResponseListener(hash) {
-    delete global.responseListeners[hash];
+    responseListeners.del(hash);
 }
 
 export function markResponseListenerErrored(hash) {
-    global.erroredResponseListeners[hash] = true;
+    erroredResponseListeners.set(hash, true);
 }
 
 export function isResponseListenerErrored(hash) {
-    return Boolean(global.erroredResponseListeners[hash]);
+    return erroredResponseListeners.has(hash);
 }
 
 export function getRequestListener(_ref) {
@@ -57,29 +56,32 @@ export function getRequestListener(_ref) {
         throw new Error('Name required to get request listener');
     }
 
-    var nameListeners = global.requestListeners[name];
-
-    if (!nameListeners) {
-        return;
-    }
-
     for (var _i2 = 0, _ref3 = [win, global.WINDOW_WILDCARD], _length2 = _ref3 == null ? 0 : _ref3.length; _i2 < _length2; _i2++) {
         var winQualifier = _ref3[_i2];
+        if (!winQualifier) {
+            continue;
+        }
 
-        var winListeners = winQualifier && nameListeners.get(winQualifier);
+        var nameListeners = requestListeners.get(winQualifier);
 
-        if (!winListeners) {
+        if (!nameListeners) {
+            continue;
+        }
+
+        var domainListeners = nameListeners[name];
+
+        if (!domainListeners) {
             continue;
         }
 
         if (domain && typeof domain === 'string') {
-            if (winListeners[domain]) {
-                return winListeners[domain];
+            if (domainListeners[domain]) {
+                return domainListeners[domain];
             }
 
-            if (winListeners[__DOMAIN_REGEX__]) {
-                for (var _i4 = 0, _winListeners$__DOMAI2 = winListeners[__DOMAIN_REGEX__], _length4 = _winListeners$__DOMAI2 == null ? 0 : _winListeners$__DOMAI2.length; _i4 < _length4; _i4++) {
-                    var _ref5 = _winListeners$__DOMAI2[_i4];
+            if (domainListeners[__DOMAIN_REGEX__]) {
+                for (var _i4 = 0, _domainListeners$__DO2 = domainListeners[__DOMAIN_REGEX__], _length4 = _domainListeners$__DO2 == null ? 0 : _domainListeners$__DO2.length; _i4 < _length4; _i4++) {
+                    var _ref5 = _domainListeners$__DO2[_i4];
                     var regex = _ref5.regex,
                         listener = _ref5.listener;
 
@@ -90,13 +92,12 @@ export function getRequestListener(_ref) {
             }
         }
 
-        if (winListeners[WILDCARD]) {
-            return winListeners[WILDCARD];
+        if (domainListeners[WILDCARD]) {
+            return domainListeners[WILDCARD];
         }
     }
 }
 
-// eslint-disable-next-line complexity
 export function addRequestListener(_ref6, listener) {
     var name = _ref6.name,
         win = _ref6.win,
@@ -163,55 +164,49 @@ export function addRequestListener(_ref6, listener) {
         }
     }
 
-    var requestListeners = global.requestListeners;
-
-    var nameListeners = requestListeners[name];
-
-    if (!nameListeners) {
-        nameListeners = new WeakMap();
-        requestListeners[name] = nameListeners;
-    }
-
-    var winListeners = nameListeners.get(win);
-
-    if (!winListeners) {
-        winListeners = {};
-        nameListeners.set(win, winListeners);
-    }
+    var nameListeners = requestListeners.getOrSet(win, function () {
+        return {};
+    });
+    // $FlowFixMe
+    var domainListeners = getOrSet(nameListeners, name, function () {
+        return {};
+    });
 
     var strDomain = domain.toString();
 
-    var regexListeners = winListeners[__DOMAIN_REGEX__];
+    var regexListeners = void 0;
     var regexListener = void 0;
 
     if (isRegex(domain)) {
-
-        if (!regexListeners) {
-            regexListeners = [];
-            winListeners[__DOMAIN_REGEX__] = regexListeners;
-        }
-
+        regexListeners = getOrSet(domainListeners, __DOMAIN_REGEX__, function () {
+            return [];
+        });
         regexListener = { regex: domain, listener: listener };
-
         regexListeners.push(regexListener);
     } else {
-        winListeners[strDomain] = listener;
+        domainListeners[strDomain] = listener;
     }
 
     return {
         cancel: function cancel() {
-            if (!winListeners) {
-                return;
-            }
-
-            delete winListeners[strDomain];
-
-            if (win && Object.keys(winListeners).length === 0) {
-                nameListeners['delete'](win);
-            }
+            delete domainListeners[strDomain];
 
             if (regexListener) {
                 regexListeners.splice(regexListeners.indexOf(regexListener, 1));
+
+                if (!regexListeners.length) {
+                    delete domainListeners[__DOMAIN_REGEX__];
+                }
+            }
+
+            if (!Object.keys(domainListeners).length) {
+                // $FlowFixMe
+                delete nameListeners[name];
+            }
+
+            // $FlowFixMe
+            if (win && !Object.keys(nameListeners).length) {
+                requestListeners.del(win);
             }
         }
     };

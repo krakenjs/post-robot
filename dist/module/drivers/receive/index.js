@@ -6,11 +6,11 @@ import { addEventListener, noop } from 'belter/src';
 import { MESSAGE_NAME, WINDOW_PROP, MESSAGE_TYPE } from '../../conf';
 import { markWindowKnown } from '../../lib';
 import { deserializeMessage } from '../../serialize';
-import { global } from '../../global';
+import { global, globalStore } from '../../global';
 
 import { RECEIVE_MESSAGE_TYPES } from './types';
 
-global.receivedMessages = global.receivedMessages || [];
+var receivedMessages = globalStore('receivedMessages');
 
 function parseMessage(message, source, origin) {
 
@@ -79,11 +79,11 @@ export function receiveMessage(event) {
 
     markWindowKnown(source);
 
-    if (global.receivedMessages.indexOf(message.id) === -1) {
-        global.receivedMessages.push(message.id);
-    } else {
+    if (receivedMessages.has(message.id)) {
         return;
     }
+
+    receivedMessages.set(message.id, true);
 
     if (__DEBUG__) {
         var level = void 0;
