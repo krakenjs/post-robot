@@ -9,13 +9,13 @@ import { WINDOW_PROP } from './conf';
 export let global : Object = window[WINDOW_PROP.POSTROBOT] = window[WINDOW_PROP.POSTROBOT] || {};
 let winStore = global.windowStore = global.windowStore || new WeakMap();
 
-type WindowStore<T> = {
+type WindowStore<T> = {|
     get : ((CrossDomainWindowType, T) => T) & ((CrossDomainWindowType, void) => T | void),
     set : (CrossDomainWindowType, T) => T,
     has : (CrossDomainWindowType) => boolean,
     del : (CrossDomainWindowType) => void,
     getOrSet : (CrossDomainWindowType, () => T) => T
-};
+|};
 
 type ObjectGetter = () => Object;
 
@@ -59,17 +59,15 @@ export function windowStore<T>(key : string, defStore? : ObjectGetter = getObj) 
     };
 }
 
-type GlobalGetter<T> = ((string, T) => T) & ((string, void) => T | void);
-
-type GlobalStore<T> = {
-    get : GlobalGetter<T>,
+type GlobalStore<T> = {|
+    get : ((string, T) => T) & ((string, void) => T | void),
     set : (string, T) => T,
     has : (string) => boolean,
     del : (string) => void,
     getOrSet : (string, () => T) => T,
     reset : () => void,
     keys : () => $ReadOnlyArray<string>
-};
+|};
 
 // $FlowFixMe
 export function globalStore<T : mixed>(key : string, defStore? : ObjectGetter = getObj) : GlobalStore<T> {

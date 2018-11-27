@@ -44,8 +44,6 @@ const listenForFunctionCalls = once(() => {
                     if (!match) {
                         throw new Error(`Proxy window does not match source`);
                     }
-
-                    proxyWindowMethods.del(id);
                     return val;
                 });
             }
@@ -74,6 +72,12 @@ export function serializeFunction<T>(destination : CrossDomainWindowType | Proxy
 
     if (ProxyWindow.isProxyWindow(destination)) {
         proxyWindowMethods.set(id, { proxy: destination, domain, val });
+        // $FlowFixMe
+        destination.awaitWindow().then(win => {
+            proxyWindowMethods.del(id);
+            let methods = methodStore.getOrSet(win, () => ({}));
+            methods[id] = { domain, val };
+        });
     } else {
         // $FlowFixMe
         let methods = methodStore.getOrSet(destination, () => ({}));

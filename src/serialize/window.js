@@ -12,6 +12,15 @@ import { getWindowInstanceID } from '../lib';
 let winToProxyWindow = windowStore('winToProxyWindow');
 let idToProxyWindow = globalStore('idToProxyWindow');
 
+function cleanupProxyWindows() {
+    for (let id of idToProxyWindow.keys()) {
+        // $FlowFixMe
+        if (idToProxyWindow.get(id).shouldClean()) {
+            delete idToProxyWindow[id];
+        }
+    }
+}
+
 type SerializedProxyWindow = {|
     close : () => ZalgoPromise<void>,
     focus : () => ZalgoPromise<void>,
@@ -142,6 +151,10 @@ export class ProxyWindow {
         return this.serializedWindow;
     }
 
+    shouldClean() : boolean {
+        return this.actualWindow && isWindowClosed(this.actualWindow);
+    }
+
     static unwrap(win : CrossDomainWindowType | ProxyWindow) : CrossDomainWindowType | ProxyWindow {
         return ProxyWindow.isProxyWindow(win)
             // $FlowFixMe
@@ -150,10 +163,14 @@ export class ProxyWindow {
     }
 
     static serialize(win : CrossDomainWindowType | ProxyWindow) : SerializedProxyWindow {
+        cleanupProxyWindows();
+
         return ProxyWindow.toProxyWindow(win).serialize();
     }
 
     static deserialize(serializedWindow : SerializedProxyWindow) : ProxyWindow {
+        cleanupProxyWindows();
+        
         return idToProxyWindow.getOrSet(serializedWindow.id, () => {
             return new ProxyWindow(serializedWindow);
         });
@@ -164,6 +181,8 @@ export class ProxyWindow {
     }
 
     static toProxyWindow(win : CrossDomainWindowType | ProxyWindow) : ProxyWindow {
+        cleanupProxyWindows();
+
         if (ProxyWindow.isProxyWindow(win)) {
             // $FlowFixMe
             return win;

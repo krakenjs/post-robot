@@ -200,8 +200,8 @@ export function addRequestListener({ name, win, domain } : { name : string, win 
             }
 
             // $FlowFixMe
-            if (!Object.keys(nameListeners).length) {
-                requestListeners.delete(win);
+            if (win && !Object.keys(nameListeners).length) {
+                requestListeners.del(win);
             }
         }
     };
