@@ -1,6 +1,6 @@
 /* @flow */
 
-import { matchDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
+import { matchDomain, type CrossDomainWindowType, type DomainMatcher } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { once, uniqueID } from 'belter/src';
 import { serializeType, type CustomSerializedType } from 'universal-serialize/src';
@@ -64,7 +64,7 @@ export type SerializedFunction = CustomSerializedType<typeof SERIALIZATION_TYPE.
     name : string
 }>;
 
-export function serializeFunction<T>(destination : CrossDomainWindowType | ProxyWindow, domain : string | Array<string>, val : () => ZalgoPromise<T> | T, key : string) : SerializedFunction {
+export function serializeFunction<T>(destination : CrossDomainWindowType | ProxyWindow, domain : DomainMatcher, val : () => ZalgoPromise<T> | T, key : string) : SerializedFunction {
     listenForFunctionCalls();
     
     let id = uniqueID();

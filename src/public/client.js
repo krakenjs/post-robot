@@ -1,7 +1,7 @@
 /* @flow */
 
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { getAncestor, isAncestor, isWindowClosed, getDomain, matchDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
+import { getAncestor, isAncestor, isWindowClosed, getDomain, matchDomain, type CrossDomainWindowType, type DomainMatcher } from 'cross-domain-utils/src';
 import { uniqueID, isRegex } from 'belter/src';
 
 
@@ -16,7 +16,7 @@ type WindowResolverType = CrossDomainWindowType | string | HTMLIFrameElement;
 
 type RequestOptionsType = {
     window? : ?WindowResolverType,
-    domain? : ?(string | Array<string> | RegExp),
+    domain? : ?DomainMatcher,
     name? : ?string,
     data? : ?Object,
     fireAndForget? : ?boolean,
@@ -39,7 +39,7 @@ export function request(options : RequestOptionsType) : ZalgoPromise<ResponseMes
 
         let name = options.name;
         let targetWindow : ?CrossDomainWindowType;
-        let domain : string | Array<string> | RegExp;
+        let domain : DomainMatcher;
 
         if (typeof options.window === 'string') {
             let el = document.getElementById(options.window);

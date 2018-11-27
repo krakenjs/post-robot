@@ -1,6 +1,6 @@
 /* @flow */
 
-import { type CrossDomainWindowType } from 'cross-domain-utils/src';
+import { type CrossDomainWindowType, type DomainMatcher } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { serializeType, type CustomSerializedType, type Thenable } from 'universal-serialize/src';
 
@@ -13,7 +13,7 @@ export type SerializedPromise = CustomSerializedType<typeof SERIALIZATION_TYPE.C
     then : SerializedFunction
 }>;
 
-export function serializePromise(destination : CrossDomainWindowType | ProxyWindow, domain : string | Array<string>, val : Thenable, key : string) : SerializedPromise {
+export function serializePromise(destination : CrossDomainWindowType | ProxyWindow, domain : DomainMatcher, val : Thenable, key : string) : SerializedPromise {
     return serializeType(SERIALIZATION_TYPE.CROSS_DOMAIN_ZALGO_PROMISE, {
         then: serializeFunction(destination, domain, (resolve, reject) => val.then(resolve, reject), key)
     });

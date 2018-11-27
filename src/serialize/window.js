@@ -1,6 +1,6 @@
 /* @flow */
 
-import { isSameDomain, isWindowClosed, type CrossDomainWindowType } from 'cross-domain-utils/src';
+import { isSameDomain, isWindowClosed, type CrossDomainWindowType, type DomainMatcher } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { uniqueID, memoizePromise } from 'belter/src';
 import { serializeType, type CustomSerializedType } from 'universal-serialize/src';
@@ -234,7 +234,7 @@ export class ProxyWindow {
 
 export type SerializedWindow = CustomSerializedType<typeof SERIALIZATION_TYPE.CROSS_DOMAIN_WINDOW, SerializedProxyWindow>;
 
-export function serializeWindow(destination : CrossDomainWindowType | ProxyWindow, domain : string | Array<string>, win : CrossDomainWindowType) : SerializedWindow {
+export function serializeWindow(destination : CrossDomainWindowType | ProxyWindow, domain : DomainMatcher, win : CrossDomainWindowType) : SerializedWindow {
     return serializeType(SERIALIZATION_TYPE.CROSS_DOMAIN_WINDOW, ProxyWindow.serialize(win));
 }
 

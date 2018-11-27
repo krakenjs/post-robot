@@ -1,6 +1,6 @@
 /* @flow */
 
-import { type CrossDomainWindowType, isWindow } from 'cross-domain-utils/src';
+import { type CrossDomainWindowType, isWindow, type DomainMatcher } from 'cross-domain-utils/src';
 import { TYPE, serialize, deserialize, type Thenable } from 'universal-serialize/src';
 
 import { SERIALIZATION_TYPE } from '../conf';
@@ -9,7 +9,7 @@ import { serializeFunction, deserializeFunction, type SerializedFunction } from 
 import { serializePromise, deserializePromise, type SerializedPromise } from './promise';
 import { serializeWindow, deserializeWindow, type SerializedWindow, ProxyWindow } from './window';
 
-export function serializeMessage<T : mixed>(destination : CrossDomainWindowType | ProxyWindow, domain : string | Array<string>, obj : T) : string {
+export function serializeMessage<T : mixed>(destination : CrossDomainWindowType | ProxyWindow, domain : DomainMatcher, obj : T) : string {
     return serialize(obj, {
         [ TYPE.PROMISE ]:  (val : Thenable, key : string) : SerializedPromise => serializePromise(destination, domain, val, key),
         [ TYPE.FUNCTION ]: (val : Function, key : string) : SerializedFunction => serializeFunction(destination, domain, val, key),

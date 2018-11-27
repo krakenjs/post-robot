@@ -1,7 +1,7 @@
 /* @flow */
 
 import { type ZalgoPromise } from 'zalgo-promise/src';
-import { matchDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
+import { matchDomain, type CrossDomainWindowType, type DomainMatcher } from 'cross-domain-utils/src';
 import { isRegex, getOrSet } from 'belter/src';
 
 import { global, globalStore, windowStore } from '../global';
@@ -25,13 +25,13 @@ export type RequestListenerType = {
     handleError : (err : mixed) => void,
     window : ?CrossDomainWindowType,
     name : string,
-    domain : string | RegExp | Array<string>
+    domain : DomainMatcher
 };
 
 export type ResponseListenerType = {
     name : string,
     window : CrossDomainWindowType,
-    domain : (string | Array<string> | RegExp),
+    domain : DomainMatcher,
     respond : (err : ?mixed, result : ?mixed) => void,
     ack? : ?boolean
 };
@@ -107,7 +107,7 @@ export function getRequestListener({ name, win, domain } : { name : string, win 
     }
 }
 
-export function addRequestListener({ name, win, domain } : { name : string, win : ?CrossDomainWindowType, domain : ?(string | RegExp | Array<string>) }, listener : RequestListenerType) : { cancel : () => void } {
+export function addRequestListener({ name, win, domain } : { name : string, win : ?CrossDomainWindowType, domain : ?DomainMatcher }, listener : RequestListenerType) : { cancel : () => void } {
 
     if (!name || typeof name !== 'string') {
         throw new Error(`Name required to add request listener`);

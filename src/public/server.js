@@ -1,6 +1,6 @@
 /* @flow */
 
-import { isWindowClosed, type CrossDomainWindowType } from 'cross-domain-utils/src';
+import { isWindowClosed, type CrossDomainWindowType, type DomainMatcher } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { once as onceFunction, safeInterval } from 'belter/src';
 
@@ -16,7 +16,7 @@ type ServerOptionsType = {
     errorHandler? : ?ErrorHandlerType,
     window? : CrossDomainWindowType,
     name? : ?string,
-    domain? : ?(string | RegExp | Array<string>),
+    domain? : ?DomainMatcher,
     once? : ?boolean,
     errorOnClose? : ?boolean
 };
