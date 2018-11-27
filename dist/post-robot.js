@@ -1435,7 +1435,7 @@
             function cleanupProxyWindows() {
                 for (var _i2 = 0, _idToProxyWindow$keys2 = idToProxyWindow.keys(), _length2 = null == _idToProxyWindow$keys2 ? 0 : _idToProxyWindow$keys2.length; _i2 < _length2; _i2++) {
                     var _id = _idToProxyWindow$keys2[_i2];
-                    idToProxyWindow.get(_id).shouldClean() && delete idToProxyWindow[_id];
+                    idToProxyWindow.get(_id).shouldClean() && idToProxyWindow.del(_id);
                 }
             }
             var window_ProxyWindow = function() {
