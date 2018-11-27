@@ -16,7 +16,7 @@ function cleanupProxyWindows() {
     for (let id of idToProxyWindow.keys()) {
         // $FlowFixMe
         if (idToProxyWindow.get(id).shouldClean()) {
-            delete idToProxyWindow[id];
+            idToProxyWindow.del(id);
         }
     }
 }
