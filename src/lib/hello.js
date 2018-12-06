@@ -1,6 +1,6 @@
 /* @flow */
 
-import { getAllWindows, type CrossDomainWindowType } from 'cross-domain-utils/src';
+import { getAncestor, type CrossDomainWindowType } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { noop, uniqueID, once, weakMapMemoizePromise } from 'belter/src';
 
@@ -36,10 +36,9 @@ export let getWindowInstanceID = weakMapMemoizePromise((win : CrossDomainWindowT
 export function initHello() {
     listenForHello();
 
-    for (let win of getAllWindows()) {
-        if (win !== window) {
-            sayHello(win).catch(noop);
-        }
+    let parent = getAncestor();
+    if (parent) {
+        sayHello(parent).catch(noop);
     }
 }
 
