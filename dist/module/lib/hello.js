@@ -1,4 +1,4 @@
-import { getAllWindows } from 'cross-domain-utils/src';
+import { getAncestor } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { noop, uniqueID, once, weakMapMemoizePromise } from 'belter/src';
 
@@ -44,11 +44,9 @@ export var getWindowInstanceID = weakMapMemoizePromise(function (win) {
 export function initHello() {
     listenForHello();
 
-    for (var _i2 = 0, _getAllWindows2 = getAllWindows(), _length2 = _getAllWindows2 == null ? 0 : _getAllWindows2.length; _i2 < _length2; _i2++) {
-        var win = _getAllWindows2[_i2];
-        if (win !== window) {
-            sayHello(win)['catch'](noop);
-        }
+    var parent = getAncestor();
+    if (parent) {
+        sayHello(parent)['catch'](noop);
     }
 }
 

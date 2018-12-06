@@ -547,41 +547,38 @@
             __webpack_require__.d(__webpack_exports__, "getActualDomain", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.a;
             });
-            __webpack_require__.d(__webpack_exports__, "getAllWindows", function() {
+            __webpack_require__.d(__webpack_exports__, "getAncestor", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.b;
             });
-            __webpack_require__.d(__webpack_exports__, "getAncestor", function() {
+            __webpack_require__.d(__webpack_exports__, "getDomain", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.c;
             });
-            __webpack_require__.d(__webpack_exports__, "getDomain", function() {
+            __webpack_require__.d(__webpack_exports__, "getUserAgent", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.d;
             });
-            __webpack_require__.d(__webpack_exports__, "getUserAgent", function() {
+            __webpack_require__.d(__webpack_exports__, "isActuallySameDomain", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.e;
             });
-            __webpack_require__.d(__webpack_exports__, "isActuallySameDomain", function() {
+            __webpack_require__.d(__webpack_exports__, "isAncestor", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.f;
             });
-            __webpack_require__.d(__webpack_exports__, "isAncestor", function() {
+            __webpack_require__.d(__webpack_exports__, "isSameDomain", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.g;
             });
-            __webpack_require__.d(__webpack_exports__, "isSameDomain", function() {
+            __webpack_require__.d(__webpack_exports__, "isWindow", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.h;
             });
-            __webpack_require__.d(__webpack_exports__, "isWindow", function() {
+            __webpack_require__.d(__webpack_exports__, "isWindowClosed", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.i;
             });
-            __webpack_require__.d(__webpack_exports__, "isWindowClosed", function() {
+            __webpack_require__.d(__webpack_exports__, "linkFrameWindow", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.j;
             });
-            __webpack_require__.d(__webpack_exports__, "linkFrameWindow", function() {
+            __webpack_require__.d(__webpack_exports__, "matchDomain", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.k;
             });
-            __webpack_require__.d(__webpack_exports__, "matchDomain", function() {
-                return __WEBPACK_IMPORTED_MODULE_0__utils__.l;
-            });
             __webpack_require__.d(__webpack_exports__, "stringifyDomainPattern", function() {
-                return __WEBPACK_IMPORTED_MODULE_0__utils__.m;
+                return __WEBPACK_IMPORTED_MODULE_0__utils__.l;
             });
             var __WEBPACK_IMPORTED_MODULE_1__types__ = __webpack_require__("./node_modules/cross-domain-utils/src/types.js");
             __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__types__), __webpack_require__("./node_modules/cross-domain-utils/src/constants.js");
@@ -594,22 +591,11 @@
             }
             var constants = __webpack_require__("./node_modules/cross-domain-utils/src/constants.js");
             __webpack_exports__.a = getActualDomain;
-            __webpack_exports__.d = getDomain;
-            __webpack_exports__.f = isActuallySameDomain;
-            __webpack_exports__.h = isSameDomain;
-            __webpack_exports__.b = function getAllWindows() {
-                var win = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window, frames = function(win) {
-                    var top = getTop(win);
-                    if (!top) throw new Error("Can not determine top window");
-                    return [].concat(getAllChildFrames(top), [ top ]);
-                }(win), opener = function() {
-                    var win = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window;
-                    return getOpener(getTop(win) || win);
-                }(win);
-                return opener ? [].concat(getAllWindows(opener), frames) : frames;
-            };
-            __webpack_exports__.j = isWindowClosed;
-            __webpack_exports__.k = function(frame) {
+            __webpack_exports__.c = getDomain;
+            __webpack_exports__.e = isActuallySameDomain;
+            __webpack_exports__.g = isSameDomain;
+            __webpack_exports__.i = isWindowClosed;
+            __webpack_exports__.j = function(frame) {
                 !function() {
                     for (var i = 0; i < iframeFrames.length; i++) if (isFrameWindowClosed(iframeFrames[i])) {
                         iframeFrames.splice(i, 1);
@@ -625,19 +611,49 @@
                     iframeFrames.push(frame);
                 } catch (err) {}
             };
-            __webpack_exports__.e = function(win) {
+            __webpack_exports__.d = function(win) {
                 return (win = win || window).navigator.mockUserAgent || win.navigator.userAgent;
             };
-            __webpack_exports__.c = getAncestor;
-            __webpack_exports__.g = function(parent, child) {
+            __webpack_exports__.b = getAncestor;
+            __webpack_exports__.f = function(parent, child) {
                 var actualParent = getAncestor(child);
                 if (actualParent) return actualParent === parent;
                 if (child === parent) return !1;
-                if (getTop(child) === child) return !1;
+                if (function(win) {
+                    if (win) {
+                        try {
+                            if (win.top) return win.top;
+                        } catch (err) {}
+                        if (getParent(win) === win) return win;
+                        try {
+                            if (isAncestorParent(window, win) && window.top) return window.top;
+                        } catch (err) {}
+                        try {
+                            if (isAncestorParent(win, window) && window.top) return window.top;
+                        } catch (err) {}
+                        for (var _i7 = 0, _getAllChildFrames4 = function getAllChildFrames(win) {
+                            for (var result = [], _i3 = 0, _getFrames2 = getFrames(win), _length2 = null == _getFrames2 ? 0 : _getFrames2.length; _i3 < _length2; _i3++) {
+                                var frame = _getFrames2[_i3];
+                                result.push(frame);
+                                for (var _i5 = 0, _getAllChildFrames2 = getAllChildFrames(frame), _length4 = null == _getAllChildFrames2 ? 0 : _getAllChildFrames2.length; _i5 < _length4; _i5++) {
+                                    var childFrame = _getAllChildFrames2[_i5];
+                                    result.push(childFrame);
+                                }
+                            }
+                            return result;
+                        }(win), _length6 = null == _getAllChildFrames4 ? 0 : _getAllChildFrames4.length; _i7 < _length6; _i7++) {
+                            var frame = _getAllChildFrames4[_i7];
+                            try {
+                                if (frame.top) return frame.top;
+                            } catch (err) {}
+                            if (getParent(frame) === frame) return frame;
+                        }
+                    }
+                }(child) === child) return !1;
                 for (var _i16 = 0, _getFrames8 = getFrames(parent), _length14 = null == _getFrames8 ? 0 : _getFrames8.length; _i16 < _length14; _i16++) if (_getFrames8[_i16] === child) return !0;
                 return !1;
             };
-            __webpack_exports__.l = function matchDomain(pattern, origin) {
+            __webpack_exports__.k = function matchDomain(pattern, origin) {
                 if ("string" == typeof pattern) {
                     if ("string" == typeof origin) return pattern === constants.b || origin === pattern;
                     if (isRegex(origin)) return !1;
@@ -647,10 +663,10 @@
                     return matchDomain(subpattern, origin);
                 }));
             };
-            __webpack_exports__.m = function(pattern) {
+            __webpack_exports__.l = function(pattern) {
                 return Array.isArray(pattern) ? "(" + pattern.join(" | ") + ")" : isRegex(pattern) ? "RegExp(" + pattern.toString() : pattern.toString();
             };
-            __webpack_exports__.i = function(obj) {
+            __webpack_exports__.h = function(obj) {
                 try {
                     if (obj === window) return !0;
                 } catch (err) {
@@ -695,11 +711,6 @@
             function getParent(win) {
                 if (win) try {
                     if (win.parent && win.parent !== win) return win.parent;
-                } catch (err) {}
-            }
-            function getOpener(win) {
-                if (win && !getParent(win)) try {
-                    return win.opener;
                 } catch (err) {}
             }
             function canReadFromWindow(win) {
@@ -802,38 +813,6 @@
                 }
                 return result;
             }
-            function getAllChildFrames(win) {
-                for (var result = [], _i3 = 0, _getFrames2 = getFrames(win), _length2 = null == _getFrames2 ? 0 : _getFrames2.length; _i3 < _length2; _i3++) {
-                    var frame = _getFrames2[_i3];
-                    result.push(frame);
-                    for (var _i5 = 0, _getAllChildFrames2 = getAllChildFrames(frame), _length4 = null == _getAllChildFrames2 ? 0 : _getAllChildFrames2.length; _i5 < _length4; _i5++) {
-                        var childFrame = _getAllChildFrames2[_i5];
-                        result.push(childFrame);
-                    }
-                }
-                return result;
-            }
-            function getTop(win) {
-                if (win) {
-                    try {
-                        if (win.top) return win.top;
-                    } catch (err) {}
-                    if (getParent(win) === win) return win;
-                    try {
-                        if (isAncestorParent(window, win) && window.top) return window.top;
-                    } catch (err) {}
-                    try {
-                        if (isAncestorParent(win, window) && window.top) return window.top;
-                    } catch (err) {}
-                    for (var _i7 = 0, _getAllChildFrames4 = getAllChildFrames(win), _length6 = null == _getAllChildFrames4 ? 0 : _getAllChildFrames4.length; _i7 < _length6; _i7++) {
-                        var frame = _getAllChildFrames4[_i7];
-                        try {
-                            if (frame.top) return frame.top;
-                        } catch (err) {}
-                        if (getParent(frame) === frame) return frame;
-                    }
-                }
-            }
             function isFrameWindowClosed(frame) {
                 if (!frame.contentWindow) return !0;
                 if (!frame.parentNode) return !0;
@@ -877,7 +856,11 @@
                 return !1;
             }
             function getAncestor(win) {
-                return getOpener(win = win || window) || getParent(win) || void 0;
+                return function(win) {
+                    if (win && !getParent(win)) try {
+                        return win.opener;
+                    } catch (err) {}
+                }(win = win || window) || getParent(win) || void 0;
             }
         },
         "./node_modules/zalgo-promise/src/index.js": function(module, __webpack_exports__, __webpack_require__) {
@@ -2212,10 +2195,8 @@
                 bridge && bridge.openTunnelToOpener();
                 !function() {
                     listenForHello();
-                    for (var _i2 = 0, _getAllWindows2 = Object(src.getAllWindows)(), _length2 = null == _getAllWindows2 ? 0 : _getAllWindows2.length; _i2 < _length2; _i2++) {
-                        var win = _getAllWindows2[_i2];
-                        win !== window && sayHello(win).catch(belter_src.noop);
-                    }
+                    var parent = Object(src.getAncestor)();
+                    parent && sayHello(parent).catch(belter_src.noop);
                 }();
             }
             __webpack_require__.d(__webpack_exports__, "markWindowKnown", function() {
