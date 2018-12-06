@@ -25,7 +25,7 @@ const listenForFunctionCalls = once(() => {
         let { id, name } = data;
         
         return ZalgoPromise.try(() => {
-            let methods = methodStore.get(source, () => ({}));
+            let methods = methodStore.getOrSet(source, () => ({}));
             let meth = methods[data.id] || proxyWindowMethods.get(id);
 
             if (!meth) {
