@@ -1,6 +1,6 @@
 /* @flow */
 
-import { matchDomain, type CrossDomainWindowType, type DomainMatcher } from 'cross-domain-utils/src';
+import { matchDomain, getDomain, type CrossDomainWindowType, type DomainMatcher } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { once, uniqueID } from 'belter/src';
 import { serializeType, type CustomSerializedType } from 'universal-serialize/src';
@@ -29,20 +29,20 @@ const listenForFunctionCalls = once(() => {
             let meth = methods[data.id] || proxyWindowMethods.get(id);
 
             if (!meth) {
-                throw new Error(`Could not find method with id: ${ data.id }`);
+                throw new Error(`Could not find method '${ data.name }' with id: ${ data.id } in ${ getDomain(window) }`);
             }
 
             let { proxy, domain, val } = meth;
 
             if (!matchDomain(domain, origin)) {
-                throw new Error(`Method domain ${ JSON.stringify(meth.domain) } does not match origin ${ origin }`);
+                throw new Error(`Method '${ data.name }' domain ${ JSON.stringify(meth.domain) } does not match origin ${ origin } in ${ getDomain(window) }`);
             }
             
             if (proxy) {
                 // $FlowFixMe
                 return proxy.matchWindow(source).then(match => {
                     if (!match) {
-                        throw new Error(`Proxy window does not match source`);
+                        throw new Error(`Method call '${ data.name }' failed - proxy window does not match source in ${ getDomain(window) }`);
                     }
                     return val;
                 });
@@ -87,23 +87,28 @@ export function serializeFunction<T>(destination : CrossDomainWindowType | Proxy
     return serializeType(SERIALIZATION_TYPE.CROSS_DOMAIN_FUNCTION, { id, name: val.name || key });
 }
 
-export function deserializeFunction<T>(source : CrossDomainWindowType, origin : string, { id, name } : { id : string, name : string }) : (...args : $ReadOnlyArray<mixed>) => ZalgoPromise<T> {
+export function deserializeFunction<T>(source : CrossDomainWindowType | ProxyWindow, origin : string, { id, name } : { id : string, name : string }) : (...args : $ReadOnlyArray<mixed>) => ZalgoPromise<T> {
+
+    function innerWrapper<X : mixed>(args : $ReadOnlyArray<mixed>, opts? : Object = {}) : ZalgoPromise<X> {
+        return ZalgoPromise.try(() => {
+            // $FlowFixMe
+            return ProxyWindow.isProxyWindow(source) ? source.awaitWindow() : source;
+        }).then(win => {
+            return global.send(win, MESSAGE_NAME.METHOD, { id, name, args }, { domain: origin, ...opts });
+        });
+    }
 
     function crossDomainFunctionWrapper<X : mixed>() : ZalgoPromise<X> {
-        let args = Array.prototype.slice.call(arguments);
-        return global.send(source, MESSAGE_NAME.METHOD, { id, name, args }, { domain: origin })
+        return innerWrapper(Array.prototype.slice.call(arguments))
             .then(({ data }) => data.result);
     }
 
     crossDomainFunctionWrapper.fireAndForget = function crossDomainFireAndForgetFunctionWrapper<X : mixed>() : ZalgoPromise<X> {
-        let args = Array.prototype.slice.call(arguments);
-        return global.send(source, MESSAGE_NAME.METHOD, { id, name, args }, { domain: origin, fireAndForget: true });
+        return innerWrapper(Array.prototype.slice.call(arguments), { fireAndForget: true });
     };
 
     crossDomainFunctionWrapper.__name__ = name;
     crossDomainFunctionWrapper.__xdomain__ = true;
-
-    crossDomainFunctionWrapper.source = source;
     crossDomainFunctionWrapper.origin = origin;
 
     return crossDomainFunctionWrapper;

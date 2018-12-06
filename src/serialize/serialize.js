@@ -19,7 +19,7 @@ export function serializeMessage<T : mixed>(destination : CrossDomainWindowType 
     });
 }
 
-export function deserializeMessage<T : mixed>(source : CrossDomainWindowType, origin : string, message : string) : T {
+export function deserializeMessage<T : mixed>(source : CrossDomainWindowType | ProxyWindow, origin : string, message : string) : T {
     return deserialize(message, {
         [ SERIALIZATION_TYPE.CROSS_DOMAIN_ZALGO_PROMISE ]: (serializedPromise)  => deserializePromise(source, origin, serializedPromise),
         [ SERIALIZATION_TYPE.CROSS_DOMAIN_FUNCTION ]:      (serializedFunction) => deserializeFunction(source, origin, serializedFunction),

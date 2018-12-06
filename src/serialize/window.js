@@ -237,6 +237,6 @@ export function serializeWindow(destination : CrossDomainWindowType | ProxyWindo
     return serializeType(SERIALIZATION_TYPE.CROSS_DOMAIN_WINDOW, ProxyWindow.serialize(win));
 }
 
-export function deserializeWindow(source : CrossDomainWindowType, origin : string, win : SerializedProxyWindow) : ProxyWindow {
+export function deserializeWindow(source : CrossDomainWindowType | ProxyWindow, origin : string, win : SerializedProxyWindow) : ProxyWindow {
     return ProxyWindow.deserialize(win);
 }

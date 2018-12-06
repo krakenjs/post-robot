@@ -19,6 +19,6 @@ export function serializePromise(destination : CrossDomainWindowType | ProxyWind
     });
 }
 
-export function deserializePromise<T>(source : CrossDomainWindowType, origin : string, { then } : { then : Function }) : ZalgoPromise<T> {
+export function deserializePromise<T>(source : CrossDomainWindowType | ProxyWindow, origin : string, { then } : { then : Function }) : ZalgoPromise<T> {
     return new ZalgoPromise(then);
 }
