@@ -89,9 +89,8 @@ export class ProxyWindow {
         return ZalgoPromise.try(() => {
             if (this.actualWindow) {
                 this.actualWindow.focus();
-            } else {
-                return this.serializedWindow.focus();
             }
+            return this.serializedWindow.focus();
         }).then(() => this);
     }
 
