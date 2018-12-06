@@ -345,10 +345,14 @@
                 return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
             };
             function uniqueID() {
-                var str, chars = "0123456789abcdef";
+                var chars = "0123456789abcdef";
                 return "xxxxxxxxxx".replace(/./g, function() {
                     return chars.charAt(Math.floor(Math.random() * chars.length));
-                }) + "_" + (str = new Date().toISOString().slice(11, 19).replace("T", "."), window.btoa(str)).replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+                }) + "_" + function(str) {
+                    if ("undefined" != typeof window && "function" == typeof window.btoa) return window.btoa(str);
+                    if ("undefined" != typeof Buffer) return Buffer.from(str, "utf8").toString("base64");
+                    throw new Error("Can not find window.btoa or Buffer");
+                }(new Date().toISOString().slice(11, 19).replace("T", ".")).replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
             }
             var objectIDs = void 0;
             function serializeArgs(args) {
@@ -504,7 +508,7 @@
                     if (!key) throw new Error("WeakMap expected key");
                     var weakmap = this.weakmap;
                     if (weakmap) try {
-                        return weakmap.has(key);
+                        if (weakmap.has(key)) return !0;
                     } catch (err) {
                         delete this.weakmap;
                     }
@@ -1584,7 +1588,7 @@
                     }, function(_ref) {
                         var source = _ref.source, origin = _ref.origin, data = _ref.data, id = data.id, name = data.name;
                         return zalgo_promise_src.a.try(function() {
-                            var meth = methodStore.get(source, function() {
+                            var meth = methodStore.getOrSet(source, function() {
                                 return {};
                             })[data.id] || proxyWindowMethods.get(id);
                             if (!meth) throw new Error("Could not find method '" + data.name + "' with id: " + data.id + " in " + Object(src.getDomain)(window));

@@ -30,7 +30,7 @@ var listenForFunctionCalls = once(function () {
 
 
         return ZalgoPromise['try'](function () {
-            var methods = methodStore.get(source, function () {
+            var methods = methodStore.getOrSet(source, function () {
                 return {};
             });
             var meth = methods[data.id] || proxyWindowMethods.get(id);
