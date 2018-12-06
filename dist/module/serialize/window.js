@@ -91,9 +91,8 @@ export var ProxyWindow = function () {
         return ZalgoPromise['try'](function () {
             if (_this4.actualWindow) {
                 _this4.actualWindow.focus();
-            } else {
-                return _this4.serializedWindow.focus();
             }
+            return _this4.serializedWindow.focus();
         }).then(function () {
             return _this4;
         });

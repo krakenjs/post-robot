@@ -138,7 +138,7 @@
             __webpack_require__("./node_modules/belter/src/http.js");
             var __WEBPACK_IMPORTED_MODULE_7__types__ = __webpack_require__("./node_modules/belter/src/types.js");
             __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_7__types__), __webpack_require__("./node_modules/belter/src/decorators.js"), 
-            __webpack_require__("./node_modules/belter/src/css.js");
+            __webpack_require__("./node_modules/belter/src/css.js"), __webpack_require__("./node_modules/belter/src/test.js");
         },
         "./node_modules/belter/src/storage.js": function(module, __webpack_exports__, __webpack_require__) {
             "use strict";
@@ -202,6 +202,10 @@
                 } ]);
             };
             var __WEBPACK_IMPORTED_MODULE_0__util__ = __webpack_require__("./node_modules/belter/src/util.js"), __WEBPACK_IMPORTED_MODULE_1__dom__ = __webpack_require__("./node_modules/belter/src/dom.js");
+        },
+        "./node_modules/belter/src/test.js": function(module, __webpack_exports__, __webpack_require__) {
+            "use strict";
+            __webpack_require__("./node_modules/zalgo-promise/src/index.js"), __webpack_require__("./node_modules/belter/src/util.js");
         },
         "./node_modules/belter/src/types.js": function(module, exports) {},
         "./node_modules/belter/src/util.js": function(module, __webpack_exports__, __webpack_require__) {
@@ -1954,8 +1958,8 @@
                 ProxyWindow.prototype.focus = function() {
                     var _this4 = this;
                     return zalgo_promise_src.a.try(function() {
-                        if (!_this4.actualWindow) return _this4.serializedWindow.focus();
-                        _this4.actualWindow.focus();
+                        _this4.actualWindow && _this4.actualWindow.focus();
+                        return _this4.serializedWindow.focus();
                     }).then(function() {
                         return _this4;
                     });
@@ -2055,7 +2059,13 @@
                     });
                 };
                 return ProxyWindow;
-            }(), methodStore = Object(global.c)("methodStore"), proxyWindowMethods = Object(global.b)("proxyWindowMethods");
+            }(), _extends = Object.assign || function(target) {
+                for (var i = 1; i < arguments.length; i++) {
+                    var source = arguments[i];
+                    for (var key in source) Object.prototype.hasOwnProperty.call(source, key) && (target[key] = source[key]);
+                }
+                return target;
+            }, methodStore = Object(global.c)("methodStore"), proxyWindowMethods = Object(global.b)("proxyWindowMethods");
             global.a.listeningForFunctions = global.a.listeningForFunctions || !1;
             var listenForFunctionCalls = Object(belter_src.once)(function() {
                 if (!global.a.listeningForFunctions) {
@@ -2068,11 +2078,11 @@
                             var meth = methodStore.get(source, function() {
                                 return {};
                             })[data.id] || proxyWindowMethods.get(id);
-                            if (!meth) throw new Error("Could not find method with id: " + data.id);
+                            if (!meth) throw new Error("Could not find method '" + data.name + "' with id: " + data.id + " in " + Object(src.getDomain)(window));
                             var proxy = meth.proxy, domain = meth.domain, val = meth.val;
-                            if (!Object(src.matchDomain)(domain, origin)) throw new Error("Method domain " + JSON.stringify(meth.domain) + " does not match origin " + origin);
+                            if (!Object(src.matchDomain)(domain, origin)) throw new Error("Method '" + data.name + "' domain " + JSON.stringify(meth.domain) + " does not match origin " + origin + " in " + Object(src.getDomain)(window));
                             return proxy ? proxy.matchWindow(source).then(function(match) {
-                                if (!match) throw new Error("Proxy window does not match source");
+                                if (!match) throw new Error("Method call '" + data.name + "' failed - proxy window does not match source in " + Object(src.getDomain)(window));
                                 return val;
                             }) : val;
                         }).then(function(method) {
@@ -2173,32 +2183,32 @@
                 }, _deserialize[conf.h.CROSS_DOMAIN_FUNCTION] = function(serializedFunction) {
                     return function(source, origin, _ref2) {
                         var id = _ref2.id, name = _ref2.name;
+                        function innerWrapper(args) {
+                            var opts = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {};
+                            return zalgo_promise_src.a.try(function() {
+                                return window_ProxyWindow.isProxyWindow(source) ? source.awaitWindow() : source;
+                            }).then(function(win) {
+                                return global.a.send(win, conf.d.METHOD, {
+                                    id: id,
+                                    name: name,
+                                    args: args
+                                }, _extends({
+                                    domain: origin
+                                }, opts));
+                            });
+                        }
                         function crossDomainFunctionWrapper() {
-                            var args = Array.prototype.slice.call(arguments);
-                            return global.a.send(source, conf.d.METHOD, {
-                                id: id,
-                                name: name,
-                                args: args
-                            }, {
-                                domain: origin
-                            }).then(function(_ref3) {
+                            return innerWrapper(Array.prototype.slice.call(arguments)).then(function(_ref3) {
                                 return _ref3.data.result;
                             });
                         }
                         crossDomainFunctionWrapper.fireAndForget = function() {
-                            var args = Array.prototype.slice.call(arguments);
-                            return global.a.send(source, conf.d.METHOD, {
-                                id: id,
-                                name: name,
-                                args: args
-                            }, {
-                                domain: origin,
+                            return innerWrapper(Array.prototype.slice.call(arguments), {
                                 fireAndForget: !0
                             });
                         };
                         crossDomainFunctionWrapper.__name__ = name;
                         crossDomainFunctionWrapper.__xdomain__ = !0;
-                        crossDomainFunctionWrapper.source = source;
                         crossDomainFunctionWrapper.origin = origin;
                         return crossDomainFunctionWrapper;
                     }(source, origin, serializedFunction);
@@ -2246,7 +2256,7 @@
                     });
                 }
             };
-            var _extends = Object.assign || function(target) {
+            var send__extends = Object.assign || function(target) {
                 for (var i = 1; i < arguments.length; i++) {
                     var source = arguments[i];
                     for (var key in source) Object.prototype.hasOwnProperty.call(source, key) && (target[key] = source[key]);
@@ -2257,7 +2267,7 @@
                 return zalgo_promise_src.a.try(function() {
                     var _serializeMessage;
                     if (Object(src.isWindowClosed)(win)) throw new Error("Window is closed");
-                    var serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {})[conf.j.POSTROBOT] = _extends({
+                    var serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {})[conf.j.POSTROBOT] = send__extends({
                         id: Object(belter_src.uniqueID)()
                     }, message), _serializeMessage)), messages = [];
                     return zalgo_promise_src.a.map(Object.keys(SEND_MESSAGE_STRATEGIES), function(strategyName) {

@@ -1,4 +1,6 @@
-import { matchDomain } from 'cross-domain-utils/src';
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+import { matchDomain, getDomain } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { once, uniqueID } from 'belter/src';
 import { serializeType } from 'universal-serialize/src';
@@ -34,7 +36,7 @@ var listenForFunctionCalls = once(function () {
             var meth = methods[data.id] || proxyWindowMethods.get(id);
 
             if (!meth) {
-                throw new Error('Could not find method with id: ' + data.id);
+                throw new Error('Could not find method \'' + data.name + '\' with id: ' + data.id + ' in ' + getDomain(window));
             }
 
             var proxy = meth.proxy,
@@ -43,14 +45,14 @@ var listenForFunctionCalls = once(function () {
 
 
             if (!matchDomain(domain, origin)) {
-                throw new Error('Method domain ' + JSON.stringify(meth.domain) + ' does not match origin ' + origin);
+                throw new Error('Method \'' + data.name + '\' domain ' + JSON.stringify(meth.domain) + ' does not match origin ' + origin + ' in ' + getDomain(window));
             }
 
             if (proxy) {
                 // $FlowFixMe
                 return proxy.matchWindow(source).then(function (match) {
                     if (!match) {
-                        throw new Error('Proxy window does not match source');
+                        throw new Error('Method call \'' + data.name + '\' failed - proxy window does not match source in ' + getDomain(window));
                     }
                     return val;
                 });
@@ -97,23 +99,30 @@ export function deserializeFunction(source, origin, _ref2) {
         name = _ref2.name;
 
 
+    function innerWrapper(args) {
+        var opts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+        return ZalgoPromise['try'](function () {
+            // $FlowFixMe
+            return ProxyWindow.isProxyWindow(source) ? source.awaitWindow() : source;
+        }).then(function (win) {
+            return global.send(win, MESSAGE_NAME.METHOD, { id: id, name: name, args: args }, _extends({ domain: origin }, opts));
+        });
+    }
+
     function crossDomainFunctionWrapper() {
-        var args = Array.prototype.slice.call(arguments);
-        return global.send(source, MESSAGE_NAME.METHOD, { id: id, name: name, args: args }, { domain: origin }).then(function (_ref3) {
+        return innerWrapper(Array.prototype.slice.call(arguments)).then(function (_ref3) {
             var data = _ref3.data;
             return data.result;
         });
     }
 
     crossDomainFunctionWrapper.fireAndForget = function crossDomainFireAndForgetFunctionWrapper() {
-        var args = Array.prototype.slice.call(arguments);
-        return global.send(source, MESSAGE_NAME.METHOD, { id: id, name: name, args: args }, { domain: origin, fireAndForget: true });
+        return innerWrapper(Array.prototype.slice.call(arguments), { fireAndForget: true });
     };
 
     crossDomainFunctionWrapper.__name__ = name;
     crossDomainFunctionWrapper.__xdomain__ = true;
-
-    crossDomainFunctionWrapper.source = source;
     crossDomainFunctionWrapper.origin = origin;
 
     return crossDomainFunctionWrapper;
