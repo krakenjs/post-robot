@@ -99,7 +99,7 @@ postRobot.on('getUser', { id: 1337 }, function(event, callback) {
 ## One-off listener
 
 ```javascript
-postRobot.once('init', function(event) {
+postRobot.once('getUser', function(event) {
 
     return {
         name: 'Noggin the Nog'
@@ -123,7 +123,7 @@ listener.cancel();
 ## Listen for messages from a specific window
 
 ```javascript
-postRobot.on('init', { window: window.parent }, function(event) {
+postRobot.on('getUser', { window: window.parent }, function(event) {
 
     return {
         name: 'Guybrush Threepwood'
@@ -134,7 +134,7 @@ postRobot.on('init', { window: window.parent }, function(event) {
 ## Listen for messages from a specific domain
 
 ```javascript
-postRobot.on('init', { domain: 'http://zombo.com' }, function(event) {
+postRobot.on('getUser', { domain: 'http://zombo.com' }, function(event) {
 
     return {
         name: 'Manny Calavera'
