@@ -58,7 +58,7 @@
             var util = __webpack_require__("./node_modules/belter/src/util.js");
             __webpack_require__("./node_modules/belter/src/device.js");
             __webpack_exports__.b = function isLocalStorageEnabled() {
-                return Object(util.f)(isLocalStorageEnabled, function() {
+                return Object(util.e)(isLocalStorageEnabled, function() {
                     try {
                         if ("undefined" == typeof window) return !1;
                         if (window.localStorage) {
@@ -106,31 +106,31 @@
             __webpack_require__("./node_modules/belter/src/storage.js");
             var __WEBPACK_IMPORTED_MODULE_5__util__ = __webpack_require__("./node_modules/belter/src/util.js");
             __webpack_require__.d(__webpack_exports__, "getOrSet", function() {
-                return __WEBPACK_IMPORTED_MODULE_5__util__.e;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.d;
             });
             __webpack_require__.d(__webpack_exports__, "isRegex", function() {
-                return __WEBPACK_IMPORTED_MODULE_5__util__.g;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.f;
             });
             __webpack_require__.d(__webpack_exports__, "memoizePromise", function() {
-                return __WEBPACK_IMPORTED_MODULE_5__util__.i;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.h;
             });
             __webpack_require__.d(__webpack_exports__, "noop", function() {
-                return __WEBPACK_IMPORTED_MODULE_5__util__.j;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.i;
             });
             __webpack_require__.d(__webpack_exports__, "once", function() {
-                return __WEBPACK_IMPORTED_MODULE_5__util__.k;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.j;
             });
             __webpack_require__.d(__webpack_exports__, "safeInterval", function() {
-                return __WEBPACK_IMPORTED_MODULE_5__util__.m;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.l;
             });
             __webpack_require__.d(__webpack_exports__, "stringifyError", function() {
-                return __WEBPACK_IMPORTED_MODULE_5__util__.o;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.n;
             });
             __webpack_require__.d(__webpack_exports__, "uniqueID", function() {
-                return __WEBPACK_IMPORTED_MODULE_5__util__.p;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.o;
             });
             __webpack_require__.d(__webpack_exports__, "weakMapMemoizePromise", function() {
-                return __WEBPACK_IMPORTED_MODULE_5__util__.q;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.p;
             });
             __webpack_require__("./node_modules/belter/src/http.js");
             var __WEBPACK_IMPORTED_MODULE_7__types__ = __webpack_require__("./node_modules/belter/src/types.js");
@@ -141,7 +141,7 @@
             "use strict";
             __webpack_exports__.a = function getStorage(_ref) {
                 var name = _ref.name, _ref$version = _ref.version, version = void 0 === _ref$version ? "latest" : _ref$version, _ref$lifetime = _ref.lifetime, lifetime = void 0 === _ref$lifetime ? 3e5 : _ref$lifetime;
-                return Object(__WEBPACK_IMPORTED_MODULE_0__util__.f)(getStorage, function() {
+                return Object(__WEBPACK_IMPORTED_MODULE_0__util__.e)(getStorage, function() {
                     var STORAGE_KEY = "__" + name + "_" + version + "_storage__", accessedStorage = void 0;
                     function getState(handler) {
                         var localStorageEnabled = Object(__WEBPACK_IMPORTED_MODULE_1__dom__.b)(), storage = void 0;
@@ -150,14 +150,14 @@
                             var rawStorage = window.localStorage.getItem(STORAGE_KEY);
                             rawStorage && (storage = JSON.parse(rawStorage));
                         }
-                        storage || (storage = Object(__WEBPACK_IMPORTED_MODULE_0__util__.d)()[STORAGE_KEY]);
+                        storage || (storage = Object(__WEBPACK_IMPORTED_MODULE_0__util__.c)()[STORAGE_KEY]);
                         storage || (storage = {
-                            id: Object(__WEBPACK_IMPORTED_MODULE_0__util__.p)()
+                            id: Object(__WEBPACK_IMPORTED_MODULE_0__util__.o)()
                         });
-                        storage.id || (storage.id = Object(__WEBPACK_IMPORTED_MODULE_0__util__.p)());
+                        storage.id || (storage.id = Object(__WEBPACK_IMPORTED_MODULE_0__util__.o)());
                         accessedStorage = storage;
                         var result = handler(storage);
-                        localStorageEnabled ? window.localStorage.setItem(STORAGE_KEY, JSON.stringify(storage)) : Object(__WEBPACK_IMPORTED_MODULE_0__util__.d)()[STORAGE_KEY] = storage;
+                        localStorageEnabled ? window.localStorage.setItem(STORAGE_KEY, JSON.stringify(storage)) : Object(__WEBPACK_IMPORTED_MODULE_0__util__.c)()[STORAGE_KEY] = storage;
                         accessedStorage = null;
                         return result;
                     }
@@ -166,7 +166,7 @@
                             var session = storage.__session__, now = Date.now();
                             session && now - session.created > lifetime && (session = null);
                             session || (session = {
-                                guid: Object(__WEBPACK_IMPORTED_MODULE_0__util__.p)(),
+                                guid: Object(__WEBPACK_IMPORTED_MODULE_0__util__.o)(),
                                 created: now
                             });
                             storage.__session__ = session;
@@ -207,14 +207,14 @@
         "./node_modules/belter/src/types.js": function(module, exports) {},
         "./node_modules/belter/src/util.js": function(module, __webpack_exports__, __webpack_require__) {
             "use strict";
-            __webpack_exports__.p = uniqueID;
-            __webpack_exports__.d = function() {
+            __webpack_exports__.o = uniqueID;
+            __webpack_exports__.c = function() {
                 if ("undefined" != typeof window) return window;
                 if ("undefined" != typeof window) return window;
                 if ("undefined" != typeof global) return global;
                 throw new Error("No global found");
             };
-            __webpack_exports__.h = function(method) {
+            __webpack_exports__.g = function(method) {
                 var _this = this, options = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {}, cacheMap = new __WEBPACK_IMPORTED_MODULE_1_cross_domain_safe_weakmap_src__.a();
                 function memoizedFunction() {
                     for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) args[_key] = arguments[_key];
@@ -236,7 +236,7 @@
                 options.name && (memoizedFunction.displayName = options.name + ":memoized");
                 return memoizedFunction;
             };
-            __webpack_exports__.i = function(method) {
+            __webpack_exports__.h = function(method) {
                 var cache = {};
                 function memoizedPromiseFunction() {
                     for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) args[_key2] = arguments[_key2];
@@ -252,7 +252,7 @@
                 };
                 return memoizedPromiseFunction;
             };
-            __webpack_exports__.l = function(method) {
+            __webpack_exports__.k = function(method) {
                 var options = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {};
                 function promisifiedFunction() {
                     return __WEBPACK_IMPORTED_MODULE_0_zalgo_promise_src__.a.try(method, this, arguments);
@@ -260,12 +260,12 @@
                 options.name && (promisifiedFunction.displayName = options.name + ":promisified");
                 return promisifiedFunction;
             };
-            __webpack_exports__.f = function(method, logic) {
+            __webpack_exports__.e = function(method, logic) {
                 var args = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : [], cache = method.__inline_memoize_cache__ = method.__inline_memoize_cache__ || {}, key = serializeArgs(args);
                 return cache.hasOwnProperty(key) ? cache[key] : cache[key] = logic.apply(void 0, args);
             };
-            __webpack_exports__.j = function() {};
-            __webpack_exports__.k = function(method) {
+            __webpack_exports__.i = function() {};
+            __webpack_exports__.j = function(method) {
                 var called = !1;
                 return function() {
                     if (!called) {
@@ -274,7 +274,7 @@
                     }
                 };
             };
-            __webpack_exports__.o = function stringifyError(err) {
+            __webpack_exports__.n = function stringifyError(err) {
                 var level = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 1;
                 if (level >= 3) return "stringifyError stack overflow";
                 try {
@@ -291,16 +291,16 @@
                     return "Error while stringifying error: " + stringifyError(newErr, level + 1);
                 }
             };
-            __webpack_exports__.n = function(item) {
+            __webpack_exports__.m = function(item) {
                 return "string" == typeof item ? item : item && "function" == typeof item.toString ? item.toString() : Object.prototype.toString.call(item);
             };
-            __webpack_exports__.c = function(obj, source) {
+            __webpack_exports__.b = function(obj, source) {
                 if (!source) return obj;
                 if (Object.assign) return Object.assign(obj, source);
                 for (var key in source) source.hasOwnProperty(key) && (obj[key] = source[key]);
                 return obj;
             };
-            __webpack_exports__.m = function(method, time) {
+            __webpack_exports__.l = function(method, time) {
                 var timeout = void 0;
                 !function loop() {
                     timeout = setTimeout(function() {
@@ -317,23 +317,13 @@
             __webpack_exports__.a = function(string) {
                 return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
             };
-            __webpack_exports__.b = function(method) {
-                var time = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 100, timeout = void 0;
-                return function() {
-                    var _this3 = this, _arguments2 = arguments;
-                    clearTimeout(timeout);
-                    timeout = setTimeout(function() {
-                        return method.apply(_this3, _arguments2);
-                    }, time);
-                };
-            };
-            __webpack_exports__.g = function(item) {
+            __webpack_exports__.f = function(item) {
                 return "[object RegExp]" === Object.prototype.toString.call(item);
             };
-            __webpack_require__.d(__webpack_exports__, "q", function() {
+            __webpack_require__.d(__webpack_exports__, "p", function() {
                 return weakMapMemoizePromise;
             });
-            __webpack_exports__.e = function(obj, key, getter) {
+            __webpack_exports__.d = function(obj, key, getter) {
                 if (obj.hasOwnProperty(key)) return obj[key];
                 var val = getter();
                 obj[key] = val;
@@ -598,16 +588,57 @@
             __webpack_exports__.c = getDomain;
             __webpack_exports__.e = isActuallySameDomain;
             __webpack_exports__.g = isSameDomain;
-            __webpack_exports__.i = isWindowClosed;
+            __webpack_exports__.i = function(win) {
+                var allowMock = !(arguments.length > 1 && void 0 !== arguments[1]) || arguments[1];
+                try {
+                    if (win === window) return !1;
+                } catch (err) {
+                    return !0;
+                }
+                try {
+                    if (!win) return !0;
+                } catch (err) {
+                    return !0;
+                }
+                try {
+                    if (win.closed) return !0;
+                } catch (err) {
+                    return !err || err.message !== IE_WIN_ACCESS_ERROR;
+                }
+                if (allowMock && isSameDomain(win)) try {
+                    if (win.mockclosed) return !0;
+                } catch (err) {}
+                try {
+                    if (!win.parent || !win.top) return !0;
+                } catch (err) {}
+                var iframeIndex = function(collection, item) {
+                    for (var i = 0; i < collection.length; i++) try {
+                        if (collection[i] === item) return i;
+                    } catch (err) {}
+                    return -1;
+                }(iframeWindows, win);
+                if (-1 !== iframeIndex) {
+                    var frame = iframeFrames[iframeIndex];
+                    if (frame && function(frame) {
+                        if (!frame.contentWindow) return !0;
+                        if (!frame.parentNode) return !0;
+                        var doc = frame.ownerDocument;
+                        return !(!doc || !doc.documentElement || doc.documentElement.contains(frame));
+                    }(frame)) return !0;
+                }
+                return !1;
+            };
             __webpack_exports__.j = function(frame) {
                 !function() {
-                    for (var i = 0; i < iframeFrames.length; i++) if (isFrameWindowClosed(iframeFrames[i])) {
-                        iframeFrames.splice(i, 1);
-                        iframeWindows.splice(i, 1);
-                    }
-                    for (var _i8 = 0; _i8 < iframeWindows.length; _i8++) if (isWindowClosed(iframeWindows[_i8])) {
-                        iframeFrames.splice(_i8, 1);
-                        iframeWindows.splice(_i8, 1);
+                    for (var i = 0; i < iframeWindows.length; i++) {
+                        var closed = !1;
+                        try {
+                            closed = iframeWindows[i].closed;
+                        } catch (err) {}
+                        if (closed) {
+                            iframeFrames.splice(i, 1);
+                            iframeWindows.splice(i, 1);
+                        }
                     }
                 }();
                 if (frame && frame.contentWindow) try {
@@ -654,7 +685,7 @@
                         }
                     }
                 }(child) === child) return !1;
-                for (var _i16 = 0, _getFrames8 = getFrames(parent), _length14 = null == _getFrames8 ? 0 : _getFrames8.length; _i16 < _length14; _i16++) if (_getFrames8[_i16] === child) return !0;
+                for (var _i15 = 0, _getFrames8 = getFrames(parent), _length14 = null == _getFrames8 ? 0 : _getFrames8.length; _i15 < _length14; _i15++) if (_getFrames8[_i15] === child) return !0;
                 return !1;
             };
             __webpack_exports__.k = function matchDomain(pattern, origin) {
@@ -817,48 +848,7 @@
                 }
                 return result;
             }
-            function isFrameWindowClosed(frame) {
-                if (!frame.contentWindow) return !0;
-                if (!frame.parentNode) return !0;
-                var doc = frame.ownerDocument;
-                return !(!doc || !doc.documentElement || doc.documentElement.contains(frame));
-            }
             var iframeWindows = [], iframeFrames = [];
-            function isWindowClosed(win) {
-                var allowMock = !(arguments.length > 1 && void 0 !== arguments[1]) || arguments[1];
-                try {
-                    if (win === window) return !1;
-                } catch (err) {
-                    return !0;
-                }
-                try {
-                    if (!win) return !0;
-                } catch (err) {
-                    return !0;
-                }
-                try {
-                    if (win.closed) return !0;
-                } catch (err) {
-                    return !err || err.message !== IE_WIN_ACCESS_ERROR;
-                }
-                if (allowMock && isSameDomain(win)) try {
-                    if (win.mockclosed) return !0;
-                } catch (err) {}
-                try {
-                    if (!win.parent || !win.top) return !0;
-                } catch (err) {}
-                var iframeIndex = function(collection, item) {
-                    for (var i = 0; i < collection.length; i++) try {
-                        if (collection[i] === item) return i;
-                    } catch (err) {}
-                    return -1;
-                }(iframeWindows, win);
-                if (-1 !== iframeIndex) {
-                    var frame = iframeFrames[iframeIndex];
-                    if (frame && isFrameWindowClosed(frame)) return !0;
-                }
-                return !1;
-            }
             function getAncestor(win) {
                 return function(win) {
                     if (win && !getParent(win)) try {
@@ -1434,6 +1424,7 @@
                     !function(instance, Constructor) {
                         if (!(instance instanceof ProxyWindow)) throw new TypeError("Cannot call a class as a function");
                     }(this);
+                    this.isProxyWindow = !0;
                     this.serializedWindow = serializedWindow;
                     this.actualWindowPromise = new zalgo_promise_src.a();
                     actualWindow && this.setWindow(actualWindow);
@@ -1526,7 +1517,7 @@
                     });
                 };
                 ProxyWindow.isProxyWindow = function(obj) {
-                    return obj instanceof ProxyWindow;
+                    return Boolean(obj && obj.isProxyWindow);
                 };
                 ProxyWindow.toProxyWindow = function(win) {
                     cleanupProxyWindows();

@@ -26,6 +26,8 @@ export var ProxyWindow = function () {
     function ProxyWindow(serializedWindow, actualWindow) {
         _classCallCheck(this, ProxyWindow);
 
+        this.isProxyWindow = true;
+
         this.serializedWindow = serializedWindow;
         this.actualWindowPromise = new ZalgoPromise();
         if (actualWindow) {
@@ -183,7 +185,8 @@ export var ProxyWindow = function () {
     };
 
     ProxyWindow.isProxyWindow = function isProxyWindow(obj) {
-        return obj instanceof ProxyWindow;
+        // $FlowFixMe
+        return Boolean(obj && obj.isProxyWindow);
     };
 
     ProxyWindow.toProxyWindow = function toProxyWindow(win) {
