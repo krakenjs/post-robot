@@ -33,6 +33,7 @@ type SerializedProxyWindow = {|
 
 export class ProxyWindow {
 
+    isProxyWindow : true = true
     serializedWindow : SerializedProxyWindow
     actualWindow : CrossDomainWindowType
     actualWindowPromise : ZalgoPromise<CrossDomainWindowType>
@@ -176,7 +177,8 @@ export class ProxyWindow {
     }
 
     static isProxyWindow(obj : mixed) : boolean {
-        return obj instanceof ProxyWindow;
+        // $FlowFixMe
+        return Boolean(obj && obj.isProxyWindow);
     }
 
     static toProxyWindow(win : CrossDomainWindowType | ProxyWindow) : ProxyWindow {
