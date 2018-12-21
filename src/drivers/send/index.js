@@ -10,7 +10,7 @@ import type { Message } from '../types';
 
 import { SEND_MESSAGE_STRATEGIES } from './strategies';
 
-function logMessage(domain : string | Array<string>, message : Message) {
+function logMessage(domain : string | $ReadOnlyArray<string>, message : Message) {
     if (__DEBUG__) {
         let level;
 
@@ -30,7 +30,7 @@ function logMessage(domain : string | Array<string>, message : Message) {
     }
 }
 
-export function sendMessage(win : CrossDomainWindowType, domain : string | Array<string>, message : Message) : ZalgoPromise<void> {
+export function sendMessage(win : CrossDomainWindowType, domain : string | $ReadOnlyArray<string>, message : Message) : ZalgoPromise<void> {
     return ZalgoPromise.try(() => {
 
         if (isWindowClosed(win)) {

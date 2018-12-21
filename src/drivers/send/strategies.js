@@ -1,6 +1,6 @@
 /* @flow */
 
-import { isSameDomain, isSameTopWindow, isActuallySameDomain, getActualDomain, getDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
+import { isSameDomain, isSameTopWindow, isActuallySameDomain, getActualDomain, getDomain, type CrossDomainWindowType, type DomainMatcher } from 'cross-domain-utils/src';
 
 import { SEND_STRATEGY, PROTOCOL, WILDCARD, WINDOW_PROP } from '../../conf';
 import { needsGlobalMessagingForBrowser } from '../../lib';
@@ -8,7 +8,7 @@ import { needsGlobalMessagingForBrowser } from '../../lib';
 export let SEND_MESSAGE_STRATEGIES = {};
 
 
-SEND_MESSAGE_STRATEGIES[SEND_STRATEGY.POST_MESSAGE] = (win : CrossDomainWindowType, serializedMessage : string, domain : (string | Array<string>)) => {
+SEND_MESSAGE_STRATEGIES[SEND_STRATEGY.POST_MESSAGE] = (win : CrossDomainWindowType, serializedMessage : string, domain : DomainMatcher) => {
 
     if (__POST_ROBOT__.__IE_POPUP_SUPPORT__) {
         try {
