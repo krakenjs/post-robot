@@ -345,7 +345,7 @@
                 return "xxxxxxxxxx".replace(/./g, function() {
                     return chars.charAt(Math.floor(Math.random() * chars.length));
                 }) + "_" + function(str) {
-                    if ("undefined" != typeof window && "function" == typeof window.btoa) return window.btoa(str);
+                    if ("function" == typeof btoa) return btoa(str);
                     if ("undefined" != typeof Buffer) return Buffer.from(str, "utf8").toString("base64");
                     throw new Error("Can not find window.btoa or Buffer");
                 }(new Date().toISOString().slice(11, 19).replace("T", ".")).replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
