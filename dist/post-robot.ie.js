@@ -2688,7 +2688,7 @@
             }
             var public_parent = Object(src.getAncestor)();
             function cleanUpWindow(win) {
-                for (var _i2 = 0, _requestPromises$get2 = requestPromises.get(win, []), _length2 = null == _requestPromises$get2 ? 0 : _requestPromises$get2.length; _i2 < _length2; _i2++) _requestPromises$get2[_i2].reject(new Error("Window cleaned up before response"));
+                for (var _i2 = 0, _requestPromises$get2 = requestPromises.get(win, []), _length2 = null == _requestPromises$get2 ? 0 : _requestPromises$get2.length; _i2 < _length2; _i2++) _requestPromises$get2[_i2].reject(new Error("Window cleaned up before response")).catch(belter_src.noop);
             }
             var bridge = __webpack_require__("./src/bridge/interface.js");
             if (!global.a.initialized) {
