@@ -1,6 +1,6 @@
 {
   "name": "post-robot",
-  "version": "9.0.22",
+  "version": "9.0.23",
   "description": "Simple postMessage based server.",
   "main": "index.js",
   "scripts": {
