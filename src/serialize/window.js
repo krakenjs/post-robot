@@ -1,6 +1,6 @@
 /* @flow */
 
-import { isSameDomain, isWindowClosed, type CrossDomainWindowType, type DomainMatcher } from 'cross-domain-utils/src';
+import { isSameDomain, isWindowClosed, type CrossDomainWindowType, type DomainMatcher, getOpener, WINDOW_TYPE } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { uniqueID, memoizePromise } from 'belter/src';
 import { serializeType, type CustomSerializedType } from 'universal-serialize/src';
@@ -22,12 +22,13 @@ function cleanupProxyWindows() {
 }
 
 type SerializedProxyWindow = {|
+    id : string,
+    type : $Values<typeof WINDOW_TYPE>,
     close : () => ZalgoPromise<void>,
     focus : () => ZalgoPromise<void>,
     isClosed : () => ZalgoPromise<boolean>,
     setLocation : (string) => ZalgoPromise<void>,
     setName : (string) => ZalgoPromise<void>,
-    id : string,
     getInstanceID : () => ZalgoPromise<string>
 |};
 
@@ -45,6 +46,18 @@ export class ProxyWindow {
             this.setWindow(actualWindow);
         }
         this.serializedWindow.getInstanceID = memoizePromise(this.serializedWindow.getInstanceID);
+    }
+
+    getType() : $Values<typeof WINDOW_TYPE> {
+        return this.serializedWindow.type;
+    }
+
+    isPopup() : boolean {
+        return this.getType() === WINDOW_TYPE.POPUP;
+    }
+
+    isIframe() : boolean {
+        return this.getType() === WINDOW_TYPE.IFRAME;
     }
 
     setLocation(href : string) : ZalgoPromise<ProxyWindow> {
@@ -195,6 +208,8 @@ export class ProxyWindow {
 
             return idToProxyWindow.set(id, new ProxyWindow({
                 id,
+                // $FlowFixMe
+                type:          getOpener(win) ? WINDOW_TYPE.POPUP : WINDOW_TYPE.IFRAME,
                 getInstanceID: () => getWindowInstanceID(win),
                 close:         () => ZalgoPromise.try(() => {
                     win.close();
