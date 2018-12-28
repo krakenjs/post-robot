@@ -1,6 +1,6 @@
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-import { isSameDomain, isWindowClosed } from 'cross-domain-utils/src';
+import { isSameDomain, isWindowClosed, getOpener, WINDOW_TYPE } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { uniqueID, memoizePromise } from 'belter/src';
 import { serializeType } from 'universal-serialize/src';
@@ -35,6 +35,18 @@ export var ProxyWindow = function () {
         }
         this.serializedWindow.getInstanceID = memoizePromise(this.serializedWindow.getInstanceID);
     }
+
+    ProxyWindow.prototype.getType = function getType() {
+        return this.serializedWindow.type;
+    };
+
+    ProxyWindow.prototype.isPopup = function isPopup() {
+        return this.getType() === WINDOW_TYPE.POPUP;
+    };
+
+    ProxyWindow.prototype.isIframe = function isIframe() {
+        return this.getType() === WINDOW_TYPE.IFRAME;
+    };
 
     ProxyWindow.prototype.setLocation = function setLocation(href) {
         var _this = this;
@@ -203,6 +215,8 @@ export var ProxyWindow = function () {
 
             return idToProxyWindow.set(id, new ProxyWindow({
                 id: id,
+                // $FlowFixMe
+                type: getOpener(win) ? WINDOW_TYPE.POPUP : WINDOW_TYPE.IFRAME,
                 getInstanceID: function getInstanceID() {
                     return getWindowInstanceID(win);
                 },

@@ -543,11 +543,17 @@
             __webpack_require__.d(__webpack_exports__, "b", function() {
                 return WILDCARD;
             });
+            __webpack_require__.d(__webpack_exports__, "c", function() {
+                return WINDOW_TYPE;
+            });
             var PROTOCOL = {
                 MOCK: "mock:",
                 FILE: "file:",
                 ABOUT: "about:"
-            }, WILDCARD = "*";
+            }, WILDCARD = "*", WINDOW_TYPE = {
+                IFRAME: "iframe",
+                POPUP: "popup"
+            };
         },
         "./node_modules/cross-domain-utils/src/index.js": function(module, __webpack_exports__, __webpack_require__) {
             "use strict";
@@ -607,7 +613,14 @@
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.r;
             });
             var __WEBPACK_IMPORTED_MODULE_1__types__ = __webpack_require__("./node_modules/cross-domain-utils/src/types.js");
-            __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__types__), __webpack_require__("./node_modules/cross-domain-utils/src/constants.js");
+            __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__types__);
+            __webpack_require__.o(__WEBPACK_IMPORTED_MODULE_1__types__, "WINDOW_TYPE") && __webpack_require__.d(__webpack_exports__, "WINDOW_TYPE", function() {
+                return __WEBPACK_IMPORTED_MODULE_1__types__.WINDOW_TYPE;
+            });
+            var __WEBPACK_IMPORTED_MODULE_2__constants__ = __webpack_require__("./node_modules/cross-domain-utils/src/constants.js");
+            __webpack_require__.d(__webpack_exports__, "WINDOW_TYPE", function() {
+                return __WEBPACK_IMPORTED_MODULE_2__constants__.c;
+            });
         },
         "./node_modules/cross-domain-utils/src/types.js": function(module, exports) {},
         "./node_modules/cross-domain-utils/src/utils.js": function(module, __webpack_exports__, __webpack_require__) {
@@ -1911,6 +1924,15 @@
                     actualWindow && this.setWindow(actualWindow);
                     this.serializedWindow.getInstanceID = Object(belter_src.memoizePromise)(this.serializedWindow.getInstanceID);
                 }
+                ProxyWindow.prototype.getType = function() {
+                    return this.serializedWindow.type;
+                };
+                ProxyWindow.prototype.isPopup = function() {
+                    return this.getType() === src.WINDOW_TYPE.POPUP;
+                };
+                ProxyWindow.prototype.isIframe = function() {
+                    return this.getType() === src.WINDOW_TYPE.IFRAME;
+                };
                 ProxyWindow.prototype.setLocation = function(href) {
                     var _this = this;
                     return zalgo_promise_src.a.try(function() {
@@ -2006,6 +2028,7 @@
                         var id = Object(belter_src.uniqueID)();
                         return idToProxyWindow.set(id, new ProxyWindow({
                             id: id,
+                            type: Object(src.getOpener)(win) ? src.WINDOW_TYPE.POPUP : src.WINDOW_TYPE.IFRAME,
                             getInstanceID: function() {
                                 return Object(lib.b)(win);
                             },
