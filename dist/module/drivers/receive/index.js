@@ -1,10 +1,10 @@
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-import { isWindowClosed, getDomain } from 'cross-domain-utils/src';
+import { isWindowClosed, getDomain, isSameTopWindow } from 'cross-domain-utils/src';
 import { addEventListener, noop } from 'belter/src';
 
 import { MESSAGE_NAME, WINDOW_PROP, MESSAGE_TYPE } from '../../conf';
-import { markWindowKnown } from '../../lib';
+import { markWindowKnown, needsGlobalMessagingForBrowser } from '../../lib';
 import { deserializeMessage } from '../../serialize';
 import { global, globalStore } from '../../global';
 
@@ -127,10 +127,8 @@ export function messageListener(event) {
         data: event.data
     };
 
-    if (__POST_ROBOT__.__IE_POPUP_SUPPORT__) {
-        try {
-            require('../../compat').emulateIERestrictions(messageEvent.source, window);
-        } catch (err) {
+    if (__TEST__) {
+        if (needsGlobalMessagingForBrowser() && isSameTopWindow(messageEvent.source, window) === false) {
             return;
         }
     }

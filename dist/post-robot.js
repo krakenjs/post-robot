@@ -1230,7 +1230,6 @@
                 CROSS_DOMAIN_FUNCTION: "cross_domain_function",
                 CROSS_DOMAIN_WINDOW: "cross_domain_window"
             }, CONFIG = {
-                ALLOW_POSTMESSAGE_POPUP: !("__ALLOW_POSTMESSAGE_POPUP__" in window) || window.__ALLOW_POSTMESSAGE_POPUP__,
                 BRIDGE_TIMEOUT: 5e3,
                 CHILD_WINDOW_TIMEOUT: 5e3,
                 ACK_TIMEOUT: 2e3,
@@ -1239,9 +1238,7 @@
                 ALLOWED_POST_MESSAGE_METHODS: (_ALLOWED_POST_MESSAGE = {}, _ALLOWED_POST_MESSAGE.postrobot_post_message = !0, 
                 _ALLOWED_POST_MESSAGE.postrobot_bridge = !0, _ALLOWED_POST_MESSAGE.postrobot_global = !0, 
                 _ALLOWED_POST_MESSAGE)
-            };
-            0 === window.location.href.indexOf("file:") && (CONFIG.ALLOW_POSTMESSAGE_POPUP = !0);
-            var cross_domain_safe_weakmap_src = __webpack_require__("./node_modules/cross-domain-safe-weakmap/src/index.js"), global = window[constants_WINDOW_PROP.POSTROBOT] = window[constants_WINDOW_PROP.POSTROBOT] || {}, winStore = global.windowStore = global.windowStore || new cross_domain_safe_weakmap_src.a(), getObj = function() {
+            }, cross_domain_safe_weakmap_src = __webpack_require__("./node_modules/cross-domain-safe-weakmap/src/index.js"), global = window[constants_WINDOW_PROP.POSTROBOT] = window[constants_WINDOW_PROP.POSTROBOT] || {}, winStore = global.windowStore = global.windowStore || new cross_domain_safe_weakmap_src.a(), getObj = function() {
                 return {};
             };
             function windowStore(key) {

@@ -7,10 +7,8 @@ export var SEND_MESSAGE_STRATEGIES = {};
 
 SEND_MESSAGE_STRATEGIES[SEND_STRATEGY.POST_MESSAGE] = function (win, serializedMessage, domain) {
 
-    if (__POST_ROBOT__.__IE_POPUP_SUPPORT__) {
-        try {
-            require('../../compat').emulateIERestrictions(window, win);
-        } catch (err) {
+    if (__TEST__) {
+        if (needsGlobalMessagingForBrowser() && isSameTopWindow(window, win) === false) {
             return;
         }
     }

@@ -1285,7 +1285,7 @@
                 });
             };
             function needsBridgeForBrowser() {
-                return !!Object(cross_domain_utils_src.getUserAgent)(window).match(/MSIE|trident|edge\/12|edge\/13/i) || !conf.b.ALLOW_POSTMESSAGE_POPUP;
+                return !!Object(cross_domain_utils_src.getUserAgent)(window).match(/MSIE|trident|edge\/12|edge\/13/i);
             }
             function needsBridgeForWin(win) {
                 return !Object(cross_domain_utils_src.isSameTopWindow)(window, win);
@@ -1610,19 +1610,6 @@
                 return __WEBPACK_IMPORTED_MODULE_0__index__.destroyBridges;
             });
         },
-        "./src/compat/index.js": function(module, __webpack_exports__, __webpack_require__) {
-            "use strict";
-            Object.defineProperty(__webpack_exports__, "__esModule", {
-                value: !0
-            });
-            var src = __webpack_require__("./node_modules/cross-domain-utils/src/index.js"), conf = __webpack_require__("./src/conf/index.js");
-            function emulateIERestrictions(sourceWindow, targetWindow) {
-                if (!conf.b.ALLOW_POSTMESSAGE_POPUP && !1 === Object(src.isSameTopWindow)(sourceWindow, targetWindow)) throw new Error("Can not send and receive post messages between two different windows (disabled to emulate IE)");
-            }
-            __webpack_require__.d(__webpack_exports__, "emulateIERestrictions", function() {
-                return emulateIERestrictions;
-            });
-        },
         "./src/conf/index.js": function(module, __webpack_exports__, __webpack_require__) {
             "use strict";
             var _ALLOWED_POST_MESSAGE, MESSAGE_TYPE = {
@@ -1650,7 +1637,6 @@
                 CROSS_DOMAIN_FUNCTION: "cross_domain_function",
                 CROSS_DOMAIN_WINDOW: "cross_domain_window"
             }, CONFIG = {
-                ALLOW_POSTMESSAGE_POPUP: !("__ALLOW_POSTMESSAGE_POPUP__" in window) || window.__ALLOW_POSTMESSAGE_POPUP__,
                 BRIDGE_TIMEOUT: 5e3,
                 CHILD_WINDOW_TIMEOUT: 5e3,
                 ACK_TIMEOUT: 2e3,
@@ -1660,7 +1646,6 @@
                 _ALLOWED_POST_MESSAGE[SEND_STRATEGY.BRIDGE] = !0, _ALLOWED_POST_MESSAGE[SEND_STRATEGY.GLOBAL] = !0, 
                 _ALLOWED_POST_MESSAGE)
             };
-            0 === window.location.href.indexOf(PROTOCOL.FILE) && (CONFIG.ALLOW_POSTMESSAGE_POPUP = !0);
             __webpack_require__.d(__webpack_exports__, "b", function() {
                 return CONFIG;
             });
@@ -2227,11 +2212,6 @@
             }
             var SEND_MESSAGE_STRATEGIES = {};
             SEND_MESSAGE_STRATEGIES[conf.g.POST_MESSAGE] = function(win, serializedMessage, domain) {
-                try {
-                    __webpack_require__("./src/compat/index.js").emulateIERestrictions(window, win);
-                } catch (err) {
-                    return;
-                }
                 (Array.isArray(domain) ? domain : "string" == typeof domain ? [ domain ] : [ conf.i ]).map(function(dom) {
                     if (0 === dom.indexOf(conf.f.MOCK)) {
                         if (window.location.protocol === conf.f.FILE) return conf.i;
@@ -2433,17 +2413,11 @@
                 } catch (err) {
                     return;
                 }
-                var messageEvent = {
+                receiveMessage({
                     source: event.source || event.sourceElement,
                     origin: event.origin || event.originalEvent && event.originalEvent.origin,
                     data: event.data
-                };
-                try {
-                    __webpack_require__("./src/compat/index.js").emulateIERestrictions(messageEvent.source, window);
-                } catch (err) {
-                    return;
-                }
-                receiveMessage(messageEvent);
+                });
             }
             global.a.receiveMessage = receiveMessage;
             var requestPromises = Object(global.c)("requestPromises");
@@ -2838,7 +2812,7 @@
                 return promise;
             }
             function needsGlobalMessagingForBrowser() {
-                return !!Object(src.getUserAgent)(window).match(/MSIE|trident|edge\/12|edge\/13/i) || !conf.b.ALLOW_POSTMESSAGE_POPUP;
+                return !!Object(src.getUserAgent)(window).match(/MSIE|trident|edge\/12|edge\/13/i);
             }
             var knownWindows = Object(global.c)("knownWindows");
             function markWindowKnown(win) {

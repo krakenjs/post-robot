@@ -2,16 +2,12 @@ import { ZalgoPromise } from 'zalgo-promise/src';
 import { getDomain, isSameDomain, isOpener, isSameTopWindow, matchDomain, getUserAgent, getDomainFromUrl } from 'cross-domain-utils/src';
 import { noop } from 'belter/src';
 
-import { CONFIG, BRIDGE_NAME_PREFIX } from '../conf';
+import { BRIDGE_NAME_PREFIX } from '../conf';
 import { windowStore } from '../global';
 
 export function needsBridgeForBrowser() {
 
     if (getUserAgent(window).match(/MSIE|trident|edge\/12|edge\/13/i)) {
-        return true;
-    }
-
-    if (!CONFIG.ALLOW_POSTMESSAGE_POPUP) {
         return true;
     }
 
