@@ -46,10 +46,6 @@ let childWindow,
     otherChildFrame,
     frameElement;
 
-beforeEach(() => {
-    postRobot.CONFIG.ALLOW_POSTMESSAGE_POPUP = true;
-});
-
 before(() : ZalgoPromise<mixed> => {
     if (!postRobot.bridge) {
         throw new Error(`Expected postRobot.bridge to be available`);
@@ -906,7 +902,7 @@ describe('[post-robot] error cases', () => {
             [ SEND_STRATEGY.POST_MESSAGE ]: true
         };
 
-        postRobot.CONFIG.ALLOW_POSTMESSAGE_POPUP = false;
+        let ie8mode = enableIE8Mode();
 
         return postRobot.send(childWindow, 'sendMessageToParent', {
             messageName: 'foobuzzzz'
@@ -914,8 +910,8 @@ describe('[post-robot] error cases', () => {
             throw new Error('Expected success handler to not be called');
         }, (err) => {
             assert.ok(err);
-            postRobot.CONFIG.ALLOW_POSTMESSAGE_POPUP = true;
             postRobot.CONFIG.ALLOWED_POST_MESSAGE_METHODS = allowedStrategies;
+            ie8mode.cancel();
         });
     });
 

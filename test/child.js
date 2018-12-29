@@ -6,8 +6,6 @@ import { enableIE8Mode } from './common';
 
 window.postRobot = postRobot;
 
-postRobot.CONFIG.ALLOW_POSTMESSAGE_POPUP = true;
-
 postRobot.on('sendMessageToParent', ({ data }) => {
     return postRobot.sendToParent(data.messageName, data.data)
         .then((event) => event.data);
