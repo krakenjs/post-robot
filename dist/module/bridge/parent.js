@@ -1,7 +1,7 @@
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { getDomain, getFrameByName, isWindowClosed, getDomainFromUrl } from 'cross-domain-utils/src';
+import { getDomain, getFrameByName, isWindowClosed, getDomainFromUrl, normalizeMockUrl } from 'cross-domain-utils/src';
 
-import { CONFIG, PROTOCOL, MESSAGE_NAME } from '../conf';
+import { CONFIG, MESSAGE_NAME } from '../conf';
 import { awaitWindowHello } from '../lib';
 import { global, windowStore, globalStore } from '../global';
 
@@ -146,32 +146,10 @@ export function openBridge(url, domain) {
     });
 }
 
-var windowOpen = window.open;
-
-window.open = function windowOpenWrapper(url, name, options, last) {
-
-    var domain = url;
-
-    if (url && url.indexOf(PROTOCOL.MOCK) === 0) {
-        var _url$split = url.split('|');
-
-        domain = _url$split[0];
-        url = _url$split[1];
-    }
-
-    if (domain) {
-        domain = getDomainFromUrl(domain);
-    }
-
-    var win = windowOpen.call(this, url, name, options, last);
-
-    if (!win) {
-        return win;
-    }
-
-    if (url) {
-        registerRemoteWindow(win);
-    }
+export function linkWindow(_ref2) {
+    var win = _ref2.win,
+        name = _ref2.name,
+        domain = _ref2.domain;
 
     for (var _i2 = 0, _popupWindowsByName$k2 = popupWindowsByName.keys(), _length2 = _popupWindowsByName$k2 == null ? 0 : _popupWindowsByName$k2.length; _i2 < _length2; _i2++) {
         var winName = _popupWindowsByName$k2[_i2];
@@ -181,37 +159,61 @@ window.open = function windowOpenWrapper(url, name, options, last) {
         }
     }
 
-    if (name && win) {
-        var winOptions = popupWindowsByWin.getOrSet(win, function () {
-            return {};
+    var details = popupWindowsByWin.getOrSet(win, function () {
+        if (!name) {
+            return { win: win };
+        }
+
+        return popupWindowsByName.getOrSet(name, function () {
+            return { win: win, name: name };
         });
+    });
 
-        // $FlowFixMe
-        winOptions.name = winOptions.name || name;
-        // $FlowFixMe
-        winOptions.win = winOptions.win || win;
-        // $FlowFixMes
-        winOptions.domain = winOptions.domain || domain;
-
-        popupWindowsByWin.set(win, winOptions);
-        popupWindowsByName.set(name, winOptions);
+    if (details.win && details.win !== win) {
+        throw new Error('Different window already linked for window: ' + (name || 'undefined'));
     }
+
+    if (name) {
+        if (details.name && details.name !== name) {
+            throw new Error('Different window already linked for name ' + name + ': ' + details.name);
+        }
+
+        details.name = name;
+        popupWindowsByName.set(name, details);
+    }
+
+    if (domain) {
+        details.domain = domain;
+        registerRemoteWindow(win);
+    }
+
+    popupWindowsByWin.set(win, details);
+
+    return details;
+}
+
+export function linkUrl(win, url) {
+    linkWindow({ win: win, domain: getDomainFromUrl(url) });
+}
+
+var windowOpen = window.open;
+
+window.open = function windowOpenWrapper(url, name, options, last) {
+    var win = windowOpen.call(this, normalizeMockUrl(url), name, options, last);
+
+    if (!win) {
+        return win;
+    }
+
+    linkWindow({ win: win, name: name, domain: url ? getDomainFromUrl(url) : null });
 
     return win;
 };
 
-export function linkUrl(win, url) {
-    if (popupWindowsByWin.has(win)) {
-        // $FlowFixMe
-        popupWindowsByWin.get(win).domain = getDomainFromUrl(url);
-        registerRemoteWindow(win);
-    }
-}
-
 export function destroyBridges() {
     for (var _i4 = 0, _bridgeFrames$keys2 = bridgeFrames.keys(), _length4 = _bridgeFrames$keys2 == null ? 0 : _bridgeFrames$keys2.length; _i4 < _length4; _i4++) {
-        var domain = _bridgeFrames$keys2[_i4];
-        var frame = bridgeFrames.get(domain);
+        var _domain = _bridgeFrames$keys2[_i4];
+        var frame = bridgeFrames.get(_domain);
         if (frame && frame.parentNode) {
             frame.parentNode.removeChild(frame);
         }

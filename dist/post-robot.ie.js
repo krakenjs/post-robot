@@ -609,8 +609,11 @@
             __webpack_require__.d(__webpack_exports__, "matchDomain", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.q;
             });
-            __webpack_require__.d(__webpack_exports__, "stringifyDomainPattern", function() {
+            __webpack_require__.d(__webpack_exports__, "normalizeMockUrl", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.r;
+            });
+            __webpack_require__.d(__webpack_exports__, "stringifyDomainPattern", function() {
+                return __WEBPACK_IMPORTED_MODULE_0__utils__.s;
             });
             var __WEBPACK_IMPORTED_MODULE_1__types__ = __webpack_require__("./node_modules/cross-domain-utils/src/types.js");
             __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__types__);
@@ -743,12 +746,10 @@
                     return matchDomain(subpattern, origin);
                 }));
             };
-            __webpack_exports__.r = function(pattern) {
+            __webpack_exports__.s = function(pattern) {
                 return Array.isArray(pattern) ? "(" + pattern.join(" | ") + ")" : isRegex(pattern) ? "RegExp(" + pattern.toString() : pattern.toString();
             };
-            __webpack_exports__.d = function(url) {
-                return url.match(/^(https?|mock|file):\/\//) ? url.split("/").slice(0, 3).join("/") : getDomain();
-            };
+            __webpack_exports__.d = getDomainFromUrl;
             __webpack_exports__.n = function(obj) {
                 try {
                     if (obj === window) return !0;
@@ -786,6 +787,11 @@
                     return !0;
                 }
                 return !1;
+            };
+            __webpack_exports__.r = function(url) {
+                if (!(domain = getDomainFromUrl(url), 0 === domain.indexOf(constants.a.MOCK))) return url;
+                var domain;
+                throw new Error("Mock urls not supported out of test mode");
             };
             var IE_WIN_ACCESS_ERROR = "Call was rejected by callee.\r\n";
             function isAboutProtocol() {
@@ -945,6 +951,9 @@
             function anyMatch(collection1, collection2) {
                 for (var _i17 = 0, _length16 = null == collection1 ? 0 : collection1.length; _i17 < _length16; _i17++) for (var item1 = collection1[_i17], _i19 = 0, _length18 = null == collection2 ? 0 : collection2.length; _i19 < _length18; _i19++) if (item1 === collection2[_i19]) return !0;
                 return !1;
+            }
+            function getDomainFromUrl(url) {
+                return url.match(/^(https?|mock|file):\/\//) ? url.split("/").slice(0, 3).join("/") : getDomain();
             }
         },
         "./node_modules/zalgo-promise/src/index.js": function(module, __webpack_exports__, __webpack_require__) {
@@ -1479,43 +1488,54 @@
                     });
                 });
             }
-            var windowOpen = window.open;
-            window.open = function(url, name, options, last) {
-                var domain = url;
-                if (url && 0 === url.indexOf(conf.f.MOCK)) {
-                    var _url$split = url.split("|");
-                    domain = _url$split[0];
-                    url = _url$split[1];
-                }
-                domain && (domain = Object(cross_domain_utils_src.getDomainFromUrl)(domain));
-                var win = windowOpen.call(this, url, name, options, last);
-                if (!win) return win;
-                url && registerRemoteWindow(win);
-                for (var _i2 = 0, _popupWindowsByName$k2 = popupWindowsByName.keys(), _length2 = null == _popupWindowsByName$k2 ? 0 : _popupWindowsByName$k2.length; _i2 < _length2; _i2++) {
+            function linkWindow(_ref2) {
+                for (var win = _ref2.win, name = _ref2.name, domain = _ref2.domain, _i2 = 0, _popupWindowsByName$k2 = popupWindowsByName.keys(), _length2 = null == _popupWindowsByName$k2 ? 0 : _popupWindowsByName$k2.length; _i2 < _length2; _i2++) {
                     var winName = _popupWindowsByName$k2[_i2];
                     Object(cross_domain_utils_src.isWindowClosed)(popupWindowsByName.get(winName).win) && popupWindowsByName.del(winName);
                 }
-                if (name && win) {
-                    var winOptions = popupWindowsByWin.getOrSet(win, function() {
-                        return {};
-                    });
-                    winOptions.name = winOptions.name || name;
-                    winOptions.win = winOptions.win || win;
-                    winOptions.domain = winOptions.domain || domain;
-                    popupWindowsByWin.set(win, winOptions);
-                    popupWindowsByName.set(name, winOptions);
+                var details = popupWindowsByWin.getOrSet(win, function() {
+                    return name ? popupWindowsByName.getOrSet(name, function() {
+                        return {
+                            win: win,
+                            name: name
+                        };
+                    }) : {
+                        win: win
+                    };
+                });
+                if (details.win && details.win !== win) throw new Error("Different window already linked for window: " + (name || "undefined"));
+                if (name) {
+                    if (details.name && details.name !== name) throw new Error("Different window already linked for name " + name + ": " + details.name);
+                    details.name = name;
+                    popupWindowsByName.set(name, details);
                 }
-                return win;
-            };
-            function linkUrl(win, url) {
-                if (popupWindowsByWin.has(win)) {
-                    popupWindowsByWin.get(win).domain = Object(cross_domain_utils_src.getDomainFromUrl)(url);
+                if (domain) {
+                    details.domain = domain;
                     registerRemoteWindow(win);
                 }
+                popupWindowsByWin.set(win, details);
+                return details;
             }
+            function linkUrl(win, url) {
+                linkWindow({
+                    win: win,
+                    domain: Object(cross_domain_utils_src.getDomainFromUrl)(url)
+                });
+            }
+            var windowOpen = window.open;
+            window.open = function(url, name, options, last) {
+                var win = windowOpen.call(this, Object(cross_domain_utils_src.normalizeMockUrl)(url), name, options, last);
+                if (!win) return win;
+                linkWindow({
+                    win: win,
+                    name: name,
+                    domain: url ? Object(cross_domain_utils_src.getDomainFromUrl)(url) : null
+                });
+                return win;
+            };
             function destroyBridges() {
                 for (var _i4 = 0, _bridgeFrames$keys2 = bridgeFrames.keys(), _length4 = null == _bridgeFrames$keys2 ? 0 : _bridgeFrames$keys2.length; _i4 < _length4; _i4++) {
-                    var domain = _bridgeFrames$keys2[_i4], frame = bridgeFrames.get(domain);
+                    var _domain = _bridgeFrames$keys2[_i4], frame = bridgeFrames.get(_domain);
                     frame && frame.parentNode && frame.parentNode.removeChild(frame);
                 }
                 bridgeFrames.reset();
@@ -1566,6 +1586,9 @@
             __webpack_require__.d(__webpack_exports__, "openBridge", function() {
                 return openBridge;
             });
+            __webpack_require__.d(__webpack_exports__, "linkWindow", function() {
+                return linkWindow;
+            });
             __webpack_require__.d(__webpack_exports__, "linkUrl", function() {
                 return linkUrl;
             });
@@ -1581,6 +1604,9 @@
             var __WEBPACK_IMPORTED_MODULE_0__index__ = __webpack_require__("./src/bridge/index.js");
             __webpack_require__.d(__webpack_exports__, "openBridge", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__index__.openBridge;
+            });
+            __webpack_require__.d(__webpack_exports__, "linkWindow", function() {
+                return __WEBPACK_IMPORTED_MODULE_0__index__.linkWindow;
             });
             __webpack_require__.d(__webpack_exports__, "linkUrl", function() {
                 return __WEBPACK_IMPORTED_MODULE_0__index__.linkUrl;
@@ -1934,6 +1960,10 @@
                         if (!Object(src.isSameDomain)(_this2.actualWindow)) throw new Error("Can not set name for window on different domain");
                         _this2.actualWindow.name = name;
                         _this2.actualWindow.frameElement && _this2.actualWindow.frameElement.setAttribute("name", name);
+                        (0, __webpack_require__("./src/bridge/index.js").linkWindow)({
+                            win: _this2.actualWindow,
+                            name: name
+                        });
                     }).then(function() {
                         return _this2;
                     });
@@ -2045,6 +2075,10 @@
                             },
                             setName: function(name) {
                                 return zalgo_promise_src.a.try(function() {
+                                    (0, __webpack_require__("./src/bridge/index.js").linkWindow)({
+                                        win: win,
+                                        name: name
+                                    });
                                     win.name = name;
                                 });
                             }
@@ -2223,7 +2257,7 @@
                     return win.postMessage(serializedMessage, dom);
                 });
             };
-            var _require = __webpack_require__("./src/bridge/index.js"), sendBridgeMessage = _require.sendBridgeMessage, needsBridgeForBrowser = _require.needsBridgeForBrowser, isBridge = _require.isBridge;
+            var strategies__require = __webpack_require__("./src/bridge/index.js"), sendBridgeMessage = strategies__require.sendBridgeMessage, needsBridgeForBrowser = strategies__require.needsBridgeForBrowser, isBridge = strategies__require.isBridge;
             SEND_MESSAGE_STRATEGIES[conf.g.BRIDGE] = function(win, serializedMessage, domain) {
                 if (needsBridgeForBrowser() || isBridge()) {
                     if (Object(src.isSameDomain)(win)) throw new Error("Post message through bridge disabled between same domain windows");
@@ -2812,7 +2846,7 @@
                 return promise;
             }
             function needsGlobalMessagingForBrowser() {
-                return !!Object(src.getUserAgent)(window).match(/MSIE|trident|edge\/12|edge\/13/i);
+                return !!Object(src.getUserAgent)(window).match(/MSIE|rv:11|trident|edge\/12|edge\/13/i);
             }
             var knownWindows = Object(global.c)("knownWindows");
             function markWindowKnown(win) {

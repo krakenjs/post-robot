@@ -77,6 +77,13 @@ export var ProxyWindow = function () {
                     // $FlowFixMe
                     _this2.actualWindow.frameElement.setAttribute('name', name);
                 }
+
+                if (__POST_ROBOT__.__IE_POPUP_SUPPORT__) {
+                    var _require = require('../bridge'),
+                        linkWindow = _require.linkWindow;
+
+                    linkWindow({ win: _this2.actualWindow, name: name });
+                }
             } else {
                 return _this2.serializedWindow.setName(name);
             }
@@ -257,6 +264,14 @@ export var ProxyWindow = function () {
                 },
                 setName: function setName(name) {
                     return ZalgoPromise['try'](function () {
+                        if (__POST_ROBOT__.__IE_POPUP_SUPPORT__) {
+                            var _require2 = require('../bridge'),
+                                linkWindow = _require2.linkWindow;
+                            // $FlowFixMe
+
+
+                            linkWindow({ win: win, name: name });
+                        }
                         // $FlowFixMe
                         win.name = name;
                     });
