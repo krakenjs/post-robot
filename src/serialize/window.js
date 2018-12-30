@@ -83,6 +83,12 @@ export class ProxyWindow {
                     // $FlowFixMe
                     this.actualWindow.frameElement.setAttribute('name', name);
                 }
+
+                if (__POST_ROBOT__.__IE_POPUP_SUPPORT__) {
+                    const { linkWindow } = require('../bridge');
+                    linkWindow({ win: this.actualWindow, name });
+                }
+
             } else {
                 return this.serializedWindow.setName(name);
             }
@@ -239,6 +245,11 @@ export class ProxyWindow {
                     win.location = href;
                 }),
                 setName:       (name) => ZalgoPromise.try(() => {
+                    if (__POST_ROBOT__.__IE_POPUP_SUPPORT__) {
+                        const { linkWindow } = require('../bridge');
+                        // $FlowFixMe
+                        linkWindow({ win, name });
+                    }
                     // $FlowFixMe
                     win.name = name;
                 })

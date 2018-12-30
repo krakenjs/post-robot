@@ -34,7 +34,7 @@ function createIframe(name, callback) : CrossDomainWindowType {
 }
 
 function createPopup(name) : CrossDomainWindowType {
-    let popup = window.open(`mock://test-post-robot-child.com|/base/test/${  name }`, `${ Math.random().toString()  }_${  name.replace(/[^a-zA-Z0-9]+/g, '_') }`);
+    let popup = window.open(`mock://test-post-robot-child.com/base/test/${  name }`, `${ Math.random().toString()  }_${  name.replace(/[^a-zA-Z0-9]+/g, '_') }`);
     window.focus();
     return popup;
 }
