@@ -88,13 +88,25 @@ export function serializeFunction<T>(destination : CrossDomainWindowType | Proxy
 }
 
 export function deserializeFunction<T>(source : CrossDomainWindowType | ProxyWindow, origin : string, { id, name } : { id : string, name : string }) : (...args : $ReadOnlyArray<mixed>) => ZalgoPromise<T> {
-
     function innerWrapper<X : mixed>(args : $ReadOnlyArray<mixed>, opts? : Object = {}) : ZalgoPromise<X> {
+        let originalStack;
+
+        if (__DEBUG__) {
+            originalStack = (new Error(`Original call to ${ name }():`)).stack;
+        }
+
         return ZalgoPromise.try(() => {
             // $FlowFixMe
             return ProxyWindow.isProxyWindow(source) ? source.awaitWindow() : source;
         }).then(win => {
             return global.send(win, MESSAGE_NAME.METHOD, { id, name, args }, { domain: origin, ...opts });
+        }).catch(err => {
+            // $FlowFixMe
+            if (__DEBUG__ && originalStack && err.stack) {
+                // $FlowFixMe
+                err.stack = `${ err.stack }\n\n${ originalStack }`;
+            }
+            throw err;
         });
     }
 

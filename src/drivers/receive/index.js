@@ -124,13 +124,13 @@ export function messageListener(event : { source : CrossDomainWindowType, origin
 
     // $FlowFixMe
     let messageEvent : MessageEvent = {
-        source: event.source || event.sourceElement || event.srcElement,
+        source: event.source || event.sourceElement,
         origin: event.origin || (event.originalEvent && event.originalEvent.origin),
         data:   event.data
     };
 
     if (!messageEvent.source) {
-        throw new Error(`Post message did not have source window`);
+        return;
     }
 
     if (!messageEvent.origin) {
