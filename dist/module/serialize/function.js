@@ -98,15 +98,27 @@ export function deserializeFunction(source, origin, _ref2) {
     var id = _ref2.id,
         name = _ref2.name;
 
-
     function innerWrapper(args) {
         var opts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+        var originalStack = void 0;
+
+        if (__DEBUG__) {
+            originalStack = new Error('Original call to ' + name + '():').stack;
+        }
 
         return ZalgoPromise['try'](function () {
             // $FlowFixMe
             return ProxyWindow.isProxyWindow(source) ? source.awaitWindow() : source;
         }).then(function (win) {
             return global.send(win, MESSAGE_NAME.METHOD, { id: id, name: name, args: args }, _extends({ domain: origin }, opts));
+        })['catch'](function (err) {
+            // $FlowFixMe
+            if (__DEBUG__ && originalStack && err.stack) {
+                // $FlowFixMe
+                err.stack = err.stack + '\n\n' + originalStack;
+            }
+            throw err;
         });
     }
 

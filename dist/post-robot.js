@@ -1724,6 +1724,8 @@
                                 }, _extends({
                                     domain: origin
                                 }, opts));
+                            }).catch(function(err) {
+                                throw err;
                             });
                         }
                         function crossDomainFunctionWrapper() {
@@ -1929,13 +1931,14 @@
                     return;
                 }
                 var messageEvent = {
-                    source: event.source || event.sourceElement || event.srcElement,
+                    source: event.source || event.sourceElement,
                     origin: event.origin || event.originalEvent && event.originalEvent.origin,
                     data: event.data
                 };
-                if (!messageEvent.source) throw new Error("Post message did not have source window");
-                if (!messageEvent.origin) throw new Error("Post message did not have origin domain");
-                receiveMessage(messageEvent);
+                if (messageEvent.source) {
+                    if (!messageEvent.origin) throw new Error("Post message did not have origin domain");
+                    receiveMessage(messageEvent);
+                }
             }
             global.receiveMessage = receiveMessage;
             var requestPromises = windowStore("requestPromises");
