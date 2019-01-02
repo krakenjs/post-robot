@@ -1928,11 +1928,14 @@
                 } catch (err) {
                     return;
                 }
-                receiveMessage({
-                    source: event.source || event.sourceElement,
+                var messageEvent = {
+                    source: event.source || event.sourceElement || event.srcElement,
                     origin: event.origin || event.originalEvent && event.originalEvent.origin,
                     data: event.data
-                });
+                };
+                if (!messageEvent.source) throw new Error("Post message did not have source window");
+                if (!messageEvent.origin) throw new Error("Post message did not have origin domain");
+                receiveMessage(messageEvent);
             }
             global.receiveMessage = receiveMessage;
             var requestPromises = windowStore("requestPromises");
