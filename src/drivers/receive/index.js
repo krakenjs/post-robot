@@ -124,10 +124,18 @@ export function messageListener(event : { source : CrossDomainWindowType, origin
 
     // $FlowFixMe
     let messageEvent : MessageEvent = {
-        source: event.source || event.sourceElement,
+        source: event.source || event.sourceElement || event.srcElement,
         origin: event.origin || (event.originalEvent && event.originalEvent.origin),
         data:   event.data
     };
+
+    if (!messageEvent.source) {
+        throw new Error(`Post message did not have source window`);
+    }
+
+    if (!messageEvent.origin) {
+        throw new Error(`Post message did not have origin domain`);
+    }
 
     if (__TEST__) {
         if (needsGlobalMessagingForBrowser() && isSameTopWindow(messageEvent.source, window) === false) {
