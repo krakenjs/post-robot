@@ -44,26 +44,36 @@ var listenForFunctionCalls = once(function () {
                 val = meth.val;
 
 
-            if (!matchDomain(domain, origin)) {
-                // $FlowFixMe
-                throw new Error('Method \'' + data.name + '\' domain ' + JSON.stringify(isRegex(meth.domain) ? meth.domain.source : meth.domain) + ' does not match origin ' + origin + ' in ' + getDomain(window));
-            }
+            return ZalgoPromise['try'](function () {
+                if (!matchDomain(domain, origin)) {
+                    // $FlowFixMe
+                    throw new Error('Method \'' + data.name + '\' domain ' + JSON.stringify(isRegex(meth.domain) ? meth.domain.source : meth.domain) + ' does not match origin ' + origin + ' in ' + getDomain(window));
+                }
 
-            if (proxy) {
-                // $FlowFixMe
-                return proxy.matchWindow(source).then(function (match) {
-                    if (!match) {
-                        throw new Error('Method call \'' + data.name + '\' failed - proxy window does not match source in ' + getDomain(window));
+                if (proxy) {
+                    // $FlowFixMe
+                    return proxy.matchWindow(source).then(function (match) {
+                        // eslint-disable-line max-nested-callbacks
+                        if (!match) {
+                            throw new Error('Method call \'' + data.name + '\' failed - proxy window does not match source in ' + getDomain(window));
+                        }
+                    });
+                }
+            }).then(function () {
+                return val.apply({ source: source, origin: origin, data: data }, data.args);
+            }, function (err) {
+                return ZalgoPromise['try'](function () {
+                    // eslint-disable-line max-nested-callbacks
+                    if (val.onError) {
+                        return val.onError(err);
                     }
-                    return val;
+                }).then(function () {
+                    // eslint-disable-line max-nested-callbacks
+                    throw err;
                 });
-            }
-
-            return val;
-        }).then(function (method) {
-            return method.apply({ source: source, origin: origin, data: data }, data.args);
-        }).then(function (result) {
-            return { result: result, id: id, name: name };
+            }).then(function (result) {
+                return { result: result, id: id, name: name };
+            });
         });
     });
 });

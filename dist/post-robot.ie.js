@@ -2122,23 +2122,30 @@
                             })[data.id] || proxyWindowMethods.get(id);
                             if (!meth) throw new Error("Could not find method '" + data.name + "' with id: " + data.id + " in " + Object(src.getDomain)(window));
                             var proxy = meth.proxy, domain = meth.domain, val = meth.val;
-                            if (!Object(src.matchDomain)(domain, origin)) throw new Error("Method '" + data.name + "' domain " + JSON.stringify(Object(belter_src.isRegex)(meth.domain) ? meth.domain.source : meth.domain) + " does not match origin " + origin + " in " + Object(src.getDomain)(window));
-                            return proxy ? proxy.matchWindow(source).then(function(match) {
-                                if (!match) throw new Error("Method call '" + data.name + "' failed - proxy window does not match source in " + Object(src.getDomain)(window));
-                                return val;
-                            }) : val;
-                        }).then(function(method) {
-                            return method.apply({
-                                source: source,
-                                origin: origin,
-                                data: data
-                            }, data.args);
-                        }).then(function(result) {
-                            return {
-                                result: result,
-                                id: id,
-                                name: name
-                            };
+                            return zalgo_promise_src.a.try(function() {
+                                if (!Object(src.matchDomain)(domain, origin)) throw new Error("Method '" + data.name + "' domain " + JSON.stringify(Object(belter_src.isRegex)(meth.domain) ? meth.domain.source : meth.domain) + " does not match origin " + origin + " in " + Object(src.getDomain)(window));
+                                if (proxy) return proxy.matchWindow(source).then(function(match) {
+                                    if (!match) throw new Error("Method call '" + data.name + "' failed - proxy window does not match source in " + Object(src.getDomain)(window));
+                                });
+                            }).then(function() {
+                                return val.apply({
+                                    source: source,
+                                    origin: origin,
+                                    data: data
+                                }, data.args);
+                            }, function(err) {
+                                return zalgo_promise_src.a.try(function() {
+                                    if (val.onError) return val.onError(err);
+                                }).then(function() {
+                                    throw err;
+                                });
+                            }).then(function(result) {
+                                return {
+                                    result: result,
+                                    id: id,
+                                    name: name
+                                };
+                            });
                         });
                     });
                 }
