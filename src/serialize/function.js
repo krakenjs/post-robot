@@ -2,7 +2,7 @@
 
 import { matchDomain, getDomain, type CrossDomainWindowType, type DomainMatcher } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { once, uniqueID } from 'belter/src';
+import { once, uniqueID, isRegex } from 'belter/src';
 import { serializeType, type CustomSerializedType } from 'universal-serialize/src';
 
 import { MESSAGE_NAME, WILDCARD, SERIALIZATION_TYPE } from '../conf';
@@ -35,7 +35,8 @@ const listenForFunctionCalls = once(() => {
             let { proxy, domain, val } = meth;
 
             if (!matchDomain(domain, origin)) {
-                throw new Error(`Method '${ data.name }' domain ${ JSON.stringify(meth.domain) } does not match origin ${ origin } in ${ getDomain(window) }`);
+                // $FlowFixMe
+                throw new Error(`Method '${ data.name }' domain ${ JSON.stringify(isRegex(meth.domain) ? meth.domain.source : meth.domain) } does not match origin ${ origin } in ${ getDomain(window) }`);
             }
             
             if (proxy) {
