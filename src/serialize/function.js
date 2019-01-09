@@ -34,28 +34,33 @@ const listenForFunctionCalls = once(() => {
 
             let { proxy, domain, val } = meth;
 
-            if (!matchDomain(domain, origin)) {
-                // $FlowFixMe
-                throw new Error(`Method '${ data.name }' domain ${ JSON.stringify(isRegex(meth.domain) ? meth.domain.source : meth.domain) } does not match origin ${ origin } in ${ getDomain(window) }`);
-            }
-            
-            if (proxy) {
-                // $FlowFixMe
-                return proxy.matchWindow(source).then(match => {
-                    if (!match) {
-                        throw new Error(`Method call '${ data.name }' failed - proxy window does not match source in ${ getDomain(window) }`);
+            return ZalgoPromise.try(() => {
+                if (!matchDomain(domain, origin)) {
+                    // $FlowFixMe
+                    throw new Error(`Method '${ data.name }' domain ${ JSON.stringify(isRegex(meth.domain) ? meth.domain.source : meth.domain) } does not match origin ${ origin } in ${ getDomain(window) }`);
+                }
+                
+                if (proxy) {
+                    // $FlowFixMe
+                    return proxy.matchWindow(source).then(match => { // eslint-disable-line max-nested-callbacks
+                        if (!match) {
+                            throw new Error(`Method call '${ data.name }' failed - proxy window does not match source in ${ getDomain(window) }`);
+                        }
+                    });
+                }
+            }).then(() => {
+                return val.apply({ source, origin, data }, data.args);
+            }, err => {
+                return ZalgoPromise.try(() => { // eslint-disable-line max-nested-callbacks
+                    if (val.onError) {
+                        return val.onError(err);
                     }
-                    return val;
+                }).then(() => { // eslint-disable-line max-nested-callbacks
+                    throw err;
                 });
-            }
-
-            return val;
-
-        }).then(method => {
-            return method.apply({ source, origin, data }, data.args);
-
-        }).then(result => {
-            return { result, id, name };
+            }).then(result => {
+                return { result, id, name };
+            });
         });
     });
 });
