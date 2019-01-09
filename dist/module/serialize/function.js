@@ -2,7 +2,7 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 
 import { matchDomain, getDomain } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { once, uniqueID } from 'belter/src';
+import { once, uniqueID, isRegex } from 'belter/src';
 import { serializeType } from 'universal-serialize/src';
 
 import { MESSAGE_NAME, WILDCARD, SERIALIZATION_TYPE } from '../conf';
@@ -45,7 +45,8 @@ var listenForFunctionCalls = once(function () {
 
 
             if (!matchDomain(domain, origin)) {
-                throw new Error('Method \'' + data.name + '\' domain ' + JSON.stringify(meth.domain) + ' does not match origin ' + origin + ' in ' + getDomain(window));
+                // $FlowFixMe
+                throw new Error('Method \'' + data.name + '\' domain ' + JSON.stringify(isRegex(meth.domain) ? meth.domain.source : meth.domain) + ' does not match origin ' + origin + ' in ' + getDomain(window));
             }
 
             if (proxy) {

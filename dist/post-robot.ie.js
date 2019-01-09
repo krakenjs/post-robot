@@ -127,13 +127,13 @@
                 return __WEBPACK_IMPORTED_MODULE_5__util__.n;
             });
             __webpack_require__.d(__webpack_exports__, "uniqueID", function() {
-                return __WEBPACK_IMPORTED_MODULE_5__util__.o;
-            });
-            __webpack_require__.d(__webpack_exports__, "weakMapMemoize", function() {
                 return __WEBPACK_IMPORTED_MODULE_5__util__.p;
             });
-            __webpack_require__.d(__webpack_exports__, "weakMapMemoizePromise", function() {
+            __webpack_require__.d(__webpack_exports__, "weakMapMemoize", function() {
                 return __WEBPACK_IMPORTED_MODULE_5__util__.q;
+            });
+            __webpack_require__.d(__webpack_exports__, "weakMapMemoizePromise", function() {
+                return __WEBPACK_IMPORTED_MODULE_5__util__.r;
             });
             __webpack_require__("./node_modules/belter/src/http.js");
             var __WEBPACK_IMPORTED_MODULE_7__types__ = __webpack_require__("./node_modules/belter/src/types.js");
@@ -155,9 +155,9 @@
                         }
                         storage || (storage = Object(__WEBPACK_IMPORTED_MODULE_0__util__.c)()[STORAGE_KEY]);
                         storage || (storage = {
-                            id: Object(__WEBPACK_IMPORTED_MODULE_0__util__.o)()
+                            id: Object(__WEBPACK_IMPORTED_MODULE_0__util__.p)()
                         });
-                        storage.id || (storage.id = Object(__WEBPACK_IMPORTED_MODULE_0__util__.o)());
+                        storage.id || (storage.id = Object(__WEBPACK_IMPORTED_MODULE_0__util__.p)());
                         accessedStorage = storage;
                         var result = handler(storage);
                         localStorageEnabled ? window.localStorage.setItem(STORAGE_KEY, JSON.stringify(storage)) : Object(__WEBPACK_IMPORTED_MODULE_0__util__.c)()[STORAGE_KEY] = storage;
@@ -169,7 +169,7 @@
                             var session = storage.__session__, now = Date.now();
                             session && now - session.created > lifetime && (session = null);
                             session || (session = {
-                                guid: Object(__WEBPACK_IMPORTED_MODULE_0__util__.o)(),
+                                guid: Object(__WEBPACK_IMPORTED_MODULE_0__util__.p)(),
                                 created: now
                             });
                             storage.__session__ = session;
@@ -210,7 +210,7 @@
         "./node_modules/belter/src/types.js": function(module, exports) {},
         "./node_modules/belter/src/util.js": function(module, __webpack_exports__, __webpack_require__) {
             "use strict";
-            __webpack_exports__.o = uniqueID;
+            __webpack_exports__.p = uniqueID;
             __webpack_exports__.c = function() {
                 if ("undefined" != typeof window) return window;
                 if ("undefined" != typeof window) return window;
@@ -323,10 +323,10 @@
             __webpack_exports__.f = function(item) {
                 return "[object RegExp]" === Object.prototype.toString.call(item);
             };
-            __webpack_require__.d(__webpack_exports__, "p", function() {
+            __webpack_require__.d(__webpack_exports__, "q", function() {
                 return weakMapMemoize;
             });
-            __webpack_require__.d(__webpack_exports__, "q", function() {
+            __webpack_require__.d(__webpack_exports__, "r", function() {
                 return weakMapMemoizePromise;
             });
             __webpack_exports__.d = function(obj, key, getter) {
@@ -334,6 +334,18 @@
                 var val = getter();
                 obj[key] = val;
                 return val;
+            };
+            __webpack_exports__.o = function(fn) {
+                var result = void 0, error = void 0;
+                try {
+                    result = fn();
+                } catch (err) {
+                    error = err;
+                }
+                return {
+                    result: result,
+                    error: error
+                };
             };
             var __WEBPACK_IMPORTED_MODULE_0_zalgo_promise_src__ = __webpack_require__("./node_modules/zalgo-promise/src/index.js"), __WEBPACK_IMPORTED_MODULE_1_cross_domain_safe_weakmap_src__ = __webpack_require__("./node_modules/cross-domain-safe-weakmap/src/index.js"), _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
                 return typeof obj;
@@ -1145,6 +1157,9 @@
                 };
                 ZalgoPromise.reject = function(error) {
                     return new ZalgoPromise().reject(error);
+                };
+                ZalgoPromise.asyncReject = function(error) {
+                    return new ZalgoPromise().asyncReject(error);
                 };
                 ZalgoPromise.all = function(promises) {
                     var promise = new ZalgoPromise(), count = promises.length, results = [];
@@ -2107,7 +2122,7 @@
                             })[data.id] || proxyWindowMethods.get(id);
                             if (!meth) throw new Error("Could not find method '" + data.name + "' with id: " + data.id + " in " + Object(src.getDomain)(window));
                             var proxy = meth.proxy, domain = meth.domain, val = meth.val;
-                            if (!Object(src.matchDomain)(domain, origin)) throw new Error("Method '" + data.name + "' domain " + JSON.stringify(meth.domain) + " does not match origin " + origin + " in " + Object(src.getDomain)(window));
+                            if (!Object(src.matchDomain)(domain, origin)) throw new Error("Method '" + data.name + "' domain " + JSON.stringify(Object(belter_src.isRegex)(meth.domain) ? meth.domain.source : meth.domain) + " does not match origin " + origin + " in " + Object(src.getDomain)(window));
                             return proxy ? proxy.matchWindow(source).then(function(match) {
                                 if (!match) throw new Error("Method call '" + data.name + "' failed - proxy window does not match source in " + Object(src.getDomain)(window));
                                 return val;
