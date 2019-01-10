@@ -121,19 +121,19 @@
                 return __WEBPACK_IMPORTED_MODULE_5__util__.j;
             });
             __webpack_require__.d(__webpack_exports__, "safeInterval", function() {
-                return __WEBPACK_IMPORTED_MODULE_5__util__.l;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.m;
             });
             __webpack_require__.d(__webpack_exports__, "stringifyError", function() {
-                return __WEBPACK_IMPORTED_MODULE_5__util__.n;
+                return __WEBPACK_IMPORTED_MODULE_5__util__.o;
             });
             __webpack_require__.d(__webpack_exports__, "uniqueID", function() {
-                return __WEBPACK_IMPORTED_MODULE_5__util__.p;
-            });
-            __webpack_require__.d(__webpack_exports__, "weakMapMemoize", function() {
                 return __WEBPACK_IMPORTED_MODULE_5__util__.q;
             });
-            __webpack_require__.d(__webpack_exports__, "weakMapMemoizePromise", function() {
+            __webpack_require__.d(__webpack_exports__, "weakMapMemoize", function() {
                 return __WEBPACK_IMPORTED_MODULE_5__util__.r;
+            });
+            __webpack_require__.d(__webpack_exports__, "weakMapMemoizePromise", function() {
+                return __WEBPACK_IMPORTED_MODULE_5__util__.s;
             });
             __webpack_require__("./node_modules/belter/src/http.js");
             var __WEBPACK_IMPORTED_MODULE_7__types__ = __webpack_require__("./node_modules/belter/src/types.js");
@@ -155,9 +155,9 @@
                         }
                         storage || (storage = Object(__WEBPACK_IMPORTED_MODULE_0__util__.c)()[STORAGE_KEY]);
                         storage || (storage = {
-                            id: Object(__WEBPACK_IMPORTED_MODULE_0__util__.p)()
+                            id: Object(__WEBPACK_IMPORTED_MODULE_0__util__.q)()
                         });
-                        storage.id || (storage.id = Object(__WEBPACK_IMPORTED_MODULE_0__util__.p)());
+                        storage.id || (storage.id = Object(__WEBPACK_IMPORTED_MODULE_0__util__.q)());
                         accessedStorage = storage;
                         var result = handler(storage);
                         localStorageEnabled ? window.localStorage.setItem(STORAGE_KEY, JSON.stringify(storage)) : Object(__WEBPACK_IMPORTED_MODULE_0__util__.c)()[STORAGE_KEY] = storage;
@@ -169,7 +169,7 @@
                             var session = storage.__session__, now = Date.now();
                             session && now - session.created > lifetime && (session = null);
                             session || (session = {
-                                guid: Object(__WEBPACK_IMPORTED_MODULE_0__util__.p)(),
+                                guid: Object(__WEBPACK_IMPORTED_MODULE_0__util__.q)(),
                                 created: now
                             });
                             storage.__session__ = session;
@@ -210,7 +210,7 @@
         "./node_modules/belter/src/types.js": function(module, exports) {},
         "./node_modules/belter/src/util.js": function(module, __webpack_exports__, __webpack_require__) {
             "use strict";
-            __webpack_exports__.p = uniqueID;
+            __webpack_exports__.q = uniqueID;
             __webpack_exports__.c = function() {
                 if ("undefined" != typeof window) return window;
                 if ("undefined" != typeof window) return window;
@@ -277,7 +277,7 @@
                     }
                 };
             };
-            __webpack_exports__.n = function stringifyError(err) {
+            __webpack_exports__.o = function stringifyError(err) {
                 var level = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 1;
                 if (level >= 3) return "stringifyError stack overflow";
                 try {
@@ -294,7 +294,7 @@
                     return "Error while stringifying error: " + stringifyError(newErr, level + 1);
                 }
             };
-            __webpack_exports__.m = function(item) {
+            __webpack_exports__.n = function(item) {
                 return "string" == typeof item ? item : item && "function" == typeof item.toString ? item.toString() : Object.prototype.toString.call(item);
             };
             __webpack_exports__.b = function(obj, source) {
@@ -303,7 +303,7 @@
                 for (var key in source) source.hasOwnProperty(key) && (obj[key] = source[key]);
                 return obj;
             };
-            __webpack_exports__.l = function(method, time) {
+            __webpack_exports__.m = function(method, time) {
                 var timeout = void 0;
                 !function loop() {
                     timeout = setTimeout(function() {
@@ -323,10 +323,10 @@
             __webpack_exports__.f = function(item) {
                 return "[object RegExp]" === Object.prototype.toString.call(item);
             };
-            __webpack_require__.d(__webpack_exports__, "q", function() {
+            __webpack_require__.d(__webpack_exports__, "r", function() {
                 return weakMapMemoize;
             });
-            __webpack_require__.d(__webpack_exports__, "r", function() {
+            __webpack_require__.d(__webpack_exports__, "s", function() {
                 return weakMapMemoizePromise;
             });
             __webpack_exports__.d = function(obj, key, getter) {
@@ -335,7 +335,7 @@
                 obj[key] = val;
                 return val;
             };
-            __webpack_exports__.o = function(fn) {
+            __webpack_exports__.p = function(fn) {
                 var result = void 0, error = void 0;
                 try {
                     result = fn();
@@ -346,6 +346,10 @@
                     result: result,
                     error: error
                 };
+            };
+            __webpack_exports__.l = function(arr, item) {
+                var index = arr.indexOf(item);
+                -1 !== index && arr.splice(index, 1);
             };
             var __WEBPACK_IMPORTED_MODULE_0_zalgo_promise_src__ = __webpack_require__("./node_modules/zalgo-promise/src/index.js"), __WEBPACK_IMPORTED_MODULE_1_cross_domain_safe_weakmap_src__ = __webpack_require__("./node_modules/cross-domain-safe-weakmap/src/index.js"), _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
                 return typeof obj;
@@ -1067,6 +1071,7 @@
                 ZalgoPromise.prototype.asyncReject = function(error) {
                     this.errorHandled = !0;
                     this.reject(error);
+                    return this;
                 };
                 ZalgoPromise.prototype.dispatch = function() {
                     var _this3 = this, dispatching = this.dispatching, resolved = this.resolved, rejected = this.rejected, handlers = this.handlers;
@@ -2050,7 +2055,7 @@
                     });
                 };
                 ProxyWindow.isProxyWindow = function(obj) {
-                    return Boolean(obj && obj.isProxyWindow);
+                    return Boolean(obj && !Object(src.isWindow)(obj) && obj.isProxyWindow);
                 };
                 ProxyWindow.toProxyWindow = function(win) {
                     cleanupProxyWindows();

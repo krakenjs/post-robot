@@ -1,6 +1,6 @@
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-import { isSameDomain, isWindowClosed, getOpener, WINDOW_TYPE } from 'cross-domain-utils/src';
+import { isSameDomain, isWindowClosed, getOpener, WINDOW_TYPE, isWindow } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { uniqueID, memoizePromise } from 'belter/src';
 import { serializeType } from 'universal-serialize/src';
@@ -205,7 +205,7 @@ export var ProxyWindow = function () {
 
     ProxyWindow.isProxyWindow = function isProxyWindow(obj) {
         // $FlowFixMe
-        return Boolean(obj && obj.isProxyWindow);
+        return Boolean(obj && !isWindow(obj) && obj.isProxyWindow);
     };
 
     ProxyWindow.toProxyWindow = function toProxyWindow(win) {
