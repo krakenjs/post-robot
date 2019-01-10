@@ -1,6 +1,6 @@
 /* @flow */
 
-import { isSameDomain, isWindowClosed, type CrossDomainWindowType, type DomainMatcher, getOpener, WINDOW_TYPE } from 'cross-domain-utils/src';
+import { isSameDomain, isWindowClosed, type CrossDomainWindowType, type DomainMatcher, getOpener, WINDOW_TYPE, isWindow } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { uniqueID, memoizePromise } from 'belter/src';
 import { serializeType, type CustomSerializedType } from 'universal-serialize/src';
@@ -195,9 +195,9 @@ export class ProxyWindow {
         });
     }
 
-    static isProxyWindow(obj : mixed) : boolean {
+    static isProxyWindow(obj : CrossDomainWindowType | ProxyWindow) : boolean {
         // $FlowFixMe
-        return Boolean(obj && obj.isProxyWindow);
+        return Boolean(obj && !isWindow(obj) && obj.isProxyWindow);
     }
 
     static toProxyWindow(win : CrossDomainWindowType | ProxyWindow) : ProxyWindow {
