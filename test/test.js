@@ -422,6 +422,46 @@ describe('[post-robot] serialization cases', () => {
         });
     });
 
+    it('should pass a function across windows and be able to call it instantly from its origin window', (done) => {
+
+        const expectedArgument = 567;
+        let actualArgument;
+        let expectedReturn = 'hello world';
+
+        const myfunction = (val) => {
+            actualArgument = val;
+            return expectedReturn;
+        };
+
+        postRobot.send(childFrame, 'setupListener', {
+
+            messageName: 'foo',
+            data:        {
+                myfunction
+            }
+
+        }).then(() => {
+            return postRobot.send(childFrame, 'foo');
+
+        }).then(({ data }) => {
+            const promise = data.myfunction(expectedArgument);
+
+            if (actualArgument !== expectedArgument) {
+                throw new Error(`Expected function to accept ${ expectedArgument }, got ${ actualArgument }`);
+            }
+
+            return promise;
+
+        }).then(result => {
+
+            if (result !== expectedReturn) {
+                throw new Error(`Expected function to return ${ expectedReturn }, got ${ result }`);
+            }
+
+            done();
+        });
+    });
+
     it('should pass a promise across windows and be able to call it later', (done) => {
 
         let expectedValue = 123;
