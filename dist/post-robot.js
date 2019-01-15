@@ -1608,13 +1608,7 @@
                     });
                 };
                 return ProxyWindow;
-            }(), _extends = Object.assign || function(target) {
-                for (var i = 1; i < arguments.length; i++) {
-                    var source = arguments[i];
-                    for (var key in source) Object.prototype.hasOwnProperty.call(source, key) && (target[key] = source[key]);
-                }
-                return target;
-            }, methodStore = windowStore("methodStore"), proxyWindowMethods = globalStore("proxyWindowMethods");
+            }(), methodStore = windowStore("methodStore"), proxyWindowMethods = globalStore("proxyWindowMethods");
             global.listeningForFunctions = global.listeningForFunctions || !1;
             function addMethod(id, val, name, source, domain) {
                 if (window_ProxyWindow.isProxyWindow(source)) proxyWindowMethods.set(id, {
@@ -1757,10 +1751,11 @@
                                         id: id,
                                         name: name,
                                         args: Array.prototype.slice.call(_arguments)
-                                    }, _extends({
-                                        domain: origin
-                                    }, opts)).then(function(_ref3) {
-                                        return _ref3.data.result;
+                                    }, {
+                                        domain: origin,
+                                        fireAndForget: opts.fireAndForget
+                                    }).then(function(res) {
+                                        if (!opts.fireAndForget) return res.data.result;
                                     });
                                 }).catch(function(err) {
                                     throw err;
@@ -1796,7 +1791,7 @@
                         return win.postMessage(serializedMessage, dom);
                     });
                 }
-            }, send__extends = Object.assign || function(target) {
+            }, _extends = Object.assign || function(target) {
                 for (var i = 1; i < arguments.length; i++) {
                     var source = arguments[i];
                     for (var key in source) Object.prototype.hasOwnProperty.call(source, key) && (target[key] = source[key]);
@@ -1807,7 +1802,7 @@
                 return zalgo_promise_src.a.try(function() {
                     var _serializeMessage;
                     if (Object(src.isWindowClosed)(win)) throw new Error("Window is closed");
-                    var serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {})[constants_WINDOW_PROP.POSTROBOT] = send__extends({
+                    var serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {})[constants_WINDOW_PROP.POSTROBOT] = _extends({
                         id: Object(belter_src.uniqueID)()
                     }, message), _serializeMessage)), messages = [];
                     return zalgo_promise_src.a.map(Object.keys(SEND_MESSAGE_STRATEGIES), function(strategyName) {

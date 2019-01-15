@@ -1,5 +1,3 @@
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
 import { matchDomain, getDomain } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { once, uniqueID, isRegex } from 'belter/src';
@@ -138,9 +136,10 @@ export function deserializeFunction(source, origin, _ref2) {
                 if (meth && meth.val !== crossDomainFunctionWrapper) {
                     return meth.val.apply({ source: window, origin: getDomain() }, _arguments);
                 } else {
-                    return global.send(win, MESSAGE_NAME.METHOD, { id: id, name: name, args: Array.prototype.slice.call(_arguments) }, _extends({ domain: origin }, opts)).then(function (_ref3) {
-                        var data = _ref3.data;
-                        return data.result;
+                    return global.send(win, MESSAGE_NAME.METHOD, { id: id, name: name, args: Array.prototype.slice.call(_arguments) }, { domain: origin, fireAndForget: opts.fireAndForget }).then(function (res) {
+                        if (!opts.fireAndForget) {
+                            return res.data.result;
+                        }
                     });
                 }
             })['catch'](function (err) {
