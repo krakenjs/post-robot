@@ -3,7 +3,7 @@ import { ZalgoPromise } from 'zalgo-promise/src';
 import { getAncestor, isAncestor, isWindowClosed, getDomain, matchDomain } from 'cross-domain-utils/src';
 import { uniqueID, isRegex } from 'belter/src';
 
-import { CONFIG, MESSAGE_TYPE, WILDCARD } from '../conf';
+import { CONFIG, MESSAGE_TYPE, WILDCARD, MESSAGE_NAME } from '../conf';
 import { sendMessage, addResponseListener, deleteResponseListener, markResponseListenerErrored } from '../drivers';
 import { awaitWindowHello, sayHello, isWindowKnown } from '../lib';
 import { global, windowStore } from '../global';
@@ -107,6 +107,7 @@ export function request(options) {
             }
 
             var actualDomain = domain;
+            var logName = name === MESSAGE_NAME.METHOD && options.data && typeof options.data.name === 'string' ? options.data.name + '()' : name;
 
             return new ZalgoPromise(function (resolve, reject) {
 
@@ -124,14 +125,27 @@ export function request(options) {
                             }
 
                             if (err) {
+                                if (__DEBUG__) {
+                                    // eslint-disable-next-line no-console
+                                    console.error('receive::err', logName, domain, '\n\n', err);
+                                }
                                 reject(err);
                             } else {
+                                if (__DEBUG__) {
+                                    // eslint-disable-next-line no-console
+                                    console.info('receive::res', logName, domain, '\n\n', result);
+                                }
                                 resolve(result);
                             }
                         }
                     };
 
                     addResponseListener(hash, responseListener);
+                }
+
+                if (__DEBUG__) {
+                    // eslint-disable-next-line no-console
+                    console.info('send::req', logName, domain, '\n\n', options.data);
                 }
 
                 sendMessage(win, actualDomain, {

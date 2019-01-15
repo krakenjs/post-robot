@@ -6,7 +6,7 @@ import { ZalgoPromise } from 'zalgo-promise/src';
 import { isWindowClosed, matchDomain, stringifyDomainPattern } from 'cross-domain-utils/src';
 import { noop } from 'belter/src';
 
-import { MESSAGE_TYPE, MESSAGE_ACK } from '../../conf';
+import { MESSAGE_TYPE, MESSAGE_ACK, MESSAGE_NAME } from '../../conf';
 import { sendMessage } from '../send';
 import { getRequestListener, getResponseListener, deleteResponseListener, isResponseListenerErrored } from '../listeners';
 
@@ -15,20 +15,38 @@ export var RECEIVE_MESSAGE_TYPES = (_RECEIVE_MESSAGE_TYPE = {}, _RECEIVE_MESSAGE
 
     var options = getRequestListener({ name: message.name, win: source, domain: origin });
 
-    function sendResponse(type) {
-        var data = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    var logName = message.name === MESSAGE_NAME && message.data && typeof message.data.name === 'string' ? message.data.name + '()' : message.name;
+
+    if (__DEBUG__) {
+        // eslint-disable-next-line no-console
+        console.info('receive::req', logName, origin, '\n\n', message.data);
+    }
+
+    function sendResponse(type, ack) {
+        var response = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
 
         if (message.fireAndForget || isWindowClosed(source)) {
             return ZalgoPromise.resolve();
         }
 
+        if (__DEBUG__ && type !== MESSAGE_TYPE.ACK) {
+            if (ack === MESSAGE_ACK.SUCCESS) {
+                // $FlowFixMe
+                console.info('send::res', logName, origin, '\n\n', response.data); // eslint-disable-line no-console
+            } else if (ack === MESSAGE_ACK.ERROR) {
+                // $FlowFixMe
+                console.error('send::err', logName, origin, '\n\n', response.error); // eslint-disable-line no-console
+            }
+        }
+
         // $FlowFixMe
         return sendMessage(source, origin, _extends({
             type: type,
+            ack: ack,
             hash: message.hash,
             name: message.name
-        }, data));
+        }, response));
     }
 
     return ZalgoPromise.all([sendResponse(MESSAGE_TYPE.ACK), ZalgoPromise['try'](function () {
@@ -45,15 +63,9 @@ export var RECEIVE_MESSAGE_TYPES = (_RECEIVE_MESSAGE_TYPE = {}, _RECEIVE_MESSAGE
 
         return options.handler({ source: source, origin: origin, data: data });
     }).then(function (data) {
-        return sendResponse(MESSAGE_TYPE.RESPONSE, {
-            ack: MESSAGE_ACK.SUCCESS,
-            data: data
-        });
+        return sendResponse(MESSAGE_TYPE.RESPONSE, MESSAGE_ACK.SUCCESS, { data: data });
     }, function (error) {
-        return sendResponse(MESSAGE_TYPE.RESPONSE, {
-            ack: MESSAGE_ACK.ERROR,
-            error: error
-        });
+        return sendResponse(MESSAGE_TYPE.RESPONSE, MESSAGE_ACK.ERROR, { error: error });
     })]).then(noop)['catch'](function (err) {
         if (options && options.handleError) {
             return options.handleError(err);

@@ -2114,6 +2114,27 @@
                 return target;
             }, methodStore = Object(global.c)("methodStore"), proxyWindowMethods = Object(global.b)("proxyWindowMethods");
             global.a.listeningForFunctions = global.a.listeningForFunctions || !1;
+            function addMethod(id, val, source, domain) {
+                if (window_ProxyWindow.isProxyWindow(source)) proxyWindowMethods.set(id, {
+                    val: val,
+                    domain: domain,
+                    source: source
+                }); else {
+                    proxyWindowMethods.del(id);
+                    methodStore.getOrSet(source, function() {
+                        return {};
+                    })[id] = {
+                        domain: domain,
+                        val: val,
+                        source: source
+                    };
+                }
+            }
+            function lookupMethod(source, id) {
+                return methodStore.getOrSet(source, function() {
+                    return {};
+                })[id] || proxyWindowMethods.get(id);
+            }
             var listenForFunctionCalls = Object(belter_src.once)(function() {
                 if (!global.a.listeningForFunctions) {
                     global.a.listeningForFunctions = !0;
@@ -2122,21 +2143,18 @@
                     }, function(_ref) {
                         var source = _ref.source, origin = _ref.origin, data = _ref.data, id = data.id, name = data.name;
                         return zalgo_promise_src.a.try(function() {
-                            var meth = methodStore.getOrSet(source, function() {
-                                return {};
-                            })[data.id] || proxyWindowMethods.get(id);
+                            var meth = lookupMethod(source, id);
                             if (!meth) throw new Error("Could not find method '" + data.name + "' with id: " + data.id + " in " + Object(src.getDomain)(window));
-                            var proxy = meth.proxy, domain = meth.domain, val = meth.val;
+                            var methodSource = meth.source, domain = meth.domain, val = meth.val;
                             return zalgo_promise_src.a.try(function() {
                                 if (!Object(src.matchDomain)(domain, origin)) throw new Error("Method '" + data.name + "' domain " + JSON.stringify(Object(belter_src.isRegex)(meth.domain) ? meth.domain.source : meth.domain) + " does not match origin " + origin + " in " + Object(src.getDomain)(window));
-                                if (proxy) return proxy.matchWindow(source).then(function(match) {
+                                if (window_ProxyWindow.isProxyWindow(methodSource)) return methodSource.matchWindow(source).then(function(match) {
                                     if (!match) throw new Error("Method call '" + data.name + "' failed - proxy window does not match source in " + Object(src.getDomain)(window));
                                 });
                             }).then(function() {
                                 return val.apply({
                                     source: source,
-                                    origin: origin,
-                                    data: data
+                                    origin: origin
                                 }, data.args);
                             }, function(err) {
                                 return zalgo_promise_src.a.try(function() {
@@ -2157,22 +2175,12 @@
             });
             function function_serializeFunction(destination, domain, val, key) {
                 listenForFunctionCalls();
-                var id = Object(belter_src.uniqueID)();
+                var id = val.__id__ || Object(belter_src.uniqueID)();
                 destination = window_ProxyWindow.unwrap(destination);
                 if (window_ProxyWindow.isProxyWindow(destination)) {
-                    proxyWindowMethods.set(id, {
-                        proxy: destination,
-                        domain: domain,
-                        val: val
-                    });
+                    addMethod(id, val, destination, domain);
                     destination.awaitWindow().then(function(win) {
-                        proxyWindowMethods.del(id);
-                        methodStore.getOrSet(win, function() {
-                            return {};
-                        })[id] = {
-                            domain: domain,
-                            val: val
-                        };
+                        addMethod(id, val, win, domain);
                     });
                 } else methodStore.getOrSet(destination, function() {
                     return {};
@@ -2237,34 +2245,42 @@
                 }, _deserialize[conf.h.CROSS_DOMAIN_FUNCTION] = function(serializedFunction) {
                     return function(source, origin, _ref2) {
                         var id = _ref2.id, name = _ref2.name;
-                        function innerWrapper(args) {
+                        function deserializedFunction(args) {
                             var opts = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {};
-                            return zalgo_promise_src.a.try(function() {
-                                return window_ProxyWindow.isProxyWindow(source) ? source.awaitWindow() : source;
-                            }).then(function(win) {
+                            return window_ProxyWindow.toProxyWindow(source).awaitWindow().then(function(win) {
+                                var meth = lookupMethod(win, id);
+                                if (meth) {
+                                    var _meth$val;
+                                    return (_meth$val = meth.val).call.apply(_meth$val, [ {
+                                        source: window,
+                                        origin: Object(src.getDomain)()
+                                    } ].concat(args));
+                                }
                                 return global.a.send(win, conf.d.METHOD, {
                                     id: id,
                                     name: name,
                                     args: args
                                 }, _extends({
                                     domain: origin
-                                }, opts));
+                                }, opts)).then(function(_ref3) {
+                                    return _ref3.data.result;
+                                });
                             }).catch(function(err) {
                                 throw err;
                             });
                         }
                         function crossDomainFunctionWrapper() {
-                            return innerWrapper(Array.prototype.slice.call(arguments)).then(function(_ref3) {
-                                return _ref3.data.result;
-                            });
+                            return deserializedFunction(Array.prototype.slice.call(arguments));
                         }
                         crossDomainFunctionWrapper.fireAndForget = function() {
-                            return innerWrapper(Array.prototype.slice.call(arguments), {
+                            return deserializedFunction(Array.prototype.slice.call(arguments), {
                                 fireAndForget: !0
                             });
                         };
                         crossDomainFunctionWrapper.__name__ = name;
-                        crossDomainFunctionWrapper.__xdomain__ = !0;
+                        crossDomainFunctionWrapper.__origin__ = origin;
+                        crossDomainFunctionWrapper.__source__ = source;
+                        crossDomainFunctionWrapper.__id__ = id;
                         crossDomainFunctionWrapper.origin = origin;
                         return crossDomainFunctionWrapper;
                     }(source, origin, serializedFunction);
@@ -2387,13 +2403,15 @@
                     win: source,
                     domain: origin
                 });
-                function sendResponse(type) {
-                    var data = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {};
+                message.name === conf.d && message.data && "string" == typeof message.data.name ? message.data.name : message.name;
+                function sendResponse(type, ack) {
+                    var response = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : {};
                     return message.fireAndForget || Object(src.isWindowClosed)(source) ? zalgo_promise_src.a.resolve() : sendMessage(source, origin, types__extends({
                         type: type,
+                        ack: ack,
                         hash: message.hash,
                         name: message.name
-                    }, data));
+                    }, response));
                 }
                 return zalgo_promise_src.a.all([ sendResponse(conf.e.ACK), zalgo_promise_src.a.try(function() {
                     if (!options) throw new Error("No handler found for post message: " + message.name + " from " + origin + " in " + window.location.protocol + "//" + window.location.host + window.location.pathname);
@@ -2405,13 +2423,11 @@
                         data: data
                     });
                 }).then(function(data) {
-                    return sendResponse(conf.e.RESPONSE, {
-                        ack: conf.c.SUCCESS,
+                    return sendResponse(conf.e.RESPONSE, conf.c.SUCCESS, {
                         data: data
                     });
                 }, function(error) {
-                    return sendResponse(conf.e.RESPONSE, {
-                        ack: conf.c.ERROR,
+                    return sendResponse(conf.e.RESPONSE, conf.c.ERROR, {
                         error: error
                     });
                 }) ]).then(belter_src.noop).catch(function(err) {
@@ -2523,6 +2539,7 @@
                         }
                         if ("string" != typeof domain && !Array.isArray(domain)) throw new TypeError("Expected domain to be a string or array");
                         var actualDomain = domain;
+                        name === conf.d.METHOD && options.data && "string" == typeof options.data.name && options.data.name;
                         return new zalgo_promise_src.a(function(resolve, reject) {
                             var responseListener = void 0;
                             options.fireAndForget || function(hash, listener) {
