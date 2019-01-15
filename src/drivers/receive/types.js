@@ -15,7 +15,7 @@ export let RECEIVE_MESSAGE_TYPES = {
 
         let options = getRequestListener({ name: message.name, win: source, domain: origin });
 
-        const logName = (message.name === MESSAGE_NAME && message.data && typeof message.data.name === 'string') ? `${ message.data.name }()` : message.name;
+        const logName = (message.name === MESSAGE_NAME.METHOD && message.data && typeof message.data.name === 'string') ? `${ message.data.name }()` : message.name;
 
         if (__DEBUG__) {
             // eslint-disable-next-line no-console
