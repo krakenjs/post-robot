@@ -15,7 +15,7 @@ export var RECEIVE_MESSAGE_TYPES = (_RECEIVE_MESSAGE_TYPE = {}, _RECEIVE_MESSAGE
 
     var options = getRequestListener({ name: message.name, win: source, domain: origin });
 
-    var logName = message.name === MESSAGE_NAME && message.data && typeof message.data.name === 'string' ? message.data.name + '()' : message.name;
+    var logName = message.name === MESSAGE_NAME.METHOD && message.data && typeof message.data.name === 'string' ? message.data.name + '()' : message.name;
 
     if (__DEBUG__) {
         // eslint-disable-next-line no-console

@@ -2403,7 +2403,7 @@
                     win: source,
                     domain: origin
                 });
-                message.name === conf.d && message.data && "string" == typeof message.data.name ? message.data.name : message.name;
+                message.name === conf.d.METHOD && message.data && "string" == typeof message.data.name ? message.data.name : message.name;
                 function sendResponse(type, ack) {
                     var response = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : {};
                     return message.fireAndForget || Object(src.isWindowClosed)(source) ? zalgo_promise_src.a.resolve() : sendMessage(source, origin, types__extends({
