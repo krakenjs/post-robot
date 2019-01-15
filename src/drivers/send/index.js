@@ -4,31 +4,11 @@ import { isWindowClosed, type CrossDomainWindowType } from 'cross-domain-utils/s
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { uniqueID, stringifyError } from 'belter/src';
 
-import { MESSAGE_TYPE, CONFIG, MESSAGE_NAME, WILDCARD, WINDOW_PROP } from '../../conf';
+import { CONFIG, WINDOW_PROP } from '../../conf';
 import { serializeMessage } from '../../serialize';
 import type { Message } from '../types';
 
 import { SEND_MESSAGE_STRATEGIES } from './strategies';
-
-function logMessage(domain : string | $ReadOnlyArray<string>, message : Message) {
-    if (__DEBUG__) {
-        let level;
-
-        if (Object.keys(MESSAGE_NAME).map(key => MESSAGE_NAME[key]).indexOf(message.name) !== -1 || message.type === MESSAGE_TYPE.ACK) {
-            level = 'debug';
-        } else if (message.ack === 'error') {
-            level = 'error';
-        } else {
-            level = 'info';
-        }
-
-        // eslint-disable-next-line no-console
-        if (typeof console !== 'undefined' && typeof console[level] === 'function') {
-            // eslint-disable-next-line no-console
-            console[level]('postrobot_send', message.type.replace(/^postrobot_message_/, ''), '::', message.name, '::', domain || WILDCARD, '\n\n', message);
-        }
-    }
-}
 
 export function sendMessage(win : CrossDomainWindowType, domain : string | $ReadOnlyArray<string>, message : Message) : ZalgoPromise<void> {
     return ZalgoPromise.try(() => {
@@ -36,9 +16,7 @@ export function sendMessage(win : CrossDomainWindowType, domain : string | $Read
         if (isWindowClosed(win)) {
             throw new Error('Window is closed');
         }
-
-        logMessage(domain, message);
-
+        
         const serializedMessage = serializeMessage(win, domain, {
             [ WINDOW_PROP.POSTROBOT ]: {
                 id: uniqueID(),

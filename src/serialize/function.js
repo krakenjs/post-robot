@@ -49,7 +49,7 @@ const listenForFunctionCalls = once(() => {
                     });
                 }
             }).then(() => {
-                return val.apply({ source, origin, data }, data.args);
+                return val.apply({ source, origin }, data.args);
             }, err => {
                 return ZalgoPromise.try(() => { // eslint-disable-line max-nested-callbacks
                     if (val.onError) {

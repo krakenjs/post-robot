@@ -3,7 +3,7 @@
 import { isWindowClosed, type CrossDomainWindowType, getDomain, isSameTopWindow } from 'cross-domain-utils/src';
 import { addEventListener, noop } from 'belter/src';
 
-import { MESSAGE_NAME, WINDOW_PROP, MESSAGE_TYPE } from '../../conf';
+import { WINDOW_PROP } from '../../conf';
 import { markWindowKnown, needsGlobalMessagingForBrowser } from '../../lib';
 import { deserializeMessage } from '../../serialize';
 import { global, globalStore } from '../../global';
@@ -53,7 +53,6 @@ function parseMessage(message : string, source : CrossDomainWindowType, origin :
     return parsedMessage;
 }
 
-
 export function receiveMessage(event : MessageEvent) {
 
     if (!window || window.closed) {
@@ -88,24 +87,6 @@ export function receiveMessage(event : MessageEvent) {
     }
 
     receivedMessages.set(message.id, true);
-
-    if (__DEBUG__) {
-        let level;
-
-        if (Object.keys(MESSAGE_NAME).map(key => MESSAGE_NAME[key]).indexOf(message.name) !== -1 || message.type === MESSAGE_TYPE.ACK) {
-            level = 'debug';
-        } else if (message.ack === 'error') {
-            level = 'error';
-        } else {
-            level = 'info';
-        }
-
-        // eslint-disable-next-line no-console
-        if (typeof console !== 'undefined' && typeof console[level] === 'function') {
-            // eslint-disable-next-line no-console
-            console[level]('postrobot_receive', message.type.replace(/^postrobot_message_/, ''), '::', message.name, '::', origin, '\n\n', message);
-        }
-    }
 
     if (isWindowClosed(source) && !message.fireAndForget) {
         return;
