@@ -15,19 +15,20 @@ let proxyWindowMethods = globalStore('proxyWindowMethods');
 global.listeningForFunctions = global.listeningForFunctions || false;
 
 type StoredMethod = {|
+    name : string,
     domain : DomainMatcher,
     val : Function,
     source : CrossDomainWindowType | ProxyWindow
 |};
 
-function addMethod(id : string, val : Function, source : CrossDomainWindowType | ProxyWindow, domain : DomainMatcher) {
+function addMethod(id : string, val : Function, name : string, source : CrossDomainWindowType | ProxyWindow, domain : DomainMatcher) {
     if (ProxyWindow.isProxyWindow(source)) {
-        proxyWindowMethods.set(id, { val, domain, source });
+        proxyWindowMethods.set(id, { val, name, domain, source });
     } else {
         proxyWindowMethods.del(id);
         // $FlowFixMe
         let methods = methodStore.getOrSet(source, () => ({}));
-        methods[id] = { domain, val, source };
+        methods[id] = { domain, name, val, source };
     }
 }
 
@@ -96,65 +97,63 @@ export function serializeFunction<T>(destination : CrossDomainWindowType | Proxy
     
     let id = val.__id__ || uniqueID();
     destination = ProxyWindow.unwrap(destination);
+    let name = val.__name__ || val.name || key;
 
     if (ProxyWindow.isProxyWindow(destination)) {
-        addMethod(id, val, destination, domain);
+        addMethod(id, val, name, destination, domain);
 
         // $FlowFixMe
         destination.awaitWindow().then(win => {
-            addMethod(id, val, win, domain);
+            addMethod(id, val, name, win, domain);
         });
     } else {
-        // $FlowFixMe
-        let methods = methodStore.getOrSet(destination, () => ({}));
-        methods[id] = { domain, val };
+        addMethod(id, val, name, destination, domain);
     }
 
-    return serializeType(SERIALIZATION_TYPE.CROSS_DOMAIN_FUNCTION, { id, name: val.name || key });
+    return serializeType(SERIALIZATION_TYPE.CROSS_DOMAIN_FUNCTION, { id, name });
 }
 
 export function deserializeFunction<T>(source : CrossDomainWindowType | ProxyWindow, origin : string, { id, name } : { id : string, name : string }) : (...args : $ReadOnlyArray<mixed>) => ZalgoPromise<T> {
-    function deserializedFunction<X : mixed>(args : $ReadOnlyArray<mixed>, opts? : Object = {}) : ZalgoPromise<X> {
-        let originalStack;
-
-        if (__DEBUG__) {
-            originalStack = (new Error(`Original call to ${ name }():`)).stack;
+    const getDeserializedFunction = (opts? : Object = {}) => {
+        function crossDomainFunctionWrapper<X : mixed>() : ZalgoPromise<X> {
+            let originalStack;
+    
+            if (__DEBUG__) {
+                originalStack = (new Error(`Original call to ${ name }():`)).stack;
+            }
+    
+            return ProxyWindow.toProxyWindow(source).awaitWindow().then(win => {
+                let meth = lookupMethod(win, id);
+    
+                if (meth && meth.val !== crossDomainFunctionWrapper) {
+                    return meth.val.apply({ source: window, origin: getDomain() }, arguments);
+                } else {
+                    return global.send(win, MESSAGE_NAME.METHOD, { id, name, args: Array.prototype.slice.call(arguments) }, { domain: origin, ...opts })
+                        .then(({ data }) => data.result);
+                }
+    
+            }).catch(err => {
+                // $FlowFixMe
+                if (__DEBUG__ && originalStack && err.stack) {
+                    // $FlowFixMe
+                    err.stack = `${ err.stack }\n\n${ originalStack }`;
+                }
+                throw err;
+            });
         }
 
-        return ProxyWindow.toProxyWindow(source).awaitWindow().then(win => {
-            let meth = lookupMethod(win, id);
+        crossDomainFunctionWrapper.__name__ = name;
+        crossDomainFunctionWrapper.__origin__ = origin;
+        crossDomainFunctionWrapper.__source__ = source;
+        crossDomainFunctionWrapper.__id__ = id;
 
-            if (meth) {
-                return meth.val.call({ source: window, origin: getDomain() }, ...args);
-            } else {
-                return global.send(win, MESSAGE_NAME.METHOD, { id, name, args }, { domain: origin, ...opts })
-                    .then(({ data }) => data.result);
-            }
+        crossDomainFunctionWrapper.origin = origin;
 
-        }).catch(err => {
-            // $FlowFixMe
-            if (__DEBUG__ && originalStack && err.stack) {
-                // $FlowFixMe
-                err.stack = `${ err.stack }\n\n${ originalStack }`;
-            }
-            throw err;
-        });
-    }
-
-    function crossDomainFunctionWrapper<X : mixed>() : ZalgoPromise<X> {
-        return deserializedFunction(Array.prototype.slice.call(arguments));
-    }
-
-    crossDomainFunctionWrapper.fireAndForget = function crossDomainFireAndForgetFunctionWrapper<X : mixed>() : ZalgoPromise<X> {
-        return deserializedFunction(Array.prototype.slice.call(arguments), { fireAndForget: true });
+        return crossDomainFunctionWrapper;
     };
 
-    crossDomainFunctionWrapper.__name__ = name;
-    crossDomainFunctionWrapper.__origin__ = origin;
-    crossDomainFunctionWrapper.__source__ = source;
-    crossDomainFunctionWrapper.__id__ = id;
-
-    crossDomainFunctionWrapper.origin = origin;
+    let crossDomainFunctionWrapper = getDeserializedFunction();
+    crossDomainFunctionWrapper.fireAndForget = getDeserializedFunction({ fireAndForget: true });
 
     return crossDomainFunctionWrapper;
 }
