@@ -14,16 +14,16 @@ var methodStore = windowStore('methodStore');
 var proxyWindowMethods = globalStore('proxyWindowMethods');
 global.listeningForFunctions = global.listeningForFunctions || false;
 
-function addMethod(id, val, source, domain) {
+function addMethod(id, val, name, source, domain) {
     if (ProxyWindow.isProxyWindow(source)) {
-        proxyWindowMethods.set(id, { val: val, domain: domain, source: source });
+        proxyWindowMethods.set(id, { val: val, name: name, domain: domain, source: source });
     } else {
         proxyWindowMethods.del(id);
         // $FlowFixMe
         var methods = methodStore.getOrSet(source, function () {
             return {};
         });
-        methods[id] = { domain: domain, val: val, source: source };
+        methods[id] = { domain: domain, name: name, val: val, source: source };
     }
 }
 
@@ -100,75 +100,71 @@ export function serializeFunction(destination, domain, val, key) {
 
     var id = val.__id__ || uniqueID();
     destination = ProxyWindow.unwrap(destination);
+    var name = val.__name__ || val.name || key;
 
     if (ProxyWindow.isProxyWindow(destination)) {
-        addMethod(id, val, destination, domain);
+        addMethod(id, val, name, destination, domain);
 
         // $FlowFixMe
         destination.awaitWindow().then(function (win) {
-            addMethod(id, val, win, domain);
+            addMethod(id, val, name, win, domain);
         });
     } else {
-        // $FlowFixMe
-        var methods = methodStore.getOrSet(destination, function () {
-            return {};
-        });
-        methods[id] = { domain: domain, val: val };
+        addMethod(id, val, name, destination, domain);
     }
 
-    return serializeType(SERIALIZATION_TYPE.CROSS_DOMAIN_FUNCTION, { id: id, name: val.name || key });
+    return serializeType(SERIALIZATION_TYPE.CROSS_DOMAIN_FUNCTION, { id: id, name: name });
 }
 
 export function deserializeFunction(source, origin, _ref2) {
     var id = _ref2.id,
         name = _ref2.name;
 
-    function deserializedFunction(args) {
-        var opts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    var getDeserializedFunction = function getDeserializedFunction() {
+        var opts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-        var originalStack = void 0;
+        function crossDomainFunctionWrapper() {
+            var _arguments = arguments;
 
-        if (__DEBUG__) {
-            originalStack = new Error('Original call to ' + name + '():').stack;
+            var originalStack = void 0;
+
+            if (__DEBUG__) {
+                originalStack = new Error('Original call to ' + name + '():').stack;
+            }
+
+            return ProxyWindow.toProxyWindow(source).awaitWindow().then(function (win) {
+                var meth = lookupMethod(win, id);
+
+                if (meth && meth.val !== crossDomainFunctionWrapper) {
+                    return meth.val.apply({ source: window, origin: getDomain() }, _arguments);
+                } else {
+                    return global.send(win, MESSAGE_NAME.METHOD, { id: id, name: name, args: Array.prototype.slice.call(_arguments) }, _extends({ domain: origin }, opts)).then(function (_ref3) {
+                        var data = _ref3.data;
+                        return data.result;
+                    });
+                }
+            })['catch'](function (err) {
+                // $FlowFixMe
+                if (__DEBUG__ && originalStack && err.stack) {
+                    // $FlowFixMe
+                    err.stack = err.stack + '\n\n' + originalStack;
+                }
+                throw err;
+            });
         }
 
-        return ProxyWindow.toProxyWindow(source).awaitWindow().then(function (win) {
-            var meth = lookupMethod(win, id);
+        crossDomainFunctionWrapper.__name__ = name;
+        crossDomainFunctionWrapper.__origin__ = origin;
+        crossDomainFunctionWrapper.__source__ = source;
+        crossDomainFunctionWrapper.__id__ = id;
 
-            if (meth) {
-                var _meth$val;
+        crossDomainFunctionWrapper.origin = origin;
 
-                return (_meth$val = meth.val).call.apply(_meth$val, [{ source: window, origin: getDomain() }].concat(args));
-            } else {
-                return global.send(win, MESSAGE_NAME.METHOD, { id: id, name: name, args: args }, _extends({ domain: origin }, opts)).then(function (_ref3) {
-                    var data = _ref3.data;
-                    return data.result;
-                });
-            }
-        })['catch'](function (err) {
-            // $FlowFixMe
-            if (__DEBUG__ && originalStack && err.stack) {
-                // $FlowFixMe
-                err.stack = err.stack + '\n\n' + originalStack;
-            }
-            throw err;
-        });
-    }
-
-    function crossDomainFunctionWrapper() {
-        return deserializedFunction(Array.prototype.slice.call(arguments));
-    }
-
-    crossDomainFunctionWrapper.fireAndForget = function crossDomainFireAndForgetFunctionWrapper() {
-        return deserializedFunction(Array.prototype.slice.call(arguments), { fireAndForget: true });
+        return crossDomainFunctionWrapper;
     };
 
-    crossDomainFunctionWrapper.__name__ = name;
-    crossDomainFunctionWrapper.__origin__ = origin;
-    crossDomainFunctionWrapper.__source__ = source;
-    crossDomainFunctionWrapper.__id__ = id;
-
-    crossDomainFunctionWrapper.origin = origin;
+    var crossDomainFunctionWrapper = getDeserializedFunction();
+    crossDomainFunctionWrapper.fireAndForget = getDeserializedFunction({ fireAndForget: true });
 
     return crossDomainFunctionWrapper;
 }

@@ -2114,9 +2114,10 @@
                 return target;
             }, methodStore = Object(global.c)("methodStore"), proxyWindowMethods = Object(global.b)("proxyWindowMethods");
             global.a.listeningForFunctions = global.a.listeningForFunctions || !1;
-            function addMethod(id, val, source, domain) {
+            function addMethod(id, val, name, source, domain) {
                 if (window_ProxyWindow.isProxyWindow(source)) proxyWindowMethods.set(id, {
                     val: val,
+                    name: name,
                     domain: domain,
                     source: source
                 }); else {
@@ -2125,6 +2126,7 @@
                         return {};
                     })[id] = {
                         domain: domain,
+                        name: name,
                         val: val,
                         source: source
                     };
@@ -2177,20 +2179,16 @@
                 listenForFunctionCalls();
                 var id = val.__id__ || Object(belter_src.uniqueID)();
                 destination = window_ProxyWindow.unwrap(destination);
+                var name = val.__name__ || val.name || key;
                 if (window_ProxyWindow.isProxyWindow(destination)) {
-                    addMethod(id, val, destination, domain);
+                    addMethod(id, val, name, destination, domain);
                     destination.awaitWindow().then(function(win) {
-                        addMethod(id, val, win, domain);
+                        addMethod(id, val, name, win, domain);
                     });
-                } else methodStore.getOrSet(destination, function() {
-                    return {};
-                })[id] = {
-                    domain: domain,
-                    val: val
-                };
+                } else addMethod(id, val, name, destination, domain);
                 return serializeType(conf.h.CROSS_DOMAIN_FUNCTION, {
                     id: id,
-                    name: val.name || key
+                    name: name
                 });
             }
             function serializeMessage(destination, domain, obj) {
@@ -2244,44 +2242,38 @@
                     var then;
                 }, _deserialize[conf.h.CROSS_DOMAIN_FUNCTION] = function(serializedFunction) {
                     return function(source, origin, _ref2) {
-                        var id = _ref2.id, name = _ref2.name;
-                        function deserializedFunction(args) {
-                            var opts = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {};
-                            return window_ProxyWindow.toProxyWindow(source).awaitWindow().then(function(win) {
-                                var meth = lookupMethod(win, id);
-                                if (meth) {
-                                    var _meth$val;
-                                    return (_meth$val = meth.val).call.apply(_meth$val, [ {
+                        var id = _ref2.id, name = _ref2.name, getDeserializedFunction = function() {
+                            var opts = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {};
+                            function crossDomainFunctionWrapper() {
+                                var _arguments = arguments;
+                                return window_ProxyWindow.toProxyWindow(source).awaitWindow().then(function(win) {
+                                    var meth = lookupMethod(win, id);
+                                    return meth && meth.val !== crossDomainFunctionWrapper ? meth.val.apply({
                                         source: window,
                                         origin: Object(src.getDomain)()
-                                    } ].concat(args));
-                                }
-                                return global.a.send(win, conf.d.METHOD, {
-                                    id: id,
-                                    name: name,
-                                    args: args
-                                }, _extends({
-                                    domain: origin
-                                }, opts)).then(function(_ref3) {
-                                    return _ref3.data.result;
+                                    }, _arguments) : global.a.send(win, conf.d.METHOD, {
+                                        id: id,
+                                        name: name,
+                                        args: Array.prototype.slice.call(_arguments)
+                                    }, _extends({
+                                        domain: origin
+                                    }, opts)).then(function(_ref3) {
+                                        return _ref3.data.result;
+                                    });
+                                }).catch(function(err) {
+                                    throw err;
                                 });
-                            }).catch(function(err) {
-                                throw err;
-                            });
-                        }
-                        function crossDomainFunctionWrapper() {
-                            return deserializedFunction(Array.prototype.slice.call(arguments));
-                        }
-                        crossDomainFunctionWrapper.fireAndForget = function() {
-                            return deserializedFunction(Array.prototype.slice.call(arguments), {
-                                fireAndForget: !0
-                            });
-                        };
-                        crossDomainFunctionWrapper.__name__ = name;
-                        crossDomainFunctionWrapper.__origin__ = origin;
-                        crossDomainFunctionWrapper.__source__ = source;
-                        crossDomainFunctionWrapper.__id__ = id;
-                        crossDomainFunctionWrapper.origin = origin;
+                            }
+                            crossDomainFunctionWrapper.__name__ = name;
+                            crossDomainFunctionWrapper.__origin__ = origin;
+                            crossDomainFunctionWrapper.__source__ = source;
+                            crossDomainFunctionWrapper.__id__ = id;
+                            crossDomainFunctionWrapper.origin = origin;
+                            return crossDomainFunctionWrapper;
+                        }, crossDomainFunctionWrapper = getDeserializedFunction();
+                        crossDomainFunctionWrapper.fireAndForget = getDeserializedFunction({
+                            fireAndForget: !0
+                        });
                         return crossDomainFunctionWrapper;
                     }(source, origin, serializedFunction);
                 }, _deserialize[conf.h.CROSS_DOMAIN_WINDOW] = function(serializedWindow) {
