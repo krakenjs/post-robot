@@ -58,18 +58,18 @@
                     counter += 1;
                     this.name = "__weakmap_" + (1e9 * Math.random() >>> 0) + "__" + counter;
                     if (function() {
-                        if (!window.WeakMap) return !1;
-                        if (!window.Object.freeze) return !1;
+                        if ("undefined" == typeof WeakMap) return !1;
+                        if (void 0 === Object.freeze) return !1;
                         try {
-                            var testWeakMap = new window.WeakMap(), testKey = {};
-                            window.Object.freeze(testKey);
+                            var testWeakMap = new WeakMap(), testKey = {};
+                            Object.freeze(testKey);
                             testWeakMap.set(testKey, "__testvalue__");
                             return "__testvalue__" === testWeakMap.get(testKey);
                         } catch (err) {
                             return !1;
                         }
                     }()) try {
-                        this.weakmap = new window.WeakMap();
+                        this.weakmap = new WeakMap();
                     } catch (err) {}
                     this.keys = [];
                     this.values = [];
@@ -161,7 +161,7 @@
                     if (!key) throw new Error("WeakMap expected key");
                     var weakmap = this.weakmap;
                     if (weakmap) try {
-                        return weakmap.has(key);
+                        if (weakmap.has(key)) return !0;
                     } catch (err) {
                         delete this.weakmap;
                     }
@@ -172,11 +172,31 @@
                     this._cleanupClosedWindows();
                     return -1 !== safeIndexOf(this.keys, key);
                 };
+                CrossDomainSafeWeakMap.prototype.getOrSet = function(key, getter) {
+                    if (this.has(key)) return this.get(key);
+                    var value = getter();
+                    this.set(key, value);
+                    return value;
+                };
                 return CrossDomainSafeWeakMap;
             }();
             __webpack_require__.d(__webpack_exports__, "a", function() {
                 return weakmap_CrossDomainSafeWeakMap;
             });
+        },
+        "./node_modules/cross-domain-utils/src/constants.js": function(module, __webpack_exports__, __webpack_require__) {
+            "use strict";
+            __webpack_require__.d(__webpack_exports__, "a", function() {
+                return PROTOCOL;
+            });
+            __webpack_require__.d(__webpack_exports__, "b", function() {
+                return WILDCARD;
+            });
+            var PROTOCOL = {
+                MOCK: "mock:",
+                FILE: "file:",
+                ABOUT: "about:"
+            }, WILDCARD = "*";
         },
         "./node_modules/cross-domain-utils/src/index.js": function(module, __webpack_exports__, __webpack_require__) {
             "use strict";
@@ -242,7 +262,7 @@
                 return __WEBPACK_IMPORTED_MODULE_0__utils__.t;
             });
             var __WEBPACK_IMPORTED_MODULE_1__types__ = __webpack_require__("./node_modules/cross-domain-utils/src/types.js");
-            __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__types__);
+            __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__types__), __webpack_require__("./node_modules/cross-domain-utils/src/constants.js");
         },
         "./node_modules/cross-domain-utils/src/types.js": function(module, exports) {},
         "./node_modules/cross-domain-utils/src/utils.js": function(module, __webpack_exports__, __webpack_require__) {
@@ -250,6 +270,7 @@
             function isRegex(item) {
                 return "[object RegExp]" === Object.prototype.toString.call(item);
             }
+            var constants = __webpack_require__("./node_modules/cross-domain-utils/src/constants.js");
             __webpack_exports__.h = getParent;
             __webpack_exports__.g = getOpener;
             __webpack_exports__.a = getActualDomain;
@@ -292,7 +313,7 @@
                         if (!frame.contentWindow) return !0;
                         if (!frame.parentNode) return !0;
                         var doc = frame.ownerDocument;
-                        return !(!doc || !doc.body || doc.body.contains(frame));
+                        return !(!doc || !doc.documentElement || doc.documentElement.contains(frame));
                     }(frame)) return !0;
                 }
                 return !1;
@@ -301,8 +322,8 @@
                 return (win = win || window).navigator.mockUserAgent || win.navigator.userAgent;
             };
             __webpack_exports__.e = function(win, name) {
-                for (var winFrames = getFrames(win), _i10 = 0, _length8 = null == winFrames ? 0 : winFrames.length; _i10 < _length8; _i10++) {
-                    var childFrame = winFrames[_i10];
+                for (var winFrames = getFrames(win), _i9 = 0, _length8 = null == winFrames ? 0 : winFrames.length; _i9 < _length8; _i9++) {
+                    var childFrame = winFrames[_i9];
                     try {
                         if (isSameDomain(childFrame) && childFrame.name === name && -1 !== winFrames.indexOf(childFrame)) return childFrame;
                     } catch (err) {}
@@ -323,7 +344,7 @@
                 if (actualParent) return actualParent === parent;
                 if (child === parent) return !1;
                 if (getTop(child) === child) return !1;
-                for (var _i16 = 0, _getFrames8 = getFrames(parent), _length14 = null == _getFrames8 ? 0 : _getFrames8.length; _i16 < _length14; _i16++) if (_getFrames8[_i16] === child) return !0;
+                for (var _i15 = 0, _getFrames8 = getFrames(parent), _length14 = null == _getFrames8 ? 0 : _getFrames8.length; _i15 < _length14; _i15++) if (_getFrames8[_i15] === child) return !0;
                 return !1;
             };
             __webpack_exports__.n = function() {
@@ -345,7 +366,7 @@
             };
             __webpack_exports__.s = function matchDomain(pattern, origin) {
                 if ("string" == typeof pattern) {
-                    if ("string" == typeof origin) return pattern === CONSTANTS.WILDCARD || origin === pattern;
+                    if ("string" == typeof origin) return pattern === constants.b || origin === pattern;
                     if (isRegex(origin)) return !1;
                     if (Array.isArray(origin)) return !1;
                 }
@@ -397,14 +418,9 @@
                 }
                 return !1;
             };
-            var CONSTANTS = {
-                MOCK_PROTOCOL: "mock:",
-                FILE_PROTOCOL: "file:",
-                ABOUT_PROTOCOL: "about:",
-                WILDCARD: "*"
-            }, IE_WIN_ACCESS_ERROR = "Call was rejected by callee.\r\n";
+            var IE_WIN_ACCESS_ERROR = "Call was rejected by callee.\r\n";
             function isAboutProtocol() {
-                return (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window).location.protocol === CONSTANTS.ABOUT_PROTOCOL;
+                return (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window).location.protocol === constants.a.ABOUT;
             }
             function getParent(win) {
                 if (win) try {
@@ -428,10 +444,10 @@
                 if (!location) throw new Error("Can not read window location");
                 var protocol = location.protocol;
                 if (!protocol) throw new Error("Can not read window protocol");
-                if (protocol === CONSTANTS.FILE_PROTOCOL) return CONSTANTS.FILE_PROTOCOL + "//";
-                if (protocol === CONSTANTS.ABOUT_PROTOCOL) {
+                if (protocol === constants.a.FILE) return constants.a.FILE + "//";
+                if (protocol === constants.a.ABOUT) {
                     var parent = getParent(win);
-                    return parent && canReadFromWindow(parent) ? getActualDomain(parent) : CONSTANTS.ABOUT_PROTOCOL + "//";
+                    return parent && canReadFromWindow(parent) ? getActualDomain(parent) : constants.a.ABOUT + "//";
                 }
                 var host = location.host;
                 if (!host) throw new Error("Can not read window host");
@@ -439,7 +455,7 @@
             }
             function getDomain(win) {
                 var domain = getActualDomain(win = win || window);
-                return domain && win.mockDomain && 0 === win.mockDomain.indexOf(CONSTANTS.MOCK_PROTOCOL) ? win.mockDomain : domain;
+                return domain && win.mockDomain && 0 === win.mockDomain.indexOf(constants.a.MOCK) ? win.mockDomain : domain;
             }
             function isActuallySameDomain(win) {
                 try {
@@ -558,7 +574,7 @@
                 return getOpener(win = win || window) || getParent(win) || void 0;
             }
             function anyMatch(collection1, collection2) {
-                for (var _i18 = 0, _length16 = null == collection1 ? 0 : collection1.length; _i18 < _length16; _i18++) for (var item1 = collection1[_i18], _i20 = 0, _length18 = null == collection2 ? 0 : collection2.length; _i20 < _length18; _i20++) if (item1 === collection2[_i20]) return !0;
+                for (var _i17 = 0, _length16 = null == collection1 ? 0 : collection1.length; _i17 < _length16; _i17++) for (var item1 = collection1[_i17], _i19 = 0, _length18 = null == collection2 ? 0 : collection2.length; _i19 < _length18; _i19++) if (item1 === collection2[_i19]) return !0;
                 return !1;
             }
         },
@@ -661,6 +677,7 @@
                 ZalgoPromise.prototype.asyncReject = function(error) {
                     this.errorHandled = !0;
                     this.reject(error);
+                    return this;
                 };
                 ZalgoPromise.prototype.dispatch = function() {
                     var _this3 = this, dispatching = this.dispatching, resolved = this.resolved, rejected = this.rejected, handlers = this.handlers;
@@ -751,6 +768,9 @@
                 };
                 ZalgoPromise.reject = function(error) {
                     return new ZalgoPromise().reject(error);
+                };
+                ZalgoPromise.asyncReject = function(error) {
+                    return new ZalgoPromise().asyncReject(error);
                 };
                 ZalgoPromise.all = function(promises) {
                     var promise = new ZalgoPromise(), count = promises.length, results = [];
@@ -1319,7 +1339,7 @@
                 ALLOW_POSTMESSAGE_POPUP: !("__ALLOW_POSTMESSAGE_POPUP__" in window) || window.__ALLOW_POSTMESSAGE_POPUP__,
                 BRIDGE_TIMEOUT: 5e3,
                 CHILD_WINDOW_TIMEOUT: 5e3,
-                ACK_TIMEOUT: -1 !== window.navigator.userAgent.match(/MSIE/i) ? 2e3 : 1e3,
+                ACK_TIMEOUT: -1 !== window.navigator.userAgent.match(/MSIE/i) ? 1e4 : 2e3,
                 RES_TIMEOUT: -1,
                 ALLOWED_POST_MESSAGE_METHODS: (_ALLOWED_POST_MESSAGE = {}, _ALLOWED_POST_MESSAGE[CONSTANTS.SEND_STRATEGIES.POST_MESSAGE] = !0, 
                 _ALLOWED_POST_MESSAGE[CONSTANTS.SEND_STRATEGIES.BRIDGE] = !0, _ALLOWED_POST_MESSAGE[CONSTANTS.SEND_STRATEGIES.GLOBAL] = !0, 
@@ -2380,5 +2400,4 @@
         }
     });
 });
-//# sourceMappingURL=post-robot.ie.js.map
 //# sourceMappingURL=post-robot.ie.js.map
