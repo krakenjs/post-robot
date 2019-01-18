@@ -33,10 +33,10 @@ export var RECEIVE_MESSAGE_TYPES = (_RECEIVE_MESSAGE_TYPE = {}, _RECEIVE_MESSAGE
         if (__DEBUG__ && type !== MESSAGE_TYPE.ACK) {
             if (ack === MESSAGE_ACK.SUCCESS) {
                 // $FlowFixMe
-                console.info('send::res', logName, origin, '\n\n', response.data); // eslint-disable-line no-console
+                console.info('respond::res', logName, origin, '\n\n', response.data); // eslint-disable-line no-console
             } else if (ack === MESSAGE_ACK.ERROR) {
                 // $FlowFixMe
-                console.error('send::err', logName, origin, '\n\n', response.error); // eslint-disable-line no-console
+                console.error('respond::err', logName, origin, '\n\n', response.error); // eslint-disable-line no-console
             }
         }
 
