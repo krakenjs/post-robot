@@ -124,9 +124,17 @@ export class ProxyWindow {
         });
     }
 
+    getWindow() : ?CrossDomainWindowType {
+        return this.actualWindow;
+    }
+
     setWindow(win : CrossDomainWindowType) {
         this.actualWindow = win;
         this.actualWindowPromise.resolve(win);
+    }
+
+    awaitWindow() : ZalgoPromise<CrossDomainWindowType> {
+        return this.actualWindowPromise;
     }
 
     matchWindow(win : CrossDomainWindowType) : ZalgoPromise<boolean> {
@@ -152,10 +160,6 @@ export class ProxyWindow {
 
     unwrap() : CrossDomainWindowType | ProxyWindow {
         return this.actualWindow || this;
-    }
-
-    awaitWindow() : ZalgoPromise<CrossDomainWindowType> {
-        return this.actualWindowPromise;
     }
 
     getInstanceID() : ZalgoPromise<string> {
