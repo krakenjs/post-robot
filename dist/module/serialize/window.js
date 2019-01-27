@@ -131,9 +131,17 @@ export var ProxyWindow = function () {
         });
     };
 
+    ProxyWindow.prototype.getWindow = function getWindow() {
+        return this.actualWindow;
+    };
+
     ProxyWindow.prototype.setWindow = function setWindow(win) {
         this.actualWindow = win;
         this.actualWindowPromise.resolve(win);
+    };
+
+    ProxyWindow.prototype.awaitWindow = function awaitWindow() {
+        return this.actualWindowPromise;
     };
 
     ProxyWindow.prototype.matchWindow = function matchWindow(win) {
@@ -161,10 +169,6 @@ export var ProxyWindow = function () {
 
     ProxyWindow.prototype.unwrap = function unwrap() {
         return this.actualWindow || this;
-    };
-
-    ProxyWindow.prototype.awaitWindow = function awaitWindow() {
-        return this.actualWindowPromise;
     };
 
     ProxyWindow.prototype.getInstanceID = function getInstanceID() {

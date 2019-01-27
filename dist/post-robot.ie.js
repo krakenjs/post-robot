@@ -2012,9 +2012,15 @@
                         return _this5.actualWindow ? Object(src.isWindowClosed)(_this5.actualWindow) : _this5.serializedWindow.isClosed();
                     });
                 };
+                ProxyWindow.prototype.getWindow = function() {
+                    return this.actualWindow;
+                };
                 ProxyWindow.prototype.setWindow = function(win) {
                     this.actualWindow = win;
                     this.actualWindowPromise.resolve(win);
+                };
+                ProxyWindow.prototype.awaitWindow = function() {
+                    return this.actualWindowPromise;
                 };
                 ProxyWindow.prototype.matchWindow = function(win) {
                     var _this6 = this;
@@ -2028,9 +2034,6 @@
                 };
                 ProxyWindow.prototype.unwrap = function() {
                     return this.actualWindow || this;
-                };
-                ProxyWindow.prototype.awaitWindow = function() {
-                    return this.actualWindowPromise;
                 };
                 ProxyWindow.prototype.getInstanceID = function() {
                     return this.actualWindow ? Object(lib.b)(this.actualWindow) : this.serializedWindow.getInstanceID();
