@@ -4,59 +4,61 @@ import { type ZalgoPromise } from 'zalgo-promise/src';
 import { matchDomain, type CrossDomainWindowType, type DomainMatcher } from 'cross-domain-utils/src';
 import { isRegex, getOrSet } from 'belter/src';
 
-import { global, globalStore, windowStore } from '../global';
+import { getWildcard, type WildCard, globalStore, windowStore } from '../global';
 import { WILDCARD } from '../conf';
 
-let responseListeners = globalStore('responseListeners');
-let requestListeners = windowStore('requestListeners');
-let erroredResponseListeners = globalStore('erroredResponseListeners');
-
 export function resetListeners() {
+    const responseListeners = globalStore('responseListeners');
+    const erroredResponseListeners = globalStore('erroredResponseListeners');
     responseListeners.reset();
     erroredResponseListeners.reset();
 }
 
-global.WINDOW_WILDCARD = global.WINDOW_WILDCARD || new (function WindowWildcard() { /* pass */ })();
-
 const __DOMAIN_REGEX__ = '__domain_regex__';
 
-export type RequestListenerType = {
+export type RequestListenerType = {|
     handler : ({ source : CrossDomainWindowType, origin : string, data : mixed }) => (mixed | ZalgoPromise<mixed>),
     handleError : (err : mixed) => void,
     window : ?CrossDomainWindowType,
     name : string,
     domain : DomainMatcher
-};
+|};
 
-export type ResponseListenerType = {
+export type ResponseListenerType = {|
     name : string,
-    window : CrossDomainWindowType,
+    win : CrossDomainWindowType,
     domain : DomainMatcher,
-    respond : (err : ?mixed, result : ?mixed) => void,
+    promise : ZalgoPromise<*>,
     ack? : ?boolean
-};
+|};
 
 export function addResponseListener(hash : string, listener : ResponseListenerType) {
+    const responseListeners = globalStore('responseListeners');
     responseListeners.set(hash, listener);
 }
 
 export function getResponseListener(hash : string) : ?ResponseListenerType {
+    const responseListeners = globalStore('responseListeners');
     return responseListeners.get(hash);
 }
 
 export function deleteResponseListener(hash : string) {
+    const responseListeners = globalStore('responseListeners');
     responseListeners.del(hash);
 }
 
 export function markResponseListenerErrored(hash : string) {
+    const erroredResponseListeners = globalStore('erroredResponseListeners');
     erroredResponseListeners.set(hash, true);
 }
 
 export function isResponseListenerErrored(hash : string) : boolean {
+    const erroredResponseListeners = globalStore('erroredResponseListeners');
     return erroredResponseListeners.has(hash);
 }
 
-export function getRequestListener({ name, win, domain } : { name : string, win : ?CrossDomainWindowType, domain : ?(string | RegExp) }) : ?RequestListenerType {
+export function getRequestListener({ name, win, domain } : { name : string, win : ?(CrossDomainWindowType | WildCard), domain : ?(string | RegExp) }) : ?RequestListenerType {
+    const requestListeners = windowStore('requestListeners');
 
     if (win === WILDCARD) {
         win = null;
@@ -70,18 +72,18 @@ export function getRequestListener({ name, win, domain } : { name : string, win 
         throw new Error(`Name required to get request listener`);
     }
 
-    for (let winQualifier of [ win, global.WINDOW_WILDCARD ]) {
+    for (const winQualifier of [ win, getWildcard() ]) {
         if (!winQualifier) {
             continue;
         }
 
-        let nameListeners = requestListeners.get(winQualifier);
+        const nameListeners = requestListeners.get(winQualifier);
 
         if (!nameListeners) {
             continue;
         }
 
-        let domainListeners = nameListeners[name];
+        const domainListeners = nameListeners[name];
 
         if (!domainListeners) {
             continue;
@@ -93,7 +95,7 @@ export function getRequestListener({ name, win, domain } : { name : string, win 
             }
 
             if (domainListeners[__DOMAIN_REGEX__]) {
-                for (let { regex, listener } of domainListeners[__DOMAIN_REGEX__]) {
+                for (const { regex, listener } of domainListeners[__DOMAIN_REGEX__]) {
                     if (matchDomain(regex, domain)) {
                         return listener;
                     }
@@ -107,22 +109,23 @@ export function getRequestListener({ name, win, domain } : { name : string, win 
     }
 }
 
-export function addRequestListener({ name, win, domain } : { name : string, win : ?CrossDomainWindowType, domain : ?DomainMatcher }, listener : RequestListenerType) : { cancel : () => void } {
+export function addRequestListener({ name, win, domain } : { name : string, win : ?(CrossDomainWindowType | WildCard), domain : ?DomainMatcher }, listener : RequestListenerType) : { cancel : () => void } {
+    const requestListeners = windowStore('requestListeners');
 
     if (!name || typeof name !== 'string') {
         throw new Error(`Name required to add request listener`);
     }
 
     if (Array.isArray(win)) {
-        let listenersCollection = [];
+        const listenersCollection = [];
 
-        for (let item of win) {
+        for (const item of win) {
             listenersCollection.push(addRequestListener({ name, domain, win: item }, listener));
         }
 
         return {
             cancel() {
-                for (let cancelListener of listenersCollection) {
+                for (const cancelListener of listenersCollection) {
                     cancelListener.cancel();
                 }
             }
@@ -130,34 +133,34 @@ export function addRequestListener({ name, win, domain } : { name : string, win 
     }
 
     if (Array.isArray(domain)) {
-        let listenersCollection = [];
+        const listenersCollection = [];
 
-        for (let item of domain) {
+        for (const item of domain) {
             listenersCollection.push(addRequestListener({ name, win, domain: item }, listener));
         }
 
         return {
             cancel() {
-                for (let cancelListener of listenersCollection) {
+                for (const cancelListener of listenersCollection) {
                     cancelListener.cancel();
                 }
             }
         };
     }
 
-    let existingListener = getRequestListener({ name, win, domain });
+    const existingListener = getRequestListener({ name, win, domain });
 
     if (!win || win === WILDCARD) {
-        win = global.WINDOW_WILDCARD;
+        win = getWildcard();
     }
 
     domain = domain || WILDCARD;
 
     if (existingListener) {
         if (win && domain) {
-            throw new Error(`Request listener already exists for ${ name } on domain ${ domain.toString() } for ${ win === global.WINDOW_WILDCARD ? 'wildcard' : 'specified' } window`);
+            throw new Error(`Request listener already exists for ${ name } on domain ${ domain.toString() } for ${ win === getWildcard() ? 'wildcard' : 'specified' } window`);
         } else if (win) {
-            throw new Error(`Request listener already exists for ${ name } for ${ win === global.WINDOW_WILDCARD ? 'wildcard' : 'specified' } window`);
+            throw new Error(`Request listener already exists for ${ name } for ${ win === getWildcard() ? 'wildcard' : 'specified' } window`);
         } else if (domain) {
             throw new Error(`Request listener already exists for ${ name } on domain ${ domain.toString() }`);
         } else {
@@ -165,11 +168,11 @@ export function addRequestListener({ name, win, domain } : { name : string, win 
         }
     }
 
-    let nameListeners = requestListeners.getOrSet(win, () => ({}));
+    const nameListeners = requestListeners.getOrSet(win, () => ({}));
     // $FlowFixMe
-    let domainListeners = getOrSet(nameListeners, name, () => ({}));
+    const domainListeners = getOrSet(nameListeners, name, () => ({}));
 
-    let strDomain = domain.toString();
+    const strDomain = domain.toString();
 
     let regexListeners;
     let regexListener;

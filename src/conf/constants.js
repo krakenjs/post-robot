@@ -17,19 +17,12 @@ export const MESSAGE_NAME = {
     OPEN_TUNNEL: ('postrobot_open_tunnel' : 'postrobot_open_tunnel')
 };
 
-export const WINDOW_PROP = {
-    POSTROBOT: ('__postRobot__' : '__postRobot__')
-};
+export const __POST_ROBOT__ = ('__postRobot__' : '__postRobot__');
 
 export const SEND_STRATEGY = {
     POST_MESSAGE: ('postrobot_post_message' : 'postrobot_post_message'),
     BRIDGE:       ('postrobot_bridge' : 'postrobot_bridge'),
     GLOBAL:       ('postrobot_global' : 'postrobot_global')
-};
-
-export const PROTOCOL = {
-    MOCK: ('mock:' : 'mock:'),
-    FILE: ('file:' : 'file:')
 };
 
 export const BRIDGE_NAME_PREFIX = '__postrobot_bridge__';

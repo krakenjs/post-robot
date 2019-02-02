@@ -1,12 +1,14 @@
 /* @flow */
 
-import { isSameDomain, isSameTopWindow, isActuallySameDomain, getActualDomain, getDomain, type CrossDomainWindowType, type DomainMatcher } from 'cross-domain-utils/src';
+import { isSameDomain, isSameTopWindow, isActuallySameDomain, getActualDomain,
+    getDomain, type CrossDomainWindowType, type DomainMatcher, PROTOCOL } from 'cross-domain-utils/src';
 
-import { SEND_STRATEGY, PROTOCOL, WILDCARD, WINDOW_PROP } from '../../conf';
+import { SEND_STRATEGY, WILDCARD } from '../../conf';
 import { needsGlobalMessagingForBrowser } from '../../lib';
+import { getGlobal } from '../../global';
+import { sendBridgeMessage, needsBridgeForBrowser, isBridge } from '../../bridge';
 
-export let SEND_MESSAGE_STRATEGIES = {};
-
+export const SEND_MESSAGE_STRATEGIES = {};
 
 SEND_MESSAGE_STRATEGIES[SEND_STRATEGY.POST_MESSAGE] = (win : CrossDomainWindowType, serializedMessage : string, domain : DomainMatcher) => {
 
@@ -50,13 +52,11 @@ SEND_MESSAGE_STRATEGIES[SEND_STRATEGY.POST_MESSAGE] = (win : CrossDomainWindowTy
     });
 
     domains.forEach(dom => {
-        return win.postMessage(serializedMessage, dom);
+        win.postMessage(serializedMessage, dom);
     });
 };
 
 if (__POST_ROBOT__.__IE_POPUP_SUPPORT__) {
-
-    let { sendBridgeMessage, needsBridgeForBrowser, isBridge } = require('../../bridge');
 
     SEND_MESSAGE_STRATEGIES[SEND_STRATEGY.BRIDGE] = (win : CrossDomainWindowType, serializedMessage : string, domain : string) => {
 
@@ -72,7 +72,7 @@ if (__POST_ROBOT__.__IE_POPUP_SUPPORT__) {
             throw new Error(`Can only use bridge to communicate between two different windows, not between frames`);
         }
 
-        return sendBridgeMessage(win, domain, serializedMessage);
+        sendBridgeMessage(win, domain, serializedMessage);
     };
 }
 
@@ -93,13 +93,13 @@ if (__POST_ROBOT__.__IE_POPUP_SUPPORT__ || __POST_ROBOT__.__GLOBAL_MESSAGE_SUPPO
         }
 
         // $FlowFixMe
-        let foreignGlobal = win[WINDOW_PROP.POSTROBOT];
+        const foreignGlobal = getGlobal(win);
 
         if (!foreignGlobal) {
             throw new Error(`Can not find postRobot global on foreign window`);
         }
 
-        return foreignGlobal.receiveMessage({
+        foreignGlobal.receiveMessage({
             source: window,
             origin: getDomain(),
             data:   serializedMessage

@@ -1,16 +1,17 @@
 /* @flow */
-/* eslint import/no-nodejs-modules: off */
+/* eslint import/no-nodejs-modules: off, import/no-default-export: off */
 
 import { getWebpackConfig } from 'grumbler-scripts/config/webpack.config';
 
 import globals from './globals';
 
-export let FILE_NAME = 'post-robot';
-export let MODULE_NAME = 'postRobot';
+export const FILE_NAME = 'post-robot';
+export const MODULE_NAME = 'postRobot';
 
-export let WEBPACK_CONFIG = getWebpackConfig({
+export const WEBPACK_CONFIG = getWebpackConfig({
     filename:   `${ FILE_NAME }.js`,
     modulename: MODULE_NAME,
+    minify:     false,
     vars:       {
         ...globals,
 
@@ -22,7 +23,7 @@ export let WEBPACK_CONFIG = getWebpackConfig({
     }
 });
 
-export let WEBPACK_CONFIG_MIN = getWebpackConfig({
+export const WEBPACK_CONFIG_MIN = getWebpackConfig({
     filename:   `${ FILE_NAME }.min.js`,
     modulename: MODULE_NAME,
     minify:     true,
@@ -37,22 +38,23 @@ export let WEBPACK_CONFIG_MIN = getWebpackConfig({
     }
 });
 
-export let WEBPACK_CONFIG_IE = getWebpackConfig({
+export const WEBPACK_CONFIG_IE = getWebpackConfig({
     filename:   `${ FILE_NAME }.ie.js`,
     modulename: MODULE_NAME,
+    minify:     false,
     vars:       globals
 });
 
-export let WEBPACK_CONFIG_IE_MIN = getWebpackConfig({
+export const WEBPACK_CONFIG_IE_MIN = getWebpackConfig({
     filename:   `${ FILE_NAME }.ie.min.js`,
     modulename: MODULE_NAME,
     minify:     true,
     vars:       globals
 });
 
-export let WEBPACK_CONFIG_TEST = getWebpackConfig({
-    filename:   `${ FILE_NAME }.js`,
+export const WEBPACK_CONFIG_TEST = getWebpackConfig({
     modulename: MODULE_NAME,
+    minify:     false,
     test:       true,
     vars:       globals
 });

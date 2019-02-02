@@ -2,35 +2,35 @@
 
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { isSameDomain, getOpener, getDomain, getFrameByName, type CrossDomainWindowType } from 'cross-domain-utils/src';
-import { weakMapMemoize, noop } from 'belter/src';
+import { noop } from 'belter/src';
 
-import { WINDOW_PROP } from '../conf';
-import { global } from '../global';
+import { getGlobal, windowStore } from '../global';
+import type { OnType, SendType, ReceiveMessageType } from '../types';
 
 import { needsBridge, registerRemoteWindow, rejectRemoteSendMessage, registerRemoteSendMessage, getBridgeName } from './common';
 
-let awaitRemoteBridgeForWindow = weakMapMemoize((win : CrossDomainWindowType) : ZalgoPromise<?CrossDomainWindowType> => {
-    return ZalgoPromise.try(() => {
-        try {
-            let frame = getFrameByName(win, getBridgeName(getDomain()));
+function awaitRemoteBridgeForWindow (win : CrossDomainWindowType) : ZalgoPromise<?CrossDomainWindowType> {
+    return windowStore('remoteBridgeAwaiters').getOrSet(win, () => {
+        return ZalgoPromise.try(() => {
+            const frame = getFrameByName(win, getBridgeName(getDomain()));
 
             if (!frame) {
-                return;
+                throw new Error(`Bridge not found for domain: ${ getDomain() }`);
             }
 
             // $FlowFixMe
-            if (isSameDomain(frame) && frame[WINDOW_PROP.POSTROBOT]) {
+            if (isSameDomain(frame) && getGlobal(frame)) {
                 return frame;
             }
 
-            return new ZalgoPromise(resolve => {
+            return new ZalgoPromise((resolve, reject) => {
 
                 let interval;
-                let timeout;
+                let timeout; // eslint-disable-line prefer-const
 
-                interval = setInterval(() => {
+                interval = setInterval(() => { // eslint-disable-line prefer-const
                     // $FlowFixMe
-                    if (frame && isSameDomain(frame) && frame[WINDOW_PROP.POSTROBOT]) {
+                    if (frame && isSameDomain(frame) && getGlobal(frame)) {
                         clearInterval(interval);
                         clearTimeout(timeout);
                         return resolve(frame);
@@ -39,19 +39,15 @@ let awaitRemoteBridgeForWindow = weakMapMemoize((win : CrossDomainWindowType) : 
 
                 timeout = setTimeout(() => {
                     clearInterval(interval);
-                    return resolve();
+                    return reject(new Error(`Bridge not found for domain: ${ getDomain() }`));
                 }, 2000);
             });
-
-        } catch (err) {
-            // pass
-        }
+        });
     });
-});
+}
 
-export function openTunnelToOpener() : ZalgoPromise<void> {
+export function openTunnelToOpener({ on, send, receiveMessage } : { on : OnType, send : SendType, receiveMessage : ReceiveMessageType }) : ZalgoPromise<void> {
     return ZalgoPromise.try(() => {
-
         const opener = getOpener(window);
 
         if (!opener) {
@@ -66,15 +62,12 @@ export function openTunnelToOpener() : ZalgoPromise<void> {
 
         return awaitRemoteBridgeForWindow(opener).then(bridge => {
 
-            if (!bridge) {
-                return rejectRemoteSendMessage(opener, new Error(`Can not register with opener: no bridge found in opener`));
-            }
-
             if (!window.name) {
                 return rejectRemoteSendMessage(opener, new Error(`Can not register with opener: window does not have a name`));
             }
 
-            return bridge[WINDOW_PROP.POSTROBOT].openTunnelToParent({
+            // $FlowFixMe
+            return getGlobal(bridge).openTunnelToParent({
 
                 name: window.name,
 
@@ -97,11 +90,11 @@ export function openTunnelToOpener() : ZalgoPromise<void> {
                     }
 
                     try {
-                        global.receiveMessage({
+                        receiveMessage({
                             data:   message,
                             origin: this.origin,
                             source: this.source
-                        });
+                        }, { on, send });
                     } catch (err) {
                         ZalgoPromise.reject(err);
                     }

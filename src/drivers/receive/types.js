@@ -8,12 +8,13 @@ import { MESSAGE_TYPE, MESSAGE_ACK, MESSAGE_NAME } from '../../conf';
 import { sendMessage } from '../send';
 import { getRequestListener, getResponseListener, deleteResponseListener, isResponseListenerErrored } from '../listeners';
 import type { RequestMessage, AckResponseMessage, SuccessResponseMessage, ErrorResponseMessage } from '../types';
+import type { OnType, SendType } from '../../types';
 
-export let RECEIVE_MESSAGE_TYPES = {
+export const RECEIVE_MESSAGE_TYPES = {
 
-    [ MESSAGE_TYPE.REQUEST ](source : CrossDomainWindowType, origin : string, message : RequestMessage) : ZalgoPromise<void> {
+    [ MESSAGE_TYPE.REQUEST ](source : CrossDomainWindowType, origin : string, message : RequestMessage, { on, send } : { on : OnType, send : SendType }) : ZalgoPromise<void> {
 
-        let options = getRequestListener({ name: message.name, win: source, domain: origin });
+        const options = getRequestListener({ name: message.name, win: source, domain: origin });
 
         const logName = (message.name === MESSAGE_NAME.METHOD && message.data && typeof message.data.name === 'string') ? `${ message.data.name }()` : message.name;
 
@@ -22,10 +23,10 @@ export let RECEIVE_MESSAGE_TYPES = {
             console.info('receive::req', logName, origin, '\n\n', message.data);
         }
 
-        function sendResponse(type : $Values<typeof MESSAGE_TYPE>, ack? : $Values<typeof MESSAGE_ACK>, response = {}) : ZalgoPromise<void> {
+        function sendResponse(type : $Values<typeof MESSAGE_TYPE>, ack? : $Values<typeof MESSAGE_ACK>, response = {}) {
 
             if (message.fireAndForget || isWindowClosed(source)) {
-                return ZalgoPromise.resolve();
+                return;
             }
 
             if (__DEBUG__ && type !== MESSAGE_TYPE.ACK) {
@@ -39,13 +40,13 @@ export let RECEIVE_MESSAGE_TYPES = {
             }
 
             // $FlowFixMe
-            return sendMessage(source, origin, {
+            sendMessage(source, origin, {
                 type,
                 ack,
                 hash:   message.hash,
                 name:   message.name,
                 ...response
-            });
+            }, { on, send });
         }
 
         return ZalgoPromise.all([
@@ -62,7 +63,7 @@ export let RECEIVE_MESSAGE_TYPES = {
                     throw new Error(`Request origin ${ origin } does not match domain ${ options.domain.toString() }`);
                 }
 
-                let data = message.data;
+                const data = message.data;
 
                 return options.handler({ source, origin, data });
 
@@ -88,7 +89,7 @@ export let RECEIVE_MESSAGE_TYPES = {
             return;
         }
 
-        let options = getResponseListener(message.hash);
+        const options = getResponseListener(message.hash);
 
         if (!options) {
             throw new Error(`No handler found for post message ack for message: ${ message.name } from ${ origin } in ${ window.location.protocol }//${ window.location.host }${ window.location.pathname }`);
@@ -96,6 +97,10 @@ export let RECEIVE_MESSAGE_TYPES = {
 
         if (!matchDomain(options.domain, origin)) {
             throw new Error(`Ack origin ${ origin } does not match domain ${ options.domain.toString() }`);
+        }
+
+        if (source !== options.win) {
+            throw new Error(`Ack source does not match registered window`);
         }
 
         options.ack = true;
@@ -107,7 +112,7 @@ export let RECEIVE_MESSAGE_TYPES = {
             return;
         }
 
-        let options = getResponseListener(message.hash);
+        const options = getResponseListener(message.hash);
 
         if (!options) {
             throw new Error(`No handler found for post message response for message: ${ message.name } from ${ origin } in ${ window.location.protocol }//${ window.location.host }${ window.location.pathname }`);
@@ -117,13 +122,27 @@ export let RECEIVE_MESSAGE_TYPES = {
             throw new Error(`Response origin ${ origin } does not match domain ${ stringifyDomainPattern(options.domain) }`);
         }
 
+        if (source !== options.win) {
+            throw new Error(`Response source does not match registered window`);
+        }
+
         deleteResponseListener(message.hash);
 
+        const logName = (message.name === MESSAGE_NAME.METHOD && message.data && typeof message.data.name === 'string') ? `${ message.data.name }()` : message.name;
+
         if (message.ack === MESSAGE_ACK.ERROR) {
-            return options.respond(message.error, null);
+            if (__DEBUG__) {
+                console.error('receive::err', logName, origin, '\n\n', message.error); // eslint-disable-line no-console
+            }
+
+            options.promise.reject(message.error);
+
         } else if (message.ack === MESSAGE_ACK.SUCCESS) {
-            let data = message.data;
-            return options.respond(null, { source, origin, data });
+            if (__DEBUG__) {
+                console.info('receive::res', logName, origin, '\n\n', message.data); // eslint-disable-line no-console
+            }
+
+            options.promise.resolve({ source, origin, data: message.data });
         }
     }
 };
