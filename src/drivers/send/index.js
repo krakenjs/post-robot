@@ -3,7 +3,6 @@
 import { isWindowClosed, type CrossDomainWindowType, type DomainMatcher } from 'cross-domain-utils/src';
 import { uniqueID } from 'belter/src';
 
-import { __POST_ROBOT__ } from '../../conf';
 import { serializeMessage } from '../../serialize';
 import type { Message } from '../types';
 import type { OnType, SendType } from '../../types';
@@ -16,7 +15,7 @@ export function sendMessage(win : CrossDomainWindowType, domain : DomainMatcher,
     }
     
     const serializedMessage = serializeMessage(win, domain, {
-        [ __POST_ROBOT__ ]: {
+        [ __POST_ROBOT__.__GLOBAL_KEY__ ]: {
             id: uniqueID(),
             ...message
         }

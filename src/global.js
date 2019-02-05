@@ -4,13 +4,11 @@ import { type CrossDomainWindowType, type SameDomainWindowType } from 'cross-dom
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
 import { getOrSet } from 'belter/src';
 
-import { __POST_ROBOT__ } from './conf';
-
 export function getGlobal(win : SameDomainWindowType = window) : Object {
     if (win !== window) {
-        return win[__POST_ROBOT__];
+        return win[__POST_ROBOT__.__GLOBAL_KEY__];
     }
-    const global : Object = win[__POST_ROBOT__] = win[__POST_ROBOT__] || {};
+    const global : Object = win[__POST_ROBOT__.__GLOBAL_KEY__] = win[__POST_ROBOT__.__GLOBAL_KEY__] || {};
     return global;
 }
 
@@ -30,7 +28,7 @@ type GlobalStore<T> = {|
 |};
 
 // $FlowFixMe
-export function globalStore<T : mixed>(key? : string = __POST_ROBOT__, defStore? : ObjectGetter = getObj) : GlobalStore<T> {
+export function globalStore<T : mixed>(key? : string = 'store', defStore? : ObjectGetter = getObj) : GlobalStore<T> {
     return getOrSet(getGlobal(), key, () => {
         let store = defStore();
 
@@ -80,7 +78,7 @@ type WindowStore<T> = {|
 |};
 
 // $FlowFixMe
-export function windowStore<T>(key? : string = __POST_ROBOT__, defStore? : ObjectGetter = getObj) : WindowStore<T> {
+export function windowStore<T>(key? : string = 'store', defStore? : ObjectGetter = getObj) : WindowStore<T> {
     return globalStore('windowStore').getOrSet(key, () => {
         const winStore = new WeakMap();
 

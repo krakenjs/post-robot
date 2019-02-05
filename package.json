@@ -13,7 +13,7 @@
     "babel": "babel src/ --out-dir dist/module",
     "webpack": "babel-node --config-file ./node_modules/grumbler-scripts/config/.babelrc-node --plugins=transform-es2015-modules-commonjs ./node_modules/.bin/webpack --display-optimization-bailout --progress",
     "test": "npm run lint && npm run flow-typed && npm run flow && npm run karma",
-    "build": "npm run test && npm run babel && npm run webpack",
+    "build": "npm run test && npm run babel && npm run webpack -- $@",
     "release": "./publish.sh",
     "release:patch": "./publish.sh patch",
     "release:minor": "./publish.sh minor",

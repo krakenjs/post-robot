@@ -3,7 +3,6 @@
 import { isWindowClosed, type CrossDomainWindowType, getDomain, isSameTopWindow } from 'cross-domain-utils/src';
 import { addEventListener, noop } from 'belter/src';
 
-import { __POST_ROBOT__ } from '../../conf';
 import { markWindowKnown, needsGlobalMessagingForBrowser } from '../../lib';
 import { deserializeMessage } from '../../serialize';
 import { getGlobal, globalStore } from '../../global';
@@ -29,7 +28,7 @@ function parseMessage(message : string, source : CrossDomainWindowType, origin :
         return;
     }
 
-    parsedMessage = parsedMessage[__POST_ROBOT__];
+    parsedMessage = parsedMessage[__POST_ROBOT__.__GLOBAL_KEY__];
 
     if (!parsedMessage || typeof parsedMessage !== 'object' || parsedMessage === null) {
         return;
