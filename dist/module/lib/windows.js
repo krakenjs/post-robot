@@ -1,13 +1,17 @@
-import 'cross-domain-utils/src';
+"use strict";
 
-import { windowStore } from '../global';
+exports.__esModule = true;
+exports.markWindowKnown = markWindowKnown;
+exports.isWindowKnown = isWindowKnown;
 
-var knownWindows = windowStore('knownWindows');
+var _global = require("../global");
 
-export function markWindowKnown(win) {
-    knownWindows.set(win, true);
+function markWindowKnown(win) {
+  const knownWindows = (0, _global.windowStore)('knownWindows');
+  knownWindows.set(win, true);
 }
 
-export function isWindowKnown(win) {
-    return knownWindows.get(win, false);
+function isWindowKnown(win) {
+  const knownWindows = (0, _global.windowStore)('knownWindows');
+  return knownWindows.get(win, false);
 }

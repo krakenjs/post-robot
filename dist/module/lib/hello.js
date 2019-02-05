@@ -1,64 +1,113 @@
-import { getAncestor } from 'cross-domain-utils/src';
-import { ZalgoPromise } from 'zalgo-promise/src';
-import { noop, uniqueID, once, weakMapMemoizePromise } from 'belter/src';
+"use strict";
 
-import { MESSAGE_NAME, WILDCARD } from '../conf';
-import { global, windowStore } from '../global';
+exports.__esModule = true;
+exports.sayHello = sayHello;
+exports.getWindowInstanceID = getWindowInstanceID;
+exports.initHello = initHello;
+exports.awaitWindowHello = awaitWindowHello;
 
-global.instanceID = global.instanceID || uniqueID();
-var helloPromises = windowStore('helloPromises');
+var _src = require("cross-domain-utils/src");
+
+var _src2 = require("zalgo-promise/src");
+
+var _src3 = require("belter/src");
+
+var _conf = require("../conf");
+
+var _global = require("../global");
+
+function getInstanceID() {
+  return (0, _global.globalStore)('instance').getOrSet('instanceID', _src3.uniqueID);
+}
 
 function getHelloPromise(win) {
-    return helloPromises.getOrSet(win, function () {
-        return new ZalgoPromise();
-    });
+  const helloPromises = (0, _global.windowStore)('helloPromises');
+  return helloPromises.getOrSet(win, () => new _src2.ZalgoPromise());
 }
 
-var listenForHello = once(function () {
-    global.on(MESSAGE_NAME.HELLO, { domain: WILDCARD }, function (_ref) {
-        var source = _ref.source,
-            origin = _ref.origin;
-
-        getHelloPromise(source).resolve({ win: source, domain: origin });
-        return { instanceID: global.instanceID };
+function listenForHello({
+  on
+}) {
+  return on(_conf.MESSAGE_NAME.HELLO, {
+    domain: _conf.WILDCARD
+  }, ({
+    source,
+    origin
+  }) => {
+    getHelloPromise(source).resolve({
+      win: source,
+      domain: origin
     });
-});
-
-export function sayHello(win) {
-    return global.send(win, MESSAGE_NAME.HELLO, { instanceID: global.instanceID }, { domain: WILDCARD, timeout: -1 }).then(function (_ref2) {
-        var origin = _ref2.origin,
-            instanceID = _ref2.data.instanceID;
-
-        getHelloPromise(win).resolve({ win: win, domain: origin });
-        return { win: win, domain: origin, instanceID: instanceID };
-    });
+    return {
+      instanceID: getInstanceID()
+    };
+  });
 }
 
-export var getWindowInstanceID = weakMapMemoizePromise(function (win) {
-    return sayHello(win).then(function (_ref3) {
-        var instanceID = _ref3.instanceID;
-        return instanceID;
+function sayHello(win, {
+  send
+}) {
+  return send(win, _conf.MESSAGE_NAME.HELLO, {
+    instanceID: getInstanceID()
+  }, {
+    domain: _conf.WILDCARD,
+    timeout: -1
+  }).then(({
+    origin,
+    data: {
+      instanceID
+    }
+  }) => {
+    getHelloPromise(win).resolve({
+      win,
+      domain: origin
     });
-});
+    return {
+      win,
+      domain: origin,
+      instanceID
+    };
+  });
+}
 
-export function initHello() {
-    listenForHello();
+function getWindowInstanceID(win, {
+  send
+}) {
+  return (0, _global.windowStore)('windowInstanceIDPromises').getOrSet(win, () => {
+    return sayHello(win, {
+      send
+    }).then(({
+      instanceID
+    }) => instanceID);
+  });
+}
 
-    var parent = getAncestor();
+function initHello({
+  on,
+  send
+}) {
+  return (0, _global.globalStore)('builtinListeners').getOrSet('helloListener', () => {
+    const listener = listenForHello({
+      on
+    });
+    const parent = (0, _src.getAncestor)();
+
     if (parent) {
-        sayHello(parent)['catch'](noop);
+      sayHello(parent, {
+        send
+      }).catch(_src3.noop);
     }
+
+    return listener;
+  });
 }
 
-export function awaitWindowHello(win) {
-    var timeout = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 5000;
-    var name = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'Window';
+function awaitWindowHello(win, timeout = 5000, name = 'Window') {
+  let promise = getHelloPromise(win);
 
-    var promise = getHelloPromise(win);
+  if (timeout !== -1) {
+    promise = promise.timeout(timeout, new Error(`${name} did not load after ${timeout}ms`));
+  }
 
-    if (timeout !== -1) {
-        promise = promise.timeout(timeout, new Error(name + ' did not load after ' + timeout + 'ms'));
-    }
-
-    return promise;
+  return promise;
 }

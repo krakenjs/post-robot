@@ -1,53 +1,48 @@
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+"use strict";
 
-import { isWindowClosed } from 'cross-domain-utils/src';
-import { ZalgoPromise } from 'zalgo-promise/src';
-import { uniqueID, stringifyError } from 'belter/src';
+exports.__esModule = true;
+exports.sendMessage = sendMessage;
 
-import { CONFIG, WINDOW_PROP } from '../../conf';
-import { serializeMessage } from '../../serialize';
+var _src = require("cross-domain-utils/src");
 
+var _src2 = require("belter/src");
 
-import { SEND_MESSAGE_STRATEGIES } from './strategies';
+var _serialize = require("../../serialize");
 
-export function sendMessage(win, domain, message) {
-    return ZalgoPromise['try'](function () {
-        var _serializeMessage;
+var _strategies = require("./strategies");
 
-        if (isWindowClosed(win)) {
-            throw new Error('Window is closed');
-        }
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
-        var serializedMessage = serializeMessage(win, domain, (_serializeMessage = {}, _serializeMessage[WINDOW_PROP.POSTROBOT] = _extends({
-            id: uniqueID()
-        }, message), _serializeMessage));
+function sendMessage(win, domain, message, {
+  on,
+  send
+}) {
+  if ((0, _src.isWindowClosed)(win)) {
+    throw new Error('Window is closed');
+  }
 
-        var messages = [];
+  const serializedMessage = (0, _serialize.serializeMessage)(win, domain, {
+    [__POST_ROBOT__.__GLOBAL_KEY__]: _extends({
+      id: (0, _src2.uniqueID)()
+    }, message)
+  }, {
+    on,
+    send
+  });
+  let success = false;
+  let error;
 
-        return ZalgoPromise.map(Object.keys(SEND_MESSAGE_STRATEGIES), function (strategyName) {
+  for (const strategyName of Object.keys(_strategies.SEND_MESSAGE_STRATEGIES)) {
+    try {
+      _strategies.SEND_MESSAGE_STRATEGIES[strategyName](win, serializedMessage, domain);
 
-            return ZalgoPromise['try'](function () {
+      success = true;
+    } catch (err) {
+      error = error || err;
+    }
+  }
 
-                if (!CONFIG.ALLOWED_POST_MESSAGE_METHODS[strategyName]) {
-                    throw new Error('Strategy disallowed: ' + strategyName);
-                }
-
-                return SEND_MESSAGE_STRATEGIES[strategyName](win, serializedMessage, domain);
-            }).then(function () {
-                messages.push(strategyName + ': success');
-                return true;
-            }, function (err) {
-                messages.push(strategyName + ': ' + stringifyError(err) + '\n');
-                return false;
-            });
-        }).then(function (results) {
-
-            var success = results.some(Boolean);
-            var status = message.type + ' ' + message.name + ' ' + (success ? 'success' : 'error') + ':\n  - ' + messages.join('\n  - ') + '\n';
-
-            if (!success) {
-                throw new Error(status);
-            }
-        });
-    });
+  if (!success) {
+    throw error;
+  }
 }

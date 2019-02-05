@@ -1,90 +1,102 @@
-import 'cross-domain-utils/src';
-import { WeakMap } from 'cross-domain-safe-weakmap/src';
-import { getOrSet } from 'belter/src';
+"use strict";
 
-import { WINDOW_PROP } from './conf';
+exports.__esModule = true;
+exports.getGlobal = getGlobal;
+exports.globalStore = globalStore;
+exports.getWildcard = getWildcard;
+exports.windowStore = windowStore;
+exports.WildCard = void 0;
 
-export var global = window[WINDOW_PROP.POSTROBOT] = window[WINDOW_PROP.POSTROBOT] || {};
-var winStore = global.windowStore = global.windowStore || new WeakMap();
+var _src = require("cross-domain-safe-weakmap/src");
 
-var getObj = function getObj() {
-    return {};
-};
+var _src2 = require("belter/src");
+
+function getGlobal(win = window) {
+  if (win !== window) {
+    return win[__POST_ROBOT__.__GLOBAL_KEY__];
+  }
+
+  const global = win[__POST_ROBOT__.__GLOBAL_KEY__] = win[__POST_ROBOT__.__GLOBAL_KEY__] || {};
+  return global;
+}
+
+const getObj = () => ({});
 
 // $FlowFixMe
-export function windowStore(key) {
-    var defStore = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : getObj;
-
-
-    function getStore(win) {
-        return winStore.getOrSet(win, defStore);
-    }
-
+function globalStore(key = 'store', defStore = getObj) {
+  return (0, _src2.getOrSet)(getGlobal(), key, () => {
+    let store = defStore();
     return {
-        has: function has(win) {
-            var store = getStore(win);
-            return store.hasOwnProperty(key);
-        },
-        get: function get(win, defVal) {
-            var store = getStore(win);
-            // $FlowFixMe
-            return store.hasOwnProperty(key) ? store[key] : defVal;
-        },
-        set: function set(win, val) {
-            var store = getStore(win);
-            store[key] = val;
-            return val;
-        },
-        del: function del(win) {
-            var store = getStore(win);
-            delete store[key];
-        },
-        getOrSet: function getOrSet(win, getter) {
-            var store = getStore(win);
-            if (store.hasOwnProperty(key)) {
-                return store[key];
-            }
-            var val = getter();
-            store[key] = val;
-            return val;
-        }
+      has: storeKey => {
+        return store.hasOwnProperty(storeKey);
+      },
+      get: (storeKey, defVal) => {
+        // $FlowFixMe
+        return store.hasOwnProperty(storeKey) ? store[storeKey] : defVal;
+      },
+      set: (storeKey, val) => {
+        store[storeKey] = val;
+        return val;
+      },
+      del: storeKey => {
+        delete store[storeKey];
+      },
+      getOrSet: (storeKey, getter) => {
+        // $FlowFixMe
+        return (0, _src2.getOrSet)(store, storeKey, getter);
+      },
+      reset: () => {
+        store = defStore();
+      },
+      keys: () => {
+        return Object.keys(store);
+      }
     };
+  });
+}
+
+class WildCard {}
+
+exports.WildCard = WildCard;
+
+function getWildcard() {
+  const global = getGlobal();
+  global.WINDOW_WILDCARD = global.WINDOW_WILDCARD || new WildCard();
+  return global.WINDOW_WILDCARD;
 }
 
 // $FlowFixMe
-export function globalStore(key) {
-    var defStore = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : getObj;
+function windowStore(key = 'store', defStore = getObj) {
+  return globalStore('windowStore').getOrSet(key, () => {
+    const winStore = new _src.WeakMap();
 
-    var store = getOrSet(global, key, defStore);
+    const getStore = win => {
+      return winStore.getOrSet(win, defStore);
+    };
 
     return {
-        has: function has(storeKey) {
-            return store.hasOwnProperty(storeKey);
-        },
-        get: function get(storeKey, defVal) {
-            // $FlowFixMe
-            return store.hasOwnProperty(storeKey) ? store[storeKey] : defVal;
-        },
-        set: function set(storeKey, val) {
-            store[storeKey] = val;
-            return val;
-        },
-        del: function del(storeKey) {
-            delete store[storeKey];
-        },
-        getOrSet: function getOrSet(storeKey, getter) {
-            if (store.hasOwnProperty(storeKey)) {
-                return store[storeKey];
-            }
-            var val = getter();
-            store[storeKey] = val;
-            return val;
-        },
-        reset: function reset() {
-            store = defStore();
-        },
-        keys: function keys() {
-            return Object.keys(store);
-        }
+      has: win => {
+        const store = getStore(win);
+        return store.hasOwnProperty(key);
+      },
+      get: (win, defVal) => {
+        const store = getStore(win); // $FlowFixMe
+
+        return store.hasOwnProperty(key) ? store[key] : defVal;
+      },
+      set: (win, val) => {
+        const store = getStore(win);
+        store[key] = val;
+        return val;
+      },
+      del: win => {
+        const store = getStore(win);
+        delete store[key];
+      },
+      getOrSet: (win, getter) => {
+        const store = getStore(win);
+        return (0, _src2.getOrSet)(store, key, getter);
+      }
     };
+  });
 }

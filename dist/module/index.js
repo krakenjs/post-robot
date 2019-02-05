@@ -1,7 +1,79 @@
+"use strict";
 
+exports.__esModule = true;
+var _exportNames = {
+  Promise: true,
+  ProxyWindow: true,
+  serializeMessage: true,
+  deserializeMessage: true,
+  toProxyWindow: true,
+  on: true,
+  once: true,
+  send: true,
+  markWindowKnown: true,
+  cleanUpWindow: true,
+  bridge: true,
+  setup: true
+};
+exports.bridge = exports.cleanUpWindow = exports.markWindowKnown = exports.send = exports.once = exports.on = exports.toProxyWindow = exports.deserializeMessage = exports.serializeMessage = exports.ProxyWindow = exports.Promise = void 0;
 
-// eslint-disable-next-line import/no-namespace
-import * as INTERFACE from './interface';
+var _setup = require("./setup");
 
-export * from './interface';
-export default INTERFACE;
+exports.setup = _setup.setup;
+exports.serializeMessage = _setup.serializeMessage;
+exports.deserializeMessage = _setup.deserializeMessage;
+exports.toProxyWindow = _setup.toProxyWindow;
+
+var _bridge = require("./bridge");
+
+var _src = require("zalgo-promise/src");
+
+exports.Promise = _src.ZalgoPromise;
+
+var _types = require("./types");
+
+Object.keys(_types).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  exports[key] = _types[key];
+});
+
+var _serialize = require("./serialize");
+
+exports.ProxyWindow = _serialize.ProxyWindow;
+
+var _public = require("./public");
+
+exports.on = _public.on;
+exports.once = _public.once;
+exports.send = _public.send;
+
+var _lib = require("./lib");
+
+exports.markWindowKnown = _lib.markWindowKnown;
+
+var _clean = require("./clean");
+
+exports.cleanUpWindow = _clean.cleanUpWindow;
+let bridge;
+exports.bridge = bridge;
+
+if (__POST_ROBOT__.__IE_POPUP_SUPPORT__) {
+  exports.bridge = bridge = {
+    setupBridge: _bridge.setupBridge,
+    openBridge: _bridge.openBridge,
+    linkWindow: _bridge.linkWindow,
+    linkUrl: _bridge.linkUrl,
+    isBridge: _bridge.isBridge,
+    needsBridge: _bridge.needsBridge,
+    needsBridgeForBrowser: _bridge.needsBridgeForBrowser,
+    hasBridge: _bridge.hasBridge,
+    needsBridgeForWin: _bridge.needsBridgeForWin,
+    needsBridgeForDomain: _bridge.needsBridgeForDomain,
+    destroyBridges: _bridge.destroyBridges
+  };
+}
+
+if (__POST_ROBOT__.__AUTO_SETUP__) {
+  (0, _setup.setup)();
+}

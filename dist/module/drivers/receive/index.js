@@ -1,132 +1,180 @@
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+"use strict";
 
-import { isWindowClosed, getDomain, isSameTopWindow } from 'cross-domain-utils/src';
-import { addEventListener, noop } from 'belter/src';
+exports.__esModule = true;
+exports.receiveMessage = receiveMessage;
+exports.setupGlobalReceiveMessage = setupGlobalReceiveMessage;
+exports.messageListener = messageListener;
+exports.listenForMessages = listenForMessages;
 
-import { WINDOW_PROP } from '../../conf';
-import { markWindowKnown, needsGlobalMessagingForBrowser } from '../../lib';
-import { deserializeMessage } from '../../serialize';
-import { global, globalStore } from '../../global';
+var _src = require("cross-domain-utils/src");
 
-import { RECEIVE_MESSAGE_TYPES } from './types';
+var _src2 = require("belter/src");
 
-var receivedMessages = globalStore('receivedMessages');
+var _lib = require("../../lib");
 
-function parseMessage(message, source, origin) {
+var _serialize = require("../../serialize");
 
-    var parsedMessage = void 0;
+var _global = require("../../global");
 
-    try {
-        parsedMessage = deserializeMessage(source, origin, message);
-    } catch (err) {
-        return;
-    }
+var _types = require("./types");
 
-    if (!parsedMessage) {
-        return;
-    }
+function parseMessage(message, source, origin, {
+  on,
+  send
+}) {
+  let parsedMessage;
 
-    if ((typeof parsedMessage === 'undefined' ? 'undefined' : _typeof(parsedMessage)) !== 'object' || parsedMessage === null) {
-        return;
-    }
+  try {
+    parsedMessage = (0, _serialize.deserializeMessage)(source, origin, message, {
+      on,
+      send
+    });
+  } catch (err) {
+    return;
+  }
 
-    parsedMessage = parsedMessage[WINDOW_PROP.POSTROBOT];
+  if (!parsedMessage) {
+    return;
+  }
 
-    if (!parsedMessage || (typeof parsedMessage === 'undefined' ? 'undefined' : _typeof(parsedMessage)) !== 'object' || parsedMessage === null) {
-        return;
-    }
+  if (typeof parsedMessage !== 'object' || parsedMessage === null) {
+    return;
+  }
 
-    if (!parsedMessage.type || typeof parsedMessage.type !== 'string') {
-        return;
-    }
+  parsedMessage = parsedMessage[__POST_ROBOT__.__GLOBAL_KEY__];
 
-    if (!RECEIVE_MESSAGE_TYPES[parsedMessage.type]) {
-        return;
-    }
+  if (!parsedMessage || typeof parsedMessage !== 'object' || parsedMessage === null) {
+    return;
+  }
 
-    return parsedMessage;
+  if (!parsedMessage.type || typeof parsedMessage.type !== 'string') {
+    return;
+  }
+
+  if (!_types.RECEIVE_MESSAGE_TYPES[parsedMessage.type]) {
+    return;
+  }
+
+  return parsedMessage;
 }
 
-export function receiveMessage(event) {
+function receiveMessage(event, {
+  on,
+  send
+}) {
+  const receivedMessages = (0, _global.globalStore)('receivedMessages');
 
-    if (!window || window.closed) {
-        throw new Error('Message recieved in closed window');
+  if (!window || window.closed) {
+    throw new Error(`Message recieved in closed window`);
+  }
+
+  try {
+    if (!event.source) {
+      return;
     }
+  } catch (err) {
+    return;
+  }
 
-    try {
-        if (!event.source) {
-            return;
-        }
-    } catch (err) {
-        return;
-    }
+  let {
+    source,
+    origin,
+    data
+  } = event;
 
-    var source = event.source,
-        origin = event.origin,
-        data = event.data;
-
-
-    if (__TEST__) {
-        // $FlowFixMe
-        origin = getDomain(source);
-    }
-
-    var message = parseMessage(data, source, origin);
-
-    if (!message) {
-        return;
-    }
-
-    markWindowKnown(source);
-
-    if (receivedMessages.has(message.id)) {
-        return;
-    }
-
-    receivedMessages.set(message.id, true);
-
-    if (isWindowClosed(source) && !message.fireAndForget) {
-        return;
-    }
-
-    RECEIVE_MESSAGE_TYPES[message.type](source, origin, message);
-}
-
-export function messageListener(event) {
-
-    try {
-        noop(event.source);
-    } catch (err) {
-        return;
-    }
-
+  if (__TEST__) {
     // $FlowFixMe
-    var messageEvent = {
-        source: event.source || event.sourceElement,
-        origin: event.origin || event.originalEvent && event.originalEvent.origin,
-        data: event.data
-    };
+    origin = (0, _src.getDomain)(source);
+  }
 
-    if (!messageEvent.source) {
-        return;
-    }
+  const message = parseMessage(data, source, origin, {
+    on,
+    send
+  });
 
-    if (!messageEvent.origin) {
-        throw new Error('Post message did not have origin domain');
-    }
+  if (!message) {
+    return;
+  }
 
-    if (__TEST__) {
-        if (needsGlobalMessagingForBrowser() && isSameTopWindow(messageEvent.source, window) === false) {
-            return;
-        }
-    }
+  (0, _lib.markWindowKnown)(source);
 
-    receiveMessage(messageEvent);
+  if (receivedMessages.has(message.id)) {
+    return;
+  }
+
+  receivedMessages.set(message.id, true);
+
+  if ((0, _src.isWindowClosed)(source) && !message.fireAndForget) {
+    return;
+  }
+
+  _types.RECEIVE_MESSAGE_TYPES[message.type](source, origin, message, {
+    on,
+    send
+  });
 }
 
-export function listenForMessages() {
+function setupGlobalReceiveMessage({
+  on,
+  send
+}) {
+  const global = (0, _global.getGlobal)();
+
+  global.receiveMessage = global.receiveMessage || (message => receiveMessage(message, {
+    on,
+    send
+  }));
+}
+
+function messageListener(event, {
+  on,
+  send
+}) {
+  try {
+    (0, _src2.noop)(event.source);
+  } catch (err) {
+    return;
+  } // $FlowFixMe
+
+
+  const messageEvent = {
+    source: event.source || event.sourceElement,
+    origin: event.origin || event.originalEvent && event.originalEvent.origin,
+    data: event.data
+  };
+
+  if (!messageEvent.source) {
+    return;
+  }
+
+  if (!messageEvent.origin) {
+    throw new Error(`Post message did not have origin domain`);
+  }
+
+  if (__TEST__) {
+    if ((0, _lib.needsGlobalMessagingForBrowser)() && (0, _src.isSameTopWindow)(messageEvent.source, window) === false) {
+      return;
+    }
+  }
+
+  receiveMessage(messageEvent, {
+    on,
+    send
+  });
+}
+
+function listenForMessages({
+  on,
+  send
+}) {
+  return (0, _global.globalStore)().getOrSet('postMessageListeners', () => {
     // $FlowFixMe
-    addEventListener(window, 'message', messageListener);
+    return (0, _src2.addEventListener)(window, 'message', event => {
+      // $FlowFixMe
+      messageListener(event, {
+        on,
+        send
+      });
+    });
+  });
 }
-
-global.receiveMessage = receiveMessage;

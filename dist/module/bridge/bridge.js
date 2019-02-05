@@ -1,97 +1,104 @@
-import 'zalgo-promise/src';
-import { getParent, isWindowClosed } from 'cross-domain-utils/src';
-import { noop, uniqueID } from 'belter/src';
+"use strict";
 
-import { MESSAGE_NAME, WILDCARD } from '../conf';
-import { global, globalStore } from '../global';
+exports.__esModule = true;
+exports.setupOpenTunnelToParent = setupOpenTunnelToParent;
 
-/*
-    HERE BE DRAGONS
+var _src = require("cross-domain-utils/src");
 
-    Warning: this file may look weird. Why save the tunnel window in an Object
-    by ID, then look it up later, rather than just using the reference from the closure scope?
+var _src2 = require("belter/src");
 
-    The reason is, that ends up meaning the garbage collector can never get its hands
-    on a closed window, since our closure has continued access to it -- and post-robot
-    has no good way to know whether to clean up the function with the closure scope.
+var _conf = require("../conf");
 
-    If you're editing this file, be sure to run significant memory / GC tests afterwards.
-*/
-
-var tunnelWindows = globalStore('tunnelWindows');
+var _global = require("../global");
 
 function cleanTunnelWindows() {
-    for (var _i2 = 0, _tunnelWindows$keys2 = tunnelWindows.keys(), _length2 = _tunnelWindows$keys2 == null ? 0 : _tunnelWindows$keys2.length; _i2 < _length2; _i2++) {
-        var key = _tunnelWindows$keys2[_i2];
-        var tunnelWindow = tunnelWindows[key];
+  const tunnelWindows = (0, _global.globalStore)('tunnelWindows');
 
-        try {
-            noop(tunnelWindow.source);
-        } catch (err) {
-            tunnelWindows.del(key);
-            continue;
-        }
+  for (const key of tunnelWindows.keys()) {
+    const tunnelWindow = tunnelWindows[key];
 
-        if (isWindowClosed(tunnelWindow.source)) {
-            tunnelWindows.del(key);
-        }
+    try {
+      (0, _src2.noop)(tunnelWindow.source);
+    } catch (err) {
+      tunnelWindows.del(key);
+      continue;
     }
+
+    if ((0, _src.isWindowClosed)(tunnelWindow.source)) {
+      tunnelWindows.del(key);
+    }
+  }
 }
 
-function addTunnelWindow(_ref) {
-    var name = _ref.name,
-        source = _ref.source,
-        canary = _ref.canary,
-        sendMessage = _ref.sendMessage;
-
-    cleanTunnelWindows();
-    var id = uniqueID();
-    tunnelWindows.set(id, { name: name, source: source, canary: canary, sendMessage: sendMessage });
-    return id;
+function addTunnelWindow({
+  name,
+  source,
+  canary,
+  sendMessage
+}) {
+  cleanTunnelWindows();
+  const id = (0, _src2.uniqueID)();
+  const tunnelWindows = (0, _global.globalStore)('tunnelWindows');
+  tunnelWindows.set(id, {
+    name,
+    source,
+    canary,
+    sendMessage
+  });
+  return id;
 }
 
-global.openTunnelToParent = function openTunnelToParent(_ref2) {
-    var name = _ref2.name,
-        source = _ref2.source,
-        canary = _ref2.canary,
-        sendMessage = _ref2.sendMessage;
-
-
-    var parentWindow = getParent(window);
+function setupOpenTunnelToParent({
+  send
+}) {
+  (0, _global.getGlobal)(window).openTunnelToParent = function openTunnelToParent({
+    name,
+    source,
+    canary,
+    sendMessage
+  }) {
+    const tunnelWindows = (0, _global.globalStore)('tunnelWindows');
+    const parentWindow = (0, _src.getParent)(window);
 
     if (!parentWindow) {
-        throw new Error('No parent window found to open tunnel to');
+      throw new Error(`No parent window found to open tunnel to`);
     }
 
-    var id = addTunnelWindow({ name: name, source: source, canary: canary, sendMessage: sendMessage });
+    const id = addTunnelWindow({
+      name,
+      source,
+      canary,
+      sendMessage
+    });
+    return send(parentWindow, _conf.MESSAGE_NAME.OPEN_TUNNEL, {
+      name,
 
-    return global.send(parentWindow, MESSAGE_NAME.OPEN_TUNNEL, {
+      sendMessage() {
+        const tunnelWindow = tunnelWindows.get(id);
 
-        name: name,
-
-        sendMessage: function sendMessage() {
-
-            var tunnelWindow = tunnelWindows.get(id);
-
-            try {
-                // IE gets antsy if you try to even reference a closed window
-                noop(tunnelWindow && tunnelWindow.source);
-            } catch (err) {
-                tunnelWindows.del(id);
-                return;
-            }
-
-            if (!tunnelWindow || !tunnelWindow.source || isWindowClosed(tunnelWindow.source)) {
-                return;
-            }
-
-            try {
-                tunnelWindow.canary();
-            } catch (err) {
-                return;
-            }
-
-            tunnelWindow.sendMessage.apply(this, arguments);
+        try {
+          // IE gets antsy if you try to even reference a closed window
+          (0, _src2.noop)(tunnelWindow && tunnelWindow.source);
+        } catch (err) {
+          tunnelWindows.del(id);
+          return;
         }
-    }, { domain: WILDCARD });
-};
+
+        if (!tunnelWindow || !tunnelWindow.source || (0, _src.isWindowClosed)(tunnelWindow.source)) {
+          return;
+        }
+
+        try {
+          tunnelWindow.canary();
+        } catch (err) {
+          return;
+        }
+
+        tunnelWindow.sendMessage.apply(this, arguments);
+      }
+
+    }, {
+      domain: _conf.WILDCARD
+    });
+  };
+}

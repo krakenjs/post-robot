@@ -1,123 +1,125 @@
-import { ZalgoPromise } from 'zalgo-promise/src';
-import { isSameDomain, getOpener, getDomain, getFrameByName } from 'cross-domain-utils/src';
-import { weakMapMemoize, noop } from 'belter/src';
+"use strict";
 
-import { WINDOW_PROP } from '../conf';
-import { global } from '../global';
+exports.__esModule = true;
+exports.openTunnelToOpener = openTunnelToOpener;
 
-import { needsBridge, registerRemoteWindow, rejectRemoteSendMessage, registerRemoteSendMessage, getBridgeName } from './common';
+var _src = require("zalgo-promise/src");
 
-var awaitRemoteBridgeForWindow = weakMapMemoize(function (win) {
-    return ZalgoPromise['try'](function () {
-        try {
-            var frame = getFrameByName(win, getBridgeName(getDomain()));
+var _src2 = require("cross-domain-utils/src");
 
-            if (!frame) {
-                return;
-            }
+var _src3 = require("belter/src");
 
-            // $FlowFixMe
-            if (isSameDomain(frame) && frame[WINDOW_PROP.POSTROBOT]) {
-                return frame;
-            }
+var _global = require("../global");
 
-            return new ZalgoPromise(function (resolve) {
+var _common = require("./common");
 
-                var interval = void 0;
-                var timeout = void 0;
+function awaitRemoteBridgeForWindow(win) {
+  return (0, _global.windowStore)('remoteBridgeAwaiters').getOrSet(win, () => {
+    return _src.ZalgoPromise.try(() => {
+      const frame = (0, _src2.getFrameByName)(win, (0, _common.getBridgeName)((0, _src2.getDomain)()));
 
-                interval = setInterval(function () {
-                    // $FlowFixMe
-                    if (frame && isSameDomain(frame) && frame[WINDOW_PROP.POSTROBOT]) {
-                        clearInterval(interval);
-                        clearTimeout(timeout);
-                        return resolve(frame);
-                    }
-                }, 100);
+      if (!frame) {
+        throw new Error(`Bridge not found for domain: ${(0, _src2.getDomain)()}`);
+      } // $FlowFixMe
 
-                timeout = setTimeout(function () {
-                    clearInterval(interval);
-                    return resolve();
-                }, 2000);
-            });
-        } catch (err) {
-            // pass
-        }
+
+      if ((0, _src2.isSameDomain)(frame) && (0, _global.getGlobal)(frame)) {
+        return frame;
+      }
+
+      return new _src.ZalgoPromise((resolve, reject) => {
+        let interval;
+        let timeout; // eslint-disable-line prefer-const
+
+        interval = setInterval(() => {
+          // eslint-disable-line prefer-const
+          // $FlowFixMe
+          if (frame && (0, _src2.isSameDomain)(frame) && (0, _global.getGlobal)(frame)) {
+            clearInterval(interval);
+            clearTimeout(timeout);
+            return resolve(frame);
+          }
+        }, 100);
+        timeout = setTimeout(() => {
+          clearInterval(interval);
+          return reject(new Error(`Bridge not found for domain: ${(0, _src2.getDomain)()}`));
+        }, 2000);
+      });
     });
-});
+  });
+}
 
-export function openTunnelToOpener() {
-    return ZalgoPromise['try'](function () {
+function openTunnelToOpener({
+  on,
+  send,
+  receiveMessage
+}) {
+  return _src.ZalgoPromise.try(() => {
+    const opener = (0, _src2.getOpener)(window);
 
-        var opener = getOpener(window);
+    if (!opener) {
+      return;
+    }
 
-        if (!opener) {
+    if (!(0, _common.needsBridge)({
+      win: opener
+    })) {
+      return;
+    }
+
+    (0, _common.registerRemoteWindow)(opener);
+    return awaitRemoteBridgeForWindow(opener).then(bridge => {
+      if (!window.name) {
+        return (0, _common.rejectRemoteSendMessage)(opener, new Error(`Can not register with opener: window does not have a name`));
+      } // $FlowFixMe
+
+
+      return (0, _global.getGlobal)(bridge).openTunnelToParent({
+        name: window.name,
+        source: window,
+
+        canary() {// pass
+        },
+
+        sendMessage(message) {
+          try {
+            (0, _src3.noop)(window);
+          } catch (err) {
             return;
-        }
+          }
 
-        if (!needsBridge({ win: opener })) {
+          if (!window || window.closed) {
             return;
-        }
+          }
 
-        registerRemoteWindow(opener);
-
-        return awaitRemoteBridgeForWindow(opener).then(function (bridge) {
-
-            if (!bridge) {
-                return rejectRemoteSendMessage(opener, new Error('Can not register with opener: no bridge found in opener'));
-            }
-
-            if (!window.name) {
-                return rejectRemoteSendMessage(opener, new Error('Can not register with opener: window does not have a name'));
-            }
-
-            return bridge[WINDOW_PROP.POSTROBOT].openTunnelToParent({
-
-                name: window.name,
-
-                source: window,
-
-                canary: function canary() {
-                    // pass
-                },
-                sendMessage: function sendMessage(message) {
-
-                    try {
-                        noop(window);
-                    } catch (err) {
-                        return;
-                    }
-
-                    if (!window || window.closed) {
-                        return;
-                    }
-
-                    try {
-                        global.receiveMessage({
-                            data: message,
-                            origin: this.origin,
-                            source: this.source
-                        });
-                    } catch (err) {
-                        ZalgoPromise.reject(err);
-                    }
-                }
-            }).then(function (_ref) {
-                var source = _ref.source,
-                    origin = _ref.origin,
-                    data = _ref.data;
-
-
-                if (source !== opener) {
-                    throw new Error('Source does not match opener');
-                }
-
-                registerRemoteSendMessage(source, origin, data.sendMessage);
-            })['catch'](function (err) {
-
-                rejectRemoteSendMessage(opener, err);
-                throw err;
+          try {
+            receiveMessage({
+              data: message,
+              origin: this.origin,
+              source: this.source
+            }, {
+              on,
+              send
             });
-        });
+          } catch (err) {
+            _src.ZalgoPromise.reject(err);
+          }
+        }
+
+      }).then(({
+        source,
+        origin,
+        data
+      }) => {
+        if (source !== opener) {
+          throw new Error(`Source does not match opener`);
+        }
+
+        (0, _common.registerRemoteSendMessage)(source, origin, data.sendMessage);
+      }).catch(err => {
+        (0, _common.rejectRemoteSendMessage)(opener, err);
+        throw err;
+      });
     });
+  });
 }

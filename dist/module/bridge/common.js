@@ -1,140 +1,148 @@
-import { ZalgoPromise } from 'zalgo-promise/src';
-import { getDomain, isSameDomain, isOpener, isSameTopWindow, matchDomain, getUserAgent, getDomainFromUrl } from 'cross-domain-utils/src';
-import { noop } from 'belter/src';
+"use strict";
 
-import { BRIDGE_NAME_PREFIX } from '../conf';
-import { windowStore } from '../global';
+exports.__esModule = true;
+exports.needsBridgeForBrowser = needsBridgeForBrowser;
+exports.needsBridgeForWin = needsBridgeForWin;
+exports.needsBridgeForDomain = needsBridgeForDomain;
+exports.needsBridge = needsBridge;
+exports.getBridgeName = getBridgeName;
+exports.isBridge = isBridge;
+exports.registerRemoteWindow = registerRemoteWindow;
+exports.findRemoteWindow = findRemoteWindow;
+exports.registerRemoteSendMessage = registerRemoteSendMessage;
+exports.rejectRemoteSendMessage = rejectRemoteSendMessage;
+exports.sendBridgeMessage = sendBridgeMessage;
+exports.documentBodyReady = void 0;
 
-export function needsBridgeForBrowser() {
+var _src = require("zalgo-promise/src");
 
-    if (getUserAgent(window).match(/MSIE|trident|edge\/12|edge\/13/i)) {
-        return true;
-    }
+var _src2 = require("cross-domain-utils/src");
 
-    return false;
-}
+var _src3 = require("belter/src");
 
-export function needsBridgeForWin(win) {
+var _conf = require("../conf");
 
-    if (!isSameTopWindow(window, win)) {
-        return true;
-    }
+var _global = require("../global");
 
-    return false;
-}
-
-export function needsBridgeForDomain(domain, win) {
-
-    if (domain) {
-        if (getDomain() !== getDomainFromUrl(domain)) {
-            return true;
-        }
-    } else if (win) {
-        if (!isSameDomain(win)) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-export function needsBridge(_ref) {
-    var win = _ref.win,
-        domain = _ref.domain;
-
-
-    if (!needsBridgeForBrowser()) {
-        return false;
-    }
-
-    if (domain && !needsBridgeForDomain(domain, win)) {
-        return false;
-    }
-
-    if (win && !needsBridgeForWin(win)) {
-        return false;
-    }
-
+function needsBridgeForBrowser() {
+  if ((0, _src2.getUserAgent)(window).match(/MSIE|trident|edge\/12|edge\/13/i)) {
     return true;
+  }
+
+  return false;
 }
 
-export function getBridgeName(domain) {
+function needsBridgeForWin(win) {
+  if (!(0, _src2.isSameTopWindow)(window, win)) {
+    return true;
+  }
 
-    domain = domain || getDomainFromUrl(domain);
-
-    var sanitizedDomain = domain.replace(/[^a-zA-Z0-9]+/g, '_');
-
-    var id = BRIDGE_NAME_PREFIX + '_' + sanitizedDomain;
-
-    return id;
+  return false;
 }
 
-export function isBridge() {
-    return Boolean(window.name && window.name === getBridgeName(getDomain()));
+function needsBridgeForDomain(domain, win) {
+  if (domain) {
+    if ((0, _src2.getDomain)() !== (0, _src2.getDomainFromUrl)(domain)) {
+      return true;
+    }
+  } else if (win) {
+    if (!(0, _src2.isSameDomain)(win)) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
-export var documentBodyReady = new ZalgoPromise(function (resolve) {
+function needsBridge({
+  win,
+  domain
+}) {
+  if (!needsBridgeForBrowser()) {
+    return false;
+  }
 
+  if (domain && !needsBridgeForDomain(domain, win)) {
+    return false;
+  }
+
+  if (win && !needsBridgeForWin(win)) {
+    return false;
+  }
+
+  return true;
+}
+
+function getBridgeName(domain) {
+  domain = domain || (0, _src2.getDomainFromUrl)(domain);
+  const sanitizedDomain = domain.replace(/[^a-zA-Z0-9]+/g, '_');
+  const id = `${_conf.BRIDGE_NAME_PREFIX}_${sanitizedDomain}`;
+  return id;
+}
+
+function isBridge() {
+  return Boolean(window.name && window.name === getBridgeName((0, _src2.getDomain)()));
+}
+
+const documentBodyReady = new _src.ZalgoPromise(resolve => {
+  if (window.document && window.document.body) {
+    return resolve(window.document.body);
+  }
+
+  const interval = setInterval(() => {
     if (window.document && window.document.body) {
-        return resolve(window.document.body);
+      clearInterval(interval);
+      return resolve(window.document.body);
     }
-
-    var interval = setInterval(function () {
-        if (window.document && window.document.body) {
-            clearInterval(interval);
-            return resolve(window.document.body);
-        }
-    }, 10);
+  }, 10);
 });
+exports.documentBodyReady = documentBodyReady;
 
-var remoteWindows = windowStore('remoteWindows');
-
-export function registerRemoteWindow(win) {
-    remoteWindows.getOrSet(win, function () {
-        return new ZalgoPromise();
-    });
+function registerRemoteWindow(win) {
+  const remoteWindowPromises = (0, _global.windowStore)('remoteWindowPromises');
+  remoteWindowPromises.getOrSet(win, () => new _src.ZalgoPromise());
 }
 
-export function findRemoteWindow(win) {
-    var remoteWin = remoteWindows.get(win);
+function findRemoteWindow(win) {
+  const remoteWindowPromises = (0, _global.windowStore)('remoteWindowPromises');
+  const remoteWinPromise = remoteWindowPromises.get(win);
 
-    if (!remoteWin) {
-        throw new Error('Remote window not found');
+  if (!remoteWinPromise) {
+    throw new Error(`Remote window promise not found`);
+  }
+
+  return remoteWinPromise;
+}
+
+function registerRemoteSendMessage(win, domain, sendMessage) {
+  const sendMessageWrapper = (remoteWin, remoteDomain, message) => {
+    if (remoteWin !== win) {
+      throw new Error(`Remote window does not match window`);
     }
 
-    return remoteWin;
-}
-
-export function registerRemoteSendMessage(win, domain, sendMessage) {
-    var sendMessageWrapper = function sendMessageWrapper(remoteWin, remoteDomain, message) {
-        if (remoteWin !== win) {
-            throw new Error('Remote window does not match window');
-        }
-
-        if (!matchDomain(remoteDomain, domain)) {
-            throw new Error('Remote domain ' + remoteDomain + ' does not match domain ' + domain);
-        }
-
-        sendMessage(message);
-    };
-
-    findRemoteWindow(win).resolve(sendMessageWrapper);
-}
-
-export function rejectRemoteSendMessage(win, err) {
-    findRemoteWindow(win).reject(err)['catch'](noop);
-}
-
-export function sendBridgeMessage(win, domain, message) {
-
-    var messagingChild = isOpener(window, win);
-    var messagingParent = isOpener(win, window);
-
-    if (!messagingChild && !messagingParent) {
-        throw new Error('Can only send messages to and from parent and popup windows');
+    if (!(0, _src2.matchDomain)(remoteDomain, domain)) {
+      throw new Error(`Remote domain ${remoteDomain} does not match domain ${domain}`);
     }
 
-    return findRemoteWindow(win).then(function (sendMessage) {
-        return sendMessage(win, domain, message);
-    });
+    sendMessage.fireAndForget(message);
+  };
+
+  findRemoteWindow(win).resolve(sendMessageWrapper);
+}
+
+function rejectRemoteSendMessage(win, err) {
+  findRemoteWindow(win).reject(err).catch(_src3.noop);
+}
+
+function sendBridgeMessage(win, domain, message) {
+  const messagingChild = (0, _src2.isOpener)(window, win);
+  const messagingParent = (0, _src2.isOpener)(win, window);
+
+  if (!messagingChild && !messagingParent) {
+    throw new Error(`Can only send messages to and from parent and popup windows`);
+  }
+
+  return findRemoteWindow(win).then(sendMessage => {
+    return sendMessage(win, domain, message);
+  });
 }

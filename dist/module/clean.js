@@ -1,11 +1,16 @@
-import 'cross-domain-utils/src';
-import { noop } from 'belter/src';
+"use strict";
 
-import { requestPromises } from './public';
+exports.__esModule = true;
+exports.cleanUpWindow = cleanUpWindow;
 
-export function cleanUpWindow(win) {
-    for (var _i2 = 0, _requestPromises$get2 = requestPromises.get(win, []), _length2 = _requestPromises$get2 == null ? 0 : _requestPromises$get2.length; _i2 < _length2; _i2++) {
-        var promise = _requestPromises$get2[_i2];
-        promise.reject(new Error('Window cleaned up before response'))['catch'](noop);
-    }
+var _src = require("belter/src");
+
+var _global = require("./global");
+
+function cleanUpWindow(win) {
+  const requestPromises = (0, _global.windowStore)('requestPromises');
+
+  for (const promise of requestPromises.get(win, [])) {
+    promise.reject(new Error(`Window cleaned up before response`)).catch(_src.noop);
+  }
 }

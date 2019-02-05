@@ -1,107 +1,106 @@
-import { isSameDomain, isSameTopWindow, isActuallySameDomain, getActualDomain, getDomain } from 'cross-domain-utils/src';
+"use strict";
 
-import { SEND_STRATEGY, PROTOCOL, WILDCARD, WINDOW_PROP } from '../../conf';
-import { needsGlobalMessagingForBrowser } from '../../lib';
+exports.__esModule = true;
+exports.SEND_MESSAGE_STRATEGIES = void 0;
 
-export var SEND_MESSAGE_STRATEGIES = {};
+var _src = require("cross-domain-utils/src");
 
-SEND_MESSAGE_STRATEGIES[SEND_STRATEGY.POST_MESSAGE] = function (win, serializedMessage, domain) {
+var _conf = require("../../conf");
 
-    if (__TEST__) {
-        if (needsGlobalMessagingForBrowser() && isSameTopWindow(window, win) === false) {
-            return;
-        }
+var _lib = require("../../lib");
+
+var _global = require("../../global");
+
+var _bridge = require("../../bridge");
+
+const SEND_MESSAGE_STRATEGIES = {};
+exports.SEND_MESSAGE_STRATEGIES = SEND_MESSAGE_STRATEGIES;
+
+SEND_MESSAGE_STRATEGIES[_conf.SEND_STRATEGY.POST_MESSAGE] = (win, serializedMessage, domain) => {
+  if (__TEST__) {
+    if ((0, _lib.needsGlobalMessagingForBrowser)() && (0, _src.isSameTopWindow)(window, win) === false) {
+      return;
+    }
+  }
+
+  let domains;
+
+  if (Array.isArray(domain)) {
+    domains = domain;
+  } else if (typeof domain === 'string') {
+    domains = [domain];
+  } else {
+    domains = [_conf.WILDCARD];
+  }
+
+  domains = domains.map(dom => {
+    if (dom.indexOf(_src.PROTOCOL.MOCK) === 0) {
+      if (window.location.protocol === _src.PROTOCOL.FILE) {
+        return _conf.WILDCARD;
+      }
+
+      if (!(0, _src.isActuallySameDomain)(win)) {
+        throw new Error(`Attempting to send messsage to mock domain ${dom}, but window is actually cross-domain`);
+      } // $FlowFixMe
+
+
+      return (0, _src.getActualDomain)(win);
     }
 
-    var domains = void 0;
-
-    if (Array.isArray(domain)) {
-        domains = domain;
-    } else if (typeof domain === 'string') {
-        domains = [domain];
-    } else {
-        domains = [WILDCARD];
+    if (dom.indexOf(_src.PROTOCOL.FILE) === 0) {
+      return _conf.WILDCARD;
     }
 
-    domains = domains.map(function (dom) {
-
-        if (dom.indexOf(PROTOCOL.MOCK) === 0) {
-
-            if (window.location.protocol === PROTOCOL.FILE) {
-                return WILDCARD;
-            }
-
-            if (!isActuallySameDomain(win)) {
-                throw new Error('Attempting to send messsage to mock domain ' + dom + ', but window is actually cross-domain');
-            }
-
-            // $FlowFixMe
-            return getActualDomain(win);
-        }
-
-        if (dom.indexOf(PROTOCOL.FILE) === 0) {
-            return WILDCARD;
-        }
-
-        return dom;
-    });
-
-    domains.forEach(function (dom) {
-        return win.postMessage(serializedMessage, dom);
-    });
+    return dom;
+  });
+  domains.forEach(dom => {
+    win.postMessage(serializedMessage, dom);
+  });
 };
 
 if (__POST_ROBOT__.__IE_POPUP_SUPPORT__) {
-    var _require = require('../../bridge'),
-        sendBridgeMessage = _require.sendBridgeMessage,
-        needsBridgeForBrowser = _require.needsBridgeForBrowser,
-        isBridge = _require.isBridge;
+  SEND_MESSAGE_STRATEGIES[_conf.SEND_STRATEGY.BRIDGE] = (win, serializedMessage, domain) => {
+    if (!(0, _bridge.needsBridgeForBrowser)() && !(0, _bridge.isBridge)()) {
+      return;
+    }
 
-    SEND_MESSAGE_STRATEGIES[SEND_STRATEGY.BRIDGE] = function (win, serializedMessage, domain) {
+    if ((0, _src.isSameDomain)(win)) {
+      throw new Error(`Post message through bridge disabled between same domain windows`);
+    }
 
-        if (!needsBridgeForBrowser() && !isBridge()) {
-            return;
-        }
+    if ((0, _src.isSameTopWindow)(window, win) !== false) {
+      throw new Error(`Can only use bridge to communicate between two different windows, not between frames`);
+    }
 
-        if (isSameDomain(win)) {
-            throw new Error('Post message through bridge disabled between same domain windows');
-        }
-
-        if (isSameTopWindow(window, win) !== false) {
-            throw new Error('Can only use bridge to communicate between two different windows, not between frames');
-        }
-
-        return sendBridgeMessage(win, domain, serializedMessage);
-    };
+    (0, _bridge.sendBridgeMessage)(win, domain, serializedMessage);
+  };
 }
 
 if (__POST_ROBOT__.__IE_POPUP_SUPPORT__ || __POST_ROBOT__.__GLOBAL_MESSAGE_SUPPORT__) {
+  SEND_MESSAGE_STRATEGIES[_conf.SEND_STRATEGY.GLOBAL] = (win, serializedMessage) => {
+    if (!(0, _lib.needsGlobalMessagingForBrowser)()) {
+      return;
+    }
 
-    SEND_MESSAGE_STRATEGIES[SEND_STRATEGY.GLOBAL] = function (win, serializedMessage) {
+    if (!(0, _src.isSameDomain)(win)) {
+      throw new Error(`Post message through global disabled between different domain windows`);
+    }
 
-        if (!needsGlobalMessagingForBrowser()) {
-            return;
-        }
+    if ((0, _src.isSameTopWindow)(window, win) !== false) {
+      throw new Error(`Can only use global to communicate between two different windows, not between frames`);
+    } // $FlowFixMe
 
-        if (!isSameDomain(win)) {
-            throw new Error('Post message through global disabled between different domain windows');
-        }
 
-        if (isSameTopWindow(window, win) !== false) {
-            throw new Error('Can only use global to communicate between two different windows, not between frames');
-        }
+    const foreignGlobal = (0, _global.getGlobal)(win);
 
-        // $FlowFixMe
-        var foreignGlobal = win[WINDOW_PROP.POSTROBOT];
+    if (!foreignGlobal) {
+      throw new Error(`Can not find postRobot global on foreign window`);
+    }
 
-        if (!foreignGlobal) {
-            throw new Error('Can not find postRobot global on foreign window');
-        }
-
-        return foreignGlobal.receiveMessage({
-            source: window,
-            origin: getDomain(),
-            data: serializedMessage
-        });
-    };
+    foreignGlobal.receiveMessage({
+      source: window,
+      origin: (0, _src.getDomain)(),
+      data: serializedMessage
+    });
+  };
 }

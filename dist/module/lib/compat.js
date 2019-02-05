@@ -1,10 +1,14 @@
-import { getUserAgent } from 'cross-domain-utils/src';
+"use strict";
 
-export function needsGlobalMessagingForBrowser() {
+exports.__esModule = true;
+exports.needsGlobalMessagingForBrowser = needsGlobalMessagingForBrowser;
 
-    if (getUserAgent(window).match(/MSIE|rv:11|trident|edge\/12|edge\/13/i)) {
-        return true;
-    }
+var _src = require("cross-domain-utils/src");
 
-    return false;
+function needsGlobalMessagingForBrowser() {
+  if ((0, _src.getUserAgent)(window).match(/MSIE|rv:11|trident|edge\/12|edge\/13/i)) {
+    return true;
+  }
+
+  return false;
 }

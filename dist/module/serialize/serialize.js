@@ -1,32 +1,56 @@
-import { isWindow } from 'cross-domain-utils/src';
-import { TYPE, serialize, deserialize } from 'universal-serialize/src';
+"use strict";
 
-import { SERIALIZATION_TYPE } from '../conf';
+exports.__esModule = true;
+exports.serializeMessage = serializeMessage;
+exports.deserializeMessage = deserializeMessage;
 
-import { serializeFunction, deserializeFunction } from './function';
-import { serializePromise, deserializePromise } from './promise';
-import { serializeWindow, deserializeWindow, ProxyWindow } from './window';
+var _src = require("cross-domain-utils/src");
 
-export function serializeMessage(destination, domain, obj) {
-    var _serialize;
+var _src2 = require("universal-serialize/src");
 
-    return serialize(obj, (_serialize = {}, _serialize[TYPE.PROMISE] = function (val, key) {
-        return serializePromise(destination, domain, val, key);
-    }, _serialize[TYPE.FUNCTION] = function (val, key) {
-        return serializeFunction(destination, domain, val, key);
-    }, _serialize[TYPE.OBJECT] = function (val) {
-        return isWindow(val) || ProxyWindow.isProxyWindow(val) ? serializeWindow(destination, domain, val) : val;
-    }, _serialize));
+var _conf = require("../conf");
+
+var _function = require("./function");
+
+var _promise = require("./promise");
+
+var _window = require("./window");
+
+function serializeMessage(destination, domain, obj, {
+  on,
+  send
+}) {
+  return (0, _src2.serialize)(obj, {
+    [_src2.TYPE.PROMISE]: (val, key) => (0, _promise.serializePromise)(destination, domain, val, key, {
+      on,
+      send
+    }),
+    [_src2.TYPE.FUNCTION]: (val, key) => (0, _function.serializeFunction)(destination, domain, val, key, {
+      on,
+      send
+    }),
+    [_src2.TYPE.OBJECT]: val => {
+      return (0, _src.isWindow)(val) || _window.ProxyWindow.isProxyWindow(val) ? (0, _window.serializeWindow)(destination, domain, val, {
+        on,
+        send
+      }) : val;
+    }
+  });
 }
 
-export function deserializeMessage(source, origin, message) {
-    var _deserialize;
-
-    return deserialize(message, (_deserialize = {}, _deserialize[SERIALIZATION_TYPE.CROSS_DOMAIN_ZALGO_PROMISE] = function (serializedPromise) {
-        return deserializePromise(source, origin, serializedPromise);
-    }, _deserialize[SERIALIZATION_TYPE.CROSS_DOMAIN_FUNCTION] = function (serializedFunction) {
-        return deserializeFunction(source, origin, serializedFunction);
-    }, _deserialize[SERIALIZATION_TYPE.CROSS_DOMAIN_WINDOW] = function (serializedWindow) {
-        return deserializeWindow(source, origin, serializedWindow);
-    }, _deserialize));
+function deserializeMessage(source, origin, message, {
+  on,
+  send
+}) {
+  return (0, _src2.deserialize)(message, {
+    [_conf.SERIALIZATION_TYPE.CROSS_DOMAIN_ZALGO_PROMISE]: serializedPromise => (0, _promise.deserializePromise)(source, origin, serializedPromise),
+    [_conf.SERIALIZATION_TYPE.CROSS_DOMAIN_FUNCTION]: serializedFunction => (0, _function.deserializeFunction)(source, origin, serializedFunction, {
+      on,
+      send
+    }),
+    [_conf.SERIALIZATION_TYPE.CROSS_DOMAIN_WINDOW]: serializedWindow => (0, _window.deserializeWindow)(source, origin, serializedWindow, {
+      on,
+      send
+    })
+  });
 }

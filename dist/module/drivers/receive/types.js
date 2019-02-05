@@ -1,117 +1,160 @@
-var _RECEIVE_MESSAGE_TYPE;
+"use strict";
 
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+exports.__esModule = true;
+exports.RECEIVE_MESSAGE_TYPES = void 0;
 
-import { ZalgoPromise } from 'zalgo-promise/src';
-import { isWindowClosed, matchDomain, stringifyDomainPattern } from 'cross-domain-utils/src';
-import { noop } from 'belter/src';
+var _src = require("zalgo-promise/src");
 
-import { MESSAGE_TYPE, MESSAGE_ACK, MESSAGE_NAME } from '../../conf';
-import { sendMessage } from '../send';
-import { getRequestListener, getResponseListener, deleteResponseListener, isResponseListenerErrored } from '../listeners';
+var _src2 = require("cross-domain-utils/src");
 
+var _src3 = require("belter/src");
 
-export var RECEIVE_MESSAGE_TYPES = (_RECEIVE_MESSAGE_TYPE = {}, _RECEIVE_MESSAGE_TYPE[MESSAGE_TYPE.REQUEST] = function (source, origin, message) {
+var _conf = require("../../conf");
 
-    var options = getRequestListener({ name: message.name, win: source, domain: origin });
+var _send = require("../send");
 
-    var logName = message.name === MESSAGE_NAME.METHOD && message.data && typeof message.data.name === 'string' ? message.data.name + '()' : message.name;
+var _listeners = require("../listeners");
+
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+const RECEIVE_MESSAGE_TYPES = {
+  [_conf.MESSAGE_TYPE.REQUEST](source, origin, message, {
+    on,
+    send
+  }) {
+    const options = (0, _listeners.getRequestListener)({
+      name: message.name,
+      win: source,
+      domain: origin
+    });
+    const logName = message.name === _conf.MESSAGE_NAME.METHOD && message.data && typeof message.data.name === 'string' ? `${message.data.name}()` : message.name;
 
     if (__DEBUG__) {
-        // eslint-disable-next-line no-console
-        console.info('receive::req', logName, origin, '\n\n', message.data);
+      // eslint-disable-next-line no-console
+      console.info('receive::req', logName, origin, '\n\n', message.data);
     }
 
-    function sendResponse(type, ack) {
-        var response = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-
-
-        if (message.fireAndForget || isWindowClosed(source)) {
-            return ZalgoPromise.resolve();
-        }
-
-        if (__DEBUG__ && type !== MESSAGE_TYPE.ACK) {
-            if (ack === MESSAGE_ACK.SUCCESS) {
-                // $FlowFixMe
-                console.info('respond::res', logName, origin, '\n\n', response.data); // eslint-disable-line no-console
-            } else if (ack === MESSAGE_ACK.ERROR) {
-                // $FlowFixMe
-                console.error('respond::err', logName, origin, '\n\n', response.error); // eslint-disable-line no-console
-            }
-        }
-
-        // $FlowFixMe
-        return sendMessage(source, origin, _extends({
-            type: type,
-            ack: ack,
-            hash: message.hash,
-            name: message.name
-        }, response));
-    }
-
-    return ZalgoPromise.all([sendResponse(MESSAGE_TYPE.ACK), ZalgoPromise['try'](function () {
-
-        if (!options) {
-            throw new Error('No handler found for post message: ' + message.name + ' from ' + origin + ' in ' + window.location.protocol + '//' + window.location.host + window.location.pathname);
-        }
-
-        if (!matchDomain(options.domain, origin)) {
-            throw new Error('Request origin ' + origin + ' does not match domain ' + options.domain.toString());
-        }
-
-        var data = message.data;
-
-        return options.handler({ source: source, origin: origin, data: data });
-    }).then(function (data) {
-        return sendResponse(MESSAGE_TYPE.RESPONSE, MESSAGE_ACK.SUCCESS, { data: data });
-    }, function (error) {
-        return sendResponse(MESSAGE_TYPE.RESPONSE, MESSAGE_ACK.ERROR, { error: error });
-    })]).then(noop)['catch'](function (err) {
-        if (options && options.handleError) {
-            return options.handleError(err);
-        } else {
-            throw err;
-        }
-    });
-}, _RECEIVE_MESSAGE_TYPE[MESSAGE_TYPE.ACK] = function (source, origin, message) {
-
-    if (isResponseListenerErrored(message.hash)) {
+    function sendResponse(type, ack, response = {}) {
+      if (message.fireAndForget || (0, _src2.isWindowClosed)(source)) {
         return;
+      }
+
+      if (__DEBUG__ && type !== _conf.MESSAGE_TYPE.ACK) {
+        if (ack === _conf.MESSAGE_ACK.SUCCESS) {
+          // $FlowFixMe
+          console.info('respond::res', logName, origin, '\n\n', response.data); // eslint-disable-line no-console
+        } else if (ack === _conf.MESSAGE_ACK.ERROR) {
+          // $FlowFixMe
+          console.error('respond::err', logName, origin, '\n\n', response.error); // eslint-disable-line no-console
+        }
+      } // $FlowFixMe
+
+
+      (0, _send.sendMessage)(source, origin, _extends({
+        type,
+        ack,
+        hash: message.hash,
+        name: message.name
+      }, response), {
+        on,
+        send
+      });
     }
 
-    var options = getResponseListener(message.hash);
+    return _src.ZalgoPromise.all([sendResponse(_conf.MESSAGE_TYPE.ACK), _src.ZalgoPromise.try(() => {
+      if (!options) {
+        throw new Error(`No handler found for post message: ${message.name} from ${origin} in ${window.location.protocol}//${window.location.host}${window.location.pathname}`);
+      }
+
+      if (!(0, _src2.matchDomain)(options.domain, origin)) {
+        throw new Error(`Request origin ${origin} does not match domain ${options.domain.toString()}`);
+      }
+
+      const data = message.data;
+      return options.handler({
+        source,
+        origin,
+        data
+      });
+    }).then(data => {
+      return sendResponse(_conf.MESSAGE_TYPE.RESPONSE, _conf.MESSAGE_ACK.SUCCESS, {
+        data
+      });
+    }, error => {
+      return sendResponse(_conf.MESSAGE_TYPE.RESPONSE, _conf.MESSAGE_ACK.ERROR, {
+        error
+      });
+    })]).then(_src3.noop).catch(err => {
+      if (options && options.handleError) {
+        return options.handleError(err);
+      } else {
+        throw err;
+      }
+    });
+  },
+
+  [_conf.MESSAGE_TYPE.ACK](source, origin, message) {
+    if ((0, _listeners.isResponseListenerErrored)(message.hash)) {
+      return;
+    }
+
+    const options = (0, _listeners.getResponseListener)(message.hash);
 
     if (!options) {
-        throw new Error('No handler found for post message ack for message: ' + message.name + ' from ' + origin + ' in ' + window.location.protocol + '//' + window.location.host + window.location.pathname);
+      throw new Error(`No handler found for post message ack for message: ${message.name} from ${origin} in ${window.location.protocol}//${window.location.host}${window.location.pathname}`);
     }
 
-    if (!matchDomain(options.domain, origin)) {
-        throw new Error('Ack origin ' + origin + ' does not match domain ' + options.domain.toString());
+    if (!(0, _src2.matchDomain)(options.domain, origin)) {
+      throw new Error(`Ack origin ${origin} does not match domain ${options.domain.toString()}`);
+    }
+
+    if (source !== options.win) {
+      throw new Error(`Ack source does not match registered window`);
     }
 
     options.ack = true;
-}, _RECEIVE_MESSAGE_TYPE[MESSAGE_TYPE.RESPONSE] = function (source, origin, message) {
+  },
 
-    if (isResponseListenerErrored(message.hash)) {
-        return;
+  [_conf.MESSAGE_TYPE.RESPONSE](source, origin, message) {
+    if ((0, _listeners.isResponseListenerErrored)(message.hash)) {
+      return;
     }
 
-    var options = getResponseListener(message.hash);
+    const options = (0, _listeners.getResponseListener)(message.hash);
 
     if (!options) {
-        throw new Error('No handler found for post message response for message: ' + message.name + ' from ' + origin + ' in ' + window.location.protocol + '//' + window.location.host + window.location.pathname);
+      throw new Error(`No handler found for post message response for message: ${message.name} from ${origin} in ${window.location.protocol}//${window.location.host}${window.location.pathname}`);
     }
 
-    if (!matchDomain(options.domain, origin)) {
-        throw new Error('Response origin ' + origin + ' does not match domain ' + stringifyDomainPattern(options.domain));
+    if (!(0, _src2.matchDomain)(options.domain, origin)) {
+      throw new Error(`Response origin ${origin} does not match domain ${(0, _src2.stringifyDomainPattern)(options.domain)}`);
     }
 
-    deleteResponseListener(message.hash);
-
-    if (message.ack === MESSAGE_ACK.ERROR) {
-        return options.respond(message.error, null);
-    } else if (message.ack === MESSAGE_ACK.SUCCESS) {
-        var data = message.data;
-        return options.respond(null, { source: source, origin: origin, data: data });
+    if (source !== options.win) {
+      throw new Error(`Response source does not match registered window`);
     }
-}, _RECEIVE_MESSAGE_TYPE);
+
+    (0, _listeners.deleteResponseListener)(message.hash);
+    const logName = message.name === _conf.MESSAGE_NAME.METHOD && message.data && typeof message.data.name === 'string' ? `${message.data.name}()` : message.name;
+
+    if (message.ack === _conf.MESSAGE_ACK.ERROR) {
+      if (__DEBUG__) {
+        console.error('receive::err', logName, origin, '\n\n', message.error); // eslint-disable-line no-console
+      }
+
+      options.promise.reject(message.error);
+    } else if (message.ack === _conf.MESSAGE_ACK.SUCCESS) {
+      if (__DEBUG__) {
+        console.info('receive::res', logName, origin, '\n\n', message.data); // eslint-disable-line no-console
+      }
+
+      options.promise.resolve({
+        source,
+        origin,
+        data: message.data
+      });
+    }
+  }
+
+};
+exports.RECEIVE_MESSAGE_TYPES = RECEIVE_MESSAGE_TYPES;

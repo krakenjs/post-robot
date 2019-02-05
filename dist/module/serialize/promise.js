@@ -1,22 +1,33 @@
-import 'cross-domain-utils/src';
-import { ZalgoPromise } from 'zalgo-promise/src';
-import { serializeType } from 'universal-serialize/src';
+"use strict";
 
-import { SERIALIZATION_TYPE } from '../conf';
+exports.__esModule = true;
+exports.serializePromise = serializePromise;
+exports.deserializePromise = deserializePromise;
 
-import { serializeFunction } from './function';
-import { ProxyWindow } from './window';
+var _src = require("zalgo-promise/src");
 
-export function serializePromise(destination, domain, val, key) {
-    return serializeType(SERIALIZATION_TYPE.CROSS_DOMAIN_ZALGO_PROMISE, {
-        then: serializeFunction(destination, domain, function (resolve, reject) {
-            return val.then(resolve, reject);
-        }, key)
-    });
+var _src2 = require("universal-serialize/src");
+
+var _conf = require("../conf");
+
+var _function = require("./function");
+
+var _window = require("./window");
+
+function serializePromise(destination, domain, val, key, {
+  on,
+  send
+}) {
+  return (0, _src2.serializeType)(_conf.SERIALIZATION_TYPE.CROSS_DOMAIN_ZALGO_PROMISE, {
+    then: (0, _function.serializeFunction)(destination, domain, (resolve, reject) => val.then(resolve, reject), key, {
+      on,
+      send
+    })
+  });
 }
 
-export function deserializePromise(source, origin, _ref) {
-    var then = _ref.then;
-
-    return new ZalgoPromise(then);
+function deserializePromise(source, origin, {
+  then
+}) {
+  return new _src.ZalgoPromise(then);
 }

@@ -1,7 +1,17 @@
-import { getAncestor } from 'cross-domain-utils/src';
+"use strict";
 
-export * from './client';
-export * from './server';
-export * from './config';
+exports.__esModule = true;
 
-export var parent = getAncestor();
+var _on = require("./on");
+
+Object.keys(_on).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  exports[key] = _on[key];
+});
+
+var _send = require("./send");
+
+Object.keys(_send).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  exports[key] = _send[key];
+});

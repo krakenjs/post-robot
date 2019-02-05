@@ -1,1 +1,3 @@
-import { MESSAGE_TYPE, MESSAGE_ACK } from '../conf';
+"use strict";
+
+var _conf = require("../conf");
