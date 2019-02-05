@@ -8,7 +8,7 @@ Send a message to another window, and:
 - [Pass functions](#functions) to another window, across different domains
 - [Handle any errors](#simple-listener-and-sender-with-error-handling) that prevented your message from getting through
 - Don't worry about serializing your messages; [just send javascript objects](#simple-listener-and-sender-with-error-handling)
-- Use [promises](#listener-with-promise-response), [callbacks](#listener-with-callback-response) or [async/await](#async--await) to wait for responses from windows you message
+- Use [promises](#listener-with-promise-response) or [async/await](#async--await) to wait for responses from windows you message
 - Set up a [secure message channel](#secure-message-channel) between two windows on a certain domain
 - Send messages between a [parent and a popup window](#parent-to-popup-messaging) in IE
 
@@ -79,20 +79,6 @@ postRobot.on('getUser', function(event) {
             name: user.name
         };
     });
-});
-```
-
-## Listener with callback response
-
-```javascript
-postRobot.on('getUser', { id: 1337 }, function(event, callback) {
-
-    setTimeout(function() {
-        callback(null, {
-            id:   event.data.id,
-            name: 'Captain Pugwash'
-        });
-    }, 500);
 });
 ```
 
