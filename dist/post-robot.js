@@ -607,7 +607,7 @@
             CROSS_DOMAIN_WINDOW: "cross_domain_window"
         };
         function global_getGlobal(win) {
-            return void 0 === win && (win = window), win !== window ? win.__post_robot_10_0_2__ : win.__post_robot_10_0_2__ = win.__post_robot_10_0_2__ || {};
+            return void 0 === win && (win = window), win !== window ? win.__post_robot_10_0_3__ : win.__post_robot_10_0_3__ = win.__post_robot_10_0_3__ || {};
         }
         var getObj = function() {
             return {};
@@ -1134,8 +1134,9 @@
         function send_sendMessage(win, domain, message, _ref) {
             var _serializeMessage, on = _ref.on, send = _ref.send;
             if (isWindowClosed(win)) throw new Error("Window is closed");
-            for (var error, serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {}).__post_robot_10_0_2__ = _extends({
-                id: uniqueID()
+            for (var error, serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {}).__post_robot_10_0_3__ = _extends({
+                id: uniqueID(),
+                origin: getDomain(window)
             }, message), _serializeMessage), {
                 on: on,
                 send: send
@@ -1272,16 +1273,17 @@
                 } catch (err) {
                     return;
                 }
-                if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage && (parsedMessage = parsedMessage.__post_robot_10_0_2__) && "object" == typeof parsedMessage && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
+                if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage && (parsedMessage = parsedMessage.__post_robot_10_0_3__) && "object" == typeof parsedMessage && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
             }(event.data, source, origin, {
                 on: on,
                 send: send
             });
             message && (markWindowKnown(source), receivedMessages.has(message.id) || (receivedMessages.set(message.id, !0), 
-            isWindowClosed(source) && !message.fireAndForget || RECEIVE_MESSAGE_TYPES[message.type](source, origin, message, {
+            isWindowClosed(source) && !message.fireAndForget || (0 === message.origin.indexOf(PROTOCOL.FILE) && (origin = message.origin), 
+            RECEIVE_MESSAGE_TYPES[message.type](source, origin, message, {
                 on: on,
                 send: send
-            })));
+            }))));
         }
         function on_on(name, options, handler) {
             if (!name) throw new Error("Expected name");
@@ -1497,14 +1499,14 @@
                 globalStore().getOrSet("postMessageListeners", function() {
                     return (obj = window).addEventListener("message", handler = function(event) {
                         !function(event, _ref4) {
-                            var on = _ref4.on, send = _ref4.send, messageEvent = {
-                                source: event.source || event.sourceElement,
-                                origin: event.origin || event.originalEvent && event.originalEvent.origin,
-                                data: event.data
-                            };
-                            if (messageEvent.source) {
-                                if (!messageEvent.origin) throw new Error("Post message did not have origin domain");
-                                receive_receiveMessage(messageEvent, {
+                            var on = _ref4.on, send = _ref4.send, source = event.source || event.sourceElement, origin = event.origin || event.originalEvent && event.originalEvent.origin, data = event.data;
+                            if ("null" === origin && (origin = PROTOCOL.FILE + "//"), source) {
+                                if (!origin) throw new Error("Post message did not have origin domain");
+                                receive_receiveMessage({
+                                    source: source,
+                                    origin: origin,
+                                    data: data
+                                }, {
                                     on: on,
                                     send: send
                                 });

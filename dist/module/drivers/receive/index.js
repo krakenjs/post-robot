@@ -108,6 +108,10 @@ function receiveMessage(event, {
     return;
   }
 
+  if (message.origin.indexOf(_src.PROTOCOL.FILE) === 0) {
+    origin = message.origin;
+  }
+
   _types.RECEIVE_MESSAGE_TYPES[message.type](source, origin, message, {
     on,
     send
@@ -134,30 +138,35 @@ function messageListener(event, {
     (0, _src2.noop)(event.source);
   } catch (err) {
     return;
-  } // $FlowFixMe
+  }
 
+  const source = event.source || event.sourceElement;
+  let origin = event.origin || event.originalEvent && event.originalEvent.origin;
+  const data = event.data;
 
-  const messageEvent = {
-    source: event.source || event.sourceElement,
-    origin: event.origin || event.originalEvent && event.originalEvent.origin,
-    data: event.data
-  };
+  if (origin === 'null') {
+    origin = `${_src.PROTOCOL.FILE}//`;
+  }
 
-  if (!messageEvent.source) {
+  if (!source) {
     return;
   }
 
-  if (!messageEvent.origin) {
+  if (!origin) {
     throw new Error(`Post message did not have origin domain`);
   }
 
   if (__TEST__) {
-    if ((0, _lib.needsGlobalMessagingForBrowser)() && (0, _src.isSameTopWindow)(messageEvent.source, window) === false) {
+    if ((0, _lib.needsGlobalMessagingForBrowser)() && (0, _src.isSameTopWindow)(source, window) === false) {
       return;
     }
   }
 
-  receiveMessage(messageEvent, {
+  receiveMessage({
+    source,
+    origin,
+    data
+  }, {
     on,
     send
   });

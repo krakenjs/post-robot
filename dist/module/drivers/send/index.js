@@ -23,7 +23,8 @@ function sendMessage(win, domain, message, {
 
   const serializedMessage = (0, _serialize.serializeMessage)(win, domain, {
     [__POST_ROBOT__.__GLOBAL_KEY__]: _extends({
-      id: (0, _src2.uniqueID)()
+      id: (0, _src2.uniqueID)(),
+      origin: (0, _src.getDomain)(window)
     }, message)
   }, {
     on,

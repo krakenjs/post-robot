@@ -45,9 +45,7 @@ SEND_MESSAGE_STRATEGIES[_conf.SEND_STRATEGY.POST_MESSAGE] = (win, serializedMess
 
 
       return (0, _src.getActualDomain)(win);
-    }
-
-    if (dom.indexOf(_src.PROTOCOL.FILE) === 0) {
+    } else if (dom.indexOf(_src.PROTOCOL.FILE) === 0) {
       return _conf.WILDCARD;
     }
 
