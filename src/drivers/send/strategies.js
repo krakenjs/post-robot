@@ -31,7 +31,6 @@ SEND_MESSAGE_STRATEGIES[SEND_STRATEGY.POST_MESSAGE] = (win : CrossDomainWindowTy
     domains = domains.map(dom => {
 
         if (dom.indexOf(PROTOCOL.MOCK) === 0) {
-
             if (window.location.protocol === PROTOCOL.FILE) {
                 return WILDCARD;
             }
@@ -42,9 +41,8 @@ SEND_MESSAGE_STRATEGIES[SEND_STRATEGY.POST_MESSAGE] = (win : CrossDomainWindowTy
 
             // $FlowFixMe
             return getActualDomain(win);
-        }
 
-        if (dom.indexOf(PROTOCOL.FILE) === 0) {
+        } else if (dom.indexOf(PROTOCOL.FILE) === 0) {
             return WILDCARD;
         }
 

@@ -1,6 +1,6 @@
 /* @flow */
 
-import { isWindowClosed, type CrossDomainWindowType, type DomainMatcher } from 'cross-domain-utils/src';
+import { isWindowClosed, getDomain, type CrossDomainWindowType, type DomainMatcher } from 'cross-domain-utils/src';
 import { uniqueID } from 'belter/src';
 
 import { serializeMessage } from '../../serialize';
@@ -16,7 +16,8 @@ export function sendMessage(win : CrossDomainWindowType, domain : DomainMatcher,
     
     const serializedMessage = serializeMessage(win, domain, {
         [ __POST_ROBOT__.__GLOBAL_KEY__ ]: {
-            id: uniqueID(),
+            id:     uniqueID(),
+            origin: getDomain(window),
             ...message
         }
     }, { on, send });
