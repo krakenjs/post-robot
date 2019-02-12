@@ -100,6 +100,12 @@ function listenForFunctionCalls({
             return val.onError(err);
           }
         }).then(() => {
+          // $FlowFixMe
+          if (err.stack) {
+            // $FlowFixMe
+            err.stack = `Remote call to ${name}()\n\n${err.stack}`;
+          }
+
           throw err;
         });
       }).then(result => {

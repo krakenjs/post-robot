@@ -607,7 +607,7 @@
             CROSS_DOMAIN_WINDOW: "cross_domain_window"
         };
         function global_getGlobal(win) {
-            return void 0 === win && (win = window), win !== window ? win.__post_robot_10_0_3__ : win.__post_robot_10_0_3__ = win.__post_robot_10_0_3__ || {};
+            return void 0 === win && (win = window), win !== window ? win.__post_robot_10_0_4__ : win.__post_robot_10_0_4__ = win.__post_robot_10_0_4__ || {};
         }
         var getObj = function() {
             return {};
@@ -1007,7 +1007,8 @@
                             return promise_ZalgoPromise.try(function() {
                                 if (val.onError) return val.onError(err);
                             }).then(function() {
-                                throw err;
+                                throw err.stack && (err.stack = "Remote call to " + name + "()\n\n" + err.stack), 
+                                err;
                             });
                         }).then(function(result) {
                             return {
@@ -1134,7 +1135,7 @@
         function send_sendMessage(win, domain, message, _ref) {
             var _serializeMessage, on = _ref.on, send = _ref.send;
             if (isWindowClosed(win)) throw new Error("Window is closed");
-            for (var error, serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {}).__post_robot_10_0_3__ = _extends({
+            for (var error, serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {}).__post_robot_10_0_4__ = _extends({
                 id: uniqueID(),
                 origin: getDomain(window)
             }, message), _serializeMessage), {
@@ -1273,7 +1274,7 @@
                 } catch (err) {
                     return;
                 }
-                if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage && (parsedMessage = parsedMessage.__post_robot_10_0_3__) && "object" == typeof parsedMessage && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
+                if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage && (parsedMessage = parsedMessage.__post_robot_10_0_4__) && "object" == typeof parsedMessage && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
             }(event.data, source, origin, {
                 on: on,
                 send: send
@@ -1425,7 +1426,7 @@
                         if (!matchDomain(domain, origin)) throw new Error("Remote window domain " + origin + " does not match regex: " + domain.source);
                         domain = origin;
                     }
-                    var hasResult = !1, promise = new promise_ZalgoPromise();
+                    var logName = name === MESSAGE_NAME.METHOD && data && "string" == typeof data.name ? data.name + "()" : name, hasResult = !1, promise = new promise_ZalgoPromise();
                     promise.finally(function() {
                         hasResult = !0, reqPromises.splice(reqPromises.indexOf(requestPromise, 1));
                     }).catch(src_util_noop);
@@ -1465,8 +1466,8 @@
                                 if (-1 === resTimeout) return;
                                 cycleTime = Math.min(resTimeout, 2e3);
                             } else {
-                                if (0 === ackTimeout) return promise.reject(new Error("No ack for postMessage " + name + " in " + getDomain() + " in " + totalAckTimeout + "ms"));
-                                if (0 === resTimeout) return promise.reject(new Error("No response for postMessage " + name + " in " + getDomain() + " in " + totalResTimeout + "ms"));
+                                if (0 === ackTimeout) return promise.reject(new Error("No ack for postMessage " + logName + " in " + getDomain() + " in " + totalAckTimeout + "ms"));
+                                if (0 === resTimeout) return promise.reject(new Error("No response for postMessage " + logName + " in " + getDomain() + " in " + totalResTimeout + "ms"));
                             }
                             setTimeout(cycle, cycleTime);
                         }
