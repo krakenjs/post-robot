@@ -137,10 +137,10 @@ export function send(win : CrossDomainWindowType, name : string, data : ?Object,
                     cycleTime = Math.min(resTimeout, 2000);
 
                 } else if (ackTimeout === 0) {
-                    return promise.reject(new Error(`No ack for postMessage ${ name } in ${ getDomain() } in ${ totalAckTimeout }ms`));
+                    return promise.reject(new Error(`No ack for postMessage ${ logName } in ${ getDomain() } in ${ totalAckTimeout }ms`));
 
                 } else if (resTimeout === 0) {
-                    return promise.reject(new Error(`No response for postMessage ${ name } in ${ getDomain() } in ${ totalResTimeout }ms`));
+                    return promise.reject(new Error(`No response for postMessage ${ logName } in ${ getDomain() } in ${ totalResTimeout }ms`));
                 }
 
                 setTimeout(cycle, cycleTime);
