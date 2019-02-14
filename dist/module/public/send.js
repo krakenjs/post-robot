@@ -1,7 +1,7 @@
 "use strict";
 
 exports.__esModule = true;
-exports.send = send;
+exports.send = void 0;
 
 var _src = require("zalgo-promise/src");
 
@@ -19,115 +19,128 @@ var _global = require("../global");
 
 var _on = require("./on");
 
-function send(win, name, data, options) {
+function validateOptions(name, win, domain) {
+  if (!name) {
+    throw new Error('Expected name');
+  }
+
+  if (domain) {
+    if (typeof domain !== 'string' && !Array.isArray(domain) && !(0, _src3.isRegex)(domain)) {
+      throw new TypeError(`Expected domain to be a string, array, or regex`);
+    }
+  }
+
+  if ((0, _src2.isWindowClosed)(win)) {
+    throw new Error('Target window is closed');
+  }
+}
+
+function normalizeDomain(win, domain, childTimeout, {
+  send
+}) {
+  return _src.ZalgoPromise.try(() => {
+    if ((0, _src2.isAncestor)(window, win)) {
+      return (0, _lib.awaitWindowHello)(win, childTimeout);
+    } else if ((0, _src3.isRegex)(domain)) {
+      // $FlowFixMe
+      return (0, _lib.sayHello)(win, {
+        send
+      });
+    } else {
+      return {
+        domain
+      };
+    } // $FlowFixMe
+
+  }).then(({
+    domain: normalizedDomain
+  }) => {
+    // $FlowFixMe
+    return normalizedDomain;
+  });
+}
+
+const send = (win, name, data, options) => {
   // $FlowFixMe
   options = options || {};
   let domain = options.domain || _conf.WILDCARD;
   const responseTimeout = options.timeout || _conf.RES_TIMEOUT;
   const childTimeout = options.timeout || _conf.CHILD_WINDOW_TIMEOUT;
-  const fireAndForget = options.fireAndForget || false;
+  const fireAndForget = options.fireAndForget || false; // $FlowFixMe
+
   return _src.ZalgoPromise.try(() => {
-    if (!name) {
-      throw new Error('Expected name');
+    validateOptions(name, win, domain);
+    return normalizeDomain(win, domain, childTimeout, {
+      send
+    });
+  }).then(targetDomain => {
+    if (!(0, _src2.matchDomain)(domain, targetDomain)) {
+      throw new Error(`Domain ${(0, _src3.stringify)(domain)} does not match ${(0, _src3.stringify)(targetDomain)}`);
     }
 
-    if (domain) {
-      if (typeof domain !== 'string' && !Array.isArray(domain) && !(0, _src3.isRegex)(domain)) {
-        throw new TypeError(`Expected domain to be a string, array, or regex`);
-      }
+    domain = targetDomain;
+    const logName = name === _conf.MESSAGE_NAME.METHOD && data && typeof data.name === 'string' ? `${data.name}()` : name;
+
+    if (__DEBUG__) {
+      console.info('send::req', logName, domain, '\n\n', data); // eslint-disable-line no-console
     }
 
-    if ((0, _src2.isWindowClosed)(win)) {
-      throw new Error('Target window is closed');
-    }
+    const promise = new _src.ZalgoPromise();
+    const hash = `${name}_${(0, _src3.uniqueID)()}`;
 
-    const reqPromises = (0, _global.windowStore)('requestPromises').getOrSet(win, () => []); // $FlowFixMe
-
-    const requestPromise = _src.ZalgoPromise.try(() => {
-      if ((0, _src2.isAncestor)(window, win)) {
-        return (0, _lib.awaitWindowHello)(win, childTimeout);
-      } else if ((0, _src3.isRegex)(domain)) {
-        return (0, _lib.sayHello)(win, {
-          send
-        });
-      } // $FlowFixMe
-
-    }).then(({
-      domain: origin
-    } = {}) => {
-      if ((0, _src3.isRegex)(domain)) {
-        if (!(0, _src2.matchDomain)(domain, origin)) {
-          // $FlowFixMe
-          throw new Error(`Remote window domain ${origin} does not match regex: ${domain.source}`);
+    if (!fireAndForget) {
+      const responseListener = {
+        name,
+        win,
+        domain,
+        promise
+      };
+      (0, _drivers.addResponseListener)(hash, responseListener);
+      const reqPromises = (0, _global.windowStore)('requestPromises').getOrSet(win, () => []);
+      reqPromises.push(promise);
+      promise.catch(() => {
+        (0, _drivers.markResponseListenerErrored)(hash);
+        (0, _drivers.deleteResponseListener)(hash);
+      });
+      const totalAckTimeout = (0, _lib.isWindowKnown)(win) ? _conf.ACK_TIMEOUT_KNOWN : _conf.ACK_TIMEOUT;
+      const totalResTimeout = responseTimeout;
+      let ackTimeout = totalAckTimeout;
+      let resTimeout = totalResTimeout;
+      const interval = (0, _src3.safeInterval)(() => {
+        if ((0, _src2.isWindowClosed)(win)) {
+          return promise.reject(new Error(`Window closed for ${name} before ${responseListener.ack ? 'response' : 'ack'}`));
         }
 
-        domain = origin;
-      }
+        ackTimeout = Math.max(ackTimeout - _conf.RESPONSE_CYCLE_TIME, 0);
 
-      const logName = name === _conf.MESSAGE_NAME.METHOD && data && typeof data.name === 'string' ? `${data.name}()` : name;
+        if (resTimeout !== -1) {
+          resTimeout = Math.max(resTimeout - _conf.RESPONSE_CYCLE_TIME, 0);
+        }
 
-      if (__DEBUG__) {
-        console.info('send::req', logName, domain, '\n\n', data); // eslint-disable-line no-console
-      }
+        if (!responseListener.ack && ackTimeout === 0) {
+          return promise.reject(new Error(`No ack for postMessage ${logName} in ${(0, _src2.getDomain)()} in ${totalAckTimeout}ms`));
+        } else if (resTimeout === 0) {
+          return promise.reject(new Error(`No response for postMessage ${logName} in ${(0, _src2.getDomain)()} in ${totalResTimeout}ms`));
+        }
+      }, _conf.RESPONSE_CYCLE_TIME);
+      promise.finally(() => {
+        interval.cancel();
+        reqPromises.splice(reqPromises.indexOf(promise, 1));
+      }).catch(_src3.noop);
+    }
 
-      let promise;
-      const hash = `${name}_${(0, _src3.uniqueID)()}`;
-
-      if (!fireAndForget) {
-        promise = new _src.ZalgoPromise();
-        const responseListener = {
-          name,
-          win,
-          domain,
-          promise
-        };
-        (0, _drivers.addResponseListener)(hash, responseListener);
-        promise.catch(() => {
-          (0, _drivers.markResponseListenerErrored)(hash);
-          (0, _drivers.deleteResponseListener)(hash);
-        });
-        const totalAckTimeout = (0, _lib.isWindowKnown)(win) ? _conf.ACK_TIMEOUT_KNOWN : _conf.ACK_TIMEOUT;
-        const totalResTimeout = responseTimeout;
-        let ackTimeout = totalAckTimeout;
-        let resTimeout = totalResTimeout;
-        const interval = (0, _src3.safeInterval)(() => {
-          if ((0, _src2.isWindowClosed)(win)) {
-            return promise.reject(new Error(`Window closed for ${name} before ${responseListener.ack ? 'response' : 'ack'}`));
-          }
-
-          ackTimeout = Math.max(ackTimeout - _conf.RESPONSE_CYCLE_TIME, 0);
-
-          if (resTimeout !== -1) {
-            resTimeout = Math.max(resTimeout - _conf.RESPONSE_CYCLE_TIME, 0);
-          }
-
-          if (!responseListener.ack && ackTimeout === 0) {
-            return promise.reject(new Error(`No ack for postMessage ${logName} in ${(0, _src2.getDomain)()} in ${totalAckTimeout}ms`));
-          } else if (resTimeout === 0) {
-            return promise.reject(new Error(`No response for postMessage ${logName} in ${(0, _src2.getDomain)()} in ${totalResTimeout}ms`));
-          }
-        }, _conf.RESPONSE_CYCLE_TIME);
-        promise.finally(() => {
-          interval.cancel();
-          reqPromises.splice(reqPromises.indexOf(requestPromise, 1));
-        }).catch(_src3.noop);
-      }
-
-      (0, _drivers.sendMessage)(win, domain, {
-        type: _conf.MESSAGE_TYPE.REQUEST,
-        hash,
-        name,
-        data,
-        fireAndForget
-      }, {
-        on: _on.on,
-        send
-      }); // $FlowFixMe
-
-      return promise;
+    (0, _drivers.sendMessage)(win, domain, {
+      type: _conf.MESSAGE_TYPE.REQUEST,
+      hash,
+      name,
+      data,
+      fireAndForget
+    }, {
+      on: _on.on,
+      send
     });
-
-    reqPromises.push(requestPromise);
-    return requestPromise;
+    return fireAndForget ? promise.resolve() : promise;
   });
-}
+};
+
+exports.send = send;

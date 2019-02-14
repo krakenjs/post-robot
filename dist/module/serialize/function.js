@@ -170,14 +170,17 @@ function deserializeFunction(source, origin, {
             origin: (0, _src.getDomain)()
           }, arguments);
         } else {
+          // $FlowFixMe
+          const options = {
+            domain: origin,
+            fireAndForget: opts.fireAndForget
+          };
+          const args = Array.prototype.slice.call(arguments);
           return send(win, _conf.MESSAGE_NAME.METHOD, {
             id,
             name,
-            args: Array.prototype.slice.call(arguments)
-          }, {
-            domain: origin,
-            fireAndForget: opts.fireAndForget
-          }).then(res => {
+            args
+          }, options).then(res => {
             if (!opts.fireAndForget) {
               return res.data.result;
             }

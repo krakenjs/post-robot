@@ -599,6 +599,9 @@
                 return "Error while stringifying error: " + stringifyError(newErr, level + 1);
             }
         }
+        function stringify(item) {
+            return "string" == typeof item ? item : item && "function" == typeof item.toString ? item.toString() : {}.toString.call(item);
+        }
         function util_isRegex(item) {
             return "[object RegExp]" === {}.toString.call(item);
         }
@@ -608,11 +611,7 @@
             return obj[key] = val, val;
         }
         Object.create(Error.prototype);
-        var CHILD_WINDOW_TIMEOUT = 5e3, ACK_TIMEOUT = 2e3, ACK_TIMEOUT_KNOWN = 1e4, RES_TIMEOUT = -1, RESPONSE_CYCLE_TIME = 500, MESSAGE_TYPE = {
-            REQUEST: "postrobot_message_request",
-            RESPONSE: "postrobot_message_response",
-            ACK: "postrobot_message_ack"
-        }, MESSAGE_NAME = {
+        var MESSAGE_NAME = {
             METHOD: "postrobot_method",
             HELLO: "postrobot_hello",
             OPEN_TUNNEL: "postrobot_open_tunnel"
@@ -622,7 +621,7 @@
             CROSS_DOMAIN_WINDOW: "cross_domain_window"
         };
         function global_getGlobal(win) {
-            return void 0 === win && (win = window), win !== window ? win.__post_robot_10_0_7__ : win.__post_robot_10_0_7__ = win.__post_robot_10_0_7__ || {};
+            return void 0 === win && (win = window), win !== window ? win.__post_robot_10_0_8__ : win.__post_robot_10_0_8__ = win.__post_robot_10_0_8__ || {};
         }
         var getObj = function() {
             return {};
@@ -1106,17 +1105,19 @@
                                 send: send
                             }).awaitWindow().then(function(win) {
                                 var meth = lookupMethod(win, id);
-                                return meth && meth.val !== crossDomainFunctionWrapper ? meth.val.apply({
+                                if (meth && meth.val !== crossDomainFunctionWrapper) return meth.val.apply({
                                     source: window,
                                     origin: getDomain()
-                                }, _arguments) : send(win, MESSAGE_NAME.METHOD, {
-                                    id: id,
-                                    name: name,
-                                    args: [].slice.call(_arguments)
-                                }, {
+                                }, _arguments);
+                                var options = {
                                     domain: origin,
                                     fireAndForget: opts.fireAndForget
-                                }).then(function(res) {
+                                }, _args = [].slice.call(_arguments);
+                                return send(win, MESSAGE_NAME.METHOD, {
+                                    id: id,
+                                    name: name,
+                                    args: _args
+                                }, options).then(function(res) {
                                     if (!opts.fireAndForget) return res.data.result;
                                 });
                             }).catch(function(err) {
@@ -1150,7 +1151,7 @@
         function send_sendMessage(win, domain, message, _ref) {
             var _serializeMessage, on = _ref.on, send = _ref.send;
             if (isWindowClosed(win)) throw new Error("Window is closed");
-            for (var serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {}).__post_robot_10_0_7__ = _extends({
+            for (var serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {}).__post_robot_10_0_8__ = _extends({
                 id: uniqueID(),
                 origin: getDomain(window)
             }, message), _serializeMessage), {
@@ -1207,7 +1208,7 @@
                 }
             }
         }
-        var RECEIVE_MESSAGE_TYPES = ((_RECEIVE_MESSAGE_TYPE = {})[MESSAGE_TYPE.REQUEST] = function(source, origin, message, _ref) {
+        var RECEIVE_MESSAGE_TYPES = ((_RECEIVE_MESSAGE_TYPE = {}).postrobot_message_request = function(source, origin, message, _ref) {
             var on = _ref.on, send = _ref.send, options = getRequestListener({
                 name: message.name,
                 win: source,
@@ -1224,7 +1225,7 @@
                     send: send
                 });
             }
-            return promise_ZalgoPromise.all([ sendResponse(MESSAGE_TYPE.ACK), promise_ZalgoPromise.try(function() {
+            return promise_ZalgoPromise.all([ sendResponse("postrobot_message_ack"), promise_ZalgoPromise.try(function() {
                 if (!options) throw new Error("No handler found for post message: " + message.name + " from " + origin + " in " + window.location.protocol + "//" + window.location.host + window.location.pathname);
                 if (!matchDomain(options.domain, origin)) throw new Error("Request origin " + origin + " does not match domain " + options.domain.toString());
                 return options.handler({
@@ -1233,18 +1234,18 @@
                     data: message.data
                 });
             }).then(function(data) {
-                return sendResponse(MESSAGE_TYPE.RESPONSE, "success", {
+                return sendResponse("postrobot_message_response", "success", {
                     data: data
                 });
             }, function(error) {
-                return sendResponse(MESSAGE_TYPE.RESPONSE, "error", {
+                return sendResponse("postrobot_message_response", "error", {
                     error: error
                 });
             }) ]).then(src_util_noop).catch(function(err) {
                 if (options && options.handleError) return options.handleError(err);
                 throw err;
             });
-        }, _RECEIVE_MESSAGE_TYPE[MESSAGE_TYPE.ACK] = function(source, origin, message) {
+        }, _RECEIVE_MESSAGE_TYPE.postrobot_message_ack = function(source, origin, message) {
             if (!isResponseListenerErrored(message.hash)) {
                 var options = getResponseListener(message.hash);
                 if (!options) throw new Error("No handler found for post message ack for message: " + message.name + " from " + origin + " in " + window.location.protocol + "//" + window.location.host + window.location.pathname);
@@ -1252,7 +1253,7 @@
                 if (source !== options.win) throw new Error("Ack source does not match registered window");
                 options.ack = !0;
             }
-        }, _RECEIVE_MESSAGE_TYPE[MESSAGE_TYPE.RESPONSE] = function(source, origin, message) {
+        }, _RECEIVE_MESSAGE_TYPE.postrobot_message_response = function(source, origin, message) {
             if (!isResponseListenerErrored(message.hash)) {
                 var pattern, options = getResponseListener(message.hash);
                 if (!options) throw new Error("No handler found for post message response for message: " + message.name + " from " + origin + " in " + window.location.protocol + "//" + window.location.host + window.location.pathname);
@@ -1284,7 +1285,7 @@
                 } catch (err) {
                     return;
                 }
-                if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage && (parsedMessage = parsedMessage.__post_robot_10_0_7__) && "object" == typeof parsedMessage && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
+                if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage && (parsedMessage = parsedMessage.__post_robot_10_0_8__) && "object" == typeof parsedMessage && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
             }(event.data, source, origin, {
                 on: on,
                 send: send
@@ -1379,112 +1380,119 @@
                 if (listener.cancel(), promise.resolve(event), handler) return handler(event);
             }), promise.cancel = listener.cancel, promise;
         }
-        function send_send(win, name, data, options) {
-            var domain = (options = options || {}).domain || constants_WILDCARD, responseTimeout = options.timeout || RES_TIMEOUT, childTimeout = options.timeout || CHILD_WINDOW_TIMEOUT, fireAndForget = options.fireAndForget || !1;
+        function normalizeDomain(win, domain, childTimeout, _ref) {
+            var send = _ref.send;
             return promise_ZalgoPromise.try(function() {
-                if (!name) throw new Error("Expected name");
-                if (domain && "string" != typeof domain && !Array.isArray(domain) && !util_isRegex(domain)) throw new TypeError("Expected domain to be a string, array, or regex");
-                if (isWindowClosed(win)) throw new Error("Target window is closed");
-                var reqPromises = windowStore("requestPromises").getOrSet(win, function() {
-                    return [];
-                }), requestPromise = promise_ZalgoPromise.try(function() {
-                    return function(parent, child) {
-                        var actualParent = getAncestor(child);
-                        if (actualParent) return actualParent === parent;
-                        if (child === parent) return !1;
-                        if (function(win) {
-                            if (win) {
-                                try {
-                                    if (win.top) return win.top;
-                                } catch (err) {}
-                                if (getParent(win) === win) return win;
-                                try {
-                                    if (isAncestorParent(window, win) && window.top) return window.top;
-                                } catch (err) {}
-                                try {
-                                    if (isAncestorParent(win, window) && window.top) return window.top;
-                                } catch (err) {}
-                                for (var _i7 = 0, _getAllChildFrames4 = function getAllChildFrames(win) {
-                                    for (var result = [], _i3 = 0, _getFrames2 = getFrames(win); _i3 < _getFrames2.length; _i3++) {
-                                        var frame = _getFrames2[_i3];
-                                        result.push(frame);
-                                        for (var _i5 = 0, _getAllChildFrames2 = getAllChildFrames(frame); _i5 < _getAllChildFrames2.length; _i5++) result.push(_getAllChildFrames2[_i5]);
-                                    }
-                                    return result;
-                                }(win); _i7 < _getAllChildFrames4.length; _i7++) {
-                                    var frame = _getAllChildFrames4[_i7];
-                                    try {
-                                        if (frame.top) return frame.top;
-                                    } catch (err) {}
-                                    if (getParent(frame) === frame) return frame;
+                return function(parent, child) {
+                    var actualParent = getAncestor(child);
+                    if (actualParent) return actualParent === parent;
+                    if (child === parent) return !1;
+                    if (function(win) {
+                        if (win) {
+                            try {
+                                if (win.top) return win.top;
+                            } catch (err) {}
+                            if (getParent(win) === win) return win;
+                            try {
+                                if (isAncestorParent(window, win) && window.top) return window.top;
+                            } catch (err) {}
+                            try {
+                                if (isAncestorParent(win, window) && window.top) return window.top;
+                            } catch (err) {}
+                            for (var _i7 = 0, _getAllChildFrames4 = function getAllChildFrames(win) {
+                                for (var result = [], _i3 = 0, _getFrames2 = getFrames(win); _i3 < _getFrames2.length; _i3++) {
+                                    var frame = _getFrames2[_i3];
+                                    result.push(frame);
+                                    for (var _i5 = 0, _getAllChildFrames2 = getAllChildFrames(frame); _i5 < _getAllChildFrames2.length; _i5++) result.push(_getAllChildFrames2[_i5]);
                                 }
+                                return result;
+                            }(win); _i7 < _getAllChildFrames4.length; _i7++) {
+                                var frame = _getAllChildFrames4[_i7];
+                                try {
+                                    if (frame.top) return frame.top;
+                                } catch (err) {}
+                                if (getParent(frame) === frame) return frame;
                             }
-                        }(child) === child) return !1;
-                        for (var _i15 = 0, _getFrames8 = getFrames(parent); _i15 < _getFrames8.length; _i15++) if (_getFrames8[_i15] === child) return !0;
-                        return !1;
-                    }(window, win) ? function(win, timeout, name) {
-                        void 0 === timeout && (timeout = 5e3), void 0 === name && (name = "Window");
-                        var promise = getHelloPromise(win);
-                        return -1 !== timeout && (promise = promise.timeout(timeout, new Error(name + " did not load after " + timeout + "ms"))), 
-                        promise;
-                    }(win, childTimeout) : util_isRegex(domain) ? sayHello(win, {
-                        send: send_send
-                    }) : void 0;
-                }).then(function(_temp) {
-                    var origin = (void 0 === _temp ? {} : _temp).domain;
-                    if (util_isRegex(domain)) {
-                        if (!matchDomain(domain, origin)) throw new Error("Remote window domain " + origin + " does not match regex: " + domain.source);
-                        domain = origin;
-                    }
-                    var promise, method, time, timeout, logName = name === MESSAGE_NAME.METHOD && data && "string" == typeof data.name ? data.name + "()" : name, hash = name + "_" + uniqueID();
-                    if (!fireAndForget) {
-                        promise = new promise_ZalgoPromise();
-                        var responseListener = {
-                            name: name,
-                            win: win,
-                            domain: domain,
-                            promise: promise
-                        };
-                        !function(hash, listener) {
-                            globalStore("responseListeners").set(hash, listener);
-                        }(hash, responseListener), promise.catch(function() {
-                            !function(hash) {
-                                globalStore("erroredResponseListeners").set(hash, !0);
-                            }(hash), deleteResponseListener(hash);
-                        });
-                        var totalAckTimeout = function(win) {
-                            return windowStore("knownWindows").get(win, !1);
-                        }(win) ? ACK_TIMEOUT_KNOWN : ACK_TIMEOUT, totalResTimeout = responseTimeout, ackTimeout = totalAckTimeout, resTimeout = totalResTimeout, interval = (method = function() {
-                            return isWindowClosed(win) ? promise.reject(new Error("Window closed for " + name + " before " + (responseListener.ack ? "response" : "ack"))) : (ackTimeout = Math.max(ackTimeout - RESPONSE_CYCLE_TIME, 0), 
-                            -1 !== resTimeout && (resTimeout = Math.max(resTimeout - RESPONSE_CYCLE_TIME, 0)), 
-                            responseListener.ack || 0 !== ackTimeout ? 0 === resTimeout ? promise.reject(new Error("No response for postMessage " + logName + " in " + getDomain() + " in " + totalResTimeout + "ms")) : void 0 : promise.reject(new Error("No ack for postMessage " + logName + " in " + getDomain() + " in " + totalAckTimeout + "ms")));
-                        }, time = RESPONSE_CYCLE_TIME, function loop() {
-                            timeout = setTimeout(function() {
-                                method(), loop();
-                            }, time);
-                        }(), {
-                            cancel: function() {
-                                clearTimeout(timeout);
-                            }
-                        });
-                        promise.finally(function() {
-                            interval.cancel(), reqPromises.splice(reqPromises.indexOf(requestPromise, 1));
-                        }).catch(src_util_noop);
-                    }
-                    return send_sendMessage(win, domain, {
-                        type: MESSAGE_TYPE.REQUEST,
-                        hash: hash,
-                        name: name,
-                        data: data,
-                        fireAndForget: fireAndForget
-                    }, {
-                        on: on_on,
-                        send: send_send
-                    }), promise;
-                });
-                return reqPromises.push(requestPromise), requestPromise;
+                        }
+                    }(child) === child) return !1;
+                    for (var _i15 = 0, _getFrames8 = getFrames(parent); _i15 < _getFrames8.length; _i15++) if (_getFrames8[_i15] === child) return !0;
+                    return !1;
+                }(window, win) ? function(win, timeout, name) {
+                    void 0 === timeout && (timeout = 5e3), void 0 === name && (name = "Window");
+                    var promise = getHelloPromise(win);
+                    return -1 !== timeout && (promise = promise.timeout(timeout, new Error(name + " did not load after " + timeout + "ms"))), 
+                    promise;
+                }(win, childTimeout) : util_isRegex(domain) ? sayHello(win, {
+                    send: send
+                }) : {
+                    domain: domain
+                };
+            }).then(function(_ref2) {
+                return _ref2.domain;
             });
         }
+        var send_send = function send(win, name, data, options) {
+            var domain = (options = options || {}).domain || constants_WILDCARD, responseTimeout = options.timeout || -1, childTimeout = options.timeout || 5e3, fireAndForget = options.fireAndForget || !1;
+            return promise_ZalgoPromise.try(function() {
+                return function(name, win, domain) {
+                    if (!name) throw new Error("Expected name");
+                    if (domain && "string" != typeof domain && !Array.isArray(domain) && !util_isRegex(domain)) throw new TypeError("Expected domain to be a string, array, or regex");
+                    if (isWindowClosed(win)) throw new Error("Target window is closed");
+                }(name, win, domain), normalizeDomain(win, domain, childTimeout, {
+                    send: send
+                });
+            }).then(function(targetDomain) {
+                if (!matchDomain(domain, targetDomain)) throw new Error("Domain " + stringify(domain) + " does not match " + stringify(targetDomain));
+                domain = targetDomain;
+                var method, timeout, logName = name === MESSAGE_NAME.METHOD && data && "string" == typeof data.name ? data.name + "()" : name, promise = new promise_ZalgoPromise(), hash = name + "_" + uniqueID();
+                if (!fireAndForget) {
+                    var responseListener = {
+                        name: name,
+                        win: win,
+                        domain: domain,
+                        promise: promise
+                    };
+                    !function(hash, listener) {
+                        globalStore("responseListeners").set(hash, listener);
+                    }(hash, responseListener);
+                    var reqPromises = windowStore("requestPromises").getOrSet(win, function() {
+                        return [];
+                    });
+                    reqPromises.push(promise), promise.catch(function() {
+                        !function(hash) {
+                            globalStore("erroredResponseListeners").set(hash, !0);
+                        }(hash), deleteResponseListener(hash);
+                    });
+                    var totalAckTimeout = function(win) {
+                        return windowStore("knownWindows").get(win, !1);
+                    }(win) ? 1e4 : 2e3, totalResTimeout = responseTimeout, ackTimeout = totalAckTimeout, resTimeout = totalResTimeout, interval = (method = function() {
+                        return isWindowClosed(win) ? promise.reject(new Error("Window closed for " + name + " before " + (responseListener.ack ? "response" : "ack"))) : (ackTimeout = Math.max(ackTimeout - 500, 0), 
+                        -1 !== resTimeout && (resTimeout = Math.max(resTimeout - 500, 0)), responseListener.ack || 0 !== ackTimeout ? 0 === resTimeout ? promise.reject(new Error("No response for postMessage " + logName + " in " + getDomain() + " in " + totalResTimeout + "ms")) : void 0 : promise.reject(new Error("No ack for postMessage " + logName + " in " + getDomain() + " in " + totalAckTimeout + "ms")));
+                    }, 500, function loop() {
+                        timeout = setTimeout(function() {
+                            method(), loop();
+                        }, 500);
+                    }(), {
+                        cancel: function() {
+                            clearTimeout(timeout);
+                        }
+                    });
+                    promise.finally(function() {
+                        interval.cancel(), reqPromises.splice(reqPromises.indexOf(promise, 1));
+                    }).catch(src_util_noop);
+                }
+                return send_sendMessage(win, domain, {
+                    type: "postrobot_message_request",
+                    hash: hash,
+                    name: name,
+                    data: data,
+                    fireAndForget: fireAndForget
+                }, {
+                    on: on_on,
+                    send: send
+                }), fireAndForget ? promise.resolve() : promise;
+            });
+        };
         function setup_serializeMessage(destination, domain, obj) {
             return serializeMessage(destination, domain, obj, {
                 on: on_on,
