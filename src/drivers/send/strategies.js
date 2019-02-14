@@ -30,19 +30,23 @@ SEND_MESSAGE_STRATEGIES[SEND_STRATEGY.POST_MESSAGE] = (win : CrossDomainWindowTy
 
     domains = domains.map(dom => {
 
-        if (dom.indexOf(PROTOCOL.MOCK) === 0) {
-            if (window.location.protocol === PROTOCOL.FILE) {
-                return WILDCARD;
+        if (__TEST__) {
+            if (dom.indexOf(PROTOCOL.MOCK) === 0) {
+                if (window.location.protocol === PROTOCOL.FILE) {
+                    return WILDCARD;
+                }
+
+                if (!isActuallySameDomain(win)) {
+                    throw new Error(`Attempting to send messsage to mock domain ${ dom }, but window is actually cross-domain`);
+                }
+
+                // $FlowFixMe
+                return getActualDomain(win);
+
             }
-
-            if (!isActuallySameDomain(win)) {
-                throw new Error(`Attempting to send messsage to mock domain ${ dom }, but window is actually cross-domain`);
-            }
-
-            // $FlowFixMe
-            return getActualDomain(win);
-
-        } else if (dom.indexOf(PROTOCOL.FILE) === 0) {
+        }
+        
+        if (dom.indexOf(PROTOCOL.FILE) === 0) {
             return WILDCARD;
         }
 
