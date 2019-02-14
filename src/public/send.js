@@ -2,10 +2,10 @@
 
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { isAncestor, isWindowClosed, getDomain, matchDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
-import { uniqueID, isRegex, noop } from 'belter/src';
+import { uniqueID, isRegex, noop, safeInterval } from 'belter/src';
 
 
-import { CHILD_WINDOW_TIMEOUT, MESSAGE_TYPE, WILDCARD, MESSAGE_NAME, ACK_TIMEOUT, RES_TIMEOUT, ACK_TIMEOUT_KNOWN } from '../conf';
+import { CHILD_WINDOW_TIMEOUT, MESSAGE_TYPE, WILDCARD, MESSAGE_NAME, ACK_TIMEOUT, RES_TIMEOUT, ACK_TIMEOUT_KNOWN, RESPONSE_CYCLE_TIME } from '../conf';
 import { sendMessage, addResponseListener, deleteResponseListener, markResponseListenerErrored, type ResponseListenerType } from '../drivers';
 import { awaitWindowHello, sayHello, isWindowKnown } from '../lib';
 import { windowStore } from '../global';
@@ -22,7 +22,7 @@ export function send(win : CrossDomainWindowType, name : string, data : ?Object,
     const childTimeout = options.timeout || CHILD_WINDOW_TIMEOUT;
     const fireAndForget = options.fireAndForget || false;
 
-    const prom = ZalgoPromise.try(() => {
+    return ZalgoPromise.try(() => {
         if (!name) {
             throw new Error('Expected name');
         }
@@ -65,15 +65,49 @@ export function send(win : CrossDomainWindowType, name : string, data : ?Object,
                 console.info('send::req', logName, domain, '\n\n', data); // eslint-disable-line no-console
             }
 
-            let hasResult = false;
-
-            const promise = new ZalgoPromise();
-            promise.finally(() => {
-                hasResult = true;
-                reqPromises.splice(reqPromises.indexOf(requestPromise, 1));
-            }).catch(noop);
-
+            let promise;
             const hash = `${ name }_${ uniqueID() }`;
+
+            if (!fireAndForget) {
+                promise = new ZalgoPromise();
+                
+                const responseListener : ResponseListenerType = { name, win, domain, promise };
+                addResponseListener(hash, responseListener);
+
+                promise.catch(() => {
+                    markResponseListenerErrored(hash);
+                    deleteResponseListener(hash);
+                });
+
+                const totalAckTimeout = isWindowKnown(win) ? ACK_TIMEOUT_KNOWN : ACK_TIMEOUT;
+                const totalResTimeout = responseTimeout;
+
+                let ackTimeout = totalAckTimeout;
+                let resTimeout = totalResTimeout;
+                
+                const interval = safeInterval(() => {
+                    if (isWindowClosed(win)) {
+                        return promise.reject(new Error(`Window closed for ${ name } before ${ responseListener.ack ? 'response' : 'ack' }`));
+                    }
+
+                    ackTimeout = Math.max(ackTimeout - RESPONSE_CYCLE_TIME, 0);
+                    if (resTimeout !== -1) {
+                        resTimeout = Math.max(resTimeout - RESPONSE_CYCLE_TIME, 0);
+                    }
+
+                    if (!responseListener.ack && ackTimeout === 0) {
+                        return promise.reject(new Error(`No ack for postMessage ${ logName } in ${ getDomain() } in ${ totalAckTimeout }ms`));
+
+                    } else if (resTimeout === 0) {
+                        return promise.reject(new Error(`No response for postMessage ${ logName } in ${ getDomain() } in ${ totalResTimeout }ms`));
+                    }
+                }, RESPONSE_CYCLE_TIME);
+
+                promise.finally(() => {
+                    interval.cancel();
+                    reqPromises.splice(reqPromises.indexOf(requestPromise, 1));
+                }).catch(noop);
+            }
 
             sendMessage(win, domain, {
                 type: MESSAGE_TYPE.REQUEST,
@@ -83,77 +117,11 @@ export function send(win : CrossDomainWindowType, name : string, data : ?Object,
                 fireAndForget
             }, { on, send });
 
-            if (fireAndForget) {
-                return promise.resolve();
-            }
-
-            promise.catch(() => {
-                markResponseListenerErrored(hash);
-                deleteResponseListener(hash);
-            });
-
-            const responseListener : ResponseListenerType = {
-                name,
-                win,
-                domain,
-                promise
-            };
-
-            addResponseListener(hash, responseListener);
-
-            const totalAckTimeout = isWindowKnown(win) ? ACK_TIMEOUT_KNOWN : ACK_TIMEOUT;
-            const totalResTimeout = responseTimeout;
-
-            let ackTimeout = totalAckTimeout;
-            let resTimeout = totalResTimeout;
-
-            let cycleTime = 100;
-
-            const cycle = () => {
-                if (hasResult) {
-                    return;
-                }
-
-                if (isWindowClosed(win)) {
-                    if (!responseListener.ack) {
-                        return promise.reject(new Error(`Window closed for ${ name } before ack`));
-                    } else {
-                        return promise.reject(new Error(`Window closed for ${ name } before response`));
-                    }
-                }
-
-                ackTimeout = Math.max(ackTimeout - cycleTime, 0);
-                if (resTimeout !== -1) {
-                    resTimeout = Math.max(resTimeout - cycleTime, 0);
-                }
-
-                const hasAck = responseListener.ack;
-
-                if (hasAck) {
-                    if (resTimeout === -1) {
-                        return;
-                    }
-
-                    cycleTime = Math.min(resTimeout, 2000);
-
-                } else if (ackTimeout === 0) {
-                    return promise.reject(new Error(`No ack for postMessage ${ logName } in ${ getDomain() } in ${ totalAckTimeout }ms`));
-
-                } else if (resTimeout === 0) {
-                    return promise.reject(new Error(`No response for postMessage ${ logName } in ${ getDomain() } in ${ totalResTimeout }ms`));
-                }
-
-                setTimeout(cycle, cycleTime);
-            };
-
-            setTimeout(cycle, cycleTime);
-
+            // $FlowFixMe
             return promise;
         });
 
         reqPromises.push(requestPromise);
         return requestPromise;
     });
-
-    return prom;
 }
