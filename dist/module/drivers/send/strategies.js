@@ -34,18 +34,22 @@ SEND_MESSAGE_STRATEGIES[_conf.SEND_STRATEGY.POST_MESSAGE] = (win, serializedMess
   }
 
   domains = domains.map(dom => {
-    if (dom.indexOf(_src.PROTOCOL.MOCK) === 0) {
-      if (window.location.protocol === _src.PROTOCOL.FILE) {
-        return _conf.WILDCARD;
+    if (__TEST__) {
+      if (dom.indexOf(_src.PROTOCOL.MOCK) === 0) {
+        if (window.location.protocol === _src.PROTOCOL.FILE) {
+          return _conf.WILDCARD;
+        }
+
+        if (!(0, _src.isActuallySameDomain)(win)) {
+          throw new Error(`Attempting to send messsage to mock domain ${dom}, but window is actually cross-domain`);
+        } // $FlowFixMe
+
+
+        return (0, _src.getActualDomain)(win);
       }
+    }
 
-      if (!(0, _src.isActuallySameDomain)(win)) {
-        throw new Error(`Attempting to send messsage to mock domain ${dom}, but window is actually cross-domain`);
-      } // $FlowFixMe
-
-
-      return (0, _src.getActualDomain)(win);
-    } else if (dom.indexOf(_src.PROTOCOL.FILE) === 0) {
+    if (dom.indexOf(_src.PROTOCOL.FILE) === 0) {
       return _conf.WILDCARD;
     }
 

@@ -98,24 +98,23 @@
             var domain = getActualDomain(win = win || window);
             return domain && win.mockDomain && 0 === win.mockDomain.indexOf(PROTOCOL.MOCK) ? win.mockDomain : domain;
         }
-        function isActuallySameDomain(win) {
-            try {
-                if (win === window) return !0;
-            } catch (err) {}
-            try {
-                var desc = Object.getOwnPropertyDescriptor(win, "location");
-                if (desc && !1 === desc.enumerable) return !1;
-            } catch (err) {}
-            try {
-                if (isAboutProtocol(win) && canReadFromWindow()) return !0;
-            } catch (err) {}
-            try {
-                if (getActualDomain(win) === getActualDomain(window)) return !0;
-            } catch (err) {}
-            return !1;
-        }
         function isSameDomain(win) {
-            if (!isActuallySameDomain(win)) return !1;
+            if (!function(win) {
+                try {
+                    if (win === window) return !0;
+                } catch (err) {}
+                try {
+                    var desc = Object.getOwnPropertyDescriptor(win, "location");
+                    if (desc && !1 === desc.enumerable) return !1;
+                } catch (err) {}
+                try {
+                    if (isAboutProtocol(win) && canReadFromWindow()) return !0;
+                } catch (err) {}
+                try {
+                    if (getActualDomain(win) === getActualDomain(window)) return !0;
+                } catch (err) {}
+                return !1;
+            }(win)) return !1;
             try {
                 if (win === window) return !0;
                 if (isAboutProtocol(win) && canReadFromWindow()) return !0;
@@ -656,6 +655,22 @@
             }(new Date().toISOString().slice(11, 19).replace("T", ".")).replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
         }
         function src_util_noop() {}
+        function stringifyError(err, level) {
+            if (void 0 === level && (level = 1), level >= 3) return "stringifyError stack overflow";
+            try {
+                if (!err) return "<unknown error: " + {}.toString.call(err) + ">";
+                if ("string" == typeof err) return err;
+                if (err instanceof Error) {
+                    var stack = err && err.stack, message = err && err.message;
+                    if (stack && message) return -1 !== stack.indexOf(message) ? stack : message + "\n" + stack;
+                    if (stack) return stack;
+                    if (message) return message;
+                }
+                return "function" == typeof err.toString ? err.toString() : {}.toString.call(err);
+            } catch (newErr) {
+                return "Error while stringifying error: " + stringifyError(newErr, level + 1);
+            }
+        }
         function util_isRegex(item) {
             return "[object RegExp]" === {}.toString.call(item);
         }
@@ -679,7 +694,7 @@
             CROSS_DOMAIN_WINDOW: "cross_domain_window"
         };
         function global_getGlobal(win) {
-            return void 0 === win && (win = window), win !== window ? win.__post_robot_10_0_4__ : win.__post_robot_10_0_4__ = win.__post_robot_10_0_4__ || {};
+            return void 0 === win && (win = window), win !== window ? win.__post_robot_10_0_5__ : win.__post_robot_10_0_5__ = win.__post_robot_10_0_5__ || {};
         }
         var getObj = function() {
             return {};
@@ -1436,29 +1451,24 @@
         function send_sendMessage(win, domain, message, _ref) {
             var _serializeMessage, on = _ref.on, send = _ref.send;
             if (isWindowClosed(win)) throw new Error("Window is closed");
-            for (var error, serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {}).__post_robot_10_0_4__ = _extends({
+            for (var serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {}).__post_robot_10_0_5__ = _extends({
                 id: uniqueID(),
                 origin: getDomain(window)
             }, message), _serializeMessage), {
                 on: on,
                 send: send
-            }), success = !1, _i2 = 0, _Object$keys2 = Object.keys(SEND_MESSAGE_STRATEGIES); _i2 < _Object$keys2.length; _i2++) {
-                var strategyName = _Object$keys2[_i2];
+            }), strategies = Object.keys(SEND_MESSAGE_STRATEGIES), errors = [], _i2 = 0; _i2 < strategies.length; _i2++) {
+                var strategyName = strategies[_i2];
                 try {
-                    SEND_MESSAGE_STRATEGIES[strategyName](win, serializedMessage, domain), success = !0;
+                    SEND_MESSAGE_STRATEGIES[strategyName](win, serializedMessage, domain);
                 } catch (err) {
-                    error = error || err;
+                    errors.push(err);
                 }
             }
-            if (!success) throw error;
+            if (errors.length === strategies.length) throw new Error("All post-robot messaging strategies failed:\n\n" + errors.map(stringifyError).join("\n\n"));
         }
         SEND_MESSAGE_STRATEGIES.postrobot_post_message = function(win, serializedMessage, domain) {
             (Array.isArray(domain) ? domain : "string" == typeof domain ? [ domain ] : [ constants_WILDCARD ]).map(function(dom) {
-                if (0 === dom.indexOf(PROTOCOL.MOCK)) {
-                    if (window.location.protocol === PROTOCOL.FILE) return constants_WILDCARD;
-                    if (!isActuallySameDomain(win)) throw new Error("Attempting to send messsage to mock domain " + dom + ", but window is actually cross-domain");
-                    return getActualDomain(win);
-                }
                 return 0 === dom.indexOf(PROTOCOL.FILE) ? constants_WILDCARD : dom;
             }).forEach(function(dom) {
                 win.postMessage(serializedMessage, dom);
@@ -1599,7 +1609,7 @@
                 } catch (err) {
                     return;
                 }
-                if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage && (parsedMessage = parsedMessage.__post_robot_10_0_4__) && "object" == typeof parsedMessage && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
+                if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage && (parsedMessage = parsedMessage.__post_robot_10_0_5__) && "object" == typeof parsedMessage && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
             }(event.data, source, origin, {
                 on: on,
                 send: send
