@@ -25,6 +25,7 @@ export function setup() {
     if (!getGlobal().initialized) {
         getGlobal().initialized = true;
     
+        setupGlobalReceiveMessage({ on, send });
         listenForMessages({ on, send });
     
         if (__POST_ROBOT__.__IE_POPUP_SUPPORT__) {
@@ -32,6 +33,5 @@ export function setup() {
         }
 
         initHello({ on, send });
-        setupGlobalReceiveMessage({ on, send });
     }
 }
