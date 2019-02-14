@@ -2,6 +2,7 @@
 
 exports.__esModule = true;
 exports.getGlobal = getGlobal;
+exports.deleteGlobal = deleteGlobal;
 exports.globalStore = globalStore;
 exports.getWildcard = getWildcard;
 exports.windowStore = windowStore;
@@ -18,6 +19,10 @@ function getGlobal(win = window) {
 
   const global = win[__POST_ROBOT__.__GLOBAL_KEY__] = win[__POST_ROBOT__.__GLOBAL_KEY__] || {};
   return global;
+}
+
+function deleteGlobal() {
+  delete window[__POST_ROBOT__.__GLOBAL_KEY__];
 }
 
 const getObj = () => ({});

@@ -5,6 +5,7 @@ exports.receiveMessage = receiveMessage;
 exports.setupGlobalReceiveMessage = setupGlobalReceiveMessage;
 exports.messageListener = messageListener;
 exports.listenForMessages = listenForMessages;
+exports.stopListenForMessages = stopListenForMessages;
 
 var _src = require("cross-domain-utils/src");
 
@@ -176,7 +177,7 @@ function listenForMessages({
   on,
   send
 }) {
-  return (0, _global.globalStore)().getOrSet('postMessageListeners', () => {
+  return (0, _global.globalStore)().getOrSet('postMessageListener', () => {
     // $FlowFixMe
     return (0, _src2.addEventListener)(window, 'message', event => {
       // $FlowFixMe
@@ -186,4 +187,12 @@ function listenForMessages({
       });
     });
   });
+}
+
+function stopListenForMessages() {
+  const listener = (0, _global.globalStore)().get('postMessageListener');
+
+  if (listener) {
+    listener.cancel();
+  }
 }

@@ -5,6 +5,7 @@ exports.serializeMessage = serializeMessage;
 exports.deserializeMessage = deserializeMessage;
 exports.toProxyWindow = toProxyWindow;
 exports.setup = setup;
+exports.destroy = destroy;
 
 var _lib = require("./lib");
 
@@ -63,4 +64,9 @@ function setup() {
       send: _public.send
     });
   }
+}
+
+function destroy() {
+  (0, _drivers.stopListenForMessages)();
+  (0, _global.deleteGlobal)();
 }
