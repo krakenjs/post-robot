@@ -4,6 +4,7 @@ exports.__esModule = true;
 var _exportNames = {
   Promise: true,
   ProxyWindow: true,
+  destroy: true,
   serializeMessage: true,
   deserializeMessage: true,
   toProxyWindow: true,
@@ -15,11 +16,12 @@ var _exportNames = {
   bridge: true,
   setup: true
 };
-exports.bridge = exports.cleanUpWindow = exports.markWindowKnown = exports.send = exports.once = exports.on = exports.toProxyWindow = exports.deserializeMessage = exports.serializeMessage = exports.ProxyWindow = exports.Promise = void 0;
+exports.bridge = exports.cleanUpWindow = exports.markWindowKnown = exports.send = exports.once = exports.on = exports.toProxyWindow = exports.deserializeMessage = exports.serializeMessage = exports.destroy = exports.ProxyWindow = exports.Promise = void 0;
 
 var _setup = require("./setup");
 
 exports.setup = _setup.setup;
+exports.destroy = _setup.destroy;
 exports.serializeMessage = _setup.serializeMessage;
 exports.deserializeMessage = _setup.deserializeMessage;
 exports.toProxyWindow = _setup.toProxyWindow;
