@@ -3,8 +3,8 @@
 import type { CrossDomainWindowType, DomainMatcher } from 'cross-domain-utils/src';
 
 import { initHello } from './lib';
-import { listenForMessages, receiveMessage, setupGlobalReceiveMessage } from './drivers';
-import { getGlobal } from './global';
+import { listenForMessages, stopListenForMessages, receiveMessage, setupGlobalReceiveMessage } from './drivers';
+import { getGlobal, deleteGlobal } from './global';
 import { on, send } from './public';
 import { setupBridge } from './bridge';
 import { serializeMessage as internalSerializeMessage, deserializeMessage as internalDeserializeMessage, ProxyWindow } from './serialize';
@@ -34,4 +34,9 @@ export function setup() {
 
         initHello({ on, send });
     }
+}
+
+export function destroy() {
+    stopListenForMessages();
+    deleteGlobal();
 }

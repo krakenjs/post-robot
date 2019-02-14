@@ -12,6 +12,10 @@ export function getGlobal(win : SameDomainWindowType = window) : Object {
     return global;
 }
 
+export function deleteGlobal() {
+    delete window[__POST_ROBOT__.__GLOBAL_KEY__];
+}
+
 type ObjectGetter = () => Object;
 const getObj : ObjectGetter = () => ({});
 

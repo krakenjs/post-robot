@@ -138,11 +138,18 @@ export function messageListener(event : ListenerEvent, { on, send } : { on : OnT
 }
 
 export function listenForMessages({ on, send } : { on : OnType, send : SendType }) : CancelableType {
-    return globalStore().getOrSet('postMessageListeners', () => {
+    return globalStore().getOrSet('postMessageListener', () => {
         // $FlowFixMe
         return addEventListener(window, 'message', event => {
             // $FlowFixMe
             messageListener(event, { on, send });
         });
     });
+}
+
+export function stopListenForMessages() {
+    const listener = globalStore().get('postMessageListener');
+    if (listener) {
+        listener.cancel();
+    }
 }
