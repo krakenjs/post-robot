@@ -41,6 +41,10 @@ function toProxyWindow(win) {
 function setup() {
   if (!(0, _global.getGlobal)().initialized) {
     (0, _global.getGlobal)().initialized = true;
+    (0, _drivers.setupGlobalReceiveMessage)({
+      on: _public.on,
+      send: _public.send
+    });
     (0, _drivers.listenForMessages)({
       on: _public.on,
       send: _public.send
@@ -55,10 +59,6 @@ function setup() {
     }
 
     (0, _lib.initHello)({
-      on: _public.on,
-      send: _public.send
-    });
-    (0, _drivers.setupGlobalReceiveMessage)({
       on: _public.on,
       send: _public.send
     });
