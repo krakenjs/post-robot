@@ -608,7 +608,7 @@
             return obj[key] = val, val;
         }
         Object.create(Error.prototype);
-        var CHILD_WINDOW_TIMEOUT = 5e3, ACK_TIMEOUT = 2e3, ACK_TIMEOUT_KNOWN = 1e4, RES_TIMEOUT = -1, MESSAGE_TYPE = {
+        var CHILD_WINDOW_TIMEOUT = 5e3, ACK_TIMEOUT = 2e3, ACK_TIMEOUT_KNOWN = 1e4, RES_TIMEOUT = -1, RESPONSE_CYCLE_TIME = 500, MESSAGE_TYPE = {
             REQUEST: "postrobot_message_request",
             RESPONSE: "postrobot_message_response",
             ACK: "postrobot_message_ack"
@@ -622,7 +622,7 @@
             CROSS_DOMAIN_WINDOW: "cross_domain_window"
         };
         function global_getGlobal(win) {
-            return void 0 === win && (win = window), win !== window ? win.__post_robot_10_0_6__ : win.__post_robot_10_0_6__ = win.__post_robot_10_0_6__ || {};
+            return void 0 === win && (win = window), win !== window ? win.__post_robot_10_0_7__ : win.__post_robot_10_0_7__ = win.__post_robot_10_0_7__ || {};
         }
         var getObj = function() {
             return {};
@@ -1150,7 +1150,7 @@
         function send_sendMessage(win, domain, message, _ref) {
             var _serializeMessage, on = _ref.on, send = _ref.send;
             if (isWindowClosed(win)) throw new Error("Window is closed");
-            for (var serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {}).__post_robot_10_0_6__ = _extends({
+            for (var serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {}).__post_robot_10_0_7__ = _extends({
                 id: uniqueID(),
                 origin: getDomain(window)
             }, message), _serializeMessage), {
@@ -1284,7 +1284,7 @@
                 } catch (err) {
                     return;
                 }
-                if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage && (parsedMessage = parsedMessage.__post_robot_10_0_6__) && "object" == typeof parsedMessage && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
+                if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage && (parsedMessage = parsedMessage.__post_robot_10_0_7__) && "object" == typeof parsedMessage && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
             }(event.data, source, origin, {
                 on: on,
                 send: send
@@ -1436,12 +1436,42 @@
                         if (!matchDomain(domain, origin)) throw new Error("Remote window domain " + origin + " does not match regex: " + domain.source);
                         domain = origin;
                     }
-                    var logName = name === MESSAGE_NAME.METHOD && data && "string" == typeof data.name ? data.name + "()" : name, hasResult = !1, promise = new promise_ZalgoPromise();
-                    promise.finally(function() {
-                        hasResult = !0, reqPromises.splice(reqPromises.indexOf(requestPromise, 1));
-                    }).catch(src_util_noop);
-                    var hash = name + "_" + uniqueID();
-                    if (send_sendMessage(win, domain, {
+                    var promise, method, time, timeout, logName = name === MESSAGE_NAME.METHOD && data && "string" == typeof data.name ? data.name + "()" : name, hash = name + "_" + uniqueID();
+                    if (!fireAndForget) {
+                        promise = new promise_ZalgoPromise();
+                        var responseListener = {
+                            name: name,
+                            win: win,
+                            domain: domain,
+                            promise: promise
+                        };
+                        !function(hash, listener) {
+                            globalStore("responseListeners").set(hash, listener);
+                        }(hash, responseListener), promise.catch(function() {
+                            !function(hash) {
+                                globalStore("erroredResponseListeners").set(hash, !0);
+                            }(hash), deleteResponseListener(hash);
+                        });
+                        var totalAckTimeout = function(win) {
+                            return windowStore("knownWindows").get(win, !1);
+                        }(win) ? ACK_TIMEOUT_KNOWN : ACK_TIMEOUT, totalResTimeout = responseTimeout, ackTimeout = totalAckTimeout, resTimeout = totalResTimeout, interval = (method = function() {
+                            return isWindowClosed(win) ? promise.reject(new Error("Window closed for " + name + " before " + (responseListener.ack ? "response" : "ack"))) : (ackTimeout = Math.max(ackTimeout - RESPONSE_CYCLE_TIME, 0), 
+                            -1 !== resTimeout && (resTimeout = Math.max(resTimeout - RESPONSE_CYCLE_TIME, 0)), 
+                            responseListener.ack || 0 !== ackTimeout ? 0 === resTimeout ? promise.reject(new Error("No response for postMessage " + logName + " in " + getDomain() + " in " + totalResTimeout + "ms")) : void 0 : promise.reject(new Error("No ack for postMessage " + logName + " in " + getDomain() + " in " + totalAckTimeout + "ms")));
+                        }, time = RESPONSE_CYCLE_TIME, function loop() {
+                            timeout = setTimeout(function() {
+                                method(), loop();
+                            }, time);
+                        }(), {
+                            cancel: function() {
+                                clearTimeout(timeout);
+                            }
+                        });
+                        promise.finally(function() {
+                            interval.cancel(), reqPromises.splice(reqPromises.indexOf(requestPromise, 1));
+                        }).catch(src_util_noop);
+                    }
+                    return send_sendMessage(win, domain, {
                         type: MESSAGE_TYPE.REQUEST,
                         hash: hash,
                         name: name,
@@ -1450,38 +1480,7 @@
                     }, {
                         on: on_on,
                         send: send_send
-                    }), fireAndForget) return promise.resolve();
-                    promise.catch(function() {
-                        !function(hash) {
-                            globalStore("erroredResponseListeners").set(hash, !0);
-                        }(hash), deleteResponseListener(hash);
-                    });
-                    var responseListener = {
-                        name: name,
-                        win: win,
-                        domain: domain,
-                        promise: promise
-                    };
-                    !function(hash, listener) {
-                        globalStore("responseListeners").set(hash, listener);
-                    }(hash, responseListener);
-                    var totalAckTimeout = function(win) {
-                        return windowStore("knownWindows").get(win, !1);
-                    }(win) ? ACK_TIMEOUT_KNOWN : ACK_TIMEOUT, totalResTimeout = responseTimeout, ackTimeout = totalAckTimeout, resTimeout = totalResTimeout, cycleTime = 100;
-                    return setTimeout(function cycle() {
-                        if (!hasResult) {
-                            if (isWindowClosed(win)) return promise.reject(responseListener.ack ? new Error("Window closed for " + name + " before response") : new Error("Window closed for " + name + " before ack"));
-                            if (ackTimeout = Math.max(ackTimeout - cycleTime, 0), -1 !== resTimeout && (resTimeout = Math.max(resTimeout - cycleTime, 0)), 
-                            responseListener.ack) {
-                                if (-1 === resTimeout) return;
-                                cycleTime = Math.min(resTimeout, 2e3);
-                            } else {
-                                if (0 === ackTimeout) return promise.reject(new Error("No ack for postMessage " + logName + " in " + getDomain() + " in " + totalAckTimeout + "ms"));
-                                if (0 === resTimeout) return promise.reject(new Error("No response for postMessage " + logName + " in " + getDomain() + " in " + totalResTimeout + "ms"));
-                            }
-                            setTimeout(cycle, cycleTime);
-                        }
-                    }, cycleTime), promise;
+                    }), promise;
                 });
                 return reqPromises.push(requestPromise), requestPromise;
             });

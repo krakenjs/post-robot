@@ -19,15 +19,15 @@ function awaitRemoteBridgeForWindow(win) {
       const frame = (0, _src2.getFrameByName)(win, (0, _common.getBridgeName)((0, _src2.getDomain)()));
 
       if (!frame) {
-        throw new Error(`Bridge not found for domain: ${(0, _src2.getDomain)()}`);
+        return;
       } // $FlowFixMe
 
 
-      if ((0, _src2.isSameDomain)(frame) && (0, _global.getGlobal)(frame)) {
+      if ((0, _src2.isSameDomain)(frame) && (0, _src2.isSameDomain)(frame) && (0, _global.getGlobal)(frame)) {
         return frame;
       }
 
-      return new _src.ZalgoPromise((resolve, reject) => {
+      return new _src.ZalgoPromise(resolve => {
         let interval;
         let timeout; // eslint-disable-line prefer-const
 
@@ -42,7 +42,7 @@ function awaitRemoteBridgeForWindow(win) {
         }, 100);
         timeout = setTimeout(() => {
           clearInterval(interval);
-          return reject(new Error(`Bridge not found for domain: ${(0, _src2.getDomain)()}`));
+          return resolve();
         }, 2000);
       });
     });
@@ -57,11 +57,7 @@ function openTunnelToOpener({
   return _src.ZalgoPromise.try(() => {
     const opener = (0, _src2.getOpener)(window);
 
-    if (!opener) {
-      return;
-    }
-
-    if (!(0, _common.needsBridge)({
+    if (!opener || !(0, _common.needsBridge)({
       win: opener
     })) {
       return;
@@ -69,6 +65,10 @@ function openTunnelToOpener({
 
     (0, _common.registerRemoteWindow)(opener);
     return awaitRemoteBridgeForWindow(opener).then(bridge => {
+      if (!bridge) {
+        return (0, _common.rejectRemoteSendMessage)(opener, new Error(`Can not register with opener: no bridge found in opener`));
+      }
+
       if (!window.name) {
         return (0, _common.rejectRemoteSendMessage)(opener, new Error(`Can not register with opener: window does not have a name`));
       } // $FlowFixMe

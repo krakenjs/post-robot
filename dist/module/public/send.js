@@ -26,8 +26,7 @@ function send(win, name, data, options) {
   const responseTimeout = options.timeout || _conf.RES_TIMEOUT;
   const childTimeout = options.timeout || _conf.CHILD_WINDOW_TIMEOUT;
   const fireAndForget = options.fireAndForget || false;
-
-  const prom = _src.ZalgoPromise.try(() => {
+  return _src.ZalgoPromise.try(() => {
     if (!name) {
       throw new Error('Expected name');
     }
@@ -71,13 +70,49 @@ function send(win, name, data, options) {
         console.info('send::req', logName, domain, '\n\n', data); // eslint-disable-line no-console
       }
 
-      let hasResult = false;
-      const promise = new _src.ZalgoPromise();
-      promise.finally(() => {
-        hasResult = true;
-        reqPromises.splice(reqPromises.indexOf(requestPromise, 1));
-      }).catch(_src3.noop);
+      let promise;
       const hash = `${name}_${(0, _src3.uniqueID)()}`;
+
+      if (!fireAndForget) {
+        promise = new _src.ZalgoPromise();
+        const responseListener = {
+          name,
+          win,
+          domain,
+          promise
+        };
+        (0, _drivers.addResponseListener)(hash, responseListener);
+        promise.catch(() => {
+          (0, _drivers.markResponseListenerErrored)(hash);
+          (0, _drivers.deleteResponseListener)(hash);
+        });
+        const totalAckTimeout = (0, _lib.isWindowKnown)(win) ? _conf.ACK_TIMEOUT_KNOWN : _conf.ACK_TIMEOUT;
+        const totalResTimeout = responseTimeout;
+        let ackTimeout = totalAckTimeout;
+        let resTimeout = totalResTimeout;
+        const interval = (0, _src3.safeInterval)(() => {
+          if ((0, _src2.isWindowClosed)(win)) {
+            return promise.reject(new Error(`Window closed for ${name} before ${responseListener.ack ? 'response' : 'ack'}`));
+          }
+
+          ackTimeout = Math.max(ackTimeout - _conf.RESPONSE_CYCLE_TIME, 0);
+
+          if (resTimeout !== -1) {
+            resTimeout = Math.max(resTimeout - _conf.RESPONSE_CYCLE_TIME, 0);
+          }
+
+          if (!responseListener.ack && ackTimeout === 0) {
+            return promise.reject(new Error(`No ack for postMessage ${logName} in ${(0, _src2.getDomain)()} in ${totalAckTimeout}ms`));
+          } else if (resTimeout === 0) {
+            return promise.reject(new Error(`No response for postMessage ${logName} in ${(0, _src2.getDomain)()} in ${totalResTimeout}ms`));
+          }
+        }, _conf.RESPONSE_CYCLE_TIME);
+        promise.finally(() => {
+          interval.cancel();
+          reqPromises.splice(reqPromises.indexOf(requestPromise, 1));
+        }).catch(_src3.noop);
+      }
+
       (0, _drivers.sendMessage)(win, domain, {
         type: _conf.MESSAGE_TYPE.REQUEST,
         hash,
@@ -87,72 +122,12 @@ function send(win, name, data, options) {
       }, {
         on: _on.on,
         send
-      });
+      }); // $FlowFixMe
 
-      if (fireAndForget) {
-        return promise.resolve();
-      }
-
-      promise.catch(() => {
-        (0, _drivers.markResponseListenerErrored)(hash);
-        (0, _drivers.deleteResponseListener)(hash);
-      });
-      const responseListener = {
-        name,
-        win,
-        domain,
-        promise
-      };
-      (0, _drivers.addResponseListener)(hash, responseListener);
-      const totalAckTimeout = (0, _lib.isWindowKnown)(win) ? _conf.ACK_TIMEOUT_KNOWN : _conf.ACK_TIMEOUT;
-      const totalResTimeout = responseTimeout;
-      let ackTimeout = totalAckTimeout;
-      let resTimeout = totalResTimeout;
-      let cycleTime = 100;
-
-      const cycle = () => {
-        if (hasResult) {
-          return;
-        }
-
-        if ((0, _src2.isWindowClosed)(win)) {
-          if (!responseListener.ack) {
-            return promise.reject(new Error(`Window closed for ${name} before ack`));
-          } else {
-            return promise.reject(new Error(`Window closed for ${name} before response`));
-          }
-        }
-
-        ackTimeout = Math.max(ackTimeout - cycleTime, 0);
-
-        if (resTimeout !== -1) {
-          resTimeout = Math.max(resTimeout - cycleTime, 0);
-        }
-
-        const hasAck = responseListener.ack;
-
-        if (hasAck) {
-          if (resTimeout === -1) {
-            return;
-          }
-
-          cycleTime = Math.min(resTimeout, 2000);
-        } else if (ackTimeout === 0) {
-          return promise.reject(new Error(`No ack for postMessage ${logName} in ${(0, _src2.getDomain)()} in ${totalAckTimeout}ms`));
-        } else if (resTimeout === 0) {
-          return promise.reject(new Error(`No response for postMessage ${logName} in ${(0, _src2.getDomain)()} in ${totalResTimeout}ms`));
-        }
-
-        setTimeout(cycle, cycleTime);
-      };
-
-      setTimeout(cycle, cycleTime);
       return promise;
     });
 
     reqPromises.push(requestPromise);
     return requestPromise;
   });
-
-  return prom;
 }
