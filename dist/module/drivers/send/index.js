@@ -30,20 +30,18 @@ function sendMessage(win, domain, message, {
     on,
     send
   });
-  let success = false;
-  let error;
+  const strategies = Object.keys(_strategies.SEND_MESSAGE_STRATEGIES);
+  const errors = [];
 
-  for (const strategyName of Object.keys(_strategies.SEND_MESSAGE_STRATEGIES)) {
+  for (const strategyName of strategies) {
     try {
       _strategies.SEND_MESSAGE_STRATEGIES[strategyName](win, serializedMessage, domain);
-
-      success = true;
     } catch (err) {
-      error = error || err;
+      errors.push(err);
     }
   }
 
-  if (!success) {
-    throw error;
+  if (errors.length === strategies.length) {
+    throw new Error(`All post-robot messaging strategies failed:\n\n${errors.map(_src2.stringifyError).join('\n\n')}`);
   }
 }
