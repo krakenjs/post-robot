@@ -35,11 +35,19 @@ export type OnType = (
     handler : ?HandlerType
 ) => CancelableType;
 
-export type RequestOptionsType = {|
+type RegularRequestOptionsType = {|
     domain? : ?DomainMatcher,
-    fireAndForget? : ?boolean,
+    fireAndForget? : false,
     timeout? : ?number
 |};
+
+type FireAndForgetRequestOptionsType = {|
+    domain? : ?DomainMatcher,
+    fireAndForget : true,
+    timeout? : ?number
+|};
+
+export type RequestOptionsType = RegularRequestOptionsType | FireAndForgetRequestOptionsType;
 
 export type ResponseMessageEvent = {|
     source : CrossDomainWindowType,
@@ -47,12 +55,21 @@ export type ResponseMessageEvent = {|
     data : Object
 |};
 
-export type SendType = (
+type RegularSendType = (
     win : CrossDomainWindowType,
     name : string,
     data : ?Object,
-    options? : RequestOptionsType
+    options? : RegularRequestOptionsType
 ) => ZalgoPromise<ResponseMessageEvent>;
+
+type FireAndForgetSendType = (
+    win : CrossDomainWindowType,
+    name : string,
+    data : ?Object,
+    options? : FireAndForgetRequestOptionsType
+) => ZalgoPromise<void>;
+
+export type SendType = RegularSendType & FireAndForgetSendType;
 
 export type MessageEvent = {|
     source : CrossDomainWindowType,
