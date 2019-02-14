@@ -15,15 +15,15 @@ function awaitRemoteBridgeForWindow (win : CrossDomainWindowType) : ZalgoPromise
             const frame = getFrameByName(win, getBridgeName(getDomain()));
 
             if (!frame) {
-                throw new Error(`Bridge not found for domain: ${ getDomain() }`);
+                return;
             }
 
             // $FlowFixMe
-            if (isSameDomain(frame) && getGlobal(frame)) {
+            if (isSameDomain(frame) && isSameDomain(frame) && getGlobal(frame)) {
                 return frame;
             }
 
-            return new ZalgoPromise((resolve, reject) => {
+            return new ZalgoPromise(resolve => {
 
                 let interval;
                 let timeout; // eslint-disable-line prefer-const
@@ -39,7 +39,7 @@ function awaitRemoteBridgeForWindow (win : CrossDomainWindowType) : ZalgoPromise
 
                 timeout = setTimeout(() => {
                     clearInterval(interval);
-                    return reject(new Error(`Bridge not found for domain: ${ getDomain() }`));
+                    return resolve();
                 }, 2000);
             });
         });
@@ -49,18 +49,18 @@ function awaitRemoteBridgeForWindow (win : CrossDomainWindowType) : ZalgoPromise
 export function openTunnelToOpener({ on, send, receiveMessage } : { on : OnType, send : SendType, receiveMessage : ReceiveMessageType }) : ZalgoPromise<void> {
     return ZalgoPromise.try(() => {
         const opener = getOpener(window);
-
-        if (!opener) {
-            return;
-        }
-
-        if (!needsBridge({ win: opener })) {
+        
+        if (!opener || !needsBridge({ win: opener })) {
             return;
         }
 
         registerRemoteWindow(opener);
 
         return awaitRemoteBridgeForWindow(opener).then(bridge => {
+
+            if (!bridge) {
+                return rejectRemoteSendMessage(opener, new Error(`Can not register with opener: no bridge found in opener`));
+            }
 
             if (!window.name) {
                 return rejectRemoteSendMessage(opener, new Error(`Can not register with opener: window does not have a name`));
