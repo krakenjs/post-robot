@@ -85,7 +85,7 @@ export function receiveMessage(event : MessageEvent, { on, send } : { on : OnTyp
     }
 
     if (message.origin.indexOf(PROTOCOL.FILE) === 0) {
-        origin = message.origin;
+        origin = `${ PROTOCOL.FILE }//`;
     }
 
     RECEIVE_MESSAGE_TYPES[message.type](source, origin, message, { on, send });
