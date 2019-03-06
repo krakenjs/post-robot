@@ -110,7 +110,7 @@ function receiveMessage(event, {
   }
 
   if (message.origin.indexOf(_src.PROTOCOL.FILE) === 0) {
-    origin = message.origin;
+    origin = `${_src.PROTOCOL.FILE}//`;
   }
 
   _types.RECEIVE_MESSAGE_TYPES[message.type](source, origin, message, {
