@@ -29,19 +29,29 @@ type SerializedProxyWindow = {|
     focus : () => ZalgoPromise<void>,
     isClosed : () => ZalgoPromise<boolean>,
     setLocation : (string) => ZalgoPromise<void>,
+    getName : () => ZalgoPromise<?string>,
     setName : (string) => ZalgoPromise<void>,
     getInstanceID : () => ZalgoPromise<string>
 |};
 
 function getSerializedWindow(id : string, win : CrossDomainWindowType, { send } : { send : SendType }) : SerializedProxyWindow {
+    let windowName;
+    
     return {
         id,
         type:          getOpener(win) ? WINDOW_TYPE.POPUP : WINDOW_TYPE.IFRAME,
-        getInstanceID: () => getWindowInstanceID(win, { send }),
+        getInstanceID: memoizePromise(() => getWindowInstanceID(win, { send })),
         close:         () => ZalgoPromise.try(() => {
             win.close();
         }),
-        focus: () => ZalgoPromise.try(() => {
+        getName: () => ZalgoPromise.try(() => {
+            if (isWindowClosed(win)) {
+                return;
+            }
+
+            return windowName;
+        }),
+        focus:   () => ZalgoPromise.try(() => {
             win.focus();
         }),
         isClosed: () => ZalgoPromise.try(() => {
@@ -74,6 +84,8 @@ function getSerializedWindow(id : string, win : CrossDomainWindowType, { send } 
             if (win.frameElement) {
                 win.frameElement.setAttribute('name', name);
             }
+
+            windowName = name;
         })
     };
 }
@@ -85,6 +97,7 @@ export class ProxyWindow {
     actualWindow : CrossDomainWindowType
     actualWindowPromise : ZalgoPromise<CrossDomainWindowType>
     send : SendType
+    name : string
 
     constructor(serializedWindow : SerializedProxyWindow, actualWindow? : ?CrossDomainWindowType, { send } : { send : SendType }) {
         this.serializedWindow = serializedWindow;
@@ -93,7 +106,6 @@ export class ProxyWindow {
         if (actualWindow) {
             this.setWindow(actualWindow);
         }
-        this.serializedWindow.getInstanceID = memoizePromise(this.serializedWindow.getInstanceID);
     }
 
     getType() : $Values<typeof WINDOW_TYPE> {
@@ -121,7 +133,16 @@ export class ProxyWindow {
     }
 
     focus() : ZalgoPromise<ProxyWindow> {
-        return this.serializedWindow.focus().then(() => this);
+        return ZalgoPromise.try(() => {
+            return ZalgoPromise.all([
+                this.isPopup() && this.serializedWindow.getName().then(name => {
+                    if (name) {
+                        window.open('', name);
+                    }
+                }),
+                this.serializedWindow.focus()
+            ]);
+        }).then(() => this);
     }
 
     isClosed() : ZalgoPromise<boolean> {
