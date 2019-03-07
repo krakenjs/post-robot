@@ -35,14 +35,22 @@ function cleanupProxyWindows() {
 function getSerializedWindow(id, win, {
   send
 }) {
+  let windowName;
   return {
     id,
     type: (0, _src.getOpener)(win) ? _src.WINDOW_TYPE.POPUP : _src.WINDOW_TYPE.IFRAME,
-    getInstanceID: () => (0, _lib.getWindowInstanceID)(win, {
+    getInstanceID: (0, _src3.memoizePromise)(() => (0, _lib.getWindowInstanceID)(win, {
       send
-    }),
+    })),
     close: () => _src2.ZalgoPromise.try(() => {
       win.close();
+    }),
+    getName: () => _src2.ZalgoPromise.try(() => {
+      if ((0, _src.isWindowClosed)(win)) {
+        return;
+      }
+
+      return windowName;
     }),
     focus: () => _src2.ZalgoPromise.try(() => {
       win.focus();
@@ -78,6 +86,8 @@ function getSerializedWindow(id, win, {
       if (win.frameElement) {
         win.frameElement.setAttribute('name', name);
       }
+
+      windowName = name;
     })
   };
 }
@@ -91,6 +101,7 @@ class ProxyWindow {
     this.actualWindow = void 0;
     this.actualWindowPromise = void 0;
     this.send = void 0;
+    this.name = void 0;
     this.serializedWindow = serializedWindow;
     this.actualWindowPromise = new _src2.ZalgoPromise();
     this.send = send;
@@ -98,8 +109,6 @@ class ProxyWindow {
     if (actualWindow) {
       this.setWindow(actualWindow);
     }
-
-    this.serializedWindow.getInstanceID = (0, _src3.memoizePromise)(this.serializedWindow.getInstanceID);
   }
 
   getType() {
@@ -127,7 +136,13 @@ class ProxyWindow {
   }
 
   focus() {
-    return this.serializedWindow.focus().then(() => this);
+    return _src2.ZalgoPromise.try(() => {
+      return _src2.ZalgoPromise.all([this.isPopup() && this.serializedWindow.getName().then(name => {
+        if (name) {
+          window.open('', name);
+        }
+      }), this.serializedWindow.focus()]);
+    }).then(() => this);
   }
 
   isClosed() {

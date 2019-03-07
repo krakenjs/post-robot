@@ -585,6 +585,31 @@
                 throw new Error("Can not find window.btoa or Buffer");
             }(new Date().toISOString().slice(11, 19).replace("T", ".")).replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
         }
+        function memoizePromise(method) {
+            var cache = {};
+            function memoizedPromiseFunction() {
+                for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) args[_key2] = arguments[_key2];
+                var key = function(args) {
+                    try {
+                        return JSON.stringify([].slice.call(args), function(subkey, val) {
+                            return "function" == typeof val ? "memoize[" + function(obj) {
+                                if (objectIDs = objectIDs || new weakmap_CrossDomainSafeWeakMap(), null == obj || "object" != typeof obj && "function" != typeof obj) throw new Error("Invalid object");
+                                var uid = objectIDs.get(obj);
+                                return uid || (uid = typeof obj + ":" + uniqueID(), objectIDs.set(obj, uid)), uid;
+                            }(val) + "]" : val;
+                        });
+                    } catch (err) {
+                        throw new Error("Arguments not serializable -- can not be used to memoize");
+                    }
+                }(args);
+                return cache.hasOwnProperty(key) ? cache[key] : (cache[key] = method.apply(this, arguments).finally(function() {
+                    delete cache[key];
+                }), cache[key]);
+            }
+            return memoizedPromiseFunction.reset = function() {
+                cache = {};
+            }, memoizedPromiseFunction;
+        }
         function src_util_noop() {}
         function stringifyError(err, level) {
             if (void 0 === level && (level = 1), level >= 3) return "stringifyError stack overflow";
@@ -624,7 +649,7 @@
             CROSS_DOMAIN_WINDOW: "cross_domain_window"
         };
         function global_getGlobal(win) {
-            return void 0 === win && (win = window), win !== window ? win.__post_robot_10_0_12__ : win.__post_robot_10_0_12__ = win.__post_robot_10_0_12__ || {};
+            return void 0 === win && (win = window), win !== window ? win.__post_robot_10_0_13__ : win.__post_robot_10_0_13__ = win.__post_robot_10_0_13__ || {};
         }
         var getObj = function() {
             return {};
@@ -689,7 +714,7 @@
                 };
             });
         }
-        function hello_getInstanceID() {
+        function getInstanceID() {
             return globalStore("instance").getOrSet("instanceID", uniqueID);
         }
         function getHelloPromise(win) {
@@ -699,7 +724,7 @@
         }
         function sayHello(win, _ref3) {
             return (0, _ref3.send)(win, MESSAGE_NAME.HELLO, {
-                instanceID: hello_getInstanceID()
+                instanceID: getInstanceID()
             }, {
                 domain: constants_WILDCARD,
                 timeout: -1
@@ -808,18 +833,23 @@
             }
         }
         function getSerializedWindow(id, win, _ref) {
-            var send = _ref.send;
+            var windowName, send = _ref.send;
             return {
                 id: id,
                 type: getOpener(win) ? WINDOW_TYPE.POPUP : WINDOW_TYPE.IFRAME,
-                getInstanceID: function() {
+                getInstanceID: memoizePromise(function() {
                     return getWindowInstanceID(win, {
                         send: send
                     });
-                },
+                }),
                 close: function() {
                     return promise_ZalgoPromise.try(function() {
                         win.close();
+                    });
+                },
+                getName: function() {
+                    return promise_ZalgoPromise.try(function() {
+                        if (!isWindowClosed(win)) return windowName;
                     });
                 },
                 focus: function() {
@@ -845,7 +875,8 @@
                         (win = function(win) {
                             if (!isSameDomain(win)) throw new Error("Expected window to be same domain");
                             return win;
-                        }(win)).name = name, win.frameElement && win.frameElement.setAttribute("name", name);
+                        }(win)).name = name, win.frameElement && win.frameElement.setAttribute("name", name), 
+                        windowName = name;
                     });
                 }
             };
@@ -860,33 +891,8 @@
             function ProxyWindow(serializedWindow, actualWindow, _ref2) {
                 var send = _ref2.send;
                 this.isProxyWindow = !0, this.serializedWindow = void 0, this.actualWindow = void 0, 
-                this.actualWindowPromise = void 0, this.send = void 0, this.serializedWindow = serializedWindow, 
-                this.actualWindowPromise = new promise_ZalgoPromise(), this.send = send, actualWindow && this.setWindow(actualWindow), 
-                this.serializedWindow.getInstanceID = function(method) {
-                    var cache = {};
-                    function memoizedPromiseFunction() {
-                        for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) args[_key2] = arguments[_key2];
-                        var key = function(args) {
-                            try {
-                                return JSON.stringify([].slice.call(args), function(subkey, val) {
-                                    return "function" == typeof val ? "memoize[" + function(obj) {
-                                        if (objectIDs = objectIDs || new weakmap_CrossDomainSafeWeakMap(), null == obj || "object" != typeof obj && "function" != typeof obj) throw new Error("Invalid object");
-                                        var uid = objectIDs.get(obj);
-                                        return uid || (uid = typeof obj + ":" + uniqueID(), objectIDs.set(obj, uid)), uid;
-                                    }(val) + "]" : val;
-                                });
-                            } catch (err) {
-                                throw new Error("Arguments not serializable -- can not be used to memoize");
-                            }
-                        }(args);
-                        return cache.hasOwnProperty(key) ? cache[key] : (cache[key] = method.apply(this, arguments).finally(function() {
-                            delete cache[key];
-                        }), cache[key]);
-                    }
-                    return memoizedPromiseFunction.reset = function() {
-                        cache = {};
-                    }, memoizedPromiseFunction;
-                }(this.serializedWindow.getInstanceID);
+                this.actualWindowPromise = void 0, this.send = void 0, this.name = void 0, this.serializedWindow = serializedWindow, 
+                this.actualWindowPromise = new promise_ZalgoPromise(), this.send = send, actualWindow && this.setWindow(actualWindow);
             }
             var _proto = ProxyWindow.prototype;
             return _proto.getType = function() {
@@ -912,7 +918,11 @@
                 });
             }, _proto.focus = function() {
                 var _this4 = this;
-                return this.serializedWindow.focus().then(function() {
+                return promise_ZalgoPromise.try(function() {
+                    return promise_ZalgoPromise.all([ _this4.isPopup() && _this4.serializedWindow.getName().then(function(name) {
+                        name && window.open("", name);
+                    }), _this4.serializedWindow.focus() ]);
+                }).then(function() {
                     return _this4;
                 });
             }, _proto.isClosed = function() {
@@ -1150,7 +1160,7 @@
         function send_sendMessage(win, domain, message, _ref) {
             var _serializeMessage, on = _ref.on, send = _ref.send;
             if (isWindowClosed(win)) throw new Error("Window is closed");
-            for (var serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {}).__post_robot_10_0_12__ = _extends({
+            for (var serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {}).__post_robot_10_0_13__ = _extends({
                 id: uniqueID(),
                 origin: getDomain(window)
             }, message), _serializeMessage), {
@@ -1284,7 +1294,7 @@
                 } catch (err) {
                     return;
                 }
-                if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage && (parsedMessage = parsedMessage.__post_robot_10_0_12__) && "object" == typeof parsedMessage && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
+                if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage && (parsedMessage = parsedMessage.__post_robot_10_0_13__) && "object" == typeof parsedMessage && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
             }(event.data, source, origin, {
                 on: on,
                 send: send
@@ -1561,7 +1571,7 @@
                             win: source,
                             domain: origin
                         }), {
-                            instanceID: hello_getInstanceID()
+                            instanceID: getInstanceID()
                         };
                     }), parent = getAncestor();
                     return parent && sayHello(parent, {
@@ -1575,7 +1585,7 @@
         }
         function destroy() {
             var listener;
-            (listener = globalStore().get("postMessageListener")) && listener.cancel(), delete window.__post_robot_10_0_12__;
+            (listener = globalStore().get("postMessageListener")) && listener.cancel(), delete window.__post_robot_10_0_13__;
         }
         function cleanUpWindow(win) {
             for (var _i2 = 0, _requestPromises$get2 = windowStore("requestPromises").get(win, []); _i2 < _requestPromises$get2.length; _i2++) _requestPromises$get2[_i2].reject(new Error("Window cleaned up before response")).catch(src_util_noop);
