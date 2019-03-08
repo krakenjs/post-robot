@@ -3,7 +3,7 @@
 import type { CrossDomainWindowType, DomainMatcher } from 'cross-domain-utils/src';
 
 import { initHello } from './lib';
-import { listenForMessages, stopListenForMessages, receiveMessage, setupGlobalReceiveMessage } from './drivers';
+import { listenForMessages, stopListenForMessages, receiveMessage, setupGlobalReceiveMessage, cancelResponseListeners } from './drivers';
 import { getGlobal, deleteGlobal } from './global';
 import { on, send } from './public';
 import { setupBridge } from './bridge';
@@ -37,6 +37,7 @@ export function setup() {
 }
 
 export function destroy() {
+    cancelResponseListeners();
     stopListenForMessages();
     deleteGlobal();
 }

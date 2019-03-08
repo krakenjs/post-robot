@@ -100,6 +100,10 @@ export const send : SendType = (win, name, data, options) => {
                     return promise.reject(new Error(`Window closed for ${ name } before ${ responseListener.ack ? 'response' : 'ack' }`));
                 }
 
+                if (responseListener.cancelled) {
+                    return promise.reject(new Error(`Response listener was cancelled for ${ name }`));
+                }
+
                 ackTimeout = Math.max(ackTimeout - RESPONSE_CYCLE_TIME, 0);
                 if (resTimeout !== -1) {
                     resTimeout = Math.max(resTimeout - RESPONSE_CYCLE_TIME, 0);

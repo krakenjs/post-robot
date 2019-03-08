@@ -29,7 +29,8 @@ export type ResponseListenerType = {|
     win : CrossDomainWindowType,
     domain : DomainMatcher,
     promise : ZalgoPromise<*>,
-    ack? : ?boolean
+    ack? : ?boolean,
+    cancelled? : ?boolean
 |};
 
 export function addResponseListener(hash : string, listener : ResponseListenerType) {
@@ -45,6 +46,17 @@ export function getResponseListener(hash : string) : ?ResponseListenerType {
 export function deleteResponseListener(hash : string) {
     const responseListeners = globalStore('responseListeners');
     responseListeners.del(hash);
+}
+
+export function cancelResponseListeners() {
+    const responseListeners = globalStore('responseListeners');
+    for (const hash of responseListeners.keys()) {
+        const listener = responseListeners.get(hash);
+        if (listener) {
+            listener.cancelled = true;
+        }
+        responseListeners.del(hash);
+    }
 }
 
 export function markResponseListenerErrored(hash : string) {
