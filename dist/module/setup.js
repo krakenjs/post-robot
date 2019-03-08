@@ -67,6 +67,7 @@ function setup() {
 }
 
 function destroy() {
+  (0, _drivers.cancelResponseListeners)();
   (0, _drivers.stopListenForMessages)();
   (0, _global.deleteGlobal)();
 }

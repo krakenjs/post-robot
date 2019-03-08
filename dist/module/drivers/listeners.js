@@ -5,6 +5,7 @@ exports.resetListeners = resetListeners;
 exports.addResponseListener = addResponseListener;
 exports.getResponseListener = getResponseListener;
 exports.deleteResponseListener = deleteResponseListener;
+exports.cancelResponseListeners = cancelResponseListeners;
 exports.markResponseListenerErrored = markResponseListenerErrored;
 exports.isResponseListenerErrored = isResponseListenerErrored;
 exports.getRequestListener = getRequestListener;
@@ -40,6 +41,20 @@ function getResponseListener(hash) {
 function deleteResponseListener(hash) {
   const responseListeners = (0, _global.globalStore)('responseListeners');
   responseListeners.del(hash);
+}
+
+function cancelResponseListeners() {
+  const responseListeners = (0, _global.globalStore)('responseListeners');
+
+  for (const hash of responseListeners.keys()) {
+    const listener = responseListeners.get(hash);
+
+    if (listener) {
+      listener.cancelled = true;
+    }
+
+    responseListeners.del(hash);
+  }
 }
 
 function markResponseListenerErrored(hash) {

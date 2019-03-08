@@ -111,6 +111,10 @@ const send = (win, name, data, options) => {
           return promise.reject(new Error(`Window closed for ${name} before ${responseListener.ack ? 'response' : 'ack'}`));
         }
 
+        if (responseListener.cancelled) {
+          return promise.reject(new Error(`Response listener was cancelled for ${name}`));
+        }
+
         ackTimeout = Math.max(ackTimeout - _conf.RESPONSE_CYCLE_TIME, 0);
 
         if (resTimeout !== -1) {
