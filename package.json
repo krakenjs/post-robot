@@ -20,7 +20,8 @@
     "release:major": "./publish.sh major",
     "clean": "rimraf dist coverage",
     "reinstall": "rimraf flow-typed && rimraf node_modules && npm install && flow-typed install",
-    "debug": "cross-env NODE_ENV=debug"
+    "debug": "cross-env NODE_ENV=debug",
+    "changelog": "./node_modules/.bin/auto-changelog"
   },
   "repository": {
     "type": "git",
@@ -47,7 +48,16 @@
     "globals.js"
   ],
   "readmeFilename": "README.md",
+  "auto-changelog": {
+    "output": "CHANGELOG.md",
+    "template": "compact",
+    "unreleased": false,
+    "commitLimit": 10,
+    "backfillLimit": 10,
+    "ignoreCommitPattern": "Dist"
+  },
   "devDependencies": {
+    "auto-changelog": "^1.11.0",
     "flow-bin": "^0.81",
     "grumbler-scripts": "^3",
     "mocha": "^4"
