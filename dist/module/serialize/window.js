@@ -43,7 +43,7 @@ function getSerializedWindow(id, win, {
       send
     })),
     close: () => _src2.ZalgoPromise.try(() => {
-      win.close();
+      (0, _src.closeWindow)(win);
     }),
     getName: () => _src2.ZalgoPromise.try(() => {
       if ((0, _src.isWindowClosed)(win)) {
