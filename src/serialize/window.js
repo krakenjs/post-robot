@@ -1,6 +1,6 @@
 /* @flow */
 
-import { isSameDomain, isWindowClosed, type CrossDomainWindowType,
+import { isSameDomain, isWindowClosed, type CrossDomainWindowType, closeWindow,
     type DomainMatcher, getOpener, WINDOW_TYPE, isWindow, assertSameDomain } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { uniqueID, memoizePromise } from 'belter/src';
@@ -42,7 +42,7 @@ function getSerializedWindow(id : string, win : CrossDomainWindowType, { send } 
         type:          getOpener(win) ? WINDOW_TYPE.POPUP : WINDOW_TYPE.IFRAME,
         getInstanceID: memoizePromise(() => getWindowInstanceID(win, { send })),
         close:         () => ZalgoPromise.try(() => {
-            win.close();
+            closeWindow(win);
         }),
         getName: () => ZalgoPromise.try(() => {
             if (isWindowClosed(win)) {
