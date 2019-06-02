@@ -328,6 +328,11 @@
             } catch (err) {
                 if (err && err.message === IE_WIN_ACCESS_ERROR) return !0;
             }
+            try {
+                if (obj && "__unlikely_value__" === obj.__cross_domain_utils_window_check__) return !1;
+            } catch (err) {
+                return !0;
+            }
             return !1;
         }
         function utils_isPromise(item) {
@@ -585,17 +590,16 @@
                 } catch (err) {
                     delete this.weakmap;
                 }
-                if (this.isSafeToReadWrite(key)) {
+                if (this.isSafeToReadWrite(key)) try {
                     var name = this.name, entry = key[name];
-                    entry && entry[0] === key ? entry[1] = value : defineProperty(key, name, {
+                    return void (entry && entry[0] === key ? entry[1] = value : defineProperty(key, name, {
                         value: [ key, value ],
                         writable: !0
-                    });
-                } else {
-                    this._cleanupClosedWindows();
-                    var keys = this.keys, values = this.values, index = util_safeIndexOf(keys, key);
-                    -1 === index ? (keys.push(key), values.push(value)) : values[index] = value;
-                }
+                    }));
+                } catch (err) {}
+                this._cleanupClosedWindows();
+                var keys = this.keys, values = this.values, index = util_safeIndexOf(keys, key);
+                -1 === index ? (keys.push(key), values.push(value)) : values[index] = value;
             }, _proto.get = function(key) {
                 if (!key) throw new Error("WeakMap expected key");
                 var weakmap = this.weakmap;
@@ -604,14 +608,13 @@
                 } catch (err) {
                     delete this.weakmap;
                 }
-                if (!this.isSafeToReadWrite(key)) {
-                    this._cleanupClosedWindows();
-                    var index = util_safeIndexOf(this.keys, key);
-                    if (-1 === index) return;
-                    return this.values[index];
-                }
-                var entry = key[this.name];
-                if (entry && entry[0] === key) return entry[1];
+                if (this.isSafeToReadWrite(key)) try {
+                    var entry = key[this.name];
+                    return entry && entry[0] === key ? entry[1] : void 0;
+                } catch (err) {}
+                this._cleanupClosedWindows();
+                var index = util_safeIndexOf(this.keys, key);
+                if (-1 !== index) return this.values[index];
             }, _proto.delete = function(key) {
                 if (!key) throw new Error("WeakMap expected key");
                 var weakmap = this.weakmap;
@@ -620,14 +623,13 @@
                 } catch (err) {
                     delete this.weakmap;
                 }
-                if (this.isSafeToReadWrite(key)) {
+                if (this.isSafeToReadWrite(key)) try {
                     var entry = key[this.name];
                     entry && entry[0] === key && (entry[0] = entry[1] = void 0);
-                } else {
-                    this._cleanupClosedWindows();
-                    var keys = this.keys, index = util_safeIndexOf(keys, key);
-                    -1 !== index && (keys.splice(index, 1), this.values.splice(index, 1));
-                }
+                } catch (err) {}
+                this._cleanupClosedWindows();
+                var keys = this.keys, index = util_safeIndexOf(keys, key);
+                -1 !== index && (keys.splice(index, 1), this.values.splice(index, 1));
             }, _proto.has = function(key) {
                 if (!key) throw new Error("WeakMap expected key");
                 var weakmap = this.weakmap;
@@ -636,10 +638,10 @@
                 } catch (err) {
                     delete this.weakmap;
                 }
-                if (this.isSafeToReadWrite(key)) {
+                if (this.isSafeToReadWrite(key)) try {
                     var entry = key[this.name];
                     return !(!entry || entry[0] !== key);
-                }
+                } catch (err) {}
                 return this._cleanupClosedWindows(), -1 !== util_safeIndexOf(this.keys, key);
             }, _proto.getOrSet = function(key, getter) {
                 if (this.has(key)) return this.get(key);
@@ -694,13 +696,13 @@
                     if (stack) return stack;
                     if (message) return message;
                 }
-                return "function" == typeof err.toString ? err.toString() : {}.toString.call(err);
+                return err && err.toString && "function" == typeof err.toString ? err.toString() : {}.toString.call(err);
             } catch (newErr) {
                 return "Error while stringifying error: " + stringifyError(newErr, level + 1);
             }
         }
         function stringify(item) {
-            return "string" == typeof item ? item : item && "function" == typeof item.toString ? item.toString() : {}.toString.call(item);
+            return "string" == typeof item ? item : item && item.toString && "function" == typeof item.toString ? item.toString() : {}.toString.call(item);
         }
         function util_isRegex(item) {
             return "[object RegExp]" === {}.toString.call(item);
@@ -721,7 +723,7 @@
             CROSS_DOMAIN_WINDOW: "cross_domain_window"
         };
         function global_getGlobal(win) {
-            return void 0 === win && (win = window), win !== window ? win.__post_robot_10_0_16__ : win.__post_robot_10_0_16__ = win.__post_robot_10_0_16__ || {};
+            return void 0 === win && (win = window), win !== window ? win.__post_robot_10_0_17__ : win.__post_robot_10_0_17__ = win.__post_robot_10_0_17__ || {};
         }
         var getObj = function() {
             return {};
@@ -1238,10 +1240,13 @@
             }, _proto.matchWindow = function(win) {
                 var _this5 = this;
                 return promise_ZalgoPromise.try(function() {
-                    return _this5.actualWindow ? win === _this5.actualWindow : promise_ZalgoPromise.all([ _this5.getInstanceID(), getWindowInstanceID(win, {
-                        send: _this5.send
-                    }) ]).then(function(_ref3) {
-                        var match = _ref3[0] === _ref3[1];
+                    return _this5.actualWindow ? win === _this5.actualWindow : promise_ZalgoPromise.hash({
+                        proxyInstanceID: _this5.getInstanceID(),
+                        knownWindowInstanceID: getWindowInstanceID(win, {
+                            send: _this5.send
+                        })
+                    }).then(function(_ref3) {
+                        var match = _ref3.proxyInstanceID === _ref3.knownWindowInstanceID;
                         return match && _this5.setWindow(win), match;
                     });
                 });
@@ -1460,7 +1465,7 @@
         function send_sendMessage(win, domain, message, _ref) {
             var _serializeMessage, on = _ref.on, send = _ref.send;
             if (isWindowClosed(win)) throw new Error("Window is closed");
-            for (var serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {}).__post_robot_10_0_16__ = _extends({
+            for (var serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {}).__post_robot_10_0_17__ = _extends({
                 id: uniqueID(),
                 origin: getDomain(window)
             }, message), _serializeMessage), {
@@ -1618,7 +1623,7 @@
                 } catch (err) {
                     return;
                 }
-                if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage && (parsedMessage = parsedMessage.__post_robot_10_0_16__) && "object" == typeof parsedMessage && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
+                if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage && (parsedMessage = parsedMessage.__post_robot_10_0_17__) && "object" == typeof parsedMessage && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
             }(event.data, source, origin, {
                 on: on,
                 send: send
@@ -1811,46 +1816,46 @@
             });
         }
         function setup() {
-            var _ref3, on, send, global;
-            global_getGlobal().initialized || (global_getGlobal().initialized = !0, on = (_ref3 = {
-                on: on_on,
-                send: send_send
-            }).on, send = _ref3.send, (global = global_getGlobal()).receiveMessage = global.receiveMessage || function(message) {
-                return receive_receiveMessage(message, {
-                    on: on,
-                    send: send
-                });
-            }, function(_ref5) {
-                var on = _ref5.on, send = _ref5.send;
-                globalStore().getOrSet("postMessageListener", function() {
-                    return (obj = window).addEventListener("message", handler = function(event) {
-                        !function(event, _ref4) {
-                            var on = _ref4.on, send = _ref4.send, source = event.source || event.sourceElement, origin = event.origin || event.originalEvent && event.originalEvent.origin, data = event.data;
-                            if ("null" === origin && (origin = PROTOCOL.FILE + "//"), source) {
-                                if (!origin) throw new Error("Post message did not have origin domain");
-                                receive_receiveMessage({
-                                    source: source,
-                                    origin: origin,
-                                    data: data
-                                }, {
-                                    on: on,
-                                    send: send
-                                });
-                            }
-                        }(event, {
-                            on: on,
-                            send: send
-                        });
-                    }), {
-                        cancel: function() {
-                            obj.removeEventListener("message", handler);
-                        }
-                    };
-                    var obj, handler;
-                });
+            var _ref5, on, send;
+            global_getGlobal().initialized || (global_getGlobal().initialized = !0, function(_ref3) {
+                var on = _ref3.on, send = _ref3.send, global = global_getGlobal();
+                global.receiveMessage = global.receiveMessage || function(message) {
+                    return receive_receiveMessage(message, {
+                        on: on,
+                        send: send
+                    });
+                };
             }({
                 on: on_on,
                 send: send_send
+            }), on = (_ref5 = {
+                on: on_on,
+                send: send_send
+            }).on, send = _ref5.send, globalStore().getOrSet("postMessageListener", function() {
+                return (obj = window).addEventListener("message", handler = function(event) {
+                    !function(event, _ref4) {
+                        var on = _ref4.on, send = _ref4.send, source = event.source || event.sourceElement, origin = event.origin || event.originalEvent && event.originalEvent.origin, data = event.data;
+                        if ("null" === origin && (origin = PROTOCOL.FILE + "//"), source) {
+                            if (!origin) throw new Error("Post message did not have origin domain");
+                            receive_receiveMessage({
+                                source: source,
+                                origin: origin,
+                                data: data
+                            }, {
+                                on: on,
+                                send: send
+                            });
+                        }
+                    }(event, {
+                        on: on,
+                        send: send
+                    });
+                }), {
+                    cancel: function() {
+                        obj.removeEventListener("message", handler);
+                    }
+                };
+                var obj, handler;
             }), setupBridge({
                 on: on_on,
                 send: send_send,
@@ -1886,7 +1891,7 @@
                     listener && (listener.cancelled = !0), responseListeners.del(hash);
                 }
             }(), (listener = globalStore().get("postMessageListener")) && listener.cancel(), 
-            delete window.__post_robot_10_0_16__;
+            delete window.__post_robot_10_0_17__;
         }
         function cleanUpWindow(win) {
             for (var _i2 = 0, _requestPromises$get2 = windowStore("requestPromises").get(win, []); _i2 < _requestPromises$get2.length; _i2++) _requestPromises$get2[_i2].reject(new Error("Window cleaned up before response")).catch(src_util_noop);
