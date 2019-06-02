@@ -169,10 +169,10 @@ export class ProxyWindow {
                 return win === this.actualWindow;
             }
             
-            return ZalgoPromise.all([
-                this.getInstanceID(),
-                getWindowInstanceID(win, { send: this.send })
-            ]).then(([ proxyInstanceID, knownWindowInstanceID ]) => {
+            return ZalgoPromise.hash({
+                proxyInstanceID:       this.getInstanceID(),
+                knownWindowInstanceID: getWindowInstanceID(win, { send: this.send })
+            }).then(({ proxyInstanceID, knownWindowInstanceID }) => {
                 const match = proxyInstanceID === knownWindowInstanceID;
 
                 if (match) {

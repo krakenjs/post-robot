@@ -102,7 +102,12 @@ export function findRemoteWindow(win : CrossDomainWindowType) : ZalgoPromise<(re
     return remoteWinPromise;
 }
 
-export function registerRemoteSendMessage(win : CrossDomainWindowType, domain : string, sendMessage : (message : string) => void) {
+type SendMessageType = {|
+    (string) : void,
+    fireAndForget : (string) => void
+|};
+
+export function registerRemoteSendMessage(win : CrossDomainWindowType, domain : string, sendMessage : SendMessageType) {
     const sendMessageWrapper = (remoteWin : CrossDomainWindowType, remoteDomain : string, message : string) => {
         if (remoteWin !== win) {
             throw new Error(`Remote window does not match window`);

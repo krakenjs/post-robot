@@ -94,7 +94,14 @@ export type SerializedFunction = CustomSerializedType<typeof SERIALIZATION_TYPE.
     name : string
 }>;
 
-export function serializeFunction<T>(destination : CrossDomainWindowType | ProxyWindow, domain : DomainMatcher, val : () => ZalgoPromise<T> | T, key : string, { on } : { on : OnType }) : SerializedFunction {
+// eslint-disable-next-line flowtype/require-exact-type
+type SerializableFunction<T> = {
+    () : ZalgoPromise<T> | T,
+    __id__? : string,
+    __name__? : string
+};
+
+export function serializeFunction<T>(destination : CrossDomainWindowType | ProxyWindow, domain : DomainMatcher, val : SerializableFunction<T>, key : string, { on } : { on : OnType }) : SerializedFunction {
     listenForFunctionCalls({ on });
     
     const id = val.__id__ || uniqueID();
