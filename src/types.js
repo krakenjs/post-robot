@@ -77,4 +77,12 @@ export type MessageEvent = {|
     data : string
 |};
 
+// eslint-disable-next-line flowtype/require-exact-type
+export type CrossDomainFunctionType<A, R> = {
+    (...args : A) : ZalgoPromise<R>,
+    fireAndForget : (...args : A) => ZalgoPromise<void>,
+    __id__? : string,
+    __name__? : string
+};
+
 export type ReceiveMessageType = (MessageEvent, { on : OnType, send : SendType }) => void;
