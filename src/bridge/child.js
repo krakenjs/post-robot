@@ -1,7 +1,7 @@
 /* @flow */
 
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { isSameDomain, getOpener, getDomain, getFrameByName, type CrossDomainWindowType } from 'cross-domain-utils/src';
+import { isSameDomain, getOpener, getDomain, getFrameByName, assertSameDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
 import { noop } from 'belter/src';
 
 import { getGlobal, windowStore } from '../global';
@@ -18,8 +18,7 @@ function awaitRemoteBridgeForWindow (win : CrossDomainWindowType) : ZalgoPromise
                 return;
             }
 
-            // $FlowFixMe
-            if (isSameDomain(frame) && isSameDomain(frame) && getGlobal(frame)) {
+            if (isSameDomain(frame) && getGlobal(assertSameDomain(frame))) {
                 return frame;
             }
 
@@ -29,8 +28,7 @@ function awaitRemoteBridgeForWindow (win : CrossDomainWindowType) : ZalgoPromise
                 let timeout; // eslint-disable-line prefer-const
 
                 interval = setInterval(() => { // eslint-disable-line prefer-const
-                    // $FlowFixMe
-                    if (frame && isSameDomain(frame) && getGlobal(frame)) {
+                    if (frame && isSameDomain(frame) && getGlobal(assertSameDomain(frame))) {
                         clearInterval(interval);
                         clearTimeout(timeout);
                         return resolve(frame);
@@ -66,8 +64,7 @@ export function openTunnelToOpener({ on, send, receiveMessage } : { on : OnType,
                 return rejectRemoteSendMessage(opener, new Error(`Can not register with opener: window does not have a name`));
             }
 
-            // $FlowFixMe
-            return getGlobal(bridge).openTunnelToParent({
+            return getGlobal(assertSameDomain(bridge)).openTunnelToParent({
 
                 name: window.name,
 

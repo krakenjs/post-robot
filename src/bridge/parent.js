@@ -21,10 +21,7 @@ export function listenForOpenTunnel({ on, send, receiveMessage } : { on : OnType
         }
 
         return bridgePromise.then(bridge => {
-
-            // $FlowFixMe
             if (source !== bridge) {
-                // $FlowFixMe
                 throw new Error(`Message source does not matched registered bridge for domain ${ origin }`);
             }
 
@@ -40,18 +37,14 @@ export function listenForOpenTunnel({ on, send, receiveMessage } : { on : OnType
                 throw new Error(`Window with name ${ data.name } does not exist, or was not opened by this window`);
             }
 
-            // $FlowFixMe
             if (!popupWindowsByName.get(data.name).domain) {
                 throw new Error(`We do not have a registered domain for window ${ data.name }`);
             }
 
-            // $FlowFixMe
             if (popupWindowsByName.get(data.name).domain !== origin) {
-                // $FlowFixMe
                 throw new Error(`Message origin ${ origin } does not matched registered window origin ${ popupWindowsByName.get(data.name).domain }`);
             }
 
-            // $FlowFixMe
             registerRemoteSendMessage(popupWindowsByName.get(data.name).win, origin, data.sendMessage);
 
             return {
@@ -166,17 +159,18 @@ export function linkWindow({ win, name, domain } : WinDetails) : WinDetails {
 
     for (const winName of popupWindowsByName.keys()) {
         // $FlowFixMe
-        if (isWindowClosed(popupWindowsByName.get(winName).win)) {
+        const details = popupWindowsByName.get(winName);
+        if (!details || isWindowClosed(details.win)) {
             popupWindowsByName.del(winName);
         }
     }
 
-    const details : WinDetails = popupWindowsByWin.getOrSet(win, () => {
+    const details = popupWindowsByWin.getOrSet(win, () : WinDetails => {
         if (!name) {
             return { win };
         }
         
-        return popupWindowsByName.getOrSet(name, () => {
+        return popupWindowsByName.getOrSet(name, () : WinDetails => {
             return { win, name };
         });
     });

@@ -48,8 +48,6 @@ function normalizeDomain(win : CrossDomainWindowType, domain : DomainMatcher, ch
 }
 
 export const send : SendType = (win, name, data, options) => {
-
-    // $FlowFixMe
     options = options || {};
     let domain = options.domain || WILDCARD;
     const responseTimeout = options.timeout || RES_TIMEOUT;

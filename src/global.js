@@ -31,7 +31,6 @@ type GlobalStore<T> = {|
     keys : () => $ReadOnlyArray<string>
 |};
 
-// $FlowFixMe
 export function globalStore<T : mixed>(key? : string = 'store', defStore? : ObjectGetter = getObj) : GlobalStore<T> {
     return getOrSet(getGlobal(), key, () => {
         let store = defStore();
@@ -81,7 +80,6 @@ type WindowStore<T> = {|
     getOrSet : (CrossDomainWindowType | WildCard, () => T) => T
 |};
 
-// $FlowFixMe
 export function windowStore<T>(key? : string = 'store', defStore? : ObjectGetter = getObj) : WindowStore<T> {
     return globalStore('windowStore').getOrSet(key, () => {
         const winStore = new WeakMap();
