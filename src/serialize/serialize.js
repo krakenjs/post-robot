@@ -24,6 +24,6 @@ export function deserializeMessage<T : mixed>(source : CrossDomainWindowType | P
     return deserialize(message, {
         [ SERIALIZATION_TYPE.CROSS_DOMAIN_ZALGO_PROMISE ]: (serializedPromise)  => deserializePromise(source, origin, serializedPromise),
         [ SERIALIZATION_TYPE.CROSS_DOMAIN_FUNCTION ]:      (serializedFunction) => deserializeFunction(source, origin, serializedFunction, { on, send }),
-        [ SERIALIZATION_TYPE.CROSS_DOMAIN_WINDOW ]:        (serializedWindow)   => deserializeWindow(source, origin, serializedWindow, { on, send })
+        [ SERIALIZATION_TYPE.CROSS_DOMAIN_WINDOW ]:        (serializedWindow)   => deserializeWindow(source, origin, serializedWindow, { send })
     });
 }

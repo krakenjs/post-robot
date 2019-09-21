@@ -39,7 +39,7 @@ function lookupMethod(source : CrossDomainWindowType, id : string) : ?StoredMeth
     return methods[id] || proxyWindowMethods.get(id);
 }
 
-function listenForFunctionCalls({ on } : { on : OnType }) : CancelableType {
+function listenForFunctionCalls({ on, send } : { on : OnType, send : SendType }) : CancelableType {
     return globalStore('builtinListeners').getOrSet('functionCalls', () => {
         return on(MESSAGE_NAME.METHOD, { domain: WILDCARD }, ({ source, origin, data } : { source : CrossDomainWindowType, origin : string, data : Object }) => {
             const { id, name } = data;
@@ -60,7 +60,7 @@ function listenForFunctionCalls({ on } : { on : OnType }) : CancelableType {
                 
                 if (ProxyWindow.isProxyWindow(methodSource)) {
                     // $FlowFixMe
-                    return methodSource.matchWindow(source).then(match => {
+                    return methodSource.matchWindow(source, { send }).then(match => {
                         if (!match) {
                             throw new Error(`Method call '${ data.name }' failed - proxy window does not match source in ${ getDomain(window) }`);
                         }
@@ -101,8 +101,8 @@ type SerializableFunction<T> = {
     __name__? : string
 };
 
-export function serializeFunction<T>(destination : CrossDomainWindowType | ProxyWindow, domain : DomainMatcher, val : SerializableFunction<T>, key : string, { on } : { on : OnType }) : SerializedFunction {
-    listenForFunctionCalls({ on });
+export function serializeFunction<T>(destination : CrossDomainWindowType | ProxyWindow, domain : DomainMatcher, val : SerializableFunction<T>, key : string, { on, send } : { on : OnType, send : SendType }) : SerializedFunction {
+    listenForFunctionCalls({ on, send });
     
     const id = val.__id__ || uniqueID();
     destination = ProxyWindow.unwrap(destination);

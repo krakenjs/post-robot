@@ -17,6 +17,10 @@ export function deserializeMessage<T : mixed>(source : CrossDomainWindowType | P
     return internalDeserializeMessage(source, origin, message, { on, send });
 }
 
+export function createProxyWindow(win? : CrossDomainWindowType) : ProxyWindow {
+    return new ProxyWindow({ send, win });
+}
+
 export function toProxyWindow(win : CrossDomainWindowType | ProxyWindow) : ProxyWindow {
     return ProxyWindow.toProxyWindow(win, { send });
 }
