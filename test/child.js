@@ -18,3 +18,7 @@ on('waitForMessage', ({ data }) => {
         return data.handler ? data.handler() : data.data;
     }).then((event) => event.data);
 });
+
+window.addEventListener('error', () => {
+    // pass
+});

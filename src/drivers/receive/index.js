@@ -1,6 +1,6 @@
 /* @flow */
 
-import { isWindowClosed, type CrossDomainWindowType, getDomain, isSameTopWindow, assertSameDomain, PROTOCOL  } from 'cross-domain-utils/src';
+import { isWindowClosed, type CrossDomainWindowType, getDomain, isSameTopWindow, PROTOCOL  } from 'cross-domain-utils/src';
 import { addEventListener, noop } from 'belter/src';
 
 import { markWindowKnown, needsGlobalMessagingForBrowser } from '../../lib';
@@ -62,7 +62,8 @@ export function receiveMessage(event : MessageEvent, { on, send } : { on : OnTyp
     let { source, origin, data } = event;
 
     if (__TEST__) {
-        origin = getDomain(assertSameDomain(source));
+        // $FlowFixMe
+        origin = getDomain(source);
     }
 
     const message = parseMessage(data, source, origin, { on, send });

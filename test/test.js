@@ -571,6 +571,7 @@ describe('[post-robot] serialization cases', () => {
             return data.promise;
 
         }).catch(err2 => {
+
             if (!(err2 instanceof Error)) {
                 throw new TypeError(`Expected err to be an Error instance`);
             }
@@ -594,7 +595,7 @@ describe('[post-robot] serialization cases', () => {
             }
 
             done();
-        });
+        }).catch(done);
 
         const err = new Error(expectedErrorMessage);
         // $FlowFixMe
