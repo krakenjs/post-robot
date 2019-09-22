@@ -132,16 +132,21 @@ const send = (win, name, data, options) => {
       }).catch(_src3.noop);
     }
 
-    (0, _drivers.sendMessage)(win, domain, {
-      type: _conf.MESSAGE_TYPE.REQUEST,
-      hash,
-      name,
-      data,
-      fireAndForget
-    }, {
-      on: _on.on,
-      send
-    });
+    try {
+      (0, _drivers.sendMessage)(win, domain, {
+        type: _conf.MESSAGE_TYPE.REQUEST,
+        hash,
+        name,
+        data,
+        fireAndForget
+      }, {
+        on: _on.on,
+        send
+      });
+    } catch (err) {
+      throw new Error(`Send request message failed for ${logName} in ${(0, _src2.getDomain)()}\n\n${(0, _src3.stringifyError)(err)}`);
+    }
+
     return fireAndForget ? promise.resolve() : promise;
   });
 };

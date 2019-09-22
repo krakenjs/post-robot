@@ -68,7 +68,7 @@ function listenForFunctionCalls({
       const meth = lookupMethod(source, id);
 
       if (!meth) {
-        throw new Error(`Could not find method '${data.name}' with id: ${data.id} in ${(0, _src.getDomain)(window)}`);
+        throw new Error(`Could not find method '${name}' with id: ${data.id} in ${(0, _src.getDomain)(window)}`);
       }
 
       const {
@@ -132,7 +132,11 @@ function serializeFunction(destination, domain, val, key, {
   });
   const id = val.__id__ || (0, _src3.uniqueID)();
   destination = _window.ProxyWindow.unwrap(destination);
-  const name = val.__name__ || val.name || key;
+  let name = val.__name__ || val.name || key;
+
+  if (name.indexOf('anonymous::') === 0) {
+    name = name.replace('anonymous::', `${key}::`);
+  }
 
   if (_window.ProxyWindow.isProxyWindow(destination)) {
     addMethod(id, val, name, destination, domain); // $FlowFixMe

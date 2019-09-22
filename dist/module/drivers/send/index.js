@@ -42,6 +42,6 @@ function sendMessage(win, domain, message, {
   }
 
   if (errors.length === strategies.length) {
-    throw new Error(`All post-robot messaging strategies failed:\n\n${errors.map(_src2.stringifyError).join('\n\n')}`);
+    throw new Error(`All post-robot messaging strategies failed:\n\n${errors.map((err, i) => `${i}. ${(0, _src2.stringifyError)(err)}`).join('\n\n')}`);
   }
 }

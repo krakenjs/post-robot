@@ -45,6 +45,13 @@ SEND_MESSAGE_STRATEGIES[_conf.SEND_STRATEGY.POST_MESSAGE] = (win, serializedMess
         } // $FlowFixMe
 
 
+        const windowDomain = (0, _src.getDomain)(win);
+
+        if (windowDomain !== dom) {
+          throw new Error(`Mock domain target ${dom} does not match window domain ${windowDomain}`);
+        } // $FlowFixMe
+
+
         return (0, _src.getActualDomain)(win);
       }
     }
@@ -63,7 +70,7 @@ SEND_MESSAGE_STRATEGIES[_conf.SEND_STRATEGY.POST_MESSAGE] = (win, serializedMess
 if (__POST_ROBOT__.__IE_POPUP_SUPPORT__) {
   SEND_MESSAGE_STRATEGIES[_conf.SEND_STRATEGY.BRIDGE] = (win, serializedMessage, domain) => {
     if (!(0, _bridge.needsBridgeForBrowser)() && !(0, _bridge.isBridge)()) {
-      return;
+      throw new Error(`Bridge not needed for browser`);
     }
 
     if ((0, _src.isSameDomain)(win)) {
@@ -81,7 +88,7 @@ if (__POST_ROBOT__.__IE_POPUP_SUPPORT__) {
 if (__POST_ROBOT__.__IE_POPUP_SUPPORT__ || __POST_ROBOT__.__GLOBAL_MESSAGE_SUPPORT__) {
   SEND_MESSAGE_STRATEGIES[_conf.SEND_STRATEGY.GLOBAL] = (win, serializedMessage) => {
     if (!(0, _lib.needsGlobalMessagingForBrowser)()) {
-      return;
+      throw new Error(`Global messaging not needed for browser`);
     }
 
     if (!(0, _src.isSameDomain)(win)) {

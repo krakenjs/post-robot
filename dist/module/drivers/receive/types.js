@@ -47,18 +47,22 @@ const RECEIVE_MESSAGE_TYPES = {
           // $FlowFixMe
           console.error('respond::err', logName, origin, '\n\n', response.error); // eslint-disable-line no-console
         }
-      } // $FlowFixMe
+      }
 
-
-      (0, _send.sendMessage)(source, origin, _extends({
-        type,
-        ack,
-        hash: message.hash,
-        name: message.name
-      }, response), {
-        on,
-        send
-      });
+      try {
+        // $FlowFixMe
+        (0, _send.sendMessage)(source, origin, _extends({
+          type,
+          ack,
+          hash: message.hash,
+          name: message.name
+        }, response), {
+          on,
+          send
+        });
+      } catch (err) {
+        throw new Error(`Send response message failed for ${logName} in ${(0, _src2.getDomain)()}\n\n${(0, _src3.stringifyError)(err)}`);
+      }
     }
 
     return _src.ZalgoPromise.all([sendResponse(_conf.MESSAGE_TYPE.ACK), _src.ZalgoPromise.try(() => {
@@ -104,12 +108,16 @@ const RECEIVE_MESSAGE_TYPES = {
       throw new Error(`No handler found for post message ack for message: ${message.name} from ${origin} in ${window.location.protocol}//${window.location.host}${window.location.pathname}`);
     }
 
-    if (!(0, _src2.matchDomain)(options.domain, origin)) {
-      throw new Error(`Ack origin ${origin} does not match domain ${options.domain.toString()}`);
-    }
+    try {
+      if (!(0, _src2.matchDomain)(options.domain, origin)) {
+        throw new Error(`Ack origin ${origin} does not match domain ${options.domain.toString()}`);
+      }
 
-    if (source !== options.win) {
-      throw new Error(`Ack source does not match registered window`);
+      if (source !== options.win) {
+        throw new Error(`Ack source does not match registered window`);
+      }
+    } catch (err) {
+      options.promise.reject(err);
     }
 
     options.ack = true;
