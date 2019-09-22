@@ -29,20 +29,19 @@ function validateOptions(name : string, win : CrossDomainWindowType, domain : ?D
     }
 }
 
-function normalizeDomain(win : CrossDomainWindowType, domain : DomainMatcher, childTimeout : number, { send } : { send : SendType }) : ZalgoPromise<string | $ReadOnlyArray<string>> {
+function normalizeDomain(win : CrossDomainWindowType, targetDomain : DomainMatcher, actualDomain : ?string, { send } : { send : SendType }) : ZalgoPromise<string | $ReadOnlyArray<string>> {
+    if (typeof targetDomain === 'string') {
+        return ZalgoPromise.resolve(targetDomain);
+    }
+    
     return ZalgoPromise.try(() => {
-        if (isAncestor(window, win)) {
-            return awaitWindowHello(win, childTimeout);
-        } else if (isRegex(domain)) {
-            // $FlowFixMe
-            return sayHello(win, { send });
-        } else {
-            return { domain };
-        }
-    // $FlowFixMe
-    }).then(({ domain: normalizedDomain }) => {
+        return actualDomain || sayHello(win, { send }).then(({ domain }) => domain);
 
-        // $FlowFixMe
+    }).then(normalizedDomain => {
+        if (!matchDomain(targetDomain, targetDomain)) {
+            throw new Error(`Domain ${ stringify(targetDomain) } does not match ${ stringify(targetDomain) }`);
+        }
+
         return normalizedDomain;
     });
 }
@@ -57,12 +56,15 @@ export const send : SendType = (win, name, data, options) => {
     // $FlowFixMe
     return ZalgoPromise.try(() => {
         validateOptions(name, win, domain);
-        return normalizeDomain(win, domain, childTimeout, { send });
-    }).then(targetDomain => {
 
-        if (!matchDomain(domain, targetDomain)) {
-            throw new Error(`Domain ${ stringify(domain) } does not match ${ stringify(targetDomain) }`);
+        if (isAncestor(window, win)) {
+            return awaitWindowHello(win, childTimeout);
         }
+        
+    }).then(({ domain: actualDomain } = {}) => {
+
+        return normalizeDomain(win, domain, actualDomain, { send });
+    }).then(targetDomain => {
 
         domain = targetDomain;
 

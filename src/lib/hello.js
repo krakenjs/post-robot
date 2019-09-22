@@ -12,14 +12,25 @@ function getInstanceID() : string {
     return globalStore('instance').getOrSet('instanceID', uniqueID);
 }
 
-function getHelloPromise(win : CrossDomainWindowType) : ZalgoPromise<{ win : CrossDomainWindowType, domain : string }> {
+function getHelloPromise(win : CrossDomainWindowType) : ZalgoPromise<{ domain : string }> {
     const helloPromises = windowStore('helloPromises');
     return helloPromises.getOrSet(win, () => new ZalgoPromise());
 }
 
+function resolveHelloPromise(win : CrossDomainWindowType, { domain }) : ZalgoPromise<{ domain : string }> {
+    const helloPromises = windowStore('helloPromises');
+    const existingPromise = helloPromises.get(win);
+    if (existingPromise) {
+        existingPromise.resolve({ domain });
+    }
+    const newPromise = ZalgoPromise.resolve({ domain });
+    helloPromises.set(win, newPromise);
+    return newPromise;
+}
+
 function listenForHello({ on } : { on : OnType }) : CancelableType {
     return on(MESSAGE_NAME.HELLO, { domain: WILDCARD }, ({ source, origin }) => {
-        getHelloPromise(source).resolve({ win: source, domain: origin });
+        resolveHelloPromise(source, { domain: origin });
         return { instanceID: getInstanceID() };
     });
 }
@@ -27,7 +38,7 @@ function listenForHello({ on } : { on : OnType }) : CancelableType {
 export function sayHello(win : CrossDomainWindowType, { send } : { send : SendType }) : ZalgoPromise<{ win : CrossDomainWindowType, domain : string, instanceID : string }> {
     return send(win, MESSAGE_NAME.HELLO, { instanceID: getInstanceID() }, { domain: WILDCARD, timeout: -1 })
         .then(({ origin, data: { instanceID } }) => {
-            getHelloPromise(win).resolve({ win, domain: origin });
+            resolveHelloPromise(win, { domain: origin });
             return { win, domain: origin, instanceID };
         });
 }
@@ -51,7 +62,7 @@ export function initHello({ on, send } : { on : OnType, send : SendType }) : Can
     });
 }
 
-export function awaitWindowHello(win : CrossDomainWindowType, timeout : number = 5000, name : string = 'Window') : ZalgoPromise<{ win : CrossDomainWindowType, domain : string }> {
+export function awaitWindowHello(win : CrossDomainWindowType, timeout : number = 5000, name : string = 'Window') : ZalgoPromise<{ domain : string }> {
     let promise = getHelloPromise(win);
 
     if (timeout !== -1) {
