@@ -1,8 +1,8 @@
 /* @flow */
 
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { isWindowClosed, matchDomain, stringifyDomainPattern, type CrossDomainWindowType } from 'cross-domain-utils/src';
-import { noop } from 'belter/src';
+import { getDomain, isWindowClosed, matchDomain, stringifyDomainPattern, type CrossDomainWindowType } from 'cross-domain-utils/src';
+import { noop, stringifyError } from 'belter/src';
 
 import { MESSAGE_TYPE, MESSAGE_ACK, MESSAGE_NAME } from '../../conf';
 import { sendMessage } from '../send';
@@ -39,14 +39,18 @@ export const RECEIVE_MESSAGE_TYPES = {
                 }
             }
 
-            // $FlowFixMe
-            sendMessage(source, origin, {
-                type,
-                ack,
-                hash:   message.hash,
-                name:   message.name,
-                ...response
-            }, { on, send });
+            try {
+                // $FlowFixMe
+                sendMessage(source, origin, {
+                    type,
+                    ack,
+                    hash:   message.hash,
+                    name:   message.name,
+                    ...response
+                }, { on, send });
+            } catch (err) {
+                throw new Error(`Send response message failed for ${ logName } in ${ getDomain() }\n\n${ stringifyError(err) }`);
+            }
         }
 
         return ZalgoPromise.all([

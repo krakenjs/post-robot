@@ -2,7 +2,7 @@
 
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { isAncestor, isWindowClosed, getDomain, matchDomain, type CrossDomainWindowType, type DomainMatcher } from 'cross-domain-utils/src';
-import { uniqueID, isRegex, noop, safeInterval, stringify } from 'belter/src';
+import { uniqueID, isRegex, noop, safeInterval, stringify, stringifyError } from 'belter/src';
 
 
 import { CHILD_WINDOW_TIMEOUT, MESSAGE_TYPE, WILDCARD, MESSAGE_NAME, ACK_TIMEOUT, RES_TIMEOUT, ACK_TIMEOUT_KNOWN, RESPONSE_CYCLE_TIME } from '../conf';
@@ -123,13 +123,17 @@ export const send : SendType = (win, name, data, options) => {
             }).catch(noop);
         }
 
-        sendMessage(win, domain, {
-            type: MESSAGE_TYPE.REQUEST,
-            hash,
-            name,
-            data,
-            fireAndForget
-        }, { on, send });
+        try {
+            sendMessage(win, domain, {
+                type: MESSAGE_TYPE.REQUEST,
+                hash,
+                name,
+                data,
+                fireAndForget
+            }, { on, send });
+        } catch (err) {
+            throw new Error(`Send request message failed for ${ logName } in ${ getDomain() }\n\n${ stringifyError(err) }`);
+        }
     
         return fireAndForget ? promise.resolve() : promise;
     });

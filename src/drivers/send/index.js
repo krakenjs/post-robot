@@ -34,6 +34,6 @@ export function sendMessage(win : CrossDomainWindowType, domain : DomainMatcher,
     }
 
     if (errors.length === strategies.length) {
-        throw new Error(`All post-robot messaging strategies failed:\n\n${ errors.map(stringifyError).join('\n\n') }`);
+        throw new Error(`All post-robot messaging strategies failed:\n\n${ errors.map((err, i) => `${ i }. ${ stringifyError(err) }`).join('\n\n') }`);
     }
 }
