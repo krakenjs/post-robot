@@ -25,6 +25,26 @@ function getHelloPromise(win) {
   return helloPromises.getOrSet(win, () => new _src2.ZalgoPromise());
 }
 
+function resolveHelloPromise(win, {
+  domain
+}) {
+  const helloPromises = (0, _global.windowStore)('helloPromises');
+  const existingPromise = helloPromises.get(win);
+
+  if (existingPromise) {
+    existingPromise.resolve({
+      domain
+    });
+  }
+
+  const newPromise = _src2.ZalgoPromise.resolve({
+    domain
+  });
+
+  helloPromises.set(win, newPromise);
+  return newPromise;
+}
+
 function listenForHello({
   on
 }) {
@@ -34,8 +54,7 @@ function listenForHello({
     source,
     origin
   }) => {
-    getHelloPromise(source).resolve({
-      win: source,
+    resolveHelloPromise(source, {
       domain: origin
     });
     return {
@@ -58,8 +77,7 @@ function sayHello(win, {
       instanceID
     }
   }) => {
-    getHelloPromise(win).resolve({
-      win,
+    resolveHelloPromise(win, {
       domain: origin
     });
     return {

@@ -187,10 +187,6 @@ function linkWindow({
   }
 
   if (name) {
-    if (details.name && details.name !== name) {
-      throw new Error(`Different window already linked for name ${name}: ${details.name}`);
-    }
-
     details.name = name;
     popupWindowsByName.set(name, details);
   }

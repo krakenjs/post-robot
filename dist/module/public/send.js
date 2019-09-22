@@ -35,27 +35,24 @@ function validateOptions(name, win, domain) {
   }
 }
 
-function normalizeDomain(win, domain, childTimeout, {
+function normalizeDomain(win, targetDomain, actualDomain, {
   send
 }) {
-  return _src.ZalgoPromise.try(() => {
-    if ((0, _src2.isAncestor)(window, win)) {
-      return (0, _lib.awaitWindowHello)(win, childTimeout);
-    } else if ((0, _src3.isRegex)(domain)) {
-      // $FlowFixMe
-      return (0, _lib.sayHello)(win, {
-        send
-      });
-    } else {
-      return {
-        domain
-      };
-    } // $FlowFixMe
+  if (typeof targetDomain === 'string') {
+    return _src.ZalgoPromise.resolve(targetDomain);
+  }
 
-  }).then(({
-    domain: normalizedDomain
-  }) => {
-    // $FlowFixMe
+  return _src.ZalgoPromise.try(() => {
+    return actualDomain || (0, _lib.sayHello)(win, {
+      send
+    }).then(({
+      domain
+    }) => domain);
+  }).then(normalizedDomain => {
+    if (!(0, _src2.matchDomain)(targetDomain, targetDomain)) {
+      throw new Error(`Domain ${(0, _src3.stringify)(targetDomain)} does not match ${(0, _src3.stringify)(targetDomain)}`);
+    }
+
     return normalizedDomain;
   });
 }
@@ -69,14 +66,17 @@ const send = (win, name, data, options) => {
 
   return _src.ZalgoPromise.try(() => {
     validateOptions(name, win, domain);
-    return normalizeDomain(win, domain, childTimeout, {
+
+    if ((0, _src2.isAncestor)(window, win)) {
+      return (0, _lib.awaitWindowHello)(win, childTimeout);
+    }
+  }).then(({
+    domain: actualDomain
+  } = {}) => {
+    return normalizeDomain(win, domain, actualDomain, {
       send
     });
   }).then(targetDomain => {
-    if (!(0, _src2.matchDomain)(domain, targetDomain)) {
-      throw new Error(`Domain ${(0, _src3.stringify)(domain)} does not match ${(0, _src3.stringify)(targetDomain)}`);
-    }
-
     domain = targetDomain;
     const logName = name === _conf.MESSAGE_NAME.METHOD && data && typeof data.name === 'string' ? `${data.name}()` : name;
 
