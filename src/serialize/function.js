@@ -47,7 +47,7 @@ function listenForFunctionCalls({ on, send } : { on : OnType, send : SendType })
             const meth = lookupMethod(source, id);
     
             if (!meth) {
-                throw new Error(`Could not find method '${ data.name }' with id: ${ data.id } in ${ getDomain(window) }`);
+                throw new Error(`Could not find method '${ name }' with id: ${ data.id } in ${ getDomain(window) }`);
             }
 
             const { source: methodSource, domain, val } = meth;
@@ -106,7 +106,11 @@ export function serializeFunction<T>(destination : CrossDomainWindowType | Proxy
     
     const id = val.__id__ || uniqueID();
     destination = ProxyWindow.unwrap(destination);
-    const name = val.__name__ || val.name || key;
+    let name = val.__name__ || val.name || key;
+
+    if (name.indexOf('anonymous::') === 0) {
+        name = name.replace('anonymous::', `${ key }::`);
+    }
 
     if (ProxyWindow.isProxyWindow(destination)) {
         addMethod(id, val, name, destination, domain);

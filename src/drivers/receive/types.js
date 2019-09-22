@@ -95,12 +95,16 @@ export const RECEIVE_MESSAGE_TYPES = {
             throw new Error(`No handler found for post message ack for message: ${ message.name } from ${ origin } in ${ window.location.protocol }//${ window.location.host }${ window.location.pathname }`);
         }
 
-        if (!matchDomain(options.domain, origin)) {
-            throw new Error(`Ack origin ${ origin } does not match domain ${ options.domain.toString() }`);
-        }
-
-        if (source !== options.win) {
-            throw new Error(`Ack source does not match registered window`);
+        try {
+            if (!matchDomain(options.domain, origin)) {
+                throw new Error(`Ack origin ${ origin } does not match domain ${ options.domain.toString() }`);
+            }
+    
+            if (source !== options.win) {
+                throw new Error(`Ack source does not match registered window`);
+            }
+        } catch (err) {
+            options.promise.reject(err);
         }
 
         options.ack = true;
