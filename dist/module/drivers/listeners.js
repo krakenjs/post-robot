@@ -205,8 +205,7 @@ function addRequestListener({
     }
   }
 
-  const nameListeners = requestListeners.getOrSet(win, () => ({})); // $FlowFixMe
-
+  const nameListeners = requestListeners.getOrSet(win, () => ({}));
   const domainListeners = (0, _src2.getOrSet)(nameListeners, name, () => ({}));
   const strDomain = domain.toString();
   let regexListeners;
@@ -236,10 +235,8 @@ function addRequestListener({
       }
 
       if (!Object.keys(domainListeners).length) {
-        // $FlowFixMe
         delete nameListeners[name];
-      } // $FlowFixMe
-
+      }
 
       if (win && !Object.keys(nameListeners).length) {
         requestListeners.del(win);

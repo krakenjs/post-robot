@@ -178,7 +178,6 @@ function listenForMessages({
   send
 }) {
   return (0, _global.globalStore)().getOrSet('postMessageListener', () => {
-    // $FlowFixMe
     return (0, _src2.addEventListener)(window, 'message', event => {
       // $FlowFixMe
       messageListener(event, {

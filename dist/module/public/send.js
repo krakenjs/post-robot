@@ -61,7 +61,6 @@ function normalizeDomain(win, domain, childTimeout, {
 }
 
 const send = (win, name, data, options) => {
-  // $FlowFixMe
   options = options || {};
   let domain = options.domain || _conf.WILDCARD;
   const responseTimeout = options.timeout || _conf.RES_TIMEOUT;

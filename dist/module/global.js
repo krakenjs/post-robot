@@ -27,7 +27,6 @@ function deleteGlobal() {
 
 const getObj = () => ({});
 
-// $FlowFixMe
 function globalStore(key = 'store', defStore = getObj) {
   return (0, _src2.getOrSet)(getGlobal(), key, () => {
     let store = defStore();
@@ -70,7 +69,6 @@ function getWildcard() {
   return global.WINDOW_WILDCARD;
 }
 
-// $FlowFixMe
 function windowStore(key = 'store', defStore = getObj) {
   return globalStore('windowStore').getOrSet(key, () => {
     const winStore = new _src.WeakMap();

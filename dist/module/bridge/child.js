@@ -20,10 +20,9 @@ function awaitRemoteBridgeForWindow(win) {
 
       if (!frame) {
         return;
-      } // $FlowFixMe
+      }
 
-
-      if ((0, _src2.isSameDomain)(frame) && (0, _src2.isSameDomain)(frame) && (0, _global.getGlobal)(frame)) {
+      if ((0, _src2.isSameDomain)(frame) && (0, _global.getGlobal)((0, _src2.assertSameDomain)(frame))) {
         return frame;
       }
 
@@ -33,8 +32,7 @@ function awaitRemoteBridgeForWindow(win) {
 
         interval = setInterval(() => {
           // eslint-disable-line prefer-const
-          // $FlowFixMe
-          if (frame && (0, _src2.isSameDomain)(frame) && (0, _global.getGlobal)(frame)) {
+          if (frame && (0, _src2.isSameDomain)(frame) && (0, _global.getGlobal)((0, _src2.assertSameDomain)(frame))) {
             clearInterval(interval);
             clearTimeout(timeout);
             return resolve(frame);
@@ -71,10 +69,9 @@ function openTunnelToOpener({
 
       if (!window.name) {
         return (0, _common.rejectRemoteSendMessage)(opener, new Error(`Can not register with opener: window does not have a name`));
-      } // $FlowFixMe
+      }
 
-
-      return (0, _global.getGlobal)(bridge).openTunnelToParent({
+      return (0, _global.getGlobal)((0, _src2.assertSameDomain)(bridge)).openTunnelToParent({
         name: window.name,
         source: window,
 

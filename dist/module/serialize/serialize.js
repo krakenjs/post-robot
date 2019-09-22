@@ -49,7 +49,6 @@ function deserializeMessage(source, origin, message, {
       send
     }),
     [_conf.SERIALIZATION_TYPE.CROSS_DOMAIN_WINDOW]: serializedWindow => (0, _window.deserializeWindow)(source, origin, serializedWindow, {
-      on,
       send
     })
   });

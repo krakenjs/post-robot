@@ -3,6 +3,7 @@
 exports.__esModule = true;
 exports.serializeMessage = serializeMessage;
 exports.deserializeMessage = deserializeMessage;
+exports.createProxyWindow = createProxyWindow;
 exports.toProxyWindow = toProxyWindow;
 exports.setup = setup;
 exports.destroy = destroy;
@@ -30,6 +31,13 @@ function deserializeMessage(source, origin, message) {
   return (0, _serialize.deserializeMessage)(source, origin, message, {
     on: _public.on,
     send: _public.send
+  });
+}
+
+function createProxyWindow(win) {
+  return new _serialize.ProxyWindow({
+    send: _public.send,
+    win
   });
 }
 

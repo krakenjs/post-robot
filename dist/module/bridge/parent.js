@@ -39,9 +39,7 @@ function listenForOpenTunnel({
     }
 
     return bridgePromise.then(bridge => {
-      // $FlowFixMe
       if (source !== bridge) {
-        // $FlowFixMe
         throw new Error(`Message source does not matched registered bridge for domain ${origin}`);
       }
 
@@ -55,19 +53,15 @@ function listenForOpenTunnel({
 
       if (!popupWindowsByName.has(data.name)) {
         throw new Error(`Window with name ${data.name} does not exist, or was not opened by this window`);
-      } // $FlowFixMe
-
+      }
 
       if (!popupWindowsByName.get(data.name).domain) {
         throw new Error(`We do not have a registered domain for window ${data.name}`);
-      } // $FlowFixMe
-
+      }
 
       if (popupWindowsByName.get(data.name).domain !== origin) {
-        // $FlowFixMe
         throw new Error(`Message origin ${origin} does not matched registered window origin ${popupWindowsByName.get(data.name).domain}`);
-      } // $FlowFixMe
-
+      }
 
       (0, _common.registerRemoteSendMessage)(popupWindowsByName.get(data.name).win, origin, data.sendMessage);
       return {
@@ -166,7 +160,9 @@ function linkWindow({
 
   for (const winName of popupWindowsByName.keys()) {
     // $FlowFixMe
-    if ((0, _src2.isWindowClosed)(popupWindowsByName.get(winName).win)) {
+    const details = popupWindowsByName.get(winName);
+
+    if (!details || (0, _src2.isWindowClosed)(details.win)) {
       popupWindowsByName.del(winName);
     }
   }

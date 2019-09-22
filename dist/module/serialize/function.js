@@ -50,7 +50,8 @@ function lookupMethod(source, id) {
 }
 
 function listenForFunctionCalls({
-  on
+  on,
+  send
 }) {
   return (0, _global.globalStore)('builtinListeners').getOrSet('functionCalls', () => {
     return on(_conf.MESSAGE_NAME.METHOD, {
@@ -83,7 +84,9 @@ function listenForFunctionCalls({
 
         if (_window.ProxyWindow.isProxyWindow(methodSource)) {
           // $FlowFixMe
-          return methodSource.matchWindow(source).then(match => {
+          return methodSource.matchWindow(source, {
+            send
+          }).then(match => {
             if (!match) {
               throw new Error(`Method call '${data.name}' failed - proxy window does not match source in ${(0, _src.getDomain)(window)}`);
             }
@@ -120,10 +123,12 @@ function listenForFunctionCalls({
 }
 
 function serializeFunction(destination, domain, val, key, {
-  on
+  on,
+  send
 }) {
   listenForFunctionCalls({
-    on
+    on,
+    send
   });
   const id = val.__id__ || (0, _src3.uniqueID)();
   destination = _window.ProxyWindow.unwrap(destination);
