@@ -34,10 +34,8 @@ type SerializedWindowType = {|
     getInstanceID : () => ZalgoPromise<string>
 |};
 
-function getSerializedWindow(winPromise : ZalgoPromise<CrossDomainWindowType>, { send } : { send : SendType }) : SerializedWindowType {
+function getSerializedWindow(winPromise : ZalgoPromise<CrossDomainWindowType>, { send, id = uniqueID() } : { send : SendType, id? : string }) : SerializedWindowType {
     let windowName;
-
-    const id = uniqueID();
     
     return {
         id,
@@ -107,7 +105,7 @@ export class ProxyWindow {
         this.serializedWindow = serializedWindow || getSerializedWindow(this.actualWindowPromise, { send });
         globalStore('idToProxyWindow').set(this.getID(), this);
         if (win) {
-            this.setWindow(win);
+            this.setWindow(win, { send });
         }
     }
 
@@ -158,9 +156,10 @@ export class ProxyWindow {
         return this.actualWindow;
     }
 
-    setWindow(win : CrossDomainWindowType) {
+    setWindow(win : CrossDomainWindowType, { send } : { send : SendType }) {
         this.actualWindow = win;
         this.actualWindowPromise.resolve(this.actualWindow);
+        this.serializedWindow = getSerializedWindow(this.actualWindowPromise, { send, id: this.getID() });
         windowStore('winToProxyWindow').set(win, this);
     }
 
@@ -181,7 +180,7 @@ export class ProxyWindow {
                 const match = proxyInstanceID === knownWindowInstanceID;
 
                 if (match) {
-                    this.setWindow(win);
+                    this.setWindow(win, { send });
                 }
 
                 return match;
