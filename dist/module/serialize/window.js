@@ -33,10 +33,10 @@ function cleanupProxyWindows() {
 }
 
 function getSerializedWindow(winPromise, {
-  send
+  send,
+  id = (0, _src3.uniqueID)()
 }) {
   let windowName;
-  const id = (0, _src3.uniqueID)();
   return {
     id,
     getType: () => winPromise.then(win => {
@@ -113,7 +113,9 @@ class ProxyWindow {
     (0, _global.globalStore)('idToProxyWindow').set(this.getID(), this);
 
     if (win) {
-      this.setWindow(win);
+      this.setWindow(win, {
+        send
+      });
     }
   }
 
@@ -161,9 +163,15 @@ class ProxyWindow {
     return this.actualWindow;
   }
 
-  setWindow(win) {
+  setWindow(win, {
+    send
+  }) {
     this.actualWindow = win;
     this.actualWindowPromise.resolve(this.actualWindow);
+    this.serializedWindow = getSerializedWindow(this.actualWindowPromise, {
+      send,
+      id: this.getID()
+    });
     (0, _global.windowStore)('winToProxyWindow').set(win, this);
   }
 
@@ -191,7 +199,9 @@ class ProxyWindow {
         const match = proxyInstanceID === knownWindowInstanceID;
 
         if (match) {
-          this.setWindow(win);
+          this.setWindow(win, {
+            send
+          });
         }
 
         return match;
