@@ -117,8 +117,10 @@ export class ProxyWindow {
         return this.serializedWindow.getType();
     }
 
-    isPopup() : boolean {
-        return this.getType() === WINDOW_TYPE.POPUP;
+    isPopup() : ZalgoPromise<boolean> {
+        return this.getType().then(type => {
+            return type === WINDOW_TYPE.POPUP;
+        });
     }
 
     setLocation(href : string) : ZalgoPromise<ProxyWindow> {
@@ -138,13 +140,19 @@ export class ProxyWindow {
     }
 
     focus() : ZalgoPromise<ProxyWindow> {
+        const isPopupPromise = this.isPopup();
+        const getNamePromise = this.getName();
+
+        const reopenPromise = ZalgoPromise.hash({ isPopup: isPopupPromise, name: getNamePromise }).then(({ isPopup, name }) => {
+            if (isPopup && name) {
+                window.open('', name);
+            }
+        });
+        const focusPromise = this.serializedWindow.focus();
+
         return ZalgoPromise.all([
-            this.isPopup() && this.getName().then(name => {
-                if (name) {
-                    window.open('', name);
-                }
-            }),
-            this.serializedWindow.focus()
+            reopenPromise,
+            focusPromise
         ]).then(() => this);
     }
 
