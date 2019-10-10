@@ -109,12 +109,10 @@ function getRequestListener({
       }
 
       if (domainListeners[__DOMAIN_REGEX__]) {
-        for (const _ref of domainListeners[__DOMAIN_REGEX__]) {
-          const {
-            regex,
-            listener
-          } = _ref;
-
+        for (const {
+          regex,
+          listener
+        } of domainListeners[__DOMAIN_REGEX__]) {
           if ((0, _src.matchDomain)(regex, domain)) {
             return listener;
           }

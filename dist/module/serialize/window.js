@@ -128,7 +128,9 @@ class ProxyWindow {
   }
 
   isPopup() {
-    return this.getType() === _src.WINDOW_TYPE.POPUP;
+    return this.getType().then(type => {
+      return type === _src.WINDOW_TYPE.POPUP;
+    });
   }
 
   setLocation(href) {
@@ -148,11 +150,23 @@ class ProxyWindow {
   }
 
   focus() {
-    return _src2.ZalgoPromise.all([this.isPopup() && this.getName().then(name => {
-      if (name) {
+    const isPopupPromise = this.isPopup();
+    const getNamePromise = this.getName();
+
+    const reopenPromise = _src2.ZalgoPromise.hash({
+      isPopup: isPopupPromise,
+      name: getNamePromise
+    }).then(({
+      isPopup,
+      name
+    }) => {
+      if (isPopup && name) {
         window.open('', name);
       }
-    }), this.serializedWindow.focus()]).then(() => this);
+    });
+
+    const focusPromise = this.serializedWindow.focus();
+    return _src2.ZalgoPromise.all([reopenPromise, focusPromise]).then(() => this);
   }
 
   isClosed() {
