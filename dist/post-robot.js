@@ -2229,6 +2229,10 @@ function memoize(method, options) {
   };
 
   return setFunctionName(memoizedFunction, getFunctionName(method) + "::memoized");
+}
+function promiseIdentity(item) {
+  // $FlowFixMe
+  return promise_ZalgoPromise.resolve(item);
 } // eslint-disable-next-line flowtype/no-weak-types
 
 function memoizePromise(method) {
@@ -4203,7 +4207,8 @@ function experiment(_ref) {
       if (isEventUnique(name + "_" + treatment)) {
         logTreatment({
           name: name,
-          treatment: treatment
+          treatment: treatment,
+          payload: payload
         });
       }
 
@@ -4453,7 +4458,7 @@ function wrapPromise(method, _temp) {
   var expected = [];
   var promises = [];
   var timer = setTimeout(function () {
-    if (expected) {
+    if (expected.length) {
       promises.push(promise_ZalgoPromise.asyncReject(new Error("Expected " + expected[0] + " to be called")));
     }
   }, timeout);
@@ -4634,14 +4639,14 @@ function global_getGlobal(win) {
   }
 
   if (win !== window) {
-    return win["__post_robot_10_0_23__"];
+    return win["__post_robot_10_0_24__"];
   }
 
-  var global = win["__post_robot_10_0_23__"] = win["__post_robot_10_0_23__"] || {};
+  var global = win["__post_robot_10_0_24__"] = win["__post_robot_10_0_24__"] || {};
   return global;
 }
 function deleteGlobal() {
-  delete window["__post_robot_10_0_23__"];
+  delete window["__post_robot_10_0_24__"];
 }
 
 var getObj = function getObj() {
@@ -6182,7 +6187,7 @@ function function_serializeFunction(destination, domain, val, key, _ref3) {
   destination = window_ProxyWindow.unwrap(destination);
   var name = val.__name__ || val.name || key;
 
-  if (name.indexOf('anonymous::') === 0) {
+  if (typeof name === 'string' && typeof name.indexOf === 'function' && name.indexOf('anonymous::') === 0) {
     name = name.replace('anonymous::', key + "::");
   }
 
@@ -6396,7 +6401,7 @@ function send_sendMessage(win, domain, message, _ref) {
     throw new Error('Window is closed');
   }
 
-  var serializedMessage = serializeMessage(win, domain, (_serializeMessage = {}, _serializeMessage["__post_robot_10_0_23__"] = _extends({
+  var serializedMessage = serializeMessage(win, domain, (_serializeMessage = {}, _serializeMessage["__post_robot_10_0_24__"] = _extends({
     id: uniqueID(),
     origin: getDomain(window)
   }, message), _serializeMessage), {
@@ -6822,7 +6827,7 @@ function parseMessage(message, source, origin, _ref) {
     return;
   }
 
-  parsedMessage = parsedMessage["__post_robot_10_0_23__"];
+  parsedMessage = parsedMessage["__post_robot_10_0_24__"];
 
   if (!parsedMessage || typeof parsedMessage !== 'object' || parsedMessage === null) {
     return;

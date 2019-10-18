@@ -134,7 +134,7 @@ function serializeFunction(destination, domain, val, key, {
   destination = _window.ProxyWindow.unwrap(destination);
   let name = val.__name__ || val.name || key;
 
-  if (name.indexOf('anonymous::') === 0) {
+  if (typeof name === 'string' && typeof name.indexOf === 'function' && name.indexOf('anonymous::') === 0) {
     name = name.replace('anonymous::', `${key}::`);
   }
 
