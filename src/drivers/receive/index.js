@@ -48,7 +48,7 @@ export function receiveMessage(event : MessageEvent, { on, send } : { on : OnTyp
     const receivedMessages = globalStore('receivedMessages');
 
     if (!window || window.closed) {
-        throw new Error(`Message recieved in closed window`);
+        throw new Error(`Message received in closed window`);
     }
 
     try {
