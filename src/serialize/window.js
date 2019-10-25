@@ -1,7 +1,7 @@
 /* @flow */
 
 import { isSameDomain, isWindowClosed, type CrossDomainWindowType, closeWindow,
-    type DomainMatcher, getOpener, WINDOW_TYPE, isWindow, assertSameDomain } from 'cross-domain-utils/src';
+    type DomainMatcher, getOpener, WINDOW_TYPE, isWindow, assertSameDomain, getFrameForWindow } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { uniqueID, memoizePromise } from 'belter/src';
 import { serializeType, type CustomSerializedType } from 'universal-serialize/src';
@@ -77,12 +77,19 @@ function getSerializedWindow(winPromise : ZalgoPromise<CrossDomainWindowType>, {
                 linkWindow({ win, name });
             }
 
-            const sameDomainWin = assertSameDomain(win);
+            const sameDomain = isSameDomain(win);
+            const frame = getFrameForWindow(win);
 
-            sameDomainWin.name = name;
+            if (sameDomain) {
+                assertSameDomain(win).name = name;
+            }
 
-            if (sameDomainWin.frameElement) {
-                sameDomainWin.frameElement.setAttribute('name', name);
+            if (frame) {
+                frame.setAttribute('name', name);
+            }
+
+            if (!sameDomain && !frame) {
+                throw new Error(`Can not set name for cross-domain window: ${ name }`);
             }
 
             windowName = name;
