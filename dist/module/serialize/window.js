@@ -81,11 +81,19 @@ function getSerializedWindow(winPromise, {
         });
       }
 
-      const sameDomainWin = (0, _src.assertSameDomain)(win);
-      sameDomainWin.name = name;
+      const sameDomain = (0, _src.isSameDomain)(win);
+      const frame = (0, _src.getFrameForWindow)(win);
 
-      if (sameDomainWin.frameElement) {
-        sameDomainWin.frameElement.setAttribute('name', name);
+      if (sameDomain) {
+        (0, _src.assertSameDomain)(win).name = name;
+      }
+
+      if (frame) {
+        frame.setAttribute('name', name);
+      }
+
+      if (!sameDomain && !frame) {
+        throw new Error(`Can not set name for cross-domain window: ${name}`);
       }
 
       windowName = name;

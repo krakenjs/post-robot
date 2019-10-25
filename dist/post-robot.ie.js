@@ -1114,6 +1114,19 @@ function closeWindow(win) {
   } catch (err) {// pass
   }
 }
+function getFrameForWindow(win) {
+  if (isSameDomain(win)) {
+    return assertSameDomain(win).frameElement;
+  }
+
+  for (var _i21 = 0, _document$querySelect2 = document.querySelectorAll('iframe'); _i21 < _document$querySelect2.length; _i21++) {
+    var frame = _document$querySelect2[_i21];
+
+    if (frame && frame.contentWindow && frame.contentWindow === win) {
+      return frame;
+    }
+  }
+}
 // CONCATENATED MODULE: ./node_modules/cross-domain-utils/src/types.js
 // export something to force webpack to see this as an ES module
 var TYPES = true;
@@ -4204,7 +4217,7 @@ function experiment(_ref) {
         return this;
       }
 
-      if (isEventUnique(name + "_" + treatment)) {
+      if (isEventUnique(name + "_" + treatment + "_" + JSON.stringify(payload))) {
         logTreatment({
           name: name,
           treatment: treatment,
@@ -4212,7 +4225,7 @@ function experiment(_ref) {
         });
       }
 
-      if (isEventUnique(name + "_" + treatment + "_" + checkpoint)) {
+      if (isEventUnique(name + "_" + treatment + "_" + checkpoint + "_" + JSON.stringify(payload))) {
         logCheckpoint({
           name: name,
           treatment: treatment,
@@ -4639,14 +4652,14 @@ function global_getGlobal(win) {
   }
 
   if (win !== window) {
-    return win["__post_robot_10_0_24__"];
+    return win["__post_robot_10_0_25__"];
   }
 
-  var global = win["__post_robot_10_0_24__"] = win["__post_robot_10_0_24__"] || {};
+  var global = win["__post_robot_10_0_25__"] = win["__post_robot_10_0_25__"] || {};
   return global;
 }
 function deleteGlobal() {
-  delete window["__post_robot_10_0_24__"];
+  delete window["__post_robot_10_0_25__"];
 }
 
 var getObj = function getObj() {
@@ -5837,11 +5850,19 @@ function getSerializedWindow(winPromise, _ref) {
           });
         }
 
-        var sameDomainWin = assertSameDomain(win);
-        sameDomainWin.name = name;
+        var sameDomain = isSameDomain(win);
+        var frame = getFrameForWindow(win);
 
-        if (sameDomainWin.frameElement) {
-          sameDomainWin.frameElement.setAttribute('name', name);
+        if (sameDomain) {
+          assertSameDomain(win).name = name;
+        }
+
+        if (frame) {
+          frame.setAttribute('name', name);
+        }
+
+        if (!sameDomain && !frame) {
+          throw new Error("Can not set name for cross-domain window: " + name);
         }
 
         windowName = name;
@@ -6449,7 +6470,7 @@ function send_sendMessage(win, domain, message, _ref) {
     throw new Error('Window is closed');
   }
 
-  var serializedMessage = serializeMessage(win, domain, (_serializeMessage = {}, _serializeMessage["__post_robot_10_0_24__"] = _extends({
+  var serializedMessage = serializeMessage(win, domain, (_serializeMessage = {}, _serializeMessage["__post_robot_10_0_25__"] = _extends({
     id: uniqueID(),
     origin: getDomain(window)
   }, message), _serializeMessage), {
@@ -6875,7 +6896,7 @@ function parseMessage(message, source, origin, _ref) {
     return;
   }
 
-  parsedMessage = parsedMessage["__post_robot_10_0_24__"];
+  parsedMessage = parsedMessage["__post_robot_10_0_25__"];
 
   if (!parsedMessage || typeof parsedMessage !== 'object' || parsedMessage === null) {
     return;
@@ -6898,7 +6919,7 @@ function receive_receiveMessage(event, _ref2) {
   var receivedMessages = globalStore('receivedMessages');
 
   if (!window || window.closed) {
-    throw new Error("Message recieved in closed window");
+    throw new Error("Message received in closed window");
   }
 
   try {

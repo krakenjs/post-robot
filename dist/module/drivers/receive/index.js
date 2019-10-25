@@ -66,7 +66,7 @@ function receiveMessage(event, {
   const receivedMessages = (0, _global.globalStore)('receivedMessages');
 
   if (!window || window.closed) {
-    throw new Error(`Message recieved in closed window`);
+    throw new Error(`Message received in closed window`);
   }
 
   try {
