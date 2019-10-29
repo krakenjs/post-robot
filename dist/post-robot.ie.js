@@ -4652,14 +4652,14 @@ function global_getGlobal(win) {
   }
 
   if (win !== window) {
-    return win["__post_robot_10_0_25__"];
+    return win["__post_robot_10_0_26__"];
   }
 
-  var global = win["__post_robot_10_0_25__"] = win["__post_robot_10_0_25__"] || {};
+  var global = win["__post_robot_10_0_26__"] = win["__post_robot_10_0_26__"] || {};
   return global;
 }
 function deleteGlobal() {
-  delete window["__post_robot_10_0_25__"];
+  delete window["__post_robot_10_0_26__"];
 }
 
 var getObj = function getObj() {
@@ -5853,16 +5853,14 @@ function getSerializedWindow(winPromise, _ref) {
         var sameDomain = isSameDomain(win);
         var frame = getFrameForWindow(win);
 
-        if (sameDomain) {
-          assertSameDomain(win).name = name;
+        if (!sameDomain) {
+          throw new Error("Can not set name for cross-domain window: " + name);
         }
+
+        assertSameDomain(win).name = name;
 
         if (frame) {
           frame.setAttribute('name', name);
-        }
-
-        if (!sameDomain && !frame) {
-          throw new Error("Can not set name for cross-domain window: " + name);
         }
 
         windowName = name;
@@ -6470,7 +6468,7 @@ function send_sendMessage(win, domain, message, _ref) {
     throw new Error('Window is closed');
   }
 
-  var serializedMessage = serializeMessage(win, domain, (_serializeMessage = {}, _serializeMessage["__post_robot_10_0_25__"] = _extends({
+  var serializedMessage = serializeMessage(win, domain, (_serializeMessage = {}, _serializeMessage["__post_robot_10_0_26__"] = _extends({
     id: uniqueID(),
     origin: getDomain(window)
   }, message), _serializeMessage), {
@@ -6896,7 +6894,7 @@ function parseMessage(message, source, origin, _ref) {
     return;
   }
 
-  parsedMessage = parsedMessage["__post_robot_10_0_25__"];
+  parsedMessage = parsedMessage["__post_robot_10_0_26__"];
 
   if (!parsedMessage || typeof parsedMessage !== 'object' || parsedMessage === null) {
     return;
