@@ -80,16 +80,13 @@ function getSerializedWindow(winPromise : ZalgoPromise<CrossDomainWindowType>, {
             const sameDomain = isSameDomain(win);
             const frame = getFrameForWindow(win);
 
-            if (sameDomain) {
-                assertSameDomain(win).name = name;
+            if (!sameDomain) {
+                throw new Error(`Can not set name for cross-domain window: ${ name }`);
             }
 
+            assertSameDomain(win).name = name;
             if (frame) {
                 frame.setAttribute('name', name);
-            }
-
-            if (!sameDomain && !frame) {
-                throw new Error(`Can not set name for cross-domain window: ${ name }`);
             }
 
             windowName = name;
