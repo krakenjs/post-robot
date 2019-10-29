@@ -165,6 +165,10 @@ export function linkWindow({ win, name, domain } : WinDetails) : WinDetails {
         }
     }
 
+    if (isWindowClosed(win)) {
+        return { win, name, domain };
+    }
+
     const details = popupWindowsByWin.getOrSet(win, () : WinDetails => {
         if (!name) {
             return { win };
