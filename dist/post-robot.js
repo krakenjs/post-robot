@@ -4652,14 +4652,14 @@ function global_getGlobal(win) {
   }
 
   if (win !== window) {
-    return win["__post_robot_10_0_26__"];
+    return win["__post_robot_10_0_27__"];
   }
 
-  var global = win["__post_robot_10_0_26__"] = win["__post_robot_10_0_26__"] || {};
+  var global = win["__post_robot_10_0_27__"] = win["__post_robot_10_0_27__"] || {};
   return global;
 }
 function deleteGlobal() {
-  delete window["__post_robot_10_0_26__"];
+  delete window["__post_robot_10_0_27__"];
 }
 
 var getObj = function getObj() {
@@ -5659,6 +5659,14 @@ function linkWindow(_ref3) {
     }
   }
 
+  if (isWindowClosed(win)) {
+    return {
+      win: win,
+      name: name,
+      domain: domain
+    };
+  }
+
   var details = popupWindowsByWin.getOrSet(win, function () {
     if (!name) {
       return {
@@ -6420,7 +6428,7 @@ function send_sendMessage(win, domain, message, _ref) {
     throw new Error('Window is closed');
   }
 
-  var serializedMessage = serializeMessage(win, domain, (_serializeMessage = {}, _serializeMessage["__post_robot_10_0_26__"] = _extends({
+  var serializedMessage = serializeMessage(win, domain, (_serializeMessage = {}, _serializeMessage["__post_robot_10_0_27__"] = _extends({
     id: uniqueID(),
     origin: getDomain(window)
   }, message), _serializeMessage), {
@@ -6846,7 +6854,7 @@ function parseMessage(message, source, origin, _ref) {
     return;
   }
 
-  parsedMessage = parsedMessage["__post_robot_10_0_26__"];
+  parsedMessage = parsedMessage["__post_robot_10_0_27__"];
 
   if (!parsedMessage || typeof parsedMessage !== 'object' || parsedMessage === null) {
     return;

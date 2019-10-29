@@ -167,6 +167,14 @@ function linkWindow({
     }
   }
 
+  if ((0, _src2.isWindowClosed)(win)) {
+    return {
+      win,
+      name,
+      domain
+    };
+  }
+
   const details = popupWindowsByWin.getOrSet(win, () => {
     if (!name) {
       return {
