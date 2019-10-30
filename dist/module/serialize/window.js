@@ -36,7 +36,11 @@ function getSerializedWindow(winPromise, {
   send,
   id = (0, _src3.uniqueID)()
 }) {
-  let windowName;
+  let windowNamePromise = winPromise.then(win => {
+    if ((0, _src.isSameDomain)(win)) {
+      return (0, _src.assertSameDomain)(win).name;
+    }
+  });
   return {
     id,
     getType: () => winPromise.then(win => {
@@ -51,7 +55,11 @@ function getSerializedWindow(winPromise, {
         return;
       }
 
-      return windowName;
+      if ((0, _src.isSameDomain)(win)) {
+        return (0, _src.assertSameDomain)(win).name;
+      }
+
+      return windowNamePromise;
     }),
     focus: () => winPromise.then(win => {
       win.focus();
@@ -94,7 +102,7 @@ function getSerializedWindow(winPromise, {
         frame.setAttribute('name', name);
       }
 
-      windowName = name;
+      windowNamePromise = _src2.ZalgoPromise.resolve(name);
     })
   };
 }

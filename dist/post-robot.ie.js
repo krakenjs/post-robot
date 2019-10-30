@@ -4652,14 +4652,14 @@ function global_getGlobal(win) {
   }
 
   if (win !== window) {
-    return win["__post_robot_10_0_28__"];
+    return win["__post_robot_10_0_29__"];
   }
 
-  var global = win["__post_robot_10_0_28__"] = win["__post_robot_10_0_28__"] || {};
+  var global = win["__post_robot_10_0_29__"] = win["__post_robot_10_0_29__"] || {};
   return global;
 }
 function deleteGlobal() {
-  delete window["__post_robot_10_0_28__"];
+  delete window["__post_robot_10_0_29__"];
 }
 
 var getObj = function getObj() {
@@ -5796,7 +5796,11 @@ function getSerializedWindow(winPromise, _ref) {
   var send = _ref.send,
       _ref$id = _ref.id,
       id = _ref$id === void 0 ? uniqueID() : _ref$id;
-  var windowName;
+  var windowNamePromise = winPromise.then(function (win) {
+    if (isSameDomain(win)) {
+      return assertSameDomain(win).name;
+    }
+  });
   return {
     id: id,
     getType: function getType() {
@@ -5820,7 +5824,11 @@ function getSerializedWindow(winPromise, _ref) {
           return;
         }
 
-        return windowName;
+        if (isSameDomain(win)) {
+          return assertSameDomain(win).name;
+        }
+
+        return windowNamePromise;
       });
     },
     focus: function focus() {
@@ -5871,7 +5879,7 @@ function getSerializedWindow(winPromise, _ref) {
           frame.setAttribute('name', name);
         }
 
-        windowName = name;
+        windowNamePromise = promise_ZalgoPromise.resolve(name);
       });
     }
   };
@@ -6476,7 +6484,7 @@ function send_sendMessage(win, domain, message, _ref) {
     throw new Error('Window is closed');
   }
 
-  var serializedMessage = serializeMessage(win, domain, (_serializeMessage = {}, _serializeMessage["__post_robot_10_0_28__"] = _extends({
+  var serializedMessage = serializeMessage(win, domain, (_serializeMessage = {}, _serializeMessage["__post_robot_10_0_29__"] = _extends({
     id: uniqueID(),
     origin: getDomain(window)
   }, message), _serializeMessage), {
@@ -6902,7 +6910,7 @@ function parseMessage(message, source, origin, _ref) {
     return;
   }
 
-  parsedMessage = parsedMessage["__post_robot_10_0_28__"];
+  parsedMessage = parsedMessage["__post_robot_10_0_29__"];
 
   if (!parsedMessage || typeof parsedMessage !== 'object' || parsedMessage === null) {
     return;
