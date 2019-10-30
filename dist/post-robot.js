@@ -38,229 +38,79 @@
         __webpack_require__.p = "";
         return __webpack_require__(__webpack_require__.s = "./src/index.js");
     }({
-        "./node_modules/cross-domain-utils/src/constants.js": function(module, __webpack_exports__, __webpack_require__) {
+        "./src/index.js": function(module, __webpack_exports__, __webpack_require__) {
             "use strict";
-            __webpack_require__.d(__webpack_exports__, "a", function() {
-                return PROTOCOL;
+            Object.defineProperty(__webpack_exports__, "__esModule", {
+                value: !0
             });
-            __webpack_require__.d(__webpack_exports__, "b", function() {
-                return WILDCARD;
+            var interface_namespaceObject = {};
+            __webpack_require__.d(interface_namespaceObject, "cleanUpWindow", function() {
+                return cleanUpWindow;
             });
+            __webpack_require__.d(interface_namespaceObject, "Promise", function() {
+                return promise_ZalgoPromise;
+            });
+            __webpack_require__.d(interface_namespaceObject, "bridge", function() {
+                return bridge;
+            });
+            __webpack_require__.d(interface_namespaceObject, "init", function() {
+                return init;
+            });
+            __webpack_require__.d(interface_namespaceObject, "parent", function() {
+                return public_parent;
+            });
+            __webpack_require__.d(interface_namespaceObject, "send", function() {
+                return _send;
+            });
+            __webpack_require__.d(interface_namespaceObject, "request", function() {
+                return request;
+            });
+            __webpack_require__.d(interface_namespaceObject, "sendToParent", function() {
+                return sendToParent;
+            });
+            __webpack_require__.d(interface_namespaceObject, "client", function() {
+                return client;
+            });
+            __webpack_require__.d(interface_namespaceObject, "on", function() {
+                return _on;
+            });
+            __webpack_require__.d(interface_namespaceObject, "listen", function() {
+                return listen;
+            });
+            __webpack_require__.d(interface_namespaceObject, "once", function() {
+                return server_once;
+            });
+            __webpack_require__.d(interface_namespaceObject, "listener", function() {
+                return server_listener;
+            });
+            __webpack_require__.d(interface_namespaceObject, "CONFIG", function() {
+                return CONFIG;
+            });
+            __webpack_require__.d(interface_namespaceObject, "CONSTANTS", function() {
+                return constants_CONSTANTS;
+            });
+            __webpack_require__.d(interface_namespaceObject, "disable", function() {
+                return disable;
+            });
+            function isRegex(item) {
+                return "[object RegExp]" === Object.prototype.toString.call(item);
+            }
             var PROTOCOL = {
                 MOCK: "mock:",
                 FILE: "file:",
                 ABOUT: "about:"
-            }, WILDCARD = "*";
-        },
-        "./node_modules/cross-domain-utils/src/index.js": function(module, __webpack_exports__, __webpack_require__) {
-            "use strict";
-            var __WEBPACK_IMPORTED_MODULE_0__utils__ = __webpack_require__("./node_modules/cross-domain-utils/src/utils.js");
-            __webpack_require__.d(__webpack_exports__, "getActualDomain", function() {
-                return __WEBPACK_IMPORTED_MODULE_0__utils__.a;
-            });
-            __webpack_require__.d(__webpack_exports__, "getAncestor", function() {
-                return __WEBPACK_IMPORTED_MODULE_0__utils__.b;
-            });
-            __webpack_require__.d(__webpack_exports__, "getDomain", function() {
-                return __WEBPACK_IMPORTED_MODULE_0__utils__.c;
-            });
-            __webpack_require__.d(__webpack_exports__, "getUserAgent", function() {
-                return __WEBPACK_IMPORTED_MODULE_0__utils__.d;
-            });
-            __webpack_require__.d(__webpack_exports__, "isActuallySameDomain", function() {
-                return __WEBPACK_IMPORTED_MODULE_0__utils__.e;
-            });
-            __webpack_require__.d(__webpack_exports__, "isAncestor", function() {
-                return __WEBPACK_IMPORTED_MODULE_0__utils__.f;
-            });
-            __webpack_require__.d(__webpack_exports__, "isIframe", function() {
-                return __WEBPACK_IMPORTED_MODULE_0__utils__.g;
-            });
-            __webpack_require__.d(__webpack_exports__, "isPopup", function() {
-                return __WEBPACK_IMPORTED_MODULE_0__utils__.h;
-            });
-            __webpack_require__.d(__webpack_exports__, "isWindow", function() {
-                return __WEBPACK_IMPORTED_MODULE_0__utils__.i;
-            });
-            __webpack_require__.d(__webpack_exports__, "isWindowClosed", function() {
-                return __WEBPACK_IMPORTED_MODULE_0__utils__.j;
-            });
-            __webpack_require__.d(__webpack_exports__, "matchDomain", function() {
-                return __WEBPACK_IMPORTED_MODULE_0__utils__.k;
-            });
-            __webpack_require__.d(__webpack_exports__, "stringifyDomainPattern", function() {
-                return __WEBPACK_IMPORTED_MODULE_0__utils__.l;
-            });
-            var __WEBPACK_IMPORTED_MODULE_1__types__ = __webpack_require__("./node_modules/cross-domain-utils/src/types.js");
-            __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__types__), __webpack_require__("./node_modules/cross-domain-utils/src/constants.js");
-        },
-        "./node_modules/cross-domain-utils/src/types.js": function(module, exports) {},
-        "./node_modules/cross-domain-utils/src/utils.js": function(module, __webpack_exports__, __webpack_require__) {
-            "use strict";
-            function isRegex(item) {
-                return "[object RegExp]" === Object.prototype.toString.call(item);
-            }
-            var constants = __webpack_require__("./node_modules/cross-domain-utils/src/constants.js");
-            __webpack_exports__.a = getActualDomain;
-            __webpack_exports__.c = getDomain;
-            __webpack_exports__.e = isActuallySameDomain;
-            __webpack_exports__.j = function(win) {
-                var allowMock = !(arguments.length > 1 && void 0 !== arguments[1]) || arguments[1];
-                try {
-                    if (win === window) return !1;
-                } catch (err) {
-                    return !0;
-                }
-                try {
-                    if (!win) return !0;
-                } catch (err) {
-                    return !0;
-                }
-                try {
-                    if (win.closed) return !0;
-                } catch (err) {
-                    return !err || err.message !== IE_WIN_ACCESS_ERROR;
-                }
-                if (allowMock && function(win) {
-                    if (!isActuallySameDomain(win)) return !1;
-                    try {
-                        if (win === window) return !0;
-                        if (isAboutProtocol(win) && canReadFromWindow(win)) return !0;
-                        if (getDomain(window) === getDomain(win)) return !0;
-                    } catch (err) {}
-                    return !1;
-                }(win)) try {
-                    if (win.mockclosed) return !0;
-                } catch (err) {}
-                try {
-                    if (!win.parent || !win.top) return !0;
-                } catch (err) {}
-                var iframeIndex = function(collection, item) {
-                    for (var i = 0; i < collection.length; i++) try {
-                        if (collection[i] === item) return i;
-                    } catch (err) {}
-                    return -1;
-                }(iframeWindows, win);
-                if (-1 !== iframeIndex) {
-                    var frame = iframeFrames[iframeIndex];
-                    if (frame && function(frame) {
-                        if (!frame.contentWindow) return !0;
-                        if (!frame.parentNode) return !0;
-                        var doc = frame.ownerDocument;
-                        return !(!doc || !doc.documentElement || doc.documentElement.contains(frame));
-                    }(frame)) return !0;
-                }
-                return !1;
-            };
-            __webpack_exports__.d = function(win) {
-                return (win = win || window).navigator.mockUserAgent || win.navigator.userAgent;
-            };
-            __webpack_exports__.b = getAncestor;
-            __webpack_exports__.f = function(parent, child) {
-                var actualParent = getAncestor(child);
-                if (actualParent) return actualParent === parent;
-                if (child === parent) return !1;
-                if (function(win) {
-                    if (win) {
-                        try {
-                            if (win.top) return win.top;
-                        } catch (err) {}
-                        if (getParent(win) === win) return win;
-                        try {
-                            if (isAncestorParent(window, win) && window.top) return window.top;
-                        } catch (err) {}
-                        try {
-                            if (isAncestorParent(win, window) && window.top) return window.top;
-                        } catch (err) {}
-                        for (var _i7 = 0, _getAllChildFrames4 = function getAllChildFrames(win) {
-                            for (var result = [], _i3 = 0, _getFrames2 = getFrames(win), _length2 = null == _getFrames2 ? 0 : _getFrames2.length; _i3 < _length2; _i3++) {
-                                var frame = _getFrames2[_i3];
-                                result.push(frame);
-                                for (var _i5 = 0, _getAllChildFrames2 = getAllChildFrames(frame), _length4 = null == _getAllChildFrames2 ? 0 : _getAllChildFrames2.length; _i5 < _length4; _i5++) {
-                                    var childFrame = _getAllChildFrames2[_i5];
-                                    result.push(childFrame);
-                                }
-                            }
-                            return result;
-                        }(win), _length6 = null == _getAllChildFrames4 ? 0 : _getAllChildFrames4.length; _i7 < _length6; _i7++) {
-                            var frame = _getAllChildFrames4[_i7];
-                            try {
-                                if (frame.top) return frame.top;
-                            } catch (err) {}
-                            if (getParent(frame) === frame) return frame;
-                        }
-                    }
-                }(child) === child) return !1;
-                for (var _i15 = 0, _getFrames8 = getFrames(parent), _length14 = null == _getFrames8 ? 0 : _getFrames8.length; _i15 < _length14; _i15++) if (_getFrames8[_i15] === child) return !0;
-                return !1;
-            };
-            __webpack_exports__.h = function() {
-                return Boolean(getOpener(window));
-            };
-            __webpack_exports__.g = function() {
-                return Boolean(getParent(window));
-            };
-            __webpack_exports__.k = function matchDomain(pattern, origin) {
-                if ("string" == typeof pattern) {
-                    if ("string" == typeof origin) return pattern === constants.b || origin === pattern;
-                    if (isRegex(origin)) return !1;
-                    if (Array.isArray(origin)) return !1;
-                }
-                return isRegex(pattern) ? isRegex(origin) ? pattern.toString() === origin.toString() : !Array.isArray(origin) && Boolean(origin.match(pattern)) : !!Array.isArray(pattern) && (Array.isArray(origin) ? JSON.stringify(pattern) === JSON.stringify(origin) : !isRegex(origin) && pattern.some(function(subpattern) {
-                    return matchDomain(subpattern, origin);
-                }));
-            };
-            __webpack_exports__.l = function(pattern) {
-                return Array.isArray(pattern) ? "(" + pattern.join(" | ") + ")" : isRegex(pattern) ? "RegExp(" + pattern.toString() : pattern.toString();
-            };
-            __webpack_exports__.i = function(obj) {
-                try {
-                    if (obj === window) return !0;
-                } catch (err) {
-                    if (err && err.message === IE_WIN_ACCESS_ERROR) return !0;
-                }
-                try {
-                    if ("[object Window]" === Object.prototype.toString.call(obj)) return !0;
-                } catch (err) {
-                    if (err && err.message === IE_WIN_ACCESS_ERROR) return !0;
-                }
-                try {
-                    if (window.Window && obj instanceof window.Window) return !0;
-                } catch (err) {
-                    if (err && err.message === IE_WIN_ACCESS_ERROR) return !0;
-                }
-                try {
-                    if (obj && obj.self === obj) return !0;
-                } catch (err) {
-                    if (err && err.message === IE_WIN_ACCESS_ERROR) return !0;
-                }
-                try {
-                    if (obj && obj.parent === obj) return !0;
-                } catch (err) {
-                    if (err && err.message === IE_WIN_ACCESS_ERROR) return !0;
-                }
-                try {
-                    if (obj && obj.top === obj) return !0;
-                } catch (err) {
-                    if (err && err.message === IE_WIN_ACCESS_ERROR) return !0;
-                }
-                try {
-                    obj && obj.__cross_domain_utils_window_check__;
-                } catch (err) {
-                    return !0;
-                }
-                return !1;
-            };
-            var IE_WIN_ACCESS_ERROR = "Call was rejected by callee.\r\n";
+            }, WILDCARD = "*", IE_WIN_ACCESS_ERROR = "Call was rejected by callee.\r\n";
             function isAboutProtocol() {
-                return (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window).location.protocol === constants.a.ABOUT;
+                return (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window).location.protocol === PROTOCOL.ABOUT;
             }
-            function getParent(win) {
+            function getParent() {
+                var win = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window;
                 if (win) try {
                     if (win.parent && win.parent !== win) return win.parent;
                 } catch (err) {}
             }
-            function getOpener(win) {
+            function getOpener() {
+                var win = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window;
                 if (win && !getParent(win)) try {
                     return win.opener;
                 } catch (err) {}
@@ -272,23 +122,23 @@
                 } catch (err) {}
                 return !1;
             }
-            function getActualDomain(win) {
-                var location = (win = win || window).location;
+            function getActualDomain() {
+                var win = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window, location = win.location;
                 if (!location) throw new Error("Can not read window location");
                 var protocol = location.protocol;
                 if (!protocol) throw new Error("Can not read window protocol");
-                if (protocol === constants.a.FILE) return constants.a.FILE + "//";
-                if (protocol === constants.a.ABOUT) {
+                if (protocol === PROTOCOL.FILE) return PROTOCOL.FILE + "//";
+                if (protocol === PROTOCOL.ABOUT) {
                     var parent = getParent(win);
-                    return parent && canReadFromWindow(parent) ? getActualDomain(parent) : constants.a.ABOUT + "//";
+                    return parent && canReadFromWindow(parent) ? getActualDomain(parent) : PROTOCOL.ABOUT + "//";
                 }
                 var host = location.host;
                 if (!host) throw new Error("Can not read window host");
                 return protocol + "//" + host;
             }
-            function getDomain(win) {
-                var domain = getActualDomain(win = win || window);
-                return domain && win.mockDomain && 0 === win.mockDomain.indexOf(constants.a.MOCK) ? win.mockDomain : domain;
+            function utils_getDomain() {
+                var win = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window, domain = getActualDomain(win);
+                return domain && win.mockDomain && 0 === win.mockDomain.indexOf(PROTOCOL.MOCK) ? win.mockDomain : domain;
             }
             function isActuallySameDomain(win) {
                 try {
@@ -357,81 +207,118 @@
                 return result;
             }
             var iframeWindows = [], iframeFrames = [];
-            function getAncestor(win) {
+            function isWindowClosed(win) {
+                var allowMock = !(arguments.length > 1 && void 0 !== arguments[1]) || arguments[1];
+                try {
+                    if (win === window) return !1;
+                } catch (err) {
+                    return !0;
+                }
+                try {
+                    if (!win) return !0;
+                } catch (err) {
+                    return !0;
+                }
+                try {
+                    if (win.closed) return !0;
+                } catch (err) {
+                    return !err || err.message !== IE_WIN_ACCESS_ERROR;
+                }
+                if (allowMock && function(win) {
+                    if (!isActuallySameDomain(win)) return !1;
+                    try {
+                        if (win === window) return !0;
+                        if (isAboutProtocol(win) && canReadFromWindow(win)) return !0;
+                        if (utils_getDomain(window) === utils_getDomain(win)) return !0;
+                    } catch (err) {}
+                    return !1;
+                }(win)) try {
+                    if (win.mockclosed) return !0;
+                } catch (err) {}
+                try {
+                    if (!win.parent || !win.top) return !0;
+                } catch (err) {}
+                var iframeIndex = function(collection, item) {
+                    for (var i = 0; i < collection.length; i++) try {
+                        if (collection[i] === item) return i;
+                    } catch (err) {}
+                    return -1;
+                }(iframeWindows, win);
+                if (-1 !== iframeIndex) {
+                    var frame = iframeFrames[iframeIndex];
+                    if (frame && function(frame) {
+                        if (!frame.contentWindow) return !0;
+                        if (!frame.parentNode) return !0;
+                        var doc = frame.ownerDocument;
+                        return !(!doc || !doc.documentElement || doc.documentElement.contains(frame));
+                    }(frame)) return !0;
+                }
+                return !1;
+            }
+            function getAncestor() {
+                var win = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window;
                 return getOpener(win = win || window) || getParent(win) || void 0;
             }
-        },
-        "./src/index.js": function(module, __webpack_exports__, __webpack_require__) {
-            "use strict";
-            Object.defineProperty(__webpack_exports__, "__esModule", {
-                value: !0
-            });
-            __webpack_require__.d({}, "WeakMap", function() {
-                return weakmap_CrossDomainSafeWeakMap;
-            });
-            var src_interface_namespaceObject = {};
-            __webpack_require__.d(src_interface_namespaceObject, "cleanUpWindow", function() {
-                return cleanUpWindow;
-            });
-            __webpack_require__.d(src_interface_namespaceObject, "Promise", function() {
-                return promise_ZalgoPromise;
-            });
-            __webpack_require__.d(src_interface_namespaceObject, "bridge", function() {
-                return bridge;
-            });
-            __webpack_require__.d(src_interface_namespaceObject, "init", function() {
-                return init;
-            });
-            __webpack_require__.d(src_interface_namespaceObject, "parent", function() {
-                return public_parent;
-            });
-            __webpack_require__.d(src_interface_namespaceObject, "send", function() {
-                return _send;
-            });
-            __webpack_require__.d(src_interface_namespaceObject, "request", function() {
-                return request;
-            });
-            __webpack_require__.d(src_interface_namespaceObject, "sendToParent", function() {
-                return sendToParent;
-            });
-            __webpack_require__.d(src_interface_namespaceObject, "client", function() {
-                return client;
-            });
-            __webpack_require__.d(src_interface_namespaceObject, "on", function() {
-                return _on;
-            });
-            __webpack_require__.d(src_interface_namespaceObject, "listen", function() {
-                return listen;
-            });
-            __webpack_require__.d(src_interface_namespaceObject, "once", function() {
-                return server_once;
-            });
-            __webpack_require__.d(src_interface_namespaceObject, "listener", function() {
-                return server_listener;
-            });
-            __webpack_require__.d(src_interface_namespaceObject, "CONFIG", function() {
-                return CONFIG;
-            });
-            __webpack_require__.d(src_interface_namespaceObject, "CONSTANTS", function() {
-                return constants_CONSTANTS;
-            });
-            __webpack_require__.d(src_interface_namespaceObject, "disable", function() {
-                return disable;
-            });
-            var src = __webpack_require__("./node_modules/cross-domain-utils/src/index.js");
-            function safeIndexOf(collection, item) {
+            function matchDomain(pattern, origin) {
+                if ("string" == typeof pattern) {
+                    if ("string" == typeof origin) return pattern === WILDCARD || origin === pattern;
+                    if (isRegex(origin)) return !1;
+                    if (Array.isArray(origin)) return !1;
+                }
+                return isRegex(pattern) ? isRegex(origin) ? pattern.toString() === origin.toString() : !Array.isArray(origin) && Boolean(origin.match(pattern)) : !!Array.isArray(pattern) && (Array.isArray(origin) ? JSON.stringify(pattern) === JSON.stringify(origin) : !isRegex(origin) && pattern.some(function(subpattern) {
+                    return matchDomain(subpattern, origin);
+                }));
+            }
+            function isWindow(obj) {
+                try {
+                    if (obj === window) return !0;
+                } catch (err) {
+                    if (err && err.message === IE_WIN_ACCESS_ERROR) return !0;
+                }
+                try {
+                    if ("[object Window]" === Object.prototype.toString.call(obj)) return !0;
+                } catch (err) {
+                    if (err && err.message === IE_WIN_ACCESS_ERROR) return !0;
+                }
+                try {
+                    if (window.Window && obj instanceof window.Window) return !0;
+                } catch (err) {
+                    if (err && err.message === IE_WIN_ACCESS_ERROR) return !0;
+                }
+                try {
+                    if (obj && obj.self === obj) return !0;
+                } catch (err) {
+                    if (err && err.message === IE_WIN_ACCESS_ERROR) return !0;
+                }
+                try {
+                    if (obj && obj.parent === obj) return !0;
+                } catch (err) {
+                    if (err && err.message === IE_WIN_ACCESS_ERROR) return !0;
+                }
+                try {
+                    if (obj && obj.top === obj) return !0;
+                } catch (err) {
+                    if (err && err.message === IE_WIN_ACCESS_ERROR) return !0;
+                }
+                try {
+                    if (obj && "__unlikely_value__" === obj.__cross_domain_utils_window_check__) return !1;
+                } catch (err) {
+                    return !0;
+                }
+                return !1;
+            }
+            function util_safeIndexOf(collection, item) {
                 for (var i = 0; i < collection.length; i++) try {
                     if (collection[i] === item) return i;
                 } catch (err) {}
                 return -1;
             }
-            var _ALLOWED_POST_MESSAGE, defineProperty = Object.defineProperty, counter = Date.now() % 1e9, weakmap_CrossDomainSafeWeakMap = function() {
+            var _ALLOWED_POST_MESSAGE, weakmap_CrossDomainSafeWeakMap = function() {
                 function CrossDomainSafeWeakMap() {
                     !function(instance, Constructor) {
                         if (!(instance instanceof CrossDomainSafeWeakMap)) throw new TypeError("Cannot call a class as a function");
                     }(this);
-                    counter += 1;
-                    this.name = "__weakmap_" + (1e9 * Math.random() >>> 0) + "__" + counter;
+                    this.name = "__weakmap_" + (1e9 * Math.random() >>> 0) + "__";
                     if (function() {
                         if ("undefined" == typeof WeakMap) return !1;
                         if (void 0 === Object.freeze) return !1;
@@ -452,7 +339,7 @@
                 CrossDomainSafeWeakMap.prototype._cleanupClosedWindows = function() {
                     for (var weakmap = this.weakmap, keys = this.keys, i = 0; i < keys.length; i++) {
                         var value = keys[i];
-                        if (Object(src.isWindow)(value) && Object(src.isWindowClosed)(value)) {
+                        if (isWindow(value) && isWindowClosed(value)) {
                             if (weakmap) try {
                                 weakmap.delete(value);
                             } catch (err) {}
@@ -463,7 +350,7 @@
                     }
                 };
                 CrossDomainSafeWeakMap.prototype.isSafeToReadWrite = function(key) {
-                    if (Object(src.isWindow)(key)) return !1;
+                    if (isWindow(key)) return !1;
                     try {
                         key && key.self;
                         key && key[this.name];
@@ -480,20 +367,20 @@
                     } catch (err) {
                         delete this.weakmap;
                     }
-                    if (this.isSafeToReadWrite(key)) {
+                    if (this.isSafeToReadWrite(key)) try {
                         var name = this.name, entry = key[name];
-                        entry && entry[0] === key ? entry[1] = value : defineProperty(key, name, {
+                        entry && entry[0] === key ? entry[1] = value : Object.defineProperty(key, name, {
                             value: [ key, value ],
                             writable: !0
                         });
-                    } else {
-                        this._cleanupClosedWindows();
-                        var keys = this.keys, values = this.values, index = safeIndexOf(keys, key);
-                        if (-1 === index) {
-                            keys.push(key);
-                            values.push(value);
-                        } else values[index] = value;
-                    }
+                        return;
+                    } catch (err) {}
+                    this._cleanupClosedWindows();
+                    var keys = this.keys, values = this.values, index = util_safeIndexOf(keys, key);
+                    if (-1 === index) {
+                        keys.push(key);
+                        values.push(value);
+                    } else values[index] = value;
                 };
                 CrossDomainSafeWeakMap.prototype.get = function(key) {
                     if (!key) throw new Error("WeakMap expected key");
@@ -503,14 +390,13 @@
                     } catch (err) {
                         delete this.weakmap;
                     }
-                    if (!this.isSafeToReadWrite(key)) {
-                        this._cleanupClosedWindows();
-                        var index = safeIndexOf(this.keys, key);
-                        if (-1 === index) return;
-                        return this.values[index];
-                    }
-                    var entry = key[this.name];
-                    if (entry && entry[0] === key) return entry[1];
+                    if (this.isSafeToReadWrite(key)) try {
+                        var entry = key[this.name];
+                        return entry && entry[0] === key ? entry[1] : void 0;
+                    } catch (err) {}
+                    this._cleanupClosedWindows();
+                    var index = util_safeIndexOf(this.keys, key);
+                    if (-1 !== index) return this.values[index];
                 };
                 CrossDomainSafeWeakMap.prototype.delete = function(key) {
                     if (!key) throw new Error("WeakMap expected key");
@@ -520,16 +406,15 @@
                     } catch (err) {
                         delete this.weakmap;
                     }
-                    if (this.isSafeToReadWrite(key)) {
+                    if (this.isSafeToReadWrite(key)) try {
                         var entry = key[this.name];
                         entry && entry[0] === key && (entry[0] = entry[1] = void 0);
-                    } else {
-                        this._cleanupClosedWindows();
-                        var keys = this.keys, index = safeIndexOf(keys, key);
-                        if (-1 !== index) {
-                            keys.splice(index, 1);
-                            this.values.splice(index, 1);
-                        }
+                    } catch (err) {}
+                    this._cleanupClosedWindows();
+                    var keys = this.keys, index = util_safeIndexOf(keys, key);
+                    if (-1 !== index) {
+                        keys.splice(index, 1);
+                        this.values.splice(index, 1);
                     }
                 };
                 CrossDomainSafeWeakMap.prototype.has = function(key) {
@@ -540,12 +425,12 @@
                     } catch (err) {
                         delete this.weakmap;
                     }
-                    if (this.isSafeToReadWrite(key)) {
+                    if (this.isSafeToReadWrite(key)) try {
                         var entry = key[this.name];
                         return !(!entry || entry[0] !== key);
-                    }
+                    } catch (err) {}
                     this._cleanupClosedWindows();
-                    return -1 !== safeIndexOf(this.keys, key);
+                    return -1 !== util_safeIndexOf(this.keys, key);
                 };
                 CrossDomainSafeWeakMap.prototype.getOrSet = function(key, getter) {
                     if (this.has(key)) return this.get(key);
@@ -644,7 +529,7 @@
                     }
                 };
             };
-            function util_noop() {}
+            function lib_util_noop() {}
             function uniqueID() {
                 var chars = "0123456789abcdef";
                 return "xxxxxxxxxx".replace(/./g, function() {
@@ -671,15 +556,15 @@
                 });
                 return newobj;
             }
-            function isRegex(item) {
+            function util_isRegex(item) {
                 return "[object RegExp]" === Object.prototype.toString.call(item);
             }
             function utils_isPromise(item) {
                 try {
                     if (!item) return !1;
                     if ("undefined" != typeof Promise && item instanceof Promise) return !0;
-                    if ("undefined" != typeof window && window.Window && item instanceof window.Window) return !1;
-                    if ("undefined" != typeof window && window.constructor && item instanceof window.constructor) return !1;
+                    if ("undefined" != typeof window && "function" == typeof window.Window && item instanceof window.Window) return !1;
+                    if ("undefined" != typeof window && "function" == typeof window.constructor && item instanceof window.constructor) return !1;
                     var _toString = {}.toString;
                     if (_toString) {
                         var name = _toString.call(item);
@@ -691,18 +576,20 @@
                 }
                 return !1;
             }
-            function getGlobal() {
-                var glob = void 0;
-                if ("undefined" != typeof window) glob = window; else {
-                    if ("undefined" == typeof window) throw new TypeError("Can not find global");
-                    glob = window;
+            var dispatchedErrors = [], possiblyUnhandledPromiseHandlers = [], activeCount = 0, flushPromise = void 0;
+            function flushActive() {
+                if (!activeCount && flushPromise) {
+                    var promise = flushPromise;
+                    flushPromise = null;
+                    promise.resolve();
                 }
-                var zalgoGlobal = glob.__zalgopromise__ = glob.__zalgopromise__ || {};
-                zalgoGlobal.flushPromises = zalgoGlobal.flushPromises || [];
-                zalgoGlobal.activeCount = zalgoGlobal.activeCount || 0;
-                zalgoGlobal.possiblyUnhandledPromiseHandlers = zalgoGlobal.possiblyUnhandledPromiseHandlers || [];
-                zalgoGlobal.dispatchedErrors = zalgoGlobal.dispatchedErrors || [];
-                return zalgoGlobal;
+            }
+            function startActive() {
+                activeCount += 1;
+            }
+            function endActive() {
+                activeCount -= 1;
+                flushActive();
             }
             var promise_ZalgoPromise = function() {
                 function ZalgoPromise(handler) {
@@ -716,6 +603,7 @@
                     this.handlers = [];
                     if (handler) {
                         var _result = void 0, _error = void 0, resolved = !1, rejected = !1, isAsync = !1;
+                        startActive();
                         try {
                             handler(function(res) {
                                 if (isAsync) _this.resolve(res); else {
@@ -729,9 +617,11 @@
                                 }
                             });
                         } catch (err) {
+                            endActive();
                             this.reject(err);
                             return;
                         }
+                        endActive();
                         isAsync = !0;
                         resolved ? this.resolve(_result) : rejected && this.reject(_error);
                     }
@@ -756,12 +646,12 @@
                     this.error = error;
                     this.errorHandled || setTimeout(function() {
                         _this2.errorHandled || function(err, promise) {
-                            if (-1 === getGlobal().dispatchedErrors.indexOf(err)) {
-                                getGlobal().dispatchedErrors.push(err);
+                            if (-1 === dispatchedErrors.indexOf(err)) {
+                                dispatchedErrors.push(err);
                                 setTimeout(function() {
                                     throw err;
                                 }, 1);
-                                for (var j = 0; j < getGlobal().possiblyUnhandledPromiseHandlers.length; j++) getGlobal().possiblyUnhandledPromiseHandlers[j](err, promise);
+                                for (var j = 0; j < possiblyUnhandledPromiseHandlers.length; j++) possiblyUnhandledPromiseHandlers[j](err, promise);
                             }
                         }(error, _this2);
                     }, 1);
@@ -774,42 +664,43 @@
                     return this;
                 };
                 ZalgoPromise.prototype.dispatch = function() {
-                    var _this3 = this, dispatching = this.dispatching, resolved = this.resolved, rejected = this.rejected, handlers = this.handlers;
+                    var dispatching = this.dispatching, resolved = this.resolved, rejected = this.rejected, handlers = this.handlers;
                     if (!dispatching && (resolved || rejected)) {
                         this.dispatching = !0;
-                        getGlobal().activeCount += 1;
-                        for (var _loop = function(i) {
-                            var _handlers$i = handlers[i], onSuccess = _handlers$i.onSuccess, onError = _handlers$i.onError, promise = _handlers$i.promise, result = void 0;
+                        startActive();
+                        for (var chain = function(firstPromise, secondPromise) {
+                            return firstPromise.then(function(res) {
+                                secondPromise.resolve(res);
+                            }, function(err) {
+                                secondPromise.reject(err);
+                            });
+                        }, i = 0; i < handlers.length; i++) {
+                            var _handlers$i = handlers[i], _onSuccess = _handlers$i.onSuccess, _onError = _handlers$i.onError, _promise = _handlers$i.promise, _result2 = void 0;
                             if (resolved) try {
-                                result = onSuccess ? onSuccess(_this3.value) : _this3.value;
+                                _result2 = _onSuccess ? _onSuccess(this.value) : this.value;
                             } catch (err) {
-                                promise.reject(err);
-                                return "continue";
+                                _promise.reject(err);
+                                continue;
                             } else if (rejected) {
-                                if (!onError) {
-                                    promise.reject(_this3.error);
-                                    return "continue";
+                                if (!_onError) {
+                                    _promise.reject(this.error);
+                                    continue;
                                 }
                                 try {
-                                    result = onError(_this3.error);
+                                    _result2 = _onError(this.error);
                                 } catch (err) {
-                                    promise.reject(err);
-                                    return "continue";
+                                    _promise.reject(err);
+                                    continue;
                                 }
                             }
-                            if (result instanceof ZalgoPromise && (result.resolved || result.rejected)) {
-                                result.resolved ? promise.resolve(result.value) : promise.reject(result.error);
-                                result.errorHandled = !0;
-                            } else utils_isPromise(result) ? result instanceof ZalgoPromise && (result.resolved || result.rejected) ? result.resolved ? promise.resolve(result.value) : promise.reject(result.error) : result.then(function(res) {
-                                promise.resolve(res);
-                            }, function(err) {
-                                promise.reject(err);
-                            }) : promise.resolve(result);
-                        }, i = 0; i < handlers.length; i++) _loop(i);
+                            if (_result2 instanceof ZalgoPromise && (_result2.resolved || _result2.rejected)) {
+                                _result2.resolved ? _promise.resolve(_result2.value) : _promise.reject(_result2.error);
+                                _result2.errorHandled = !0;
+                            } else utils_isPromise(_result2) ? _result2 instanceof ZalgoPromise && (_result2.resolved || _result2.rejected) ? _result2.resolved ? _promise.resolve(_result2.value) : _promise.reject(_result2.error) : chain(_result2, _promise) : _promise.resolve(_result2);
+                        }
                         handlers.length = 0;
                         this.dispatching = !1;
-                        getGlobal().activeCount -= 1;
-                        0 === getGlobal().activeCount && ZalgoPromise.flushQueue();
+                        endActive();
                     }
                 };
                 ZalgoPromise.prototype.then = function(onSuccess, onError) {
@@ -841,10 +732,10 @@
                     });
                 };
                 ZalgoPromise.prototype.timeout = function(time, err) {
-                    var _this4 = this;
+                    var _this3 = this;
                     if (this.resolved || this.rejected) return this;
                     var timeout = setTimeout(function() {
-                        _this4.resolved || _this4.rejected || _this4.reject(err || new Error("Promise timed out after " + time + "ms"));
+                        _this3.resolved || _this3.rejected || _this3.reject(err || new Error("Promise timed out after " + time + "ms"));
                     }, time);
                     return this.then(function(result) {
                         clearTimeout(timeout);
@@ -872,26 +763,28 @@
                         promise.resolve(results);
                         return promise;
                     }
-                    for (var _loop2 = function(i) {
+                    for (var chain = function(i, firstPromise, secondPromise) {
+                        return firstPromise.then(function(res) {
+                            results[i] = res;
+                            0 == (count -= 1) && promise.resolve(results);
+                        }, function(err) {
+                            secondPromise.reject(err);
+                        });
+                    }, i = 0; i < promises.length; i++) {
                         var prom = promises[i];
                         if (prom instanceof ZalgoPromise) {
                             if (prom.resolved) {
                                 results[i] = prom.value;
                                 count -= 1;
-                                return "continue";
+                                continue;
                             }
                         } else if (!utils_isPromise(prom)) {
                             results[i] = prom;
                             count -= 1;
-                            return "continue";
+                            continue;
                         }
-                        ZalgoPromise.resolve(prom).then(function(result) {
-                            results[i] = result;
-                            0 == (count -= 1) && promise.resolve(results);
-                        }, function(err) {
-                            promise.reject(err);
-                        });
-                    }, i = 0; i < promises.length; i++) _loop2(i);
+                        chain(i, ZalgoPromise.resolve(prom), promise);
+                    }
                     0 === count && promise.resolve(results);
                     return promise;
                 };
@@ -910,10 +803,10 @@
                 };
                 ZalgoPromise.onPossiblyUnhandledException = function(handler) {
                     return function(handler) {
-                        getGlobal().possiblyUnhandledPromiseHandlers.push(handler);
+                        possiblyUnhandledPromiseHandlers.push(handler);
                         return {
                             cancel: function() {
-                                getGlobal().possiblyUnhandledPromiseHandlers.splice(getGlobal().possiblyUnhandledPromiseHandlers.indexOf(handler), 1);
+                                possiblyUnhandledPromiseHandlers.splice(possiblyUnhandledPromiseHandlers.indexOf(handler), 1);
                             }
                         };
                     }(handler);
@@ -921,11 +814,14 @@
                 ZalgoPromise.try = function(method, context, args) {
                     if (method && "function" != typeof method && !method.call) throw new Error("Promise.try expected a function");
                     var result = void 0;
+                    startActive();
                     try {
                         result = method.apply(context, args || []);
                     } catch (err) {
+                        endActive();
                         return ZalgoPromise.reject(err);
                     }
+                    endActive();
                     return ZalgoPromise.resolve(result);
                 };
                 ZalgoPromise.delay = function(_delay) {
@@ -937,15 +833,11 @@
                     return !!(value && value instanceof ZalgoPromise) || utils_isPromise(value);
                 };
                 ZalgoPromise.flush = function() {
-                    var promise = new ZalgoPromise();
-                    getGlobal().flushPromises.push(promise);
-                    0 === getGlobal().activeCount && ZalgoPromise.flushQueue();
-                    return promise;
-                };
-                ZalgoPromise.flushQueue = function() {
-                    var promisesToFlush = getGlobal().flushPromises;
-                    getGlobal().flushPromises = [];
-                    for (var _i2 = 0, _length2 = null == promisesToFlush ? 0 : promisesToFlush.length; _i2 < _length2; _i2++) promisesToFlush[_i2].resolve();
+                    return function(Zalgo) {
+                        var promise = flushPromise = flushPromise || new ZalgoPromise();
+                        flushActive();
+                        return promise;
+                    }();
                 };
                 return ZalgoPromise;
             }(), global = window[constants_CONSTANTS.WINDOW_PROPS.POSTROBOT] = window[constants_CONSTANTS.WINDOW_PROPS.POSTROBOT] || {};
@@ -964,7 +856,7 @@
                     if (!methods) throw new Error("Could not find any methods this window has privileges to call");
                     var meth = methods[data.id];
                     if (!meth) throw new Error("Could not find method with id: " + data.id);
-                    if (!Object(src.matchDomain)(meth.domain, origin)) throw new Error("Method domain " + meth.domain + " does not match origin " + origin);
+                    if (!matchDomain(meth.domain, origin)) throw new Error("Method domain " + meth.domain + " does not match origin " + origin);
                     return promise_ZalgoPromise.try(function() {
                         return meth.method.apply({
                             source: source,
@@ -1042,8 +934,8 @@
                 (Array.isArray(domain) ? domain : "string" == typeof domain ? [ domain ] : [ constants_CONSTANTS.WILDCARD ]).map(function(dom) {
                     if (0 === dom.indexOf(constants_CONSTANTS.MOCK_PROTOCOL)) {
                         if (window.location.protocol === constants_CONSTANTS.FILE_PROTOCOL) return constants_CONSTANTS.WILDCARD;
-                        if (!Object(src.isActuallySameDomain)(win)) throw new Error("Attempting to send messsage to mock domain " + dom + ", but window is actually cross-domain");
-                        return Object(src.getActualDomain)(win);
+                        if (!isActuallySameDomain(win)) throw new Error("Attempting to send messsage to mock domain " + dom + ", but window is actually cross-domain");
+                        return getActualDomain(win);
                     }
                     return 0 === dom.indexOf(constants_CONSTANTS.FILE_PROTOCOL) ? constants_CONSTANTS.WILDCARD : dom;
                 }).forEach(function(dom) {
@@ -1061,7 +953,13 @@
                 return promise_ZalgoPromise.try(function() {
                     var _jsonStringify;
                     message = function(win, message) {
-                        var options = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : {}, id = uniqueID(), type = Object(src.isPopup)() ? constants_CONSTANTS.WINDOW_TYPES.POPUP : Object(src.isIframe)() ? constants_CONSTANTS.WINDOW_TYPES.IFRAME : constants_CONSTANTS.WINDOW_TYPES.FULLPAGE, sourceDomain = Object(src.getDomain)(window);
+                        var options = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : {}, id = uniqueID(), type = function() {
+                            var win = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window;
+                            return Boolean(getOpener(win));
+                        }() ? constants_CONSTANTS.WINDOW_TYPES.POPUP : function() {
+                            var win = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window;
+                            return Boolean(getParent(win));
+                        }() ? constants_CONSTANTS.WINDOW_TYPES.IFRAME : constants_CONSTANTS.WINDOW_TYPES.FULLPAGE, sourceDomain = utils_getDomain(window);
                         return _extends({}, message, options, {
                             sourceDomain: sourceDomain,
                             id: message.id || id,
@@ -1091,7 +989,8 @@
                                             return promise.then(resolve, reject);
                                         }, name + ".then")
                                     };
-                                }(destination, domain, item, key.toString()) : isRegex(item) ? (regex = item, {
+                                }(destination, domain, item, key.toString()) : util_isRegex(item) ? (regex = item, 
+                                {
                                     __type__: constants_CONSTANTS.SERIALIZATION_TYPES.REGEX,
                                     __source__: regex.source
                                 }) : void 0;
@@ -1101,7 +1000,7 @@
                         domain: domain
                     });
                     if (win === window && !CONFIG.ALLOW_SAME_ORIGIN) throw new Error("Attemping to send message to self");
-                    if (Object(src.isWindowClosed)(win)) throw new Error("Window is closed");
+                    if (isWindowClosed(win)) throw new Error("Window is closed");
                     var messages = [], serializedMessage = function(obj, replacer, indent) {
                         var objectToJSON = void 0, arrayToJSON = void 0;
                         try {
@@ -1172,7 +1071,7 @@
                             if (winListeners[domain]) return winListeners[domain];
                             if (winListeners[__DOMAIN_REGEX__]) for (var _i4 = 0, _winListeners$__DOMAI2 = winListeners[__DOMAIN_REGEX__], _length4 = null == _winListeners$__DOMAI2 ? 0 : _winListeners$__DOMAI2.length; _i4 < _length4; _i4++) {
                                 var _ref5 = _winListeners$__DOMAI2[_i4], regex = _ref5.regex, listener = _ref5.listener;
-                                if (Object(src.matchDomain)(regex, domain)) return listener;
+                                if (matchDomain(regex, domain)) return listener;
                             }
                         }
                         if (winListeners[constants_CONSTANTS.WILDCARD]) return winListeners[constants_CONSTANTS.WILDCARD];
@@ -1189,7 +1088,7 @@
                 if (!isResponseListenerErrored(message.hash)) {
                     var options = getResponseListener(message.hash);
                     if (!options) throw new Error("No handler found for post message ack for message: " + message.name + " from " + origin + " in " + window.location.protocol + "//" + window.location.host + window.location.pathname);
-                    if (!Object(src.matchDomain)(options.domain, origin)) throw new Error("Ack origin " + origin + " does not match domain " + options.domain.toString());
+                    if (!matchDomain(options.domain, origin)) throw new Error("Ack origin " + origin + " does not match domain " + options.domain.toString());
                     options.ack = !0;
                 }
             }, _RECEIVE_MESSAGE_TYPE[constants_CONSTANTS.POST_MESSAGE_TYPE.REQUEST] = function(source, origin, message) {
@@ -1199,7 +1098,7 @@
                     domain: origin
                 });
                 function respond(data) {
-                    return message.fireAndForget || Object(src.isWindowClosed)(source) ? promise_ZalgoPromise.resolve() : sendMessage(source, types__extends({
+                    return message.fireAndForget || isWindowClosed(source) ? promise_ZalgoPromise.resolve() : sendMessage(source, types__extends({
                         target: message.originalSource,
                         hash: message.hash,
                         name: message.name
@@ -1209,7 +1108,7 @@
                     type: constants_CONSTANTS.POST_MESSAGE_TYPE.ACK
                 }), promise_ZalgoPromise.try(function() {
                     if (!options) throw new Error("No handler found for post message: " + message.name + " from " + origin + " in " + window.location.protocol + "//" + window.location.host + window.location.pathname);
-                    if (!Object(src.matchDomain)(options.domain, origin)) throw new Error("Request origin " + origin + " does not match domain " + options.domain.toString());
+                    if (!matchDomain(options.domain, origin)) throw new Error("Request origin " + origin + " does not match domain " + options.domain.toString());
                     var data = message.data;
                     return options.handler({
                         source: source,
@@ -1230,15 +1129,16 @@
                         error: error,
                         code: code
                     });
-                }) ]).then(util_noop).catch(function(err) {
+                }) ]).then(lib_util_noop).catch(function(err) {
                     if (options && options.handleError) return options.handleError(err);
                     throw err;
                 });
             }, _RECEIVE_MESSAGE_TYPE[constants_CONSTANTS.POST_MESSAGE_TYPE.RESPONSE] = function(source, origin, message) {
                 if (!isResponseListenerErrored(message.hash)) {
-                    var options = getResponseListener(message.hash);
+                    var pattern, options = getResponseListener(message.hash);
                     if (!options) throw new Error("No handler found for post message response for message: " + message.name + " from " + origin + " in " + window.location.protocol + "//" + window.location.host + window.location.pathname);
-                    if (!Object(src.matchDomain)(options.domain, origin)) throw new Error("Response origin " + origin + " does not match domain " + Object(src.stringifyDomainPattern)(options.domain));
+                    if (!matchDomain(options.domain, origin)) throw new Error("Response origin " + origin + " does not match domain " + (pattern = options.domain, 
+                    Array.isArray(pattern) ? "(" + pattern.join(" | ") + ")" : isRegex(pattern) ? "RegExp(" + pattern.toString() : pattern.toString()));
                     deleteResponseListener(message.hash);
                     if (message.ack === constants_CONSTANTS.POST_MESSAGE_ACK.ERROR) {
                         var err = new Error(message.error);
@@ -1261,45 +1161,46 @@
             };
             global.receivedMessages = global.receivedMessages || [];
             function receiveMessage(event) {
-                if (!window || window.closed) throw new Error("Message recieved in closed window");
-                try {
-                    if (!event.source) return;
-                } catch (err) {
-                    return;
-                }
-                var source = event.source, origin = event.origin, message = function(message) {
-                    var item, parsedMessage = void 0;
+                if (window && !window.closed) {
                     try {
-                        parsedMessage = (item = message, JSON.parse(item));
+                        if (!event.source) return;
                     } catch (err) {
                         return;
                     }
-                    if (parsedMessage && "object" === (void 0 === parsedMessage ? "undefined" : receive__typeof(parsedMessage)) && null !== parsedMessage && (parsedMessage = parsedMessage[constants_CONSTANTS.WINDOW_PROPS.POSTROBOT]) && "object" === (void 0 === parsedMessage ? "undefined" : receive__typeof(parsedMessage)) && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
-                }(event.data);
-                if (message) {
-                    if (!message.sourceDomain || "string" != typeof message.sourceDomain) throw new Error("Expected message to have sourceDomain");
-                    0 !== message.sourceDomain.indexOf(constants_CONSTANTS.MOCK_PROTOCOL) && 0 !== message.sourceDomain.indexOf(constants_CONSTANTS.FILE_PROTOCOL) || (origin = message.sourceDomain);
-                    if (-1 === global.receivedMessages.indexOf(message.id)) {
-                        global.receivedMessages.push(message.id);
-                        if (!Object(src.isWindowClosed)(source) || message.fireAndForget) {
-                            message.data && (message.data = function(source, origin, obj) {
-                                return replaceObject({
-                                    obj: message.data
-                                }, function(item) {
-                                    if ("object" === (void 0 === item ? "undefined" : serialize__typeof(item)) && null !== item) return isSerialized(item, constants_CONSTANTS.SERIALIZATION_TYPES.METHOD) ? deserializeMethod(source, origin, item) : isSerialized(item, constants_CONSTANTS.SERIALIZATION_TYPES.ERROR) ? function(source, origin, obj) {
-                                        var err = new Error(obj.__message__);
-                                        obj.__code__ && (err.code = obj.__code__);
-                                        return err;
-                                    }(0, 0, item) : isSerialized(item, constants_CONSTANTS.SERIALIZATION_TYPES.PROMISE) ? function(source, origin, prom) {
-                                        return window.Promise ? new window.Promise(function(resolve, reject) {
-                                            return deserializeMethod(source, origin, prom.__then__)(resolve, reject);
-                                        }) : deserializeZalgoPromise(source, origin, prom);
-                                    }(source, origin, item) : isSerialized(item, constants_CONSTANTS.SERIALIZATION_TYPES.ZALGO_PROMISE) ? deserializeZalgoPromise(source, origin, item) : isSerialized(item, constants_CONSTANTS.SERIALIZATION_TYPES.REGEX) ? function(source, origin, item) {
-                                        return new RegExp(item.__source__);
-                                    }(0, 0, item) : void 0;
-                                }).obj;
-                            }(source, origin));
-                            RECEIVE_MESSAGE_TYPES[message.type](source, origin, message);
+                    var source = event.source, origin = event.origin, message = function(message) {
+                        var item, parsedMessage = void 0;
+                        try {
+                            parsedMessage = (item = message, JSON.parse(item));
+                        } catch (err) {
+                            return;
+                        }
+                        if (parsedMessage && "object" === (void 0 === parsedMessage ? "undefined" : receive__typeof(parsedMessage)) && null !== parsedMessage && (parsedMessage = parsedMessage[constants_CONSTANTS.WINDOW_PROPS.POSTROBOT]) && "object" === (void 0 === parsedMessage ? "undefined" : receive__typeof(parsedMessage)) && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
+                    }(event.data);
+                    if (message) {
+                        if (!message.sourceDomain || "string" != typeof message.sourceDomain) throw new Error("Expected message to have sourceDomain");
+                        0 !== message.sourceDomain.indexOf(constants_CONSTANTS.MOCK_PROTOCOL) && 0 !== message.sourceDomain.indexOf(constants_CONSTANTS.FILE_PROTOCOL) || (origin = message.sourceDomain);
+                        if (-1 === global.receivedMessages.indexOf(message.id)) {
+                            global.receivedMessages.push(message.id);
+                            if (!isWindowClosed(source) || message.fireAndForget) {
+                                message.data && (message.data = function(source, origin, obj) {
+                                    return replaceObject({
+                                        obj: message.data
+                                    }, function(item) {
+                                        if ("object" === (void 0 === item ? "undefined" : serialize__typeof(item)) && null !== item) return isSerialized(item, constants_CONSTANTS.SERIALIZATION_TYPES.METHOD) ? deserializeMethod(source, origin, item) : isSerialized(item, constants_CONSTANTS.SERIALIZATION_TYPES.ERROR) ? function(source, origin, obj) {
+                                            var err = new Error(obj.__message__);
+                                            obj.__code__ && (err.code = obj.__code__);
+                                            return err;
+                                        }(0, 0, item) : isSerialized(item, constants_CONSTANTS.SERIALIZATION_TYPES.PROMISE) ? function(source, origin, prom) {
+                                            return window.Promise ? new window.Promise(function(resolve, reject) {
+                                                return deserializeMethod(source, origin, prom.__then__)(resolve, reject);
+                                            }) : deserializeZalgoPromise(source, origin, prom);
+                                        }(source, origin, item) : isSerialized(item, constants_CONSTANTS.SERIALIZATION_TYPES.ZALGO_PROMISE) ? deserializeZalgoPromise(source, origin, item) : isSerialized(item, constants_CONSTANTS.SERIALIZATION_TYPES.REGEX) ? function(source, origin, item) {
+                                            return new RegExp(item.__source__);
+                                        }(0, 0, item) : void 0;
+                                    }).obj;
+                                }(source, origin));
+                                RECEIVE_MESSAGE_TYPES[message.type](source, origin, message);
+                            }
                         }
                     }
                 }
@@ -1337,14 +1238,50 @@
                     var win = targetWindow;
                     domain = options.domain || constants_CONSTANTS.WILDCARD;
                     var hash = options.name + "_" + uniqueID();
-                    if (Object(src.isWindowClosed)(win)) throw new Error("Target window is closed");
+                    if (isWindowClosed(win)) throw new Error("Target window is closed");
                     var hasResult = !1, requestPromises = global.requestPromises.get(win);
                     if (!requestPromises) {
                         requestPromises = [];
                         global.requestPromises.set(win, requestPromises);
                     }
                     var requestPromise = promise_ZalgoPromise.try(function() {
-                        if (Object(src.isAncestor)(window, win)) return function(win) {
+                        if (function(parent, child) {
+                            var actualParent = getAncestor(child);
+                            if (actualParent) return actualParent === parent;
+                            if (child === parent) return !1;
+                            if (function() {
+                                var win = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : window;
+                                try {
+                                    if (win.top) return win.top;
+                                } catch (err) {}
+                                if (getParent(win) === win) return win;
+                                try {
+                                    if (isAncestorParent(window, win) && window.top) return window.top;
+                                } catch (err) {}
+                                try {
+                                    if (isAncestorParent(win, window) && window.top) return window.top;
+                                } catch (err) {}
+                                for (var _i7 = 0, _getAllChildFrames4 = function getAllChildFrames(win) {
+                                    for (var result = [], _i3 = 0, _getFrames2 = getFrames(win), _length2 = null == _getFrames2 ? 0 : _getFrames2.length; _i3 < _length2; _i3++) {
+                                        var frame = _getFrames2[_i3];
+                                        result.push(frame);
+                                        for (var _i5 = 0, _getAllChildFrames2 = getAllChildFrames(frame), _length4 = null == _getAllChildFrames2 ? 0 : _getAllChildFrames2.length; _i5 < _length4; _i5++) {
+                                            var childFrame = _getAllChildFrames2[_i5];
+                                            result.push(childFrame);
+                                        }
+                                    }
+                                    return result;
+                                }(win), _length6 = null == _getAllChildFrames4 ? 0 : _getAllChildFrames4.length; _i7 < _length6; _i7++) {
+                                    var frame = _getAllChildFrames4[_i7];
+                                    try {
+                                        if (frame.top) return frame.top;
+                                    } catch (err) {}
+                                    if (getParent(frame) === frame) return frame;
+                                }
+                            }(child) === child) return !1;
+                            for (var _i15 = 0, _getFrames8 = getFrames(parent), _length14 = null == _getFrames8 ? 0 : _getFrames8.length; _i15 < _length14; _i15++) if (_getFrames8[_i15] === child) return !0;
+                            return !1;
+                        }(window, win)) return function(win) {
                             var timeout = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 5e3, name = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : "Window", promise = global.readyPromises.get(win);
                             if (promise) return promise;
                             promise = new promise_ZalgoPromise();
@@ -1356,11 +1293,11 @@
                         }(win, options.timeout || CONFIG.CHILD_WINDOW_TIMEOUT);
                     }).then(function() {
                         var origin = (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}).origin;
-                        if (isRegex(domain) && !origin) return sayHello(win);
+                        if (util_isRegex(domain) && !origin) return sayHello(win);
                     }).then(function() {
                         var origin = (arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}).origin;
-                        if (isRegex(domain)) {
-                            if (!Object(src.matchDomain)(domain, origin)) throw new Error("Remote window domain " + origin + " does not match regex: " + domain.toString());
+                        if (util_isRegex(domain)) {
+                            if (!matchDomain(domain, origin)) throw new Error("Remote window domain " + origin + " does not match regex: " + domain.toString());
                             domain = origin;
                         }
                         if ("string" != typeof domain && !Array.isArray(domain)) throw new TypeError("Expected domain to be a string or array");
@@ -1392,15 +1329,15 @@
                             var ackTimeout = CONFIG.ACK_TIMEOUT, resTimeout = options.timeout || CONFIG.RES_TIMEOUT, cycleTime = 100;
                             setTimeout(function cycle() {
                                 if (!hasResult) {
-                                    if (Object(src.isWindowClosed)(win)) return responseListener.ack ? reject(new Error("Window closed for " + name + " before response")) : reject(new Error("Window closed for " + name + " before ack"));
+                                    if (isWindowClosed(win)) return responseListener.ack ? reject(new Error("Window closed for " + name + " before response")) : reject(new Error("Window closed for " + name + " before ack"));
                                     ackTimeout = Math.max(ackTimeout - cycleTime, 0);
                                     -1 !== resTimeout && (resTimeout = Math.max(resTimeout - cycleTime, 0));
                                     if (responseListener.ack) {
                                         if (-1 === resTimeout) return;
                                         cycleTime = Math.min(resTimeout, 2e3);
                                     } else {
-                                        if (0 === ackTimeout) return reject(new Error("No ack for postMessage " + name + " in " + Object(src.getDomain)() + " in " + CONFIG.ACK_TIMEOUT + "ms"));
-                                        if (0 === resTimeout) return reject(new Error("No response for postMessage " + name + " in " + Object(src.getDomain)() + " in " + (options.timeout || CONFIG.RES_TIMEOUT) + "ms"));
+                                        if (0 === ackTimeout) return reject(new Error("No ack for postMessage " + name + " in " + utils_getDomain() + " in " + CONFIG.ACK_TIMEOUT + "ms"));
+                                        if (0 === resTimeout) return reject(new Error("No response for postMessage " + name + " in " + utils_getDomain() + " in " + (options.timeout || CONFIG.RES_TIMEOUT) + "ms"));
                                     }
                                     setTimeout(cycle, cycleTime);
                                 }
@@ -1424,7 +1361,7 @@
                 return request(options);
             }
             function sendToParent(name, data, options) {
-                var win = Object(src.getAncestor)();
+                var win = getAncestor();
                 return win ? _send(win, name, data, options) : new promise_ZalgoPromise(function(resolve, reject) {
                     return reject(new Error("Window does not have a parent"));
                 });
@@ -1508,7 +1445,7 @@
                         nameListeners.set(win, winListeners);
                     }
                     var strDomain = domain.toString(), regexListeners = winListeners[__DOMAIN_REGEX__], regexListener = void 0;
-                    if (isRegex(domain)) {
+                    if (util_isRegex(domain)) {
                         if (!regexListeners) {
                             regexListeners = [];
                             winListeners[__DOMAIN_REGEX__] = regexListeners;
@@ -1545,7 +1482,7 @@
                     timeout = setTimeout(function runInterval() {
                         timeout = setTimeout(runInterval, 50);
                         (function() {
-                            if (win && "object" === (void 0 === win ? "undefined" : server__typeof(win)) && Object(src.isWindowClosed)(win)) {
+                            if (win && "object" === (void 0 === win ? "undefined" : server__typeof(win)) && isWindowClosed(win)) {
                                 interval.cancel();
                                 listenerOptions.handleError(new Error("Post message target window is closed"));
                             }
@@ -1608,7 +1545,7 @@
                 delete window[constants_CONSTANTS.WINDOW_PROPS.POSTROBOT];
                 window.removeEventListener("message", messageListener);
             }
-            var public_parent = Object(src.getAncestor)();
+            var public_parent = getAncestor();
             function cleanUpWindow(win) {
                 var requestPromises = global.requestPromises.get(win);
                 if (requestPromises) for (var _i2 = 0, _length2 = null == requestPromises ? 0 : requestPromises.length; _i2 < _length2; _i2++) requestPromises[_i2].reject(new Error("No response from window - cleaned up"));
@@ -1638,8 +1575,8 @@
                                 origin: origin
                             });
                         });
-                        var handler, parent = Object(src.getAncestor)();
-                        parent && sayHello(parent).catch(util_noop);
+                        var handler, parent = getAncestor();
+                        parent && sayHello(parent).catch(lib_util_noop);
                     }();
                     listenForMethods({
                         on: _on,
@@ -1698,7 +1635,7 @@
             __webpack_require__.d(__webpack_exports__, "disable", function() {
                 return disable;
             });
-            __webpack_exports__.default = src_interface_namespaceObject;
+            __webpack_exports__.default = interface_namespaceObject;
         }
     });
 });
