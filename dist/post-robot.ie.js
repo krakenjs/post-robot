@@ -4652,14 +4652,14 @@ function global_getGlobal(win) {
   }
 
   if (win !== window) {
-    return win["__post_robot_10_0_27__"];
+    return win["__post_robot_10_0_28__"];
   }
 
-  var global = win["__post_robot_10_0_27__"] = win["__post_robot_10_0_27__"] || {};
+  var global = win["__post_robot_10_0_28__"] = win["__post_robot_10_0_28__"] || {};
   return global;
 }
 function deleteGlobal() {
-  delete window["__post_robot_10_0_27__"];
+  delete window["__post_robot_10_0_28__"];
 }
 
 var getObj = function getObj() {
@@ -6476,7 +6476,7 @@ function send_sendMessage(win, domain, message, _ref) {
     throw new Error('Window is closed');
   }
 
-  var serializedMessage = serializeMessage(win, domain, (_serializeMessage = {}, _serializeMessage["__post_robot_10_0_27__"] = _extends({
+  var serializedMessage = serializeMessage(win, domain, (_serializeMessage = {}, _serializeMessage["__post_robot_10_0_28__"] = _extends({
     id: uniqueID(),
     origin: getDomain(window)
   }, message), _serializeMessage), {
@@ -6902,7 +6902,7 @@ function parseMessage(message, source, origin, _ref) {
     return;
   }
 
-  parsedMessage = parsedMessage["__post_robot_10_0_27__"];
+  parsedMessage = parsedMessage["__post_robot_10_0_28__"];
 
   if (!parsedMessage || typeof parsedMessage !== 'object' || parsedMessage === null) {
     return;
@@ -6924,12 +6924,8 @@ function receive_receiveMessage(event, _ref2) {
       send = _ref2.send;
   var receivedMessages = globalStore('receivedMessages');
 
-  if (!window || window.closed) {
-    throw new Error("Message received in closed window");
-  }
-
   try {
-    if (!event.source) {
+    if (!window || window.closed || !event.source) {
       return;
     }
   } catch (err) {
