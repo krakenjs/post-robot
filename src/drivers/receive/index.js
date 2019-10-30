@@ -47,12 +47,8 @@ function parseMessage(message : string, source : CrossDomainWindowType, origin :
 export function receiveMessage(event : MessageEvent, { on, send } : { on : OnType, send : SendType }) {
     const receivedMessages = globalStore('receivedMessages');
 
-    if (!window || window.closed) {
-        throw new Error(`Message received in closed window`);
-    }
-
     try {
-        if (!event.source) {
+        if (!window || window.closed || !event.source) {
             return;
         }
     } catch (err) {
