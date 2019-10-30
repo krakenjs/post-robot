@@ -35,7 +35,12 @@ type SerializedWindowType = {|
 |};
 
 function getSerializedWindow(winPromise : ZalgoPromise<CrossDomainWindowType>, { send, id = uniqueID() } : { send : SendType, id? : string }) : SerializedWindowType {
-    let windowName;
+    
+    let windowNamePromise = winPromise.then(win => {
+        if (isSameDomain(win)) {
+            return assertSameDomain(win).name;
+        }
+    });
     
     return {
         id,
@@ -49,7 +54,11 @@ function getSerializedWindow(winPromise : ZalgoPromise<CrossDomainWindowType>, {
                 return;
             }
 
-            return windowName;
+            if (isSameDomain(win)) {
+                return assertSameDomain(win).name;
+            }
+
+            return windowNamePromise;
         }),
         focus:   () => winPromise.then(win => {
             win.focus();
@@ -89,7 +98,7 @@ function getSerializedWindow(winPromise : ZalgoPromise<CrossDomainWindowType>, {
                 frame.setAttribute('name', name);
             }
 
-            windowName = name;
+            windowNamePromise = ZalgoPromise.resolve(name);
         })
     };
 }
