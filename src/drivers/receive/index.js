@@ -55,7 +55,7 @@ function parseMessage(message : string) : ?Object {
 export function receiveMessage(event : MessageEvent) {
 
     if (!window || window.closed) {
-        throw new Error(`Message recieved in closed window`);
+        return;
     }
 
     try {
