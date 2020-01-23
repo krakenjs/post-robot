@@ -49,6 +49,40 @@ function lookupMethod(source, id) {
   return methods[id] || proxyWindowMethods.get(id);
 }
 
+function stringifyArguments(args = []) {
+  return (0, _src3.arrayFrom)(args).map(arg => {
+    if (typeof arg === 'string') {
+      return `'${arg}'`;
+    }
+
+    if (arg === undefined) {
+      return 'undefined';
+    }
+
+    if (arg === null) {
+      return 'null';
+    }
+
+    if (typeof arg === 'boolean') {
+      return arg.toString();
+    }
+
+    if (Array.isArray(arg)) {
+      return '[ ... ]';
+    }
+
+    if (typeof arg === 'object') {
+      return '{ ... }';
+    }
+
+    if (typeof arg === 'function') {
+      return '() => { ... }';
+    }
+
+    return `<${typeof arg}>`;
+  }).join(', ');
+}
+
 function listenForFunctionCalls({
   on,
   send
@@ -106,7 +140,7 @@ function listenForFunctionCalls({
           // $FlowFixMe
           if (err.stack) {
             // $FlowFixMe
-            err.stack = `Remote call to ${name}()\n\n${err.stack}`;
+            err.stack = `Remote call to ${name}(${stringifyArguments(data.args)}) failed\n\n${err.stack}`;
           }
 
           throw err;
@@ -199,7 +233,7 @@ function deserializeFunction(source, origin, {
         // $FlowFixMe
         if (__DEBUG__ && originalStack && err.stack) {
           // $FlowFixMe
-          err.stack = `Remote call to ${name}() failed\n\n${err.stack}\n\n${originalStack}`;
+          err.stack = `Remote call to ${name}(${stringifyArguments(arguments)}) failed\n\n${err.stack}\n\n${originalStack}`;
         }
 
         throw err;

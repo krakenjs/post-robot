@@ -901,7 +901,7 @@
         Object.create(Error.prototype);
         function global_getGlobal(win) {
             void 0 === win && (win = window);
-            return win !== window ? win.__post_robot_10_0_30__ : win.__post_robot_10_0_30__ = win.__post_robot_10_0_30__ || {};
+            return win !== window ? win.__post_robot_10_0_31__ : win.__post_robot_10_0_31__ = win.__post_robot_10_0_31__ || {};
         }
         var getObj = function() {
             return {};
@@ -1644,7 +1644,13 @@
                         return promise_ZalgoPromise.try((function() {
                             if (val.onError) return val.onError(err);
                         })).then((function() {
-                            err.stack && (err.stack = "Remote call to " + name + "()\n\n" + err.stack);
+                            err.stack && (err.stack = "Remote call to " + name + "(" + function(args) {
+                                void 0 === args && (args = []);
+                                return (item = args, [].slice.call(item)).map((function(arg) {
+                                    return "string" == typeof arg ? "'" + arg + "'" : void 0 === arg ? "undefined" : null === arg ? "null" : "boolean" == typeof arg ? arg.toString() : Array.isArray(arg) ? "[ ... ]" : "object" == typeof arg ? "{ ... }" : "function" == typeof arg ? "() => { ... }" : "<" + typeof arg + ">";
+                                })).join(", ");
+                                var item;
+                            }(data.args) + ") failed\n\n" + err.stack);
                             throw err;
                         }));
                     })).then((function(result) {
@@ -1826,7 +1832,7 @@
             var _serializeMessage;
             var on = _ref.on, send = _ref.send;
             if (isWindowClosed(win)) throw new Error("Window is closed");
-            var serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {}).__post_robot_10_0_30__ = _extends({
+            var serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {}).__post_robot_10_0_31__ = _extends({
                 id: uniqueID(),
                 origin: getDomain(window)
             }, message), _serializeMessage), {
@@ -1975,7 +1981,7 @@
                 } catch (err) {
                     return;
                 }
-                if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage && (parsedMessage = parsedMessage.__post_robot_10_0_30__) && "object" == typeof parsedMessage && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
+                if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage && (parsedMessage = parsedMessage.__post_robot_10_0_31__) && "object" == typeof parsedMessage && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
             }(event.data, source, origin, {
                 on: on,
                 send: send
@@ -2331,10 +2337,10 @@
             }();
             (listener = globalStore().get("postMessageListener")) && listener.cancel();
             var listener;
-            delete window.__post_robot_10_0_30__;
+            delete window.__post_robot_10_0_31__;
         }
         function cleanUpWindow(win) {
-            for (var _i2 = 0, _requestPromises$get2 = windowStore("requestPromises").get(win, []); _i2 < _requestPromises$get2.length; _i2++) _requestPromises$get2[_i2].reject(new Error("Window cleaned up before response")).catch(src_util_noop);
+            for (var _i2 = 0, _requestPromises$get2 = windowStore("requestPromises").get(win, []); _i2 < _requestPromises$get2.length; _i2++) _requestPromises$get2[_i2].reject(new Error("Window " + (isWindowClosed(win) ? "closed" : "cleaned up") + " before response")).catch(src_util_noop);
         }
         __webpack_require__.d(__webpack_exports__, "bridge", (function() {
             return src_bridge;
