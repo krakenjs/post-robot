@@ -11,8 +11,6 @@ var _serialize = require("../../serialize");
 
 var _strategies = require("./strategies");
 
-function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
-
 function sendMessage(win, domain, message, {
   on,
   send
@@ -22,10 +20,11 @@ function sendMessage(win, domain, message, {
   }
 
   const serializedMessage = (0, _serialize.serializeMessage)(win, domain, {
-    [__POST_ROBOT__.__GLOBAL_KEY__]: _extends({
+    [__POST_ROBOT__.__GLOBAL_KEY__]: {
       id: (0, _src2.uniqueID)(),
-      origin: (0, _src.getDomain)(window)
-    }, message)
+      origin: (0, _src.getDomain)(window),
+      ...message
+    }
   }, {
     on,
     send

@@ -15,8 +15,6 @@ var _send = require("../send");
 
 var _listeners = require("../listeners");
 
-function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
-
 const RECEIVE_MESSAGE_TYPES = {
   [_conf.MESSAGE_TYPE.REQUEST](source, origin, message, {
     on,
@@ -51,12 +49,13 @@ const RECEIVE_MESSAGE_TYPES = {
 
       try {
         // $FlowFixMe
-        (0, _send.sendMessage)(source, origin, _extends({
+        (0, _send.sendMessage)(source, origin, {
           type,
           ack,
           hash: message.hash,
-          name: message.name
-        }, response), {
+          name: message.name,
+          ...response
+        }, {
           on,
           send
         });

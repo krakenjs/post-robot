@@ -199,7 +199,7 @@ function deserializeFunction(source, origin, {
         // $FlowFixMe
         if (__DEBUG__ && originalStack && err.stack) {
           // $FlowFixMe
-          err.stack = `${err.stack}\n\n${originalStack}`;
+          err.stack = `Remote call to ${name}() failed\n\n${err.stack}\n\n${originalStack}`;
         }
 
         throw err;
