@@ -4,7 +4,6 @@
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { type CrossDomainWindowType } from 'cross-domain-utils/src';
 import { uniqueID, noop } from 'belter/src';
-import { assert } from 'chai';
 
 import { on, send, once, bridge } from '../src';
 import { awaitWindowHello } from '../src/lib';
@@ -105,7 +104,9 @@ describe('[post-robot] happy cases', () => {
                 messageName: 'multilistener'
             });
         }).then(() => {
-            assert.equal(count, 2);
+            if (count !== 2) {
+                throw new Error(`Expected count to be 2, got ${ count }`);
+            }
         });
     });
 
@@ -121,7 +122,9 @@ describe('[post-robot] happy cases', () => {
         }).then(() => {
 
             return send(childFrame, 'foo').then(({ data }) => {
-                assert.equal(data.foo, 'bar');
+                if (data.foo !== 'bar') {
+                    throw new Error(`Expected data.foo to be 'bar', got ${ data.foo }`);
+                }
             });
         });
     });
@@ -150,7 +153,9 @@ describe('[post-robot] happy cases', () => {
         }, { domain: 'mock://test-post-robot-child.com' }).then(() => {
 
             return send(childFrame, 'domainspecificmessage').then(({ data }) => {
-                assert.equal(data.foo, 'bar');
+                if (data.foo !== 'bar') {
+                    throw new Error(`Expected data.foo to be 'bar', got ${ data.foo }`);
+                }
             });
         });
     });
@@ -179,7 +184,9 @@ describe('[post-robot] happy cases', () => {
         }, { domain: [ 'mock://test-post-robot-child.com', 'mock://non-existant-domain.com' ] }).then(() => {
 
             return send(childFrame, 'multidomainspecificmessage').then(({ data }) => {
-                assert.equal(data.foo, 'bar');
+                if (data.foo !== 'bar') {
+                    throw new Error(`Expected data.foo to be 'bar', got ${ data.foo }`);
+                }
             });
         });
     });
@@ -204,7 +211,9 @@ describe('[post-robot] options', () => {
             }).then(() => {
                 throw new Error('Expected success handler to not be called');
             }, () => {
-                assert.equal(count, 1);
+                if (count !== 1) {
+                    throw new Error(`Expected count to be 1, got ${ count }`);
+                }
             });
         });
     });
@@ -236,7 +245,9 @@ describe('[post-robot] options', () => {
             });
 
         }).then(() => {
-            assert.equal(count, 5);
+            if (count !== 5) {
+                throw new Error(`Expected count to be 5, got ${ count }`);
+            }
         });
     });
 
@@ -267,8 +278,12 @@ describe('[post-robot] options', () => {
             }).then(() => {
                 throw new Error('Expected success handler to not be called');
             }, (err) => {
-                assert.ok(err);
-                assert.equal(count, 1);
+                if (!err) {
+                    throw new Error(`Expected err`);
+                }
+                if (count !== 1) {
+                    throw new Error(`Expected count to be 1, got ${ count }`);
+                }
             });
         });
     });
@@ -843,7 +858,9 @@ describe('[post-robot] error cases', () => {
         return send(childFrame, 'doesntexist').then(() => {
             throw new Error('Expected success handler to not be called');
         }, (err) => {
-            assert.ok(err);
+            if (!err) {
+                throw new Error(`Expected err`);
+            }
         });
     });
 
@@ -858,7 +875,9 @@ describe('[post-robot] error cases', () => {
                 // pass
             });
         } catch (err) {
-            assert.ok(err);
+            if (!err) {
+                throw new Error(`Expected err`);
+            }
             return;
         }
 
@@ -876,7 +895,9 @@ describe('[post-robot] error cases', () => {
         }).then(() => {
             return done(new Error('Expected success handler to not be called'));
         }, (err) => {
-            assert.ok(err);
+            if (!err) {
+                throw new Error(`Expected err`);
+            }
             done();
         });
     });
@@ -895,7 +916,9 @@ describe('[post-robot] error cases', () => {
             return send(childFrame, 'foo', {}, { domain: 'http://www.zombo.com' }).then(() => {
                 throw new Error('Expected success handler to not be called');
             }, (err) => {
-                assert.ok(err instanceof Error);
+                if (!err) {
+                    throw new Error(`Expected err`);
+                }
             });
         });
     });
@@ -915,7 +938,9 @@ describe('[post-robot] popup tests', () => {
         }).then(() => {
 
             return send(childWindow, 'foo').then(({ data }) => {
-                assert.equal(data.foo, 'bar');
+                if (data.foo !== 'bar') {
+                    throw new Error(`Expected data.foo to be 'bar', got ${ data.foo }`);
+                }
             });
         });
     });
