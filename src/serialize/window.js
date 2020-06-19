@@ -67,6 +67,10 @@ function getSerializedWindow(winPromise : ZalgoPromise<CrossDomainWindowType>, {
             return isWindowClosed(win);
         }),
         setLocation: (href) => winPromise.then(win => {
+            if (!href.match(/^https?:\/\//)) {
+                throw new Error(`Expected url to be http or https url, got ${ JSON.stringify(href) }`);
+            }
+
             if (isSameDomain(win)) {
                 try {
                     if (win.location && typeof win.location.replace === 'function') {

@@ -684,7 +684,7 @@ describe('[post-robot] serialization cases', () => {
             return send(childFrame, 'foo');
 
         }).then(({ data }) => {
-            return data.mywindow.setLocation('/base/test/child.htm');
+            return data.mywindow.setLocation(`${ window.location.origin }/base/test/child.htm`);
 
         }).then(() => {
             return awaitWindowHello(mywindow);
@@ -725,7 +725,7 @@ describe('[post-robot] serialization cases', () => {
             return send(childFrame, 'foo');
 
         }).then(({ data }) => {
-            return data.mywindow.setLocation('/base/test/child.htm');
+            return data.mywindow.setLocation(`${ window.location.origin }/base/test/child.htm`);
 
         }).then((win) => {
             return win.getInstanceID();
@@ -797,7 +797,7 @@ describe('[post-robot] serialization cases', () => {
             return send(childFrame, 'foo');
 
         }).then(({ data }) => {
-            return data.mywindow.setLocation('/base/test/child.htm');
+            return data.mywindow.setLocation(`${ window.location.origin }/base/test/child.htm`);
 
         }).then(() => {
             return awaitWindowHello(mywindow);
@@ -836,7 +836,7 @@ describe('[post-robot] serialization cases', () => {
             return send(childFrame, 'foo');
 
         }).then(({ data }) => {
-            return data.mywindow.setLocation('/base/test/child.htm');
+            return data.mywindow.setLocation(`${ window.location.origin }/base/test/child.htm`);
 
         }).then((win) => {
             return win.getInstanceID();
