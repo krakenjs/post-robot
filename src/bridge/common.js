@@ -40,7 +40,7 @@ export function needsBridgeForDomain(domain : ?string, win : ?CrossDomainWindowT
     return false;
 }
 
-export function needsBridge({ win, domain } : { win? : CrossDomainWindowType, domain? : string }) : boolean {
+export function needsBridge({ win, domain } : {| win? : CrossDomainWindowType, domain? : string |}) : boolean {
 
     if (!needsBridgeForBrowser()) {
         return false;

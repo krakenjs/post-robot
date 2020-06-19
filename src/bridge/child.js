@@ -44,7 +44,7 @@ function awaitRemoteBridgeForWindow (win : CrossDomainWindowType) : ZalgoPromise
     });
 }
 
-export function openTunnelToOpener({ on, send, receiveMessage } : { on : OnType, send : SendType, receiveMessage : ReceiveMessageType }) : ZalgoPromise<void> {
+export function openTunnelToOpener({ on, send, receiveMessage } : {| on : OnType, send : SendType, receiveMessage : ReceiveMessageType |}) : ZalgoPromise<void> {
     return ZalgoPromise.try(() => {
         const opener = getOpener(window);
         

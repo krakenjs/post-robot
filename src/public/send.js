@@ -29,7 +29,7 @@ function validateOptions(name : string, win : CrossDomainWindowType, domain : ?D
     }
 }
 
-function normalizeDomain(win : CrossDomainWindowType, targetDomain : DomainMatcher, actualDomain : ?string, { send } : { send : SendType }) : ZalgoPromise<string | $ReadOnlyArray<string>> {
+function normalizeDomain(win : CrossDomainWindowType, targetDomain : DomainMatcher, actualDomain : ?string, { send } : {| send : SendType |}) : ZalgoPromise<string | $ReadOnlyArray<string>> {
     if (typeof targetDomain === 'string') {
         return ZalgoPromise.resolve(targetDomain);
     }

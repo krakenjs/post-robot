@@ -12,7 +12,7 @@ import type { OnType, SendType } from '../../types';
 
 export const RECEIVE_MESSAGE_TYPES = {
 
-    [ MESSAGE_TYPE.REQUEST ](source : CrossDomainWindowType, origin : string, message : RequestMessage, { on, send } : { on : OnType, send : SendType }) : ZalgoPromise<void> {
+    [ MESSAGE_TYPE.REQUEST ](source : CrossDomainWindowType, origin : string, message : RequestMessage, { on, send } : {| on : OnType, send : SendType |}) : ZalgoPromise<void> {
 
         const options = getRequestListener({ name: message.name, win: source, domain: origin });
 

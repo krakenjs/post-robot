@@ -66,9 +66,9 @@ function stringifyArguments(args : $ReadOnlyArray<mixed> = []) : string {
     }).join(', ');
 }
 
-function listenForFunctionCalls({ on, send } : { on : OnType, send : SendType }) : CancelableType {
+function listenForFunctionCalls({ on, send } : {| on : OnType, send : SendType |}) : CancelableType {
     return globalStore('builtinListeners').getOrSet('functionCalls', () => {
-        return on(MESSAGE_NAME.METHOD, { domain: WILDCARD }, ({ source, origin, data } : { source : CrossDomainWindowType, origin : string, data : Object }) => {
+        return on(MESSAGE_NAME.METHOD, { domain: WILDCARD }, ({ source, origin, data } : {| source : CrossDomainWindowType, origin : string, data : Object |}) => {
             const { id, name } = data;
 
             const meth = lookupMethod(source, id);
@@ -116,10 +116,10 @@ function listenForFunctionCalls({ on, send } : { on : OnType, send : SendType })
     });
 }
 
-export type SerializedFunction = CustomSerializedType<typeof SERIALIZATION_TYPE.CROSS_DOMAIN_FUNCTION, {
+export type SerializedFunction = CustomSerializedType<typeof SERIALIZATION_TYPE.CROSS_DOMAIN_FUNCTION, {|
     id : string,
     name : string
-}>;
+|}>;
 
 // eslint-disable-next-line flowtype/require-exact-type
 type SerializableFunction<T> = {
@@ -128,7 +128,7 @@ type SerializableFunction<T> = {
     __name__? : string
 };
 
-export function serializeFunction<T>(destination : CrossDomainWindowType | ProxyWindow, domain : DomainMatcher, val : SerializableFunction<T>, key : string, { on, send } : { on : OnType, send : SendType }) : SerializedFunction {
+export function serializeFunction<T>(destination : CrossDomainWindowType | ProxyWindow, domain : DomainMatcher, val : SerializableFunction<T>, key : string, { on, send } : {| on : OnType, send : SendType |}) : SerializedFunction {
     listenForFunctionCalls({ on, send });
     
     const id = val.__id__ || uniqueID();
@@ -153,7 +153,7 @@ export function serializeFunction<T>(destination : CrossDomainWindowType | Proxy
     return serializeType(SERIALIZATION_TYPE.CROSS_DOMAIN_FUNCTION, { id, name });
 }
 
-export function deserializeFunction<T>(source : CrossDomainWindowType | ProxyWindow, origin : string, { id, name } : { id : string, name : string }, { send } : { send : SendType }) : (...args : $ReadOnlyArray<mixed>) => ZalgoPromise<T> {
+export function deserializeFunction<T>(source : CrossDomainWindowType | ProxyWindow, origin : string, { id, name } : {| id : string, name : string |}, { send } : {| send : SendType |}) : (...args : $ReadOnlyArray<mixed>) => ZalgoPromise<T> {
     const getDeserializedFunction = (opts? : Object = {}) => {
         function crossDomainFunctionWrapper<X : mixed>() : ZalgoPromise<X> {
             let originalStack;

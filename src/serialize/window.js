@@ -34,7 +34,7 @@ type SerializedWindowType = {|
     getInstanceID : () => ZalgoPromise<string>
 |};
 
-function getSerializedWindow(winPromise : ZalgoPromise<CrossDomainWindowType>, { send, id = uniqueID() } : { send : SendType, id? : string }) : SerializedWindowType {
+function getSerializedWindow(winPromise : ZalgoPromise<CrossDomainWindowType>, { send, id = uniqueID() } : {| send : SendType, id? : string |}) : SerializedWindowType {
     
     let windowNamePromise = winPromise.then(win => {
         if (isSameDomain(win)) {
@@ -113,7 +113,7 @@ export class ProxyWindow {
     send : SendType
     name : string
 
-    constructor({ send, win, serializedWindow } : { win? : CrossDomainWindowType, serializedWindow? : SerializedWindowType, send : SendType }) {
+    constructor({ send, win, serializedWindow } : {| win? : CrossDomainWindowType, serializedWindow? : SerializedWindowType, send : SendType |}) {
         this.actualWindowPromise = new ZalgoPromise();
         this.serializedWindow = serializedWindow || getSerializedWindow(this.actualWindowPromise, { send });
         globalStore('idToProxyWindow').set(this.getID(), this);
@@ -177,7 +177,7 @@ export class ProxyWindow {
         return this.actualWindow;
     }
 
-    setWindow(win : CrossDomainWindowType, { send } : { send : SendType }) {
+    setWindow(win : CrossDomainWindowType, { send } : {| send : SendType |}) {
         this.actualWindow = win;
         this.actualWindowPromise.resolve(this.actualWindow);
         this.serializedWindow = getSerializedWindow(this.actualWindowPromise, { send, id: this.getID() });
@@ -188,7 +188,7 @@ export class ProxyWindow {
         return this.actualWindowPromise;
     }
 
-    matchWindow(win : CrossDomainWindowType, { send } : { send : SendType }) : ZalgoPromise<boolean> {
+    matchWindow(win : CrossDomainWindowType, { send } : {| send : SendType |}) : ZalgoPromise<boolean> {
         return ZalgoPromise.try(() => {
             if (this.actualWindow) {
                 return win === this.actualWindow;
@@ -232,12 +232,12 @@ export class ProxyWindow {
             : win;
     }
 
-    static serialize(win : CrossDomainWindowType | ProxyWindow, { send } : { send : SendType }) : SerializedWindowType {
+    static serialize(win : CrossDomainWindowType | ProxyWindow, { send } : {| send : SendType |}) : SerializedWindowType {
         cleanupProxyWindows();
         return ProxyWindow.toProxyWindow(win, { send }).serialize();
     }
 
-    static deserialize(serializedWindow : SerializedWindowType, { send } : { send : SendType }) : ProxyWindow {
+    static deserialize(serializedWindow : SerializedWindowType, { send } : {| send : SendType |}) : ProxyWindow {
         cleanupProxyWindows();
         return globalStore('idToProxyWindow').get(serializedWindow.id) || new ProxyWindow({ serializedWindow, send });
     }
@@ -247,7 +247,7 @@ export class ProxyWindow {
         return Boolean(obj && !isWindow(obj) && obj.isProxyWindow);
     }
 
-    static toProxyWindow(win : CrossDomainWindowType | ProxyWindow, { send } : { send : SendType }) : ProxyWindow {
+    static toProxyWindow(win : CrossDomainWindowType | ProxyWindow, { send } : {| send : SendType |}) : ProxyWindow {
         cleanupProxyWindows();
 
         if (ProxyWindow.isProxyWindow(win)) {
@@ -264,10 +264,10 @@ export class ProxyWindow {
 
 export type SerializedWindow = CustomSerializedType<typeof SERIALIZATION_TYPE.CROSS_DOMAIN_WINDOW, SerializedWindowType>;
 
-export function serializeWindow(destination : CrossDomainWindowType | ProxyWindow, domain : DomainMatcher, win : CrossDomainWindowType, { send } : { send : SendType }) : SerializedWindow {
+export function serializeWindow(destination : CrossDomainWindowType | ProxyWindow, domain : DomainMatcher, win : CrossDomainWindowType, { send } : {| send : SendType |}) : SerializedWindow {
     return serializeType(SERIALIZATION_TYPE.CROSS_DOMAIN_WINDOW, ProxyWindow.serialize(win, { send }));
 }
 
-export function deserializeWindow(source : CrossDomainWindowType | ProxyWindow, origin : string, win : SerializedWindowType, { send } : { send : SendType }) : ProxyWindow {
+export function deserializeWindow(source : CrossDomainWindowType | ProxyWindow, origin : string, win : SerializedWindowType, { send } : {| send : SendType |}) : ProxyWindow {
     return ProxyWindow.deserialize(win, { send });
 }

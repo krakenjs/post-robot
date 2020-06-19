@@ -3,6 +3,7 @@
 import { send, on, once } from '../src';
 
 on('sendMessageToParent', ({ data }) => {
+    // eslint-disable-next-line compat/compat
     return send(window.opener || window.parent, data.messageName, data.data)
         .then((event) => event.data);
 });

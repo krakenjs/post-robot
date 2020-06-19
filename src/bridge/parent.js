@@ -10,7 +10,7 @@ import type { OnType, SendType, ReceiveMessageType } from '../types';
 
 import { getBridgeName, documentBodyReady, registerRemoteSendMessage, registerRemoteWindow } from './common';
 
-export function listenForOpenTunnel({ on, send, receiveMessage } : { on : OnType, send : SendType, receiveMessage : ReceiveMessageType }) {
+export function listenForOpenTunnel({ on, send, receiveMessage } : {| on : OnType, send : SendType, receiveMessage : ReceiveMessageType |}) {
     const popupWindowsByName = globalStore('popupWindowsByName');
 
     on(MESSAGE_NAME.OPEN_TUNNEL, ({ source, origin, data }) => {

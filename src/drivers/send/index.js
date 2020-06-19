@@ -9,7 +9,7 @@ import type { OnType, SendType } from '../../types';
 
 import { SEND_MESSAGE_STRATEGIES } from './strategies';
 
-export function sendMessage(win : CrossDomainWindowType, domain : DomainMatcher, message : Message, { on, send } : { on : OnType, send : SendType }) {
+export function sendMessage(win : CrossDomainWindowType, domain : DomainMatcher, message : Message, { on, send } : {| on : OnType, send : SendType |}) {
     if (isWindowClosed(win)) {
         throw new Error('Window is closed');
     }

@@ -42,7 +42,7 @@ function addTunnelWindow({ name, source, canary, sendMessage } : TunnelWindowDat
     return id;
 }
 
-export function setupOpenTunnelToParent({ send } : { send : SendType }) {
+export function setupOpenTunnelToParent({ send } : {| send : SendType |}) {
     getGlobal(window).openTunnelToParent = function openTunnelToParent({ name, source, canary, sendMessage } : TunnelWindowDataType) : ZalgoPromise<ResponseMessageEvent> {
 
         const tunnelWindows = globalStore('tunnelWindows');

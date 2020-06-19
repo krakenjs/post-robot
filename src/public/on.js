@@ -48,7 +48,7 @@ export function on(name : string, options : ServerOptionsType | HandlerType, han
     };
 }
 
-export function once(name : string, options? : ServerOptionsType | HandlerType, handler? : HandlerType) : ZalgoPromise<{ source : mixed, origin : string, data : Object }> {
+export function once(name : string, options? : ServerOptionsType | HandlerType, handler? : HandlerType) : ZalgoPromise<{| source : mixed, origin : string, data : Object |}> {
     
     // $FlowFixMe
     options = options || {};

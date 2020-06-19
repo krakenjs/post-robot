@@ -10,7 +10,7 @@ import type { OnType, SendType, MessageEvent, CancelableType } from '../../types
 
 import { RECEIVE_MESSAGE_TYPES } from './types';
 
-function parseMessage(message : string, source : CrossDomainWindowType, origin : string, { on, send } : { on : OnType, send : SendType }) : ?Object {
+function parseMessage(message : string, source : CrossDomainWindowType, origin : string, { on, send } : {| on : OnType, send : SendType |}) : ?Object {
     let parsedMessage;
 
     try {
@@ -44,7 +44,7 @@ function parseMessage(message : string, source : CrossDomainWindowType, origin :
     return parsedMessage;
 }
 
-export function receiveMessage(event : MessageEvent, { on, send } : { on : OnType, send : SendType }) {
+export function receiveMessage(event : MessageEvent, { on, send } : {| on : OnType, send : SendType |}) {
     const receivedMessages = globalStore('receivedMessages');
 
     try {
@@ -87,7 +87,7 @@ export function receiveMessage(event : MessageEvent, { on, send } : { on : OnTyp
     RECEIVE_MESSAGE_TYPES[message.type](source, origin, message, { on, send });
 }
 
-export function setupGlobalReceiveMessage({ on, send } : { on : OnType, send : SendType }) {
+export function setupGlobalReceiveMessage({ on, send } : {| on : OnType, send : SendType |}) {
     const global = getGlobal();
     global.receiveMessage = global.receiveMessage || (message => receiveMessage(message, { on, send }));
 }
@@ -97,10 +97,10 @@ type ListenerEvent = {|
     origin : string,
     data : string,
     sourceElement : CrossDomainWindowType,
-    originalEvent? : { origin : string }
+    originalEvent? : {| origin : string |}
 |};
 
-export function messageListener(event : ListenerEvent, { on, send } : { on : OnType, send : SendType }) {
+export function messageListener(event : ListenerEvent, { on, send } : {| on : OnType, send : SendType |}) {
 
     try {
         noop(event.source);
@@ -133,7 +133,7 @@ export function messageListener(event : ListenerEvent, { on, send } : { on : OnT
     receiveMessage({ source, origin, data }, { on, send });
 }
 
-export function listenForMessages({ on, send } : { on : OnType, send : SendType }) : CancelableType {
+export function listenForMessages({ on, send } : {| on : OnType, send : SendType |}) : CancelableType {
     return globalStore().getOrSet('postMessageListener', () => {
         return addEventListener(window, 'message', event => {
             // $FlowFixMe

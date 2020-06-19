@@ -1,6 +1,7 @@
 /* @flow */
 
 window.console.karma = (...args) => {
+    // eslint-disable-next-line compat/compat
     const karma = window.karma || (window.top && window.top.karma) || (window.opener && window.opener.karma);
     if (karma) {
         karma.log('debug', args);
@@ -11,7 +12,7 @@ window.console.karma = (...args) => {
 
 const IE8_USER_AGENT = 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.0; Trident/4.0)';
 
-export function enableIE8Mode() : { cancel : () => void } {
+export function enableIE8Mode() : {| cancel : () => void |} {
     window.navigator.mockUserAgent = IE8_USER_AGENT;
 
     return {

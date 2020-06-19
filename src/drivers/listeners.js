@@ -17,7 +17,7 @@ export function resetListeners() {
 const __DOMAIN_REGEX__ = '__domain_regex__';
 
 export type RequestListenerType = {|
-    handler : ({ source : CrossDomainWindowType, origin : string, data : mixed }) => (mixed | ZalgoPromise<mixed>),
+    handler : ({| source : CrossDomainWindowType, origin : string, data : mixed |}) => (mixed | ZalgoPromise<mixed>),
     handleError : (err : mixed) => void,
     window : ?CrossDomainWindowType,
     name : string,
@@ -69,7 +69,7 @@ export function isResponseListenerErrored(hash : string) : boolean {
     return erroredResponseListeners.has(hash);
 }
 
-export function getRequestListener({ name, win, domain } : { name : string, win : ?(CrossDomainWindowType | WildCard), domain : ?(string | RegExp) }) : ?RequestListenerType {
+export function getRequestListener({ name, win, domain } : {| name : string, win : ?(CrossDomainWindowType | WildCard), domain : ?(string | RegExp) |}) : ?RequestListenerType {
     const requestListeners = windowStore('requestListeners');
 
     if (win === WILDCARD) {
@@ -121,7 +121,7 @@ export function getRequestListener({ name, win, domain } : { name : string, win 
     }
 }
 
-export function addRequestListener({ name, win, domain } : { name : string, win : ?(CrossDomainWindowType | WildCard), domain : ?DomainMatcher }, listener : RequestListenerType) : { cancel : () => void } {
+export function addRequestListener({ name, win, domain } : {| name : string, win : ?(CrossDomainWindowType | WildCard), domain : ?DomainMatcher |}, listener : RequestListenerType) : {| cancel : () => void |} {
     const requestListeners = windowStore('requestListeners');
 
     if (!name || typeof name !== 'string') {

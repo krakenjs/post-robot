@@ -6,9 +6,9 @@ import { listenForWindowOpen, listenForOpenTunnel } from './parent';
 import { setupOpenTunnelToParent } from './bridge';
 import { openTunnelToOpener } from './child';
 
-export function setupBridge({ on, send, receiveMessage } : { on : OnType, send : SendType, receiveMessage : ReceiveMessageType }) {
+export function setupBridge({ on, send, receiveMessage } : {| on : OnType, send : SendType, receiveMessage : ReceiveMessageType |}) {
     listenForWindowOpen();
     listenForOpenTunnel({ on, send, receiveMessage });
-    setupOpenTunnelToParent({ on, send });
+    setupOpenTunnelToParent({ send });
     openTunnelToOpener({ on, send, receiveMessage });
 }

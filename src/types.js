@@ -13,11 +13,11 @@ export type CancelableType = {
 
 export type ErrorHandlerType = (err : mixed) => void;
 
-export type HandlerType = ({
+export type HandlerType = ({|
     source : CrossDomainWindowType,
     origin : string,
     data : any // eslint-disable-line flowtype/no-weak-types
-}) => (void | any | ZalgoPromise<any>); // eslint-disable-line flowtype/no-weak-types
+|}) => (void | any | ZalgoPromise<any>); // eslint-disable-line flowtype/no-weak-types
 
 export type ServerOptionsType = {|
     handler? : ?HandlerType,
@@ -85,4 +85,4 @@ export type CrossDomainFunctionType<A, R> = {
     __name__? : string
 };
 
-export type ReceiveMessageType = (MessageEvent, { on : OnType, send : SendType }) => void;
+export type ReceiveMessageType = (MessageEvent, {| on : OnType, send : SendType |}) => void;
