@@ -31,7 +31,6 @@ function serializeMessage(destination, domain, obj, {
     }),
     [_src2.TYPE.OBJECT]: val => {
       return (0, _src.isWindow)(val) || _window.ProxyWindow.isProxyWindow(val) ? (0, _window.serializeWindow)(destination, domain, val, {
-        on,
         send
       }) : val;
     }
@@ -39,13 +38,11 @@ function serializeMessage(destination, domain, obj, {
 }
 
 function deserializeMessage(source, origin, message, {
-  on,
   send
 }) {
   return (0, _src2.deserialize)(message, {
     [_conf.SERIALIZATION_TYPE.CROSS_DOMAIN_ZALGO_PROMISE]: serializedPromise => (0, _promise.deserializePromise)(source, origin, serializedPromise),
     [_conf.SERIALIZATION_TYPE.CROSS_DOMAIN_FUNCTION]: serializedFunction => (0, _function.deserializeFunction)(source, origin, serializedFunction, {
-      on,
       send
     }),
     [_conf.SERIALIZATION_TYPE.CROSS_DOMAIN_WINDOW]: serializedWindow => (0, _window.deserializeWindow)(source, origin, serializedWindow, {

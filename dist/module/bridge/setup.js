@@ -21,7 +21,6 @@ function setupBridge({
     receiveMessage
   });
   (0, _bridge.setupOpenTunnelToParent)({
-    on,
     send
   });
   (0, _child.openTunnelToOpener)({

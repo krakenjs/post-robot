@@ -62,6 +62,51 @@
     }([ function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
         __webpack_require__.r(__webpack_exports__);
+        __webpack_require__.d(__webpack_exports__, "Promise", (function() {
+            return promise_ZalgoPromise;
+        }));
+        __webpack_require__.d(__webpack_exports__, "TYPES", (function() {
+            return src_types_TYPES_0;
+        }));
+        __webpack_require__.d(__webpack_exports__, "ProxyWindow", (function() {
+            return window_ProxyWindow;
+        }));
+        __webpack_require__.d(__webpack_exports__, "setup", (function() {
+            return setup;
+        }));
+        __webpack_require__.d(__webpack_exports__, "destroy", (function() {
+            return destroy;
+        }));
+        __webpack_require__.d(__webpack_exports__, "serializeMessage", (function() {
+            return setup_serializeMessage;
+        }));
+        __webpack_require__.d(__webpack_exports__, "deserializeMessage", (function() {
+            return setup_deserializeMessage;
+        }));
+        __webpack_require__.d(__webpack_exports__, "createProxyWindow", (function() {
+            return createProxyWindow;
+        }));
+        __webpack_require__.d(__webpack_exports__, "toProxyWindow", (function() {
+            return setup_toProxyWindow;
+        }));
+        __webpack_require__.d(__webpack_exports__, "on", (function() {
+            return on_on;
+        }));
+        __webpack_require__.d(__webpack_exports__, "once", (function() {
+            return on_once;
+        }));
+        __webpack_require__.d(__webpack_exports__, "send", (function() {
+            return send_send;
+        }));
+        __webpack_require__.d(__webpack_exports__, "markWindowKnown", (function() {
+            return markWindowKnown;
+        }));
+        __webpack_require__.d(__webpack_exports__, "cleanUpWindow", (function() {
+            return cleanUpWindow;
+        }));
+        __webpack_require__.d(__webpack_exports__, "bridge", (function() {
+            return src_bridge;
+        }));
         function isRegex(item) {
             return "[object RegExp]" === {}.toString.call(item);
         }
@@ -219,7 +264,9 @@
         function getAllFramesInWindow(win) {
             var top = getTop(win);
             if (!top) throw new Error("Can not determine top window");
-            return [].concat(getAllChildFrames(top), [ top ]);
+            var result = [].concat(getAllChildFrames(top), [ top ]);
+            -1 === result.indexOf(win) && (result = [].concat(result, [ win ], getAllChildFrames(win)));
+            return result;
         }
         var iframeWindows = [];
         var iframeFrames = [];
@@ -258,7 +305,12 @@
                     if (!frame.contentWindow) return !0;
                     if (!frame.parentNode) return !0;
                     var doc = frame.ownerDocument;
-                    return !(!doc || !doc.documentElement || doc.documentElement.contains(frame));
+                    if (doc && doc.documentElement && !doc.documentElement.contains(frame)) {
+                        var parent = frame;
+                        for (;parent.parentNode && parent.parentNode !== parent; ) parent = parent.parentNode;
+                        if (!parent.host || !doc.documentElement.contains(parent.host)) return !0;
+                    }
+                    return !1;
                 }(frame)) return !0;
             }
             return !1;
@@ -306,8 +358,8 @@
             if (anyMatch(allFrames1, allFrames2)) return !0;
             var opener1 = getOpener(top1);
             var opener2 = getOpener(top2);
-            return !(opener1 && anyMatch(getAllFramesInWindow(opener1), allFrames2) || (opener2 && anyMatch(getAllFramesInWindow(opener2), allFrames1), 
-            1));
+            return opener1 && anyMatch(getAllFramesInWindow(opener1), allFrames2) || opener2 && anyMatch(getAllFramesInWindow(opener2), allFrames1), 
+            !1;
         }
         function matchDomain(pattern, origin) {
             if ("string" == typeof pattern) {
@@ -901,7 +953,7 @@
         Object.create(Error.prototype);
         function global_getGlobal(win) {
             void 0 === win && (win = window);
-            return win !== window ? win.__post_robot_10_0_31__ : win.__post_robot_10_0_31__ = win.__post_robot_10_0_31__ || {};
+            return win !== window ? win.__post_robot_10_0_32__ : win.__post_robot_10_0_32__ = win.__post_robot_10_0_32__ || {};
         }
         var getObj = function() {
             return {};
@@ -1047,7 +1099,8 @@
             return serializeType("error", {
                 message: _ref.message,
                 stack: _ref.stack,
-                code: _ref.code
+                code: _ref.code,
+                data: _ref.data
             });
         }, _SERIALIZER.promise = function() {}, _SERIALIZER.regex = function(val) {
             return serializeType("regex", val.source);
@@ -1071,9 +1124,10 @@
         var DESERIALIZER = ((_DESERIALIZER = {}).function = function() {
             throw new Error("Function serialization is not implemented; nothing to deserialize");
         }, _DESERIALIZER.error = function(_ref2) {
-            var stack = _ref2.stack, code = _ref2.code;
+            var stack = _ref2.stack, code = _ref2.code, data = _ref2.data;
             var error = new Error(_ref2.message);
             error.code = code;
+            data && (error.data = data);
             error.stack = stack + "\n\n" + error.stack;
             return error;
         }, _DESERIALIZER.promise = function() {
@@ -1289,7 +1343,6 @@
                     });
                 };
             }({
-                on: on,
                 send: send
             });
             !function(_ref) {
@@ -1407,6 +1460,7 @@
                 },
                 setLocation: function(href) {
                     return winPromise.then((function(win) {
+                        if (!href.match(/^https?:\/\//)) throw new Error("Expected url to be http or https url, got " + JSON.stringify(href));
                         if (isSameDomain(win)) try {
                             if (win.location && "function" == typeof win.location.replace) {
                                 win.location.replace(href);
@@ -1719,7 +1773,7 @@
         }
         function deserializeMessage(source, origin, message, _ref2) {
             var _deserialize;
-            var on = _ref2.on, send = _ref2.send;
+            var send = _ref2.send;
             return function(str, deserializers) {
                 void 0 === deserializers && (deserializers = defaultDeserializers);
                 if ("undefined" !== str) return JSON.parse(str, (function(key, val) {
@@ -1786,7 +1840,6 @@
                     });
                     return crossDomainFunctionWrapper;
                 }(source, origin, serializedFunction, {
-                    on: on,
                     send: send
                 });
             }, _deserialize.cross_domain_window = function(serializedWindow) {
@@ -1832,7 +1885,7 @@
             var _serializeMessage;
             var on = _ref.on, send = _ref.send;
             if (isWindowClosed(win)) throw new Error("Window is closed");
-            var serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {}).__post_robot_10_0_31__ = _extends({
+            var serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {}).__post_robot_10_0_32__ = _extends({
                 id: uniqueID(),
                 origin: getDomain(window)
             }, message), _serializeMessage), {
@@ -1981,7 +2034,7 @@
                 } catch (err) {
                     return;
                 }
-                if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage && (parsedMessage = parsedMessage.__post_robot_10_0_31__) && "object" == typeof parsedMessage && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
+                if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage && (parsedMessage = parsedMessage.__post_robot_10_0_32__) && "object" == typeof parsedMessage && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
             }(event.data, source, origin, {
                 on: on,
                 send: send
@@ -2337,56 +2390,12 @@
             }();
             (listener = globalStore().get("postMessageListener")) && listener.cancel();
             var listener;
-            delete window.__post_robot_10_0_31__;
+            delete window.__post_robot_10_0_32__;
         }
+        var src_types_TYPES_0 = !0;
         function cleanUpWindow(win) {
             for (var _i2 = 0, _requestPromises$get2 = windowStore("requestPromises").get(win, []); _i2 < _requestPromises$get2.length; _i2++) _requestPromises$get2[_i2].reject(new Error("Window " + (isWindowClosed(win) ? "closed" : "cleaned up") + " before response")).catch(src_util_noop);
         }
-        __webpack_require__.d(__webpack_exports__, "bridge", (function() {
-            return src_bridge;
-        }));
-        __webpack_require__.d(__webpack_exports__, "Promise", (function() {
-            return promise_ZalgoPromise;
-        }));
-        __webpack_require__.d(__webpack_exports__, "TYPES", (function() {
-            return !0;
-        }));
-        __webpack_require__.d(__webpack_exports__, "ProxyWindow", (function() {
-            return window_ProxyWindow;
-        }));
-        __webpack_require__.d(__webpack_exports__, "setup", (function() {
-            return setup;
-        }));
-        __webpack_require__.d(__webpack_exports__, "destroy", (function() {
-            return destroy;
-        }));
-        __webpack_require__.d(__webpack_exports__, "serializeMessage", (function() {
-            return setup_serializeMessage;
-        }));
-        __webpack_require__.d(__webpack_exports__, "deserializeMessage", (function() {
-            return setup_deserializeMessage;
-        }));
-        __webpack_require__.d(__webpack_exports__, "createProxyWindow", (function() {
-            return createProxyWindow;
-        }));
-        __webpack_require__.d(__webpack_exports__, "toProxyWindow", (function() {
-            return setup_toProxyWindow;
-        }));
-        __webpack_require__.d(__webpack_exports__, "on", (function() {
-            return on_on;
-        }));
-        __webpack_require__.d(__webpack_exports__, "once", (function() {
-            return on_once;
-        }));
-        __webpack_require__.d(__webpack_exports__, "send", (function() {
-            return send_send;
-        }));
-        __webpack_require__.d(__webpack_exports__, "markWindowKnown", (function() {
-            return markWindowKnown;
-        }));
-        __webpack_require__.d(__webpack_exports__, "cleanUpWindow", (function() {
-            return cleanUpWindow;
-        }));
         var src_bridge;
         src_bridge = {
             setupBridge: setupBridge,
@@ -2460,4 +2469,3 @@
         setup();
     } ]);
 }));
-//# sourceMappingURL=post-robot.ie.js.map
