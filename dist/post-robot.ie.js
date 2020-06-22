@@ -953,7 +953,7 @@
         Object.create(Error.prototype);
         function global_getGlobal(win) {
             void 0 === win && (win = window);
-            return win !== window ? win.__post_robot_10_0_34__ : win.__post_robot_10_0_34__ = win.__post_robot_10_0_34__ || {};
+            return win !== window ? win.__post_robot_10_0_35__ : win.__post_robot_10_0_35__ = win.__post_robot_10_0_35__ || {};
         }
         var getObj = function() {
             return {};
@@ -1460,8 +1460,8 @@
                 },
                 setLocation: function(href) {
                     return winPromise.then((function(win) {
-                        if (!href.match(/^(\/|https?:\/\/)/)) throw new Error("Expected url to be http or https url, or absolute path, got " + JSON.stringify(href));
-                        0 === href.indexOf("/") && (href = window.location.protocol + "//" + window.location.host + href);
+                        var domain = window.location.protocol + "//" + window.location.host;
+                        if (0 === href.indexOf("/")) href = "" + domain + href; else if (!href.match(/^https?:\/\//) && 0 !== href.indexOf(domain)) throw new Error("Expected url to be http or https url, or absolute path, got " + JSON.stringify(href));
                         if (isSameDomain(win)) try {
                             if (win.location && "function" == typeof win.location.replace) {
                                 win.location.replace(href);
@@ -1886,7 +1886,7 @@
             var _serializeMessage;
             var on = _ref.on, send = _ref.send;
             if (isWindowClosed(win)) throw new Error("Window is closed");
-            var serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {}).__post_robot_10_0_34__ = _extends({
+            var serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {}).__post_robot_10_0_35__ = _extends({
                 id: uniqueID(),
                 origin: getDomain(window)
             }, message), _serializeMessage), {
@@ -2035,7 +2035,7 @@
                 } catch (err) {
                     return;
                 }
-                if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage && (parsedMessage = parsedMessage.__post_robot_10_0_34__) && "object" == typeof parsedMessage && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
+                if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage && (parsedMessage = parsedMessage.__post_robot_10_0_35__) && "object" == typeof parsedMessage && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
             }(event.data, source, origin, {
                 on: on,
                 send: send
@@ -2391,7 +2391,7 @@
             }();
             (listener = globalStore().get("postMessageListener")) && listener.cancel();
             var listener;
-            delete window.__post_robot_10_0_34__;
+            delete window.__post_robot_10_0_35__;
         }
         var src_types_TYPES_0 = !0;
         function cleanUpWindow(win) {
