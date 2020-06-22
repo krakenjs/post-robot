@@ -68,6 +68,10 @@ function getSerializedWindow(winPromise, {
       return (0, _src.isWindowClosed)(win);
     }),
     setLocation: href => winPromise.then(win => {
+      if (href.indexOf('/') === 0) {
+        href = `${window.location.protocol}//${window.location.host}${href}`;
+      }
+
       if (!href.match(/^https?:\/\//)) {
         throw new Error(`Expected url to be http or https url, got ${JSON.stringify(href)}`);
       }
