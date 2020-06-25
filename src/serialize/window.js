@@ -46,9 +46,9 @@ function getSerializedWindow(winPromise : ZalgoPromise<CrossDomainWindowType>, {
         id,
         getType: () => winPromise.then(win => {
             if (isWindowClosed(win)) {
-                return WINDOW_TYPE.CLOSED;
+                throw new Error(`Cannot determine the type of a closed window.`);
             }
-
+            
             return getOpener(win) ? WINDOW_TYPE.POPUP : WINDOW_TYPE.IFRAME;
         }),
         getInstanceID: memoizePromise(() => winPromise.then(win => getWindowInstanceID(win, { send }))),
