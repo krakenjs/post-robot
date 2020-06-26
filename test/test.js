@@ -778,7 +778,7 @@ describe('[post-robot] serialization cases', () => {
             if (!win.isPopup()) {
                 throw new Error(`Expected window to be a POPUP`);
             }
-
+        
             if (!mywindow.closed) {
                 throw new Error(`Expected window to be closed`);
             }
