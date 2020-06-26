@@ -410,6 +410,9 @@
             } catch (err) {
                 return !0;
             }
+            try {
+                if ("postMessage" in obj && "self" in obj && "location" in obj) return !0;
+            } catch (err) {}
             return !1;
         }
         function closeWindow(win) {
@@ -953,7 +956,7 @@
         Object.create(Error.prototype);
         function global_getGlobal(win) {
             void 0 === win && (win = window);
-            return win !== window ? win.__post_robot_10_0_35__ : win.__post_robot_10_0_35__ = win.__post_robot_10_0_35__ || {};
+            return win !== window ? win.__post_robot_10_0_36__ : win.__post_robot_10_0_36__ = win.__post_robot_10_0_36__ || {};
         }
         var getObj = function() {
             return {};
@@ -1426,12 +1429,16 @@
             var windowNamePromise = winPromise.then((function(win) {
                 if (isSameDomain(win)) return assertSameDomain(win).name;
             }));
+            var windowTypePromise = winPromise.then((function(window) {
+                if (isWindowClosed(window)) throw new Error("Window is closed, can not determine type");
+                return getOpener(window) ? "popup" : "iframe";
+            }));
+            windowNamePromise.catch(src_util_noop);
+            windowTypePromise.catch(src_util_noop);
             return {
                 id: id,
                 getType: function() {
-                    return winPromise.then((function(win) {
-                        return getOpener(win) ? "popup" : "iframe";
-                    }));
+                    return windowTypePromise;
                 },
                 getInstanceID: memoizePromise((function() {
                     return winPromise.then((function(win) {
@@ -1886,7 +1893,7 @@
             var _serializeMessage;
             var on = _ref.on, send = _ref.send;
             if (isWindowClosed(win)) throw new Error("Window is closed");
-            var serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {}).__post_robot_10_0_35__ = _extends({
+            var serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {}).__post_robot_10_0_36__ = _extends({
                 id: uniqueID(),
                 origin: getDomain(window)
             }, message), _serializeMessage), {
@@ -2035,7 +2042,7 @@
                 } catch (err) {
                     return;
                 }
-                if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage && (parsedMessage = parsedMessage.__post_robot_10_0_35__) && "object" == typeof parsedMessage && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
+                if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage && (parsedMessage = parsedMessage.__post_robot_10_0_36__) && "object" == typeof parsedMessage && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
             }(event.data, source, origin, {
                 on: on,
                 send: send
@@ -2391,7 +2398,7 @@
             }();
             (listener = globalStore().get("postMessageListener")) && listener.cancel();
             var listener;
-            delete window.__post_robot_10_0_35__;
+            delete window.__post_robot_10_0_36__;
         }
         var src_types_TYPES_0 = !0;
         function cleanUpWindow(win) {

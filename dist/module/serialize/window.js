@@ -41,11 +41,20 @@ function getSerializedWindow(winPromise, {
       return (0, _src.assertSameDomain)(win).name;
     }
   });
+  const windowTypePromise = winPromise.then(window => {
+    if (!(0, _src.isWindowClosed)(window)) {
+      return (0, _src.getOpener)(window) ? _src.WINDOW_TYPE.POPUP : _src.WINDOW_TYPE.IFRAME;
+    } else {
+      throw new Error(`Window is closed, can not determine type`);
+    }
+  });
+  windowNamePromise.catch(_src3.noop);
+  windowTypePromise.catch(_src3.noop);
   return {
     id,
-    getType: () => winPromise.then(win => {
-      return (0, _src.getOpener)(win) ? _src.WINDOW_TYPE.POPUP : _src.WINDOW_TYPE.IFRAME;
-    }),
+    getType: () => {
+      return windowTypePromise;
+    },
     getInstanceID: (0, _src3.memoizePromise)(() => winPromise.then(win => (0, _lib.getWindowInstanceID)(win, {
       send
     }))),
