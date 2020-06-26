@@ -45,10 +45,6 @@ function getSerializedWindow(winPromise : ZalgoPromise<CrossDomainWindowType>, {
     return {
         id,
         getType: () => winPromise.then(win => {
-            if (isWindowClosed(win)) {
-                throw new Error(`Cannot determine the type of a closed window.`);
-            }
-            
             return getOpener(win) ? WINDOW_TYPE.POPUP : WINDOW_TYPE.IFRAME;
         }),
         getInstanceID: memoizePromise(() => winPromise.then(win => getWindowInstanceID(win, { send }))),
@@ -120,6 +116,7 @@ export class ProxyWindow {
     id : string
     isProxyWindow : true = true
     serializedWindow : SerializedWindowType
+    serializedWindowType : ZalgoPromise<$Values<typeof WINDOW_TYPE>>
     actualWindow : ?CrossDomainWindowType
     actualWindowPromise : ZalgoPromise<CrossDomainWindowType>
     send : SendType
@@ -128,6 +125,8 @@ export class ProxyWindow {
     constructor({ send, win, serializedWindow } : {| win? : CrossDomainWindowType, serializedWindow? : SerializedWindowType, send : SendType |}) {
         this.actualWindowPromise = new ZalgoPromise();
         this.serializedWindow = serializedWindow || getSerializedWindow(this.actualWindowPromise, { send });
+        this.serializedWindowType = this.serializedWindow.getType();
+        
         globalStore('idToProxyWindow').set(this.getID(), this);
         if (win) {
             this.setWindow(win, { send });
@@ -139,7 +138,7 @@ export class ProxyWindow {
     }
 
     getType() : ZalgoPromise<$Values<typeof WINDOW_TYPE>> {
-        return this.serializedWindow.getType();
+        return this.serializedWindowType;
     }
 
     isPopup() : ZalgoPromise<boolean> {

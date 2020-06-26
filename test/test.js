@@ -774,7 +774,11 @@ describe('[post-robot] serialization cases', () => {
         }).then(({ data }) => {
             return data.mywindow.close();
 
-        }).then(() => {
+        }).then((win) => {
+            if (!win.isPopup()) {
+                throw new Error(`Expected window to be a POPUP`);
+            }
+
             if (!mywindow.closed) {
                 throw new Error(`Expected window to be closed`);
             }
