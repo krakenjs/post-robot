@@ -2,7 +2,7 @@
 /* eslint max-lines: 0 */
 
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { type CrossDomainWindowType } from 'cross-domain-utils/src';
+import { type CrossDomainWindowType, WINDOW_TYPE } from 'cross-domain-utils/src';
 import { uniqueID, noop } from 'belter/src';
 
 import { on, send, once, bridge } from '../src';
@@ -774,13 +774,117 @@ describe('[post-robot] serialization cases', () => {
         }).then(({ data }) => {
             return data.mywindow.close();
 
-        }).then((win) => {
-            if (!win.isPopup()) {
-                throw new Error(`Expected window to be a POPUP`);
-            }
-        
+        }).then(() => {
             if (!mywindow.closed) {
                 throw new Error(`Expected window to be closed`);
+            }
+        });
+    });
+
+    it('should get window type for popup even if window closed after serialization', () => {
+
+        const mywindow = window.open('', uniqueID(), 'width=500,height=500');
+
+        return send(childFrame, 'setupListener', {
+
+            messageName: 'foo',
+            data:        {
+                mywindow
+            }
+
+        }).then(() => {
+            return send(childFrame, 'foo');
+
+        }).then(({ data }) => {
+            mywindow.close();
+            return data.mywindow.getType();
+
+        }).then((type) => {
+            if (type !== WINDOW_TYPE.POPUP) {
+                throw new Error(`Expected window to be a popup`);
+            }
+        });
+    });
+
+    it('should get window type for iframe even if window closed after serialization', () => {
+
+        const mywindow = createIframe('child.htm');
+
+        return send(childFrame, 'setupListener', {
+
+            messageName: 'foo',
+            data:        {
+                mywindow
+            }
+
+        }).then(() => {
+            return send(childFrame, 'foo');
+
+        }).then(({ data }) => {
+            // $FlowFixMe
+            mywindow.frameElement.parentNode.removeChild(mywindow.frameElement);
+            return data.mywindow.getType();
+
+        }).then((type) => {
+            if (type !== WINDOW_TYPE.IFRAME) {
+                throw new Error(`Expected window to be an iframe`);
+            }
+        });
+    });
+    
+    it('should error getting window type for popup if window is closed prior to serialization', () => {
+
+        const mywindow = window.open('', uniqueID(), 'width=500,height=500');
+        mywindow.close();
+        let error;
+
+        return send(childFrame, 'setupListener', {
+
+            messageName: 'foo',
+            data:        {
+                mywindow
+            }
+
+        }).then(() => {
+            return send(childFrame, 'foo');
+
+        }).then(({ data }) => {
+            return data.mywindow.getType().catch(err => {
+                error = err;
+            });
+
+        }).then(() => {
+            if (!error) {
+                throw new Error(`Expected error to be thrown`);
+            }
+        });
+    });
+
+    it('should error getting window type for iframe if window is closed prior to serialization', () => {
+
+        const mywindow = createIframe('child.htm');
+        // $FlowFixMe
+        mywindow.frameElement.parentNode.removeChild(mywindow.frameElement);
+        let error;
+
+        return send(childFrame, 'setupListener', {
+
+            messageName: 'foo',
+            data:        {
+                mywindow
+            }
+
+        }).then(() => {
+            return send(childFrame, 'foo');
+
+        }).then(({ data }) => {
+            return data.mywindow.getType().catch(err => {
+                error = err;
+            });
+
+        }).then(() => {
+            if (!error) {
+                throw new Error(`Expected error to be thrown`);
             }
         });
     });

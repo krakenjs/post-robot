@@ -3,7 +3,7 @@
 import { isSameDomain, isWindowClosed, type CrossDomainWindowType, closeWindow,
     type DomainMatcher, getOpener, WINDOW_TYPE, isWindow, assertSameDomain, getFrameForWindow } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { uniqueID, memoizePromise } from 'belter/src';
+import { uniqueID, memoizePromise, noop } from 'belter/src';
 import { serializeType, type CustomSerializedType } from 'universal-serialize/src';
 
 import { SERIALIZATION_TYPE } from '../conf';
@@ -49,6 +49,9 @@ function getSerializedWindow(winPromise : ZalgoPromise<CrossDomainWindowType>, {
             throw new Error(`Window is closed, can not determine type`);
         }
     });
+
+    windowNamePromise.catch(noop);
+    windowTypePromise.catch(noop);
 
     return {
         id,
