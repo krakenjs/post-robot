@@ -26,12 +26,12 @@ function validateOptions(name, win, domain) {
 
   if (domain) {
     if (typeof domain !== 'string' && !Array.isArray(domain) && !(0, _src3.isRegex)(domain)) {
-      throw new TypeError(`Expected domain to be a string, array, or regex`);
+      throw new TypeError(`Can not send ${name}. Expected domain ${JSON.stringify(domain)} to be a string, array, or regex`);
     }
   }
 
   if ((0, _src2.isWindowClosed)(win)) {
-    throw new Error('Target window is closed');
+    throw new Error(`Can not send ${name}. Target window is closed`);
   }
 }
 

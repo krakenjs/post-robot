@@ -873,7 +873,7 @@
         Object.create(Error.prototype);
         function global_getGlobal(win) {
             void 0 === win && (win = window);
-            return win !== window ? win.__post_robot_10_0_36__ : win.__post_robot_10_0_36__ = win.__post_robot_10_0_36__ || {};
+            return win !== window ? win.__post_robot_10_0_37__ : win.__post_robot_10_0_37__ = win.__post_robot_10_0_37__ || {};
         }
         var getObj = function() {
             return {};
@@ -1515,7 +1515,7 @@
             var _serializeMessage;
             var on = _ref.on, send = _ref.send;
             if (isWindowClosed(win)) throw new Error("Window is closed");
-            var serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {}).__post_robot_10_0_36__ = _extends({
+            var serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {}).__post_robot_10_0_37__ = _extends({
                 id: uniqueID(),
                 origin: getDomain(window)
             }, message), _serializeMessage), {
@@ -1664,7 +1664,7 @@
                 } catch (err) {
                     return;
                 }
-                if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage && (parsedMessage = parsedMessage.__post_robot_10_0_36__) && "object" == typeof parsedMessage && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
+                if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage && (parsedMessage = parsedMessage.__post_robot_10_0_37__) && "object" == typeof parsedMessage && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
             }(event.data, source, origin, {
                 on: on,
                 send: send
@@ -1804,8 +1804,8 @@
             return promise_ZalgoPromise.try((function() {
                 !function(name, win, domain) {
                     if (!name) throw new Error("Expected name");
-                    if (domain && "string" != typeof domain && !Array.isArray(domain) && !util_isRegex(domain)) throw new TypeError("Expected domain to be a string, array, or regex");
-                    if (isWindowClosed(win)) throw new Error("Target window is closed");
+                    if (domain && "string" != typeof domain && !Array.isArray(domain) && !util_isRegex(domain)) throw new TypeError("Can not send " + name + ". Expected domain " + JSON.stringify(domain) + " to be a string, array, or regex");
+                    if (isWindowClosed(win)) throw new Error("Can not send " + name + ". Target window is closed");
                 }(name, win, domain);
                 if (function(parent, child) {
                     var actualParent = getAncestor(child);
@@ -2052,7 +2052,7 @@
             }();
             (listener = globalStore().get("postMessageListener")) && listener.cancel();
             var listener;
-            delete window.__post_robot_10_0_36__;
+            delete window.__post_robot_10_0_37__;
         }
         var src_types_TYPES_0 = !0;
         function cleanUpWindow(win) {
