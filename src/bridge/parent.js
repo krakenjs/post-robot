@@ -10,6 +10,12 @@ import type { OnType, SendType, ReceiveMessageType } from '../types';
 
 import { getBridgeName, documentBodyReady, registerRemoteSendMessage, registerRemoteWindow } from './common';
 
+type WinDetails = {|
+    win : CrossDomainWindowType,
+    domain? : ?string,
+    name? : ?string
+|};
+
 export function listenForOpenTunnel({ on, send, receiveMessage } : {| on : OnType, send : SendType, receiveMessage : ReceiveMessageType |}) {
     const popupWindowsByName = globalStore('popupWindowsByName');
 
@@ -37,15 +43,21 @@ export function listenForOpenTunnel({ on, send, receiveMessage } : {| on : OnTyp
                 throw new Error(`Window with name ${ data.name } does not exist, or was not opened by this window`);
             }
 
-            if (!popupWindowsByName.get(data.name).domain) {
+            const getWindowDetails = () : WinDetails => {
+                const winDetails = popupWindowsByName.get(data.name);
+                // $FlowFixMe
+                return winDetails;
+            };
+
+            if (!getWindowDetails().domain) {
                 throw new Error(`We do not have a registered domain for window ${ data.name }`);
             }
 
-            if (popupWindowsByName.get(data.name).domain !== origin) {
-                throw new Error(`Message origin ${ origin } does not matched registered window origin ${ popupWindowsByName.get(data.name).domain }`);
+            if (getWindowDetails().domain !== origin) {
+                throw new Error(`Message origin ${ origin } does not matched registered window origin ${ getWindowDetails().domain || 'unknown' }`);
             }
 
-            registerRemoteSendMessage(popupWindowsByName.get(data.name).win, origin, data.sendMessage);
+            registerRemoteSendMessage(getWindowDetails().win, origin, data.sendMessage);
 
             return {
                 sendMessage(message) {
@@ -54,17 +66,21 @@ export function listenForOpenTunnel({ on, send, receiveMessage } : {| on : OnTyp
                         return;
                     }
 
-                    const winDetails = popupWindowsByName.get(data.name);
+                    if (!getWindowDetails()) {
+                        return;
+                    }
 
-                    if (!winDetails) {
+                    const domain = getWindowDetails().domain;
+
+                    if (!domain) {
                         return;
                     }
 
                     try {
                         receiveMessage({
                             data:   message,
-                            origin: winDetails.domain,
-                            source: winDetails.win
+                            origin: domain,
+                            source: getWindowDetails().win
                         }, { on, send });
                     } catch (err) {
                         ZalgoPromise.reject(err);
@@ -147,12 +163,6 @@ export function openBridge(url : string, domain : string) : ZalgoPromise<CrossDo
     }));
 }
 
-type WinDetails = {|
-    win : CrossDomainWindowType,
-    domain? : ?string,
-    name? : ?string
-|};
-
 export function linkWindow({ win, name, domain } : WinDetails) : WinDetails {
     const popupWindowsByName = globalStore('popupWindowsByName');
     const popupWindowsByWin = windowStore('popupWindowsByWin');
@@ -174,6 +184,7 @@ export function linkWindow({ win, name, domain } : WinDetails) : WinDetails {
             return { win };
         }
         
+        // $FlowFixMe
         return popupWindowsByName.getOrSet(name, () : WinDetails => {
             return { win, name };
         });

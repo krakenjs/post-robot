@@ -6,16 +6,21 @@ import { addRequestListener, type RequestListenerType } from '../drivers';
 import { WILDCARD } from '../conf';
 import type { ServerOptionsType, HandlerType, CancelableType } from '../types';
 
+const getDefaultServerOptions = () : ServerOptionsType => {
+    // $FlowFixMe
+    return {};
+};
+
 export function on(name : string, options : ServerOptionsType | HandlerType, handler : ?HandlerType) : CancelableType {
 
     if (!name) {
         throw new Error('Expected name');
     }
 
+    options = options || getDefaultServerOptions();
     if (typeof options === 'function') {
         handler = options;
-        // $FlowFixMe
-        options = {};
+        options = getDefaultServerOptions();
     }
 
     if (!handler) {
@@ -50,12 +55,10 @@ export function on(name : string, options : ServerOptionsType | HandlerType, han
 
 export function once(name : string, options? : ServerOptionsType | HandlerType, handler? : HandlerType) : ZalgoPromise<{| source : mixed, origin : string, data : Object |}> {
     
-    // $FlowFixMe
-    options = options || {};
+    options = options || getDefaultServerOptions();
     if (typeof options === 'function') {
         handler = options;
-        // $FlowFixMe
-        options = {};
+        options = getDefaultServerOptions();
     }
 
     const promise = new ZalgoPromise();
