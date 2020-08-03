@@ -168,7 +168,6 @@ export function linkWindow({ win, name, domain } : WinDetails) : WinDetails {
     const popupWindowsByWin = windowStore('popupWindowsByWin');
 
     for (const winName of popupWindowsByName.keys()) {
-        // $FlowFixMe
         const details = popupWindowsByName.get(winName);
         if (!details || isWindowClosed(details.win)) {
             popupWindowsByName.del(winName);
