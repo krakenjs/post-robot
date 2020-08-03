@@ -55,32 +55,42 @@ function listenForOpenTunnel({
         throw new Error(`Window with name ${data.name} does not exist, or was not opened by this window`);
       }
 
-      if (!popupWindowsByName.get(data.name).domain) {
+      const getWindowDetails = () => {
+        const winDetails = popupWindowsByName.get(data.name); // $FlowFixMe
+
+        return winDetails;
+      };
+
+      if (!getWindowDetails().domain) {
         throw new Error(`We do not have a registered domain for window ${data.name}`);
       }
 
-      if (popupWindowsByName.get(data.name).domain !== origin) {
-        throw new Error(`Message origin ${origin} does not matched registered window origin ${popupWindowsByName.get(data.name).domain}`);
+      if (getWindowDetails().domain !== origin) {
+        throw new Error(`Message origin ${origin} does not matched registered window origin ${getWindowDetails().domain || 'unknown'}`);
       }
 
-      (0, _common.registerRemoteSendMessage)(popupWindowsByName.get(data.name).win, origin, data.sendMessage);
+      (0, _common.registerRemoteSendMessage)(getWindowDetails().win, origin, data.sendMessage);
       return {
         sendMessage(message) {
           if (!window || window.closed) {
             return;
           }
 
-          const winDetails = popupWindowsByName.get(data.name);
+          if (!getWindowDetails()) {
+            return;
+          }
 
-          if (!winDetails) {
+          const domain = getWindowDetails().domain;
+
+          if (!domain) {
             return;
           }
 
           try {
             receiveMessage({
               data: message,
-              origin: winDetails.domain,
-              source: winDetails.win
+              origin: domain,
+              source: getWindowDetails().win
             }, {
               on,
               send
@@ -180,7 +190,8 @@ function linkWindow({
       return {
         win
       };
-    }
+    } // $FlowFixMe
+
 
     return popupWindowsByName.getOrSet(name, () => {
       return {

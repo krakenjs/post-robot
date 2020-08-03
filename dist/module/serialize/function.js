@@ -213,21 +213,27 @@ function deserializeFunction(source, origin, {
             origin: (0, _src.getDomain)()
           }, arguments);
         } else {
-          // $FlowFixMe
-          const options = {
-            domain: origin,
-            fireAndForget: opts.fireAndForget
-          };
           const args = Array.prototype.slice.call(arguments);
-          return send(win, _conf.MESSAGE_NAME.METHOD, {
-            id,
-            name,
-            args
-          }, options).then(res => {
-            if (!opts.fireAndForget) {
-              return res.data.result;
-            }
-          });
+
+          if (opts.fireAndForget) {
+            return send(win, _conf.MESSAGE_NAME.METHOD, {
+              id,
+              name,
+              args
+            }, {
+              domain: origin,
+              fireAndForget: true
+            });
+          } else {
+            return send(win, _conf.MESSAGE_NAME.METHOD, {
+              id,
+              name,
+              args
+            }, {
+              domain: origin,
+              fireAndForget: false
+            }).then(res => res.data.result);
+          }
         }
       }).catch(err => {
         // $FlowFixMe

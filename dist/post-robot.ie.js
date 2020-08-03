@@ -956,7 +956,7 @@
         Object.create(Error.prototype);
         function global_getGlobal(win) {
             void 0 === win && (win = window);
-            return win !== window ? win.__post_robot_10_0_37__ : win.__post_robot_10_0_37__ = win.__post_robot_10_0_37__ || {};
+            return win !== window ? win.__post_robot_10_0_38__ : win.__post_robot_10_0_38__ = win.__post_robot_10_0_38__ || {};
         }
         var getObj = function() {
             return {};
@@ -1269,18 +1269,21 @@
                         if (!data.name) throw new Error("Register window expected to be passed window name");
                         if (!data.sendMessage) throw new Error("Register window expected to be passed sendMessage method");
                         if (!popupWindowsByName.has(data.name)) throw new Error("Window with name " + data.name + " does not exist, or was not opened by this window");
-                        if (!popupWindowsByName.get(data.name).domain) throw new Error("We do not have a registered domain for window " + data.name);
-                        if (popupWindowsByName.get(data.name).domain !== origin) throw new Error("Message origin " + origin + " does not matched registered window origin " + popupWindowsByName.get(data.name).domain);
-                        registerRemoteSendMessage(popupWindowsByName.get(data.name).win, origin, data.sendMessage);
+                        var getWindowDetails = function() {
+                            return popupWindowsByName.get(data.name);
+                        };
+                        if (!getWindowDetails().domain) throw new Error("We do not have a registered domain for window " + data.name);
+                        if (getWindowDetails().domain !== origin) throw new Error("Message origin " + origin + " does not matched registered window origin " + (getWindowDetails().domain || "unknown"));
+                        registerRemoteSendMessage(getWindowDetails().win, origin, data.sendMessage);
                         return {
                             sendMessage: function(message) {
-                                if (window && !window.closed) {
-                                    var winDetails = popupWindowsByName.get(data.name);
-                                    if (winDetails) try {
+                                if (window && !window.closed && getWindowDetails()) {
+                                    var domain = getWindowDetails().domain;
+                                    if (domain) try {
                                         receiveMessage({
                                             data: message,
-                                            origin: winDetails.domain,
-                                            source: winDetails.win
+                                            origin: domain,
+                                            source: getWindowDetails().win
                                         }, {
                                             on: on,
                                             send: send
@@ -1819,17 +1822,23 @@
                                     source: window,
                                     origin: getDomain()
                                 }, _arguments);
-                                var options = {
-                                    domain: origin,
-                                    fireAndForget: opts.fireAndForget
-                                };
                                 var _args = [].slice.call(_arguments);
-                                return send(win, "postrobot_method", {
+                                return opts.fireAndForget ? send(win, "postrobot_method", {
                                     id: id,
                                     name: name,
                                     args: _args
-                                }, options).then((function(res) {
-                                    if (!opts.fireAndForget) return res.data.result;
+                                }, {
+                                    domain: origin,
+                                    fireAndForget: !0
+                                }) : send(win, "postrobot_method", {
+                                    id: id,
+                                    name: name,
+                                    args: _args
+                                }, {
+                                    domain: origin,
+                                    fireAndForget: !1
+                                }).then((function(res) {
+                                    return res.data.result;
                                 }));
                             })).catch((function(err) {
                                 throw err;
@@ -1893,7 +1902,7 @@
             var _serializeMessage;
             var on = _ref.on, send = _ref.send;
             if (isWindowClosed(win)) throw new Error("Window is closed");
-            var serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {}).__post_robot_10_0_37__ = _extends({
+            var serializedMessage = serializeMessage(win, domain, ((_serializeMessage = {}).__post_robot_10_0_38__ = _extends({
                 id: uniqueID(),
                 origin: getDomain(window)
             }, message), _serializeMessage), {
@@ -2042,7 +2051,7 @@
                 } catch (err) {
                     return;
                 }
-                if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage && (parsedMessage = parsedMessage.__post_robot_10_0_37__) && "object" == typeof parsedMessage && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
+                if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage && (parsedMessage = parsedMessage.__post_robot_10_0_38__) && "object" == typeof parsedMessage && null !== parsedMessage && parsedMessage.type && "string" == typeof parsedMessage.type && RECEIVE_MESSAGE_TYPES[parsedMessage.type]) return parsedMessage;
             }(event.data, source, origin, {
                 on: on,
                 send: send
@@ -2063,7 +2072,7 @@
         }
         function on_on(name, options, handler) {
             if (!name) throw new Error("Expected name");
-            if ("function" == typeof options) {
+            if ("function" == typeof (options = options || {})) {
                 handler = options;
                 options = {};
             }
@@ -2398,7 +2407,7 @@
             }();
             (listener = globalStore().get("postMessageListener")) && listener.cancel();
             var listener;
-            delete window.__post_robot_10_0_37__;
+            delete window.__post_robot_10_0_38__;
         }
         var src_types_TYPES_0 = !0;
         function cleanUpWindow(win) {

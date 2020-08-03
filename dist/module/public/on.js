@@ -10,15 +10,21 @@ var _drivers = require("../drivers");
 
 var _conf = require("../conf");
 
+const getDefaultServerOptions = () => {
+  // $FlowFixMe
+  return {};
+};
+
 function on(name, options, handler) {
   if (!name) {
     throw new Error('Expected name');
   }
 
-  if (typeof options === 'function') {
-    handler = options; // $FlowFixMe
+  options = options || getDefaultServerOptions();
 
-    options = {};
+  if (typeof options === 'function') {
+    handler = options;
+    options = getDefaultServerOptions();
   }
 
   if (!handler) {
@@ -53,13 +59,11 @@ function on(name, options, handler) {
 }
 
 function once(name, options, handler) {
-  // $FlowFixMe
-  options = options || {};
+  options = options || getDefaultServerOptions();
 
   if (typeof options === 'function') {
-    handler = options; // $FlowFixMe
-
-    options = {};
+    handler = options;
+    options = getDefaultServerOptions();
   }
 
   const promise = new _src.ZalgoPromise();
