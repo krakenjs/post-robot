@@ -1,7 +1,7 @@
 /* @flow */
 
 import { isSameDomain, isSameTopWindow, isActuallySameDomain, getActualDomain,
-    getDomain, type CrossDomainWindowType, type DomainMatcher, PROTOCOL } from 'cross-domain-utils/src';
+    getDomain, type CrossDomainWindowType, PROTOCOL } from 'cross-domain-utils/src';
 
 import { SEND_STRATEGY, WILDCARD } from '../../conf';
 import { needsGlobalMessagingForBrowser } from '../../lib';
@@ -10,59 +10,35 @@ import { sendBridgeMessage, needsBridgeForBrowser, isBridge } from '../../bridge
 
 export const SEND_MESSAGE_STRATEGIES = {};
 
-SEND_MESSAGE_STRATEGIES[SEND_STRATEGY.POST_MESSAGE] = (win : CrossDomainWindowType, serializedMessage : string, domain : DomainMatcher) => {
+SEND_MESSAGE_STRATEGIES[SEND_STRATEGY.POST_MESSAGE] = (win : CrossDomainWindowType, serializedMessage : string, domain : string) => {
+    if (domain.indexOf(PROTOCOL.FILE) === 0) {
+        domain = WILDCARD;
+    }
 
     if (__TEST__) {
         if (needsGlobalMessagingForBrowser() && isSameTopWindow(window, win) === false) {
             return;
         }
-    }
 
-    let domains;
-
-    if (Array.isArray(domain)) {
-        domains = domain;
-    } else if (typeof domain === 'string') {
-        domains = [ domain ];
-    } else {
-        domains = [ WILDCARD ];
-    }
-
-    domains = domains.map(dom => {
-
-        if (__TEST__) {
-            if (dom.indexOf(PROTOCOL.MOCK) === 0) {
-                if (window.location.protocol === PROTOCOL.FILE) {
-                    return WILDCARD;
-                }
-
-                if (!isActuallySameDomain(win)) {
-                    throw new Error(`Attempting to send messsage to mock domain ${ dom }, but window is actually cross-domain`);
-                }
-
-                // $FlowFixMe
-                const windowDomain = getDomain(win);
-                
-                if (windowDomain !== dom) {
-                    throw new Error(`Mock domain target ${ dom } does not match window domain ${ windowDomain }`);
-                }
-
-                // $FlowFixMe
-                return getActualDomain(win);
-
+        if (domain.indexOf(PROTOCOL.MOCK) === 0) {
+            if (!isActuallySameDomain(win)) {
+                throw new Error(`Attempting to send message to mock domain ${ domain }, but window is actually cross-domain`);
             }
-        }
-        
-        if (dom.indexOf(PROTOCOL.FILE) === 0) {
-            return WILDCARD;
-        }
 
-        return dom;
-    });
+            // $FlowFixMe
+            const windowDomain = getDomain(win);
+                
+            if (windowDomain !== domain) {
+                throw new Error(`Mock domain target ${ domain } does not match window domain ${ windowDomain }`);
+            }
 
-    domains.forEach(dom => {
-        win.postMessage(serializedMessage, dom);
-    });
+            // $FlowFixMe
+            domain = getActualDomain(win);
+
+        }
+    }
+
+    win.postMessage(serializedMessage, domain);
 };
 
 if (__POST_ROBOT__.__IE_POPUP_SUPPORT__) {

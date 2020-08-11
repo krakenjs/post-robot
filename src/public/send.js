@@ -29,33 +29,35 @@ function validateOptions(name : string, win : CrossDomainWindowType, domain : ?D
     }
 }
 
-function normalizeDomain(win : CrossDomainWindowType, targetDomain : DomainMatcher, actualDomain : ?string, { send } : {| send : SendType |}) : ZalgoPromise<string | $ReadOnlyArray<string>> {
-    if (typeof targetDomain === 'string') {
-        return ZalgoPromise.resolve(targetDomain);
-    }
-    
+function normalizeDomain(win : CrossDomainWindowType, targetDomain : DomainMatcher, actualDomain : ?string, { send } : {| send : SendType |}) : ZalgoPromise<string> {
     return ZalgoPromise.try(() => {
-        return actualDomain || sayHello(win, { send }).then(({ domain }) => domain);
-
-    }).then(normalizedDomain => {
-        if (!matchDomain(targetDomain, targetDomain)) {
-            throw new Error(`Domain ${ stringify(targetDomain) } does not match ${ stringify(targetDomain) }`);
+        if (typeof targetDomain === 'string') {
+            return targetDomain;
         }
 
-        return normalizedDomain;
+        return ZalgoPromise.try(() => {
+            return actualDomain || sayHello(win, { send }).then(({ domain }) => domain);
+
+        }).then(normalizedDomain => {
+            if (!matchDomain(targetDomain, targetDomain)) {
+                throw new Error(`Domain ${ stringify(targetDomain) } does not match ${ stringify(targetDomain) }`);
+            }
+
+            return normalizedDomain;
+        });
     });
 }
 
 export const send : SendType = (win, name, data, options) => {
     options = options || {};
-    let domain = options.domain || WILDCARD;
+    const domainMatcher = options.domain || WILDCARD;
     const responseTimeout = options.timeout || RES_TIMEOUT;
     const childTimeout = options.timeout || CHILD_WINDOW_TIMEOUT;
     const fireAndForget = options.fireAndForget || false;
 
     // $FlowFixMe
     return ZalgoPromise.try(() => {
-        validateOptions(name, win, domain);
+        validateOptions(name, win, domainMatcher);
 
         if (isAncestor(window, win)) {
             return awaitWindowHello(win, childTimeout);
@@ -63,10 +65,9 @@ export const send : SendType = (win, name, data, options) => {
         
     }).then(({ domain: actualDomain } = {}) => {
 
-        return normalizeDomain(win, domain, actualDomain, { send });
+        return normalizeDomain(win, domainMatcher, actualDomain, { send });
     }).then(targetDomain => {
-
-        domain = targetDomain;
+        const domain = targetDomain;
 
         const logName = (name === MESSAGE_NAME.METHOD && data && typeof data.name === 'string') ? `${ data.name }()` : name;
 
@@ -123,18 +124,18 @@ export const send : SendType = (win, name, data, options) => {
             }).catch(noop);
         }
 
-        try {
-            sendMessage(win, domain, {
-                type: MESSAGE_TYPE.REQUEST,
-                hash,
-                name,
-                data,
-                fireAndForget
-            }, { on, send });
-        } catch (err) {
+        return sendMessage(win, domain, {
+            id:     uniqueID(),
+            origin: getDomain(window),
+            type:   MESSAGE_TYPE.REQUEST,
+            hash,
+            name,
+            data,
+            fireAndForget
+        }, { on, send }).then(() => {
+            return fireAndForget ? promise.resolve() : promise;
+        }, err => {
             throw new Error(`Send request message failed for ${ logName } in ${ getDomain() }\n\n${ stringifyError(err) }`);
-        }
-    
-        return fireAndForget ? promise.resolve() : promise;
+        });
     });
 };

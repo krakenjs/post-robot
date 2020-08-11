@@ -1,8 +1,11 @@
 /* @flow */
 
+import { ZalgoPromise } from 'zalgo-promise/src';
 import { isWindowClosed, type CrossDomainWindowType, getDomain, isSameTopWindow, PROTOCOL  } from 'cross-domain-utils/src';
 import { addEventListener, noop } from 'belter/src';
 
+import type { Message } from '../types';
+import { MESSAGE_TYPE } from '../../conf';
 import { markWindowKnown, needsGlobalMessagingForBrowser } from '../../lib';
 import { deserializeMessage } from '../../serialize';
 import { getGlobal, globalStore } from '../../global';
@@ -10,7 +13,7 @@ import type { OnType, SendType, MessageEvent, CancelableType } from '../../types
 
 import { RECEIVE_MESSAGE_TYPES } from './types';
 
-function parseMessage(message : string, source : CrossDomainWindowType, origin : string, { on, send } : {| on : OnType, send : SendType |}) : ?Object {
+function deserializeMessages(message : string, source : CrossDomainWindowType, origin : string, { on, send } : {| on : OnType, send : SendType |}) : ?$ReadOnlyArray<Message> {
     let parsedMessage;
 
     try {
@@ -27,21 +30,13 @@ function parseMessage(message : string, source : CrossDomainWindowType, origin :
         return;
     }
 
-    parsedMessage = parsedMessage[__POST_ROBOT__.__GLOBAL_KEY__];
+    const parseMessages = parsedMessage[__POST_ROBOT__.__GLOBAL_KEY__];
 
-    if (!parsedMessage || typeof parsedMessage !== 'object' || parsedMessage === null) {
+    if (!Array.isArray(parseMessages)) {
         return;
     }
 
-    if (!parsedMessage.type || typeof parsedMessage.type !== 'string') {
-        return;
-    }
-
-    if (!RECEIVE_MESSAGE_TYPES[parsedMessage.type]) {
-        return;
-    }
-
-    return parsedMessage;
+    return parseMessages;
 }
 
 export function receiveMessage(event : MessageEvent, { on, send } : {| on : OnType, send : SendType |}) {
@@ -62,29 +57,43 @@ export function receiveMessage(event : MessageEvent, { on, send } : {| on : OnTy
         origin = getDomain(source);
     }
 
-    const message = parseMessage(data, source, origin, { on, send });
+    const messages = deserializeMessages(data, source, origin, { on, send });
 
-    if (!message) {
+    if (!messages) {
         return;
     }
 
     markWindowKnown(source);
 
-    if (receivedMessages.has(message.id)) {
-        return;
+    for (const message of messages) {
+        if (receivedMessages.has(message.id)) {
+            return;
+        }
+
+        receivedMessages.set(message.id, true);
+
+        if (isWindowClosed(source) && !message.fireAndForget) {
+            return;
+        }
+
+        if (message.origin.indexOf(PROTOCOL.FILE) === 0) {
+            origin = `${ PROTOCOL.FILE }//`;
+        }
+
+        try {
+            if (message.type === MESSAGE_TYPE.REQUEST) {
+                RECEIVE_MESSAGE_TYPES[MESSAGE_TYPE.REQUEST](source, origin, message, { on, send });
+            } else if (message.type === MESSAGE_TYPE.RESPONSE) {
+                RECEIVE_MESSAGE_TYPES[MESSAGE_TYPE.RESPONSE](source, origin, message);
+            } else if (message.type === MESSAGE_TYPE.ACK) {
+                RECEIVE_MESSAGE_TYPES[MESSAGE_TYPE.ACK](source, origin, message);
+            }
+        } catch (err) {
+            setTimeout(() => {
+                throw err;
+            }, 0);
+        }
     }
-
-    receivedMessages.set(message.id, true);
-
-    if (isWindowClosed(source) && !message.fireAndForget) {
-        return;
-    }
-
-    if (message.origin.indexOf(PROTOCOL.FILE) === 0) {
-        origin = `${ PROTOCOL.FILE }//`;
-    }
-
-    RECEIVE_MESSAGE_TYPES[message.type](source, origin, message, { on, send });
 }
 
 export function setupGlobalReceiveMessage({ on, send } : {| on : OnType, send : SendType |}) {
@@ -101,36 +110,37 @@ type ListenerEvent = {|
 |};
 
 export function messageListener(event : ListenerEvent, { on, send } : {| on : OnType, send : SendType |}) {
-
-    try {
-        noop(event.source);
-    } catch (err) {
-        return;
-    }
-
-    const source = event.source || event.sourceElement;
-    let origin = event.origin || (event.originalEvent && event.originalEvent.origin);
-    const data = event.data;
-
-    if (origin === 'null') {
-        origin = `${ PROTOCOL.FILE }//`;
-    }
-
-    if (!source) {
-        return;
-    }
-
-    if (!origin) {
-        throw new Error(`Post message did not have origin domain`);
-    }
-
-    if (__TEST__) {
-        if (needsGlobalMessagingForBrowser() && isSameTopWindow(source, window) === false) {
+    ZalgoPromise.try(() => {
+        try {
+            noop(event.source);
+        } catch (err) {
             return;
         }
-    }
 
-    receiveMessage({ source, origin, data }, { on, send });
+        const source = event.source || event.sourceElement;
+        let origin = event.origin || (event.originalEvent && event.originalEvent.origin);
+        const data = event.data;
+
+        if (origin === 'null') {
+            origin = `${ PROTOCOL.FILE }//`;
+        }
+
+        if (!source) {
+            return;
+        }
+
+        if (!origin) {
+            throw new Error(`Post message did not have origin domain`);
+        }
+
+        if (__TEST__) {
+            if (needsGlobalMessagingForBrowser() && isSameTopWindow(source, window) === false) {
+                return;
+            }
+        }
+
+        receiveMessage({ source, origin, data }, { on, send });
+    });
 }
 
 export function listenForMessages({ on, send } : {| on : OnType, send : SendType |}) : CancelableType {

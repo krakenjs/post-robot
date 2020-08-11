@@ -2,7 +2,7 @@
 
 import { getAncestor, type CrossDomainWindowType } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { noop, uniqueID } from 'belter/src';
+import { uniqueID } from 'belter/src';
 
 import { MESSAGE_NAME, WILDCARD } from '../conf';
 import { windowStore, globalStore } from '../global';
@@ -55,7 +55,11 @@ export function initHello({ on, send } : {| on : OnType, send : SendType |}) : C
 
         const parent = getAncestor();
         if (parent) {
-            sayHello(parent, { send }).catch(noop);
+            sayHello(parent, { send }).catch(err => {
+                if (__TEST__ && parent[__POST_ROBOT__.__GLOBAL_KEY__]) {
+                    throw err;
+                }
+            });
         }
 
         return listener;

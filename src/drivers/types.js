@@ -3,6 +3,8 @@
 import { MESSAGE_TYPE, MESSAGE_ACK } from '../conf';
 
 export type RequestMessage = {|
+    id : string,
+    origin : string,
     type : typeof MESSAGE_TYPE.REQUEST,
     name : string,
     hash : string,
@@ -11,26 +13,26 @@ export type RequestMessage = {|
 |};
 
 export type AckResponseMessage = {|
+    id : string,
+    origin : string,
     type : typeof MESSAGE_TYPE.ACK,
-    ack : $Values<typeof MESSAGE_ACK>,
     name : string,
     hash : string
 |};
 
-export type SuccessResponseMessage = {|
+export type ResponseMessage = {|
+    id : string,
+    origin : string,
     type : typeof MESSAGE_TYPE.RESPONSE,
-    ack : typeof MESSAGE_ACK.SUCCESS,
+    ack : $Values<typeof MESSAGE_ACK>,
     name : string,
     hash : string,
-    data : mixed
+    data : ?mixed,
+    error : ?mixed
 |};
 
-export type ErrorResponseMessage = {|
-    type : typeof MESSAGE_TYPE.RESPONSE,
-    ack : typeof MESSAGE_ACK.ERROR,
-    name : string,
-    hash : string,
-    error : mixed
-|};
+export type Message = RequestMessage | AckResponseMessage | ResponseMessage;
 
-export type Message = RequestMessage | AckResponseMessage | SuccessResponseMessage | ErrorResponseMessage;
+export type PackedMessages = {|
+    [ typeof __POST_ROBOT__.__GLOBAL_KEY__ ] : $ReadOnlyArray<Message>
+|};
