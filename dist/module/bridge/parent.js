@@ -169,7 +169,6 @@ function linkWindow({
   const popupWindowsByWin = (0, _global.windowStore)('popupWindowsByWin');
 
   for (const winName of popupWindowsByName.keys()) {
-    // $FlowFixMe
     const details = popupWindowsByName.get(winName);
 
     if (!details || (0, _src2.isWindowClosed)(details.win)) {

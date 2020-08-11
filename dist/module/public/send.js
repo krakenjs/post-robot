@@ -38,34 +38,36 @@ function validateOptions(name, win, domain) {
 function normalizeDomain(win, targetDomain, actualDomain, {
   send
 }) {
-  if (typeof targetDomain === 'string') {
-    return _src.ZalgoPromise.resolve(targetDomain);
-  }
-
   return _src.ZalgoPromise.try(() => {
-    return actualDomain || (0, _lib.sayHello)(win, {
-      send
-    }).then(({
-      domain
-    }) => domain);
-  }).then(normalizedDomain => {
-    if (!(0, _src2.matchDomain)(targetDomain, targetDomain)) {
-      throw new Error(`Domain ${(0, _src3.stringify)(targetDomain)} does not match ${(0, _src3.stringify)(targetDomain)}`);
+    if (typeof targetDomain === 'string') {
+      return targetDomain;
     }
 
-    return normalizedDomain;
+    return _src.ZalgoPromise.try(() => {
+      return actualDomain || (0, _lib.sayHello)(win, {
+        send
+      }).then(({
+        domain
+      }) => domain);
+    }).then(normalizedDomain => {
+      if (!(0, _src2.matchDomain)(targetDomain, targetDomain)) {
+        throw new Error(`Domain ${(0, _src3.stringify)(targetDomain)} does not match ${(0, _src3.stringify)(targetDomain)}`);
+      }
+
+      return normalizedDomain;
+    });
   });
 }
 
 const send = (win, name, data, options) => {
   options = options || {};
-  let domain = options.domain || _conf.WILDCARD;
+  const domainMatcher = options.domain || _conf.WILDCARD;
   const responseTimeout = options.timeout || _conf.RES_TIMEOUT;
   const childTimeout = options.timeout || _conf.CHILD_WINDOW_TIMEOUT;
   const fireAndForget = options.fireAndForget || false; // $FlowFixMe
 
   return _src.ZalgoPromise.try(() => {
-    validateOptions(name, win, domain);
+    validateOptions(name, win, domainMatcher);
 
     if ((0, _src2.isAncestor)(window, win)) {
       return (0, _lib.awaitWindowHello)(win, childTimeout);
@@ -73,11 +75,11 @@ const send = (win, name, data, options) => {
   }).then(({
     domain: actualDomain
   } = {}) => {
-    return normalizeDomain(win, domain, actualDomain, {
+    return normalizeDomain(win, domainMatcher, actualDomain, {
       send
     });
   }).then(targetDomain => {
-    domain = targetDomain;
+    const domain = targetDomain;
     const logName = name === _conf.MESSAGE_NAME.METHOD && data && typeof data.name === 'string' ? `${data.name}()` : name;
 
     if (__DEBUG__) {
@@ -132,22 +134,22 @@ const send = (win, name, data, options) => {
       }).catch(_src3.noop);
     }
 
-    try {
-      (0, _drivers.sendMessage)(win, domain, {
-        type: _conf.MESSAGE_TYPE.REQUEST,
-        hash,
-        name,
-        data,
-        fireAndForget
-      }, {
-        on: _on.on,
-        send
-      });
-    } catch (err) {
+    return (0, _drivers.sendMessage)(win, domain, {
+      id: (0, _src3.uniqueID)(),
+      origin: (0, _src2.getDomain)(window),
+      type: _conf.MESSAGE_TYPE.REQUEST,
+      hash,
+      name,
+      data,
+      fireAndForget
+    }, {
+      on: _on.on,
+      send
+    }).then(() => {
+      return fireAndForget ? promise.resolve() : promise;
+    }, err => {
       throw new Error(`Send request message failed for ${logName} in ${(0, _src2.getDomain)()}\n\n${(0, _src3.stringifyError)(err)}`);
-    }
-
-    return fireAndForget ? promise.resolve() : promise;
+    });
   });
 };
 

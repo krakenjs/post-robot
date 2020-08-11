@@ -17,54 +17,33 @@ const SEND_MESSAGE_STRATEGIES = {};
 exports.SEND_MESSAGE_STRATEGIES = SEND_MESSAGE_STRATEGIES;
 
 SEND_MESSAGE_STRATEGIES[_conf.SEND_STRATEGY.POST_MESSAGE] = (win, serializedMessage, domain) => {
+  if (domain.indexOf(_src.PROTOCOL.FILE) === 0) {
+    domain = _conf.WILDCARD;
+  }
+
   if (__TEST__) {
     if ((0, _lib.needsGlobalMessagingForBrowser)() && (0, _src.isSameTopWindow)(window, win) === false) {
       return;
     }
+
+    if (domain.indexOf(_src.PROTOCOL.MOCK) === 0) {
+      if (!(0, _src.isActuallySameDomain)(win)) {
+        throw new Error(`Attempting to send message to mock domain ${domain}, but window is actually cross-domain`);
+      } // $FlowFixMe
+
+
+      const windowDomain = (0, _src.getDomain)(win);
+
+      if (windowDomain !== domain) {
+        throw new Error(`Mock domain target ${domain} does not match window domain ${windowDomain}`);
+      } // $FlowFixMe
+
+
+      domain = (0, _src.getActualDomain)(win);
+    }
   }
 
-  let domains;
-
-  if (Array.isArray(domain)) {
-    domains = domain;
-  } else if (typeof domain === 'string') {
-    domains = [domain];
-  } else {
-    domains = [_conf.WILDCARD];
-  }
-
-  domains = domains.map(dom => {
-    if (__TEST__) {
-      if (dom.indexOf(_src.PROTOCOL.MOCK) === 0) {
-        if (window.location.protocol === _src.PROTOCOL.FILE) {
-          return _conf.WILDCARD;
-        }
-
-        if (!(0, _src.isActuallySameDomain)(win)) {
-          throw new Error(`Attempting to send messsage to mock domain ${dom}, but window is actually cross-domain`);
-        } // $FlowFixMe
-
-
-        const windowDomain = (0, _src.getDomain)(win);
-
-        if (windowDomain !== dom) {
-          throw new Error(`Mock domain target ${dom} does not match window domain ${windowDomain}`);
-        } // $FlowFixMe
-
-
-        return (0, _src.getActualDomain)(win);
-      }
-    }
-
-    if (dom.indexOf(_src.PROTOCOL.FILE) === 0) {
-      return _conf.WILDCARD;
-    }
-
-    return dom;
-  });
-  domains.forEach(dom => {
-    win.postMessage(serializedMessage, dom);
-  });
+  win.postMessage(serializedMessage, domain);
 };
 
 if (__POST_ROBOT__.__IE_POPUP_SUPPORT__) {

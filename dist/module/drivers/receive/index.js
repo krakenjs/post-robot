@@ -7,9 +7,13 @@ exports.messageListener = messageListener;
 exports.listenForMessages = listenForMessages;
 exports.stopListenForMessages = stopListenForMessages;
 
-var _src = require("cross-domain-utils/src");
+var _src = require("zalgo-promise/src");
 
-var _src2 = require("belter/src");
+var _src2 = require("cross-domain-utils/src");
+
+var _src3 = require("belter/src");
+
+var _conf = require("../../conf");
 
 var _lib = require("../../lib");
 
@@ -19,7 +23,7 @@ var _global = require("../../global");
 
 var _types = require("./types");
 
-function parseMessage(message, source, origin, {
+function deserializeMessages(message, source, origin, {
   on,
   send
 }) {
@@ -42,21 +46,13 @@ function parseMessage(message, source, origin, {
     return;
   }
 
-  parsedMessage = parsedMessage[__POST_ROBOT__.__GLOBAL_KEY__];
+  const parseMessages = parsedMessage[__POST_ROBOT__.__GLOBAL_KEY__];
 
-  if (!parsedMessage || typeof parsedMessage !== 'object' || parsedMessage === null) {
+  if (!Array.isArray(parseMessages)) {
     return;
   }
 
-  if (!parsedMessage.type || typeof parsedMessage.type !== 'string') {
-    return;
-  }
-
-  if (!_types.RECEIVE_MESSAGE_TYPES[parsedMessage.type]) {
-    return;
-  }
-
-  return parsedMessage;
+  return parseMessages;
 }
 
 function receiveMessage(event, {
@@ -81,38 +77,52 @@ function receiveMessage(event, {
 
   if (__TEST__) {
     // $FlowFixMe
-    origin = (0, _src.getDomain)(source);
+    origin = (0, _src2.getDomain)(source);
   }
 
-  const message = parseMessage(data, source, origin, {
+  const messages = deserializeMessages(data, source, origin, {
     on,
     send
   });
 
-  if (!message) {
+  if (!messages) {
     return;
   }
 
   (0, _lib.markWindowKnown)(source);
 
-  if (receivedMessages.has(message.id)) {
-    return;
+  for (const message of messages) {
+    if (receivedMessages.has(message.id)) {
+      return;
+    }
+
+    receivedMessages.set(message.id, true);
+
+    if ((0, _src2.isWindowClosed)(source) && !message.fireAndForget) {
+      return;
+    }
+
+    if (message.origin.indexOf(_src2.PROTOCOL.FILE) === 0) {
+      origin = `${_src2.PROTOCOL.FILE}//`;
+    }
+
+    try {
+      if (message.type === _conf.MESSAGE_TYPE.REQUEST) {
+        _types.RECEIVE_MESSAGE_TYPES[_conf.MESSAGE_TYPE.REQUEST](source, origin, message, {
+          on,
+          send
+        });
+      } else if (message.type === _conf.MESSAGE_TYPE.RESPONSE) {
+        _types.RECEIVE_MESSAGE_TYPES[_conf.MESSAGE_TYPE.RESPONSE](source, origin, message);
+      } else if (message.type === _conf.MESSAGE_TYPE.ACK) {
+        _types.RECEIVE_MESSAGE_TYPES[_conf.MESSAGE_TYPE.ACK](source, origin, message);
+      }
+    } catch (err) {
+      setTimeout(() => {
+        throw err;
+      }, 0);
+    }
   }
-
-  receivedMessages.set(message.id, true);
-
-  if ((0, _src.isWindowClosed)(source) && !message.fireAndForget) {
-    return;
-  }
-
-  if (message.origin.indexOf(_src.PROTOCOL.FILE) === 0) {
-    origin = `${_src.PROTOCOL.FILE}//`;
-  }
-
-  _types.RECEIVE_MESSAGE_TYPES[message.type](source, origin, message, {
-    on,
-    send
-  });
 }
 
 function setupGlobalReceiveMessage({
@@ -131,41 +141,43 @@ function messageListener(event, {
   on,
   send
 }) {
-  try {
-    (0, _src2.noop)(event.source);
-  } catch (err) {
-    return;
-  }
-
-  const source = event.source || event.sourceElement;
-  let origin = event.origin || event.originalEvent && event.originalEvent.origin;
-  const data = event.data;
-
-  if (origin === 'null') {
-    origin = `${_src.PROTOCOL.FILE}//`;
-  }
-
-  if (!source) {
-    return;
-  }
-
-  if (!origin) {
-    throw new Error(`Post message did not have origin domain`);
-  }
-
-  if (__TEST__) {
-    if ((0, _lib.needsGlobalMessagingForBrowser)() && (0, _src.isSameTopWindow)(source, window) === false) {
+  _src.ZalgoPromise.try(() => {
+    try {
+      (0, _src3.noop)(event.source);
+    } catch (err) {
       return;
     }
-  }
 
-  receiveMessage({
-    source,
-    origin,
-    data
-  }, {
-    on,
-    send
+    const source = event.source || event.sourceElement;
+    let origin = event.origin || event.originalEvent && event.originalEvent.origin;
+    const data = event.data;
+
+    if (origin === 'null') {
+      origin = `${_src2.PROTOCOL.FILE}//`;
+    }
+
+    if (!source) {
+      return;
+    }
+
+    if (!origin) {
+      throw new Error(`Post message did not have origin domain`);
+    }
+
+    if (__TEST__) {
+      if ((0, _lib.needsGlobalMessagingForBrowser)() && (0, _src2.isSameTopWindow)(source, window) === false) {
+        return;
+      }
+    }
+
+    receiveMessage({
+      source,
+      origin,
+      data
+    }, {
+      on,
+      send
+    });
   });
 }
 
@@ -174,7 +186,7 @@ function listenForMessages({
   send
 }) {
   return (0, _global.globalStore)().getOrSet('postMessageListener', () => {
-    return (0, _src2.addEventListener)(window, 'message', event => {
+    return (0, _src3.addEventListener)(window, 'message', event => {
       // $FlowFixMe
       messageListener(event, {
         on,

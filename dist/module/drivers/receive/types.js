@@ -32,39 +32,64 @@ const RECEIVE_MESSAGE_TYPES = {
       console.info('receive::req', logName, origin, '\n\n', message.data);
     }
 
-    function sendResponse(type, ack, response = {}) {
-      if (message.fireAndForget || (0, _src2.isWindowClosed)(source)) {
-        return;
-      }
-
-      if (__DEBUG__ && type !== _conf.MESSAGE_TYPE.ACK) {
-        if (ack === _conf.MESSAGE_ACK.SUCCESS) {
-          // $FlowFixMe
-          console.info('respond::res', logName, origin, '\n\n', response.data); // eslint-disable-line no-console
-        } else if (ack === _conf.MESSAGE_ACK.ERROR) {
-          // $FlowFixMe
-          console.error('respond::err', logName, origin, '\n\n', response.error); // eslint-disable-line no-console
+    function sendAck() {
+      return _src.ZalgoPromise.flush().then(() => {
+        if (message.fireAndForget || (0, _src2.isWindowClosed)(source)) {
+          return;
         }
-      }
 
-      try {
-        // $FlowFixMe
-        (0, _send.sendMessage)(source, origin, {
-          type,
-          ack,
-          hash: message.hash,
-          name: message.name,
-          ...response
-        }, {
-          on,
-          send
-        });
-      } catch (err) {
-        throw new Error(`Send response message failed for ${logName} in ${(0, _src2.getDomain)()}\n\n${(0, _src3.stringifyError)(err)}`);
-      }
+        try {
+          return (0, _send.sendMessage)(source, origin, {
+            id: (0, _src3.uniqueID)(),
+            origin: (0, _src2.getDomain)(window),
+            type: _conf.MESSAGE_TYPE.ACK,
+            hash: message.hash,
+            name: message.name
+          }, {
+            on,
+            send
+          });
+        } catch (err) {
+          throw new Error(`Send ack message failed for ${logName} in ${(0, _src2.getDomain)()}\n\n${(0, _src3.stringifyError)(err)}`);
+        }
+      });
     }
 
-    return _src.ZalgoPromise.all([sendResponse(_conf.MESSAGE_TYPE.ACK), _src.ZalgoPromise.try(() => {
+    function sendResponse(ack, data, error) {
+      return _src.ZalgoPromise.flush().then(() => {
+        if (message.fireAndForget || (0, _src2.isWindowClosed)(source)) {
+          return;
+        }
+
+        if (__DEBUG__) {
+          if (ack === _conf.MESSAGE_ACK.SUCCESS) {
+            console.info('respond::res', logName, origin, '\n\n', data); // eslint-disable-line no-console
+          } else if (ack === _conf.MESSAGE_ACK.ERROR) {
+            console.error('respond::err', logName, origin, '\n\n', error); // eslint-disable-line no-console
+          }
+        }
+
+        try {
+          return (0, _send.sendMessage)(source, origin, {
+            id: (0, _src3.uniqueID)(),
+            origin: (0, _src2.getDomain)(window),
+            type: _conf.MESSAGE_TYPE.RESPONSE,
+            hash: message.hash,
+            name: message.name,
+            ack,
+            data,
+            error
+          }, {
+            on,
+            send
+          });
+        } catch (err) {
+          throw new Error(`Send response message failed for ${logName} in ${(0, _src2.getDomain)()}\n\n${(0, _src3.stringifyError)(err)}`);
+        }
+      });
+    }
+
+    return _src.ZalgoPromise.all([sendAck(), _src.ZalgoPromise.try(() => {
       if (!options) {
         throw new Error(`No handler found for post message: ${message.name} from ${origin} in ${window.location.protocol}//${window.location.host}${window.location.pathname}`);
       }
@@ -80,13 +105,9 @@ const RECEIVE_MESSAGE_TYPES = {
         data
       });
     }).then(data => {
-      return sendResponse(_conf.MESSAGE_TYPE.RESPONSE, _conf.MESSAGE_ACK.SUCCESS, {
-        data
-      });
+      return sendResponse(_conf.MESSAGE_ACK.SUCCESS, data);
     }, error => {
-      return sendResponse(_conf.MESSAGE_TYPE.RESPONSE, _conf.MESSAGE_ACK.ERROR, {
-        error
-      });
+      return sendResponse(_conf.MESSAGE_ACK.ERROR, null, error);
     })]).then(_src3.noop).catch(err => {
       if (options && options.handleError) {
         return options.handleError(err);

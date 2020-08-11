@@ -113,7 +113,11 @@ function initHello({
     if (parent) {
       sayHello(parent, {
         send
-      }).catch(_src3.noop);
+      }).catch(err => {
+        if (__TEST__ && parent[__POST_ROBOT__.__GLOBAL_KEY__]) {
+          throw err;
+        }
+      });
     }
 
     return listener;
