@@ -5,7 +5,7 @@ import { ZalgoPromise } from 'zalgo-promise/src';
 import { uniqueID } from 'belter/src';
 
 import { MESSAGE_NAME, WILDCARD } from '../conf';
-import { windowStore, globalStore } from '../global';
+import { windowStore, globalStore, getGlobal } from '../global';
 import type { OnType, SendType, CancelableType } from '../types';
 
 function getInstanceID() : string {
@@ -56,7 +56,8 @@ export function initHello({ on, send } : {| on : OnType, send : SendType |}) : C
         const parent = getAncestor();
         if (parent) {
             sayHello(parent, { send }).catch(err => {
-                if (__TEST__ && parent[__POST_ROBOT__.__GLOBAL_KEY__]) {
+                // $FlowFixMe
+                if (__TEST__ && getGlobal(parent)) {
                     throw err;
                 }
             });

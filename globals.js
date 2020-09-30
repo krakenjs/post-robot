@@ -12,6 +12,7 @@ module.exports = {
         __GLOBAL_KEY__:              `__post_robot_${ formatVersion(pkg.version) }__`,
         __AUTO_SETUP__:              true,
         __IE_POPUP_SUPPORT__:        true,
-        __GLOBAL_MESSAGE_SUPPORT__:  true
+        __GLOBAL_MESSAGE_SUPPORT__:  true,
+        __SCRIPT_NAMESPACE__:        false
     }
 };

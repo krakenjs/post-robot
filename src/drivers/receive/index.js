@@ -8,7 +8,7 @@ import type { Message } from '../types';
 import { MESSAGE_TYPE } from '../../conf';
 import { markWindowKnown, needsGlobalMessagingForBrowser } from '../../lib';
 import { deserializeMessage } from '../../serialize';
-import { getGlobal, globalStore } from '../../global';
+import { getGlobal, globalStore, getGlobalKey } from '../../global';
 import type { OnType, SendType, MessageEvent, CancelableType } from '../../types';
 
 import { RECEIVE_MESSAGE_TYPES } from './types';
@@ -30,7 +30,7 @@ function deserializeMessages(message : string, source : CrossDomainWindowType, o
         return;
     }
 
-    const parseMessages = parsedMessage[__POST_ROBOT__.__GLOBAL_KEY__];
+    const parseMessages = parsedMessage[getGlobalKey()];
 
     if (!Array.isArray(parseMessages)) {
         return;

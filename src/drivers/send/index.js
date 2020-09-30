@@ -5,7 +5,7 @@ import { isWindowClosed, type CrossDomainWindowType } from 'cross-domain-utils/s
 import { stringifyError, noop } from 'belter/src';
 
 import { serializeMessage } from '../../serialize';
-import { windowStore } from '../../global';
+import { windowStore, getGlobalKey } from '../../global';
 import type { Message, PackedMessages } from '../types';
 import type { OnType, SendType } from '../../types';
 
@@ -13,7 +13,7 @@ import { SEND_MESSAGE_STRATEGIES } from './strategies';
 
 function packMessages(messages : $ReadOnlyArray<Message>) : PackedMessages {
     return {
-        [ __POST_ROBOT__.__GLOBAL_KEY__ ]: messages
+        [ getGlobalKey() ]: messages
     };
 }
 

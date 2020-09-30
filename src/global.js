@@ -2,18 +2,29 @@
 
 import { type CrossDomainWindowType, type SameDomainWindowType } from 'cross-domain-utils/src';
 import { WeakMap } from 'cross-domain-safe-weakmap/src';
-import { getOrSet } from 'belter/src';
+import { getOrSet, getCurrentScriptUID } from 'belter/src';
+
+export function getGlobalKey() : string {
+    if (__POST_ROBOT__.__SCRIPT_NAMESPACE__) {
+        return `${ __POST_ROBOT__.__GLOBAL_KEY__ }_${ getCurrentScriptUID() }`;
+    } else {
+        return __POST_ROBOT__.__GLOBAL_KEY__;
+    }
+}
 
 export function getGlobal(win : SameDomainWindowType = window) : Object {
+    const globalKey = getGlobalKey();
+
     if (win !== window) {
-        return win[__POST_ROBOT__.__GLOBAL_KEY__];
+        return win[globalKey];
     }
-    const global : Object = win[__POST_ROBOT__.__GLOBAL_KEY__] = win[__POST_ROBOT__.__GLOBAL_KEY__] || {};
+    const global : Object = win[globalKey] = win[globalKey] || {};
     return global;
 }
 
 export function deleteGlobal() {
-    delete window[__POST_ROBOT__.__GLOBAL_KEY__];
+    const globalKey = getGlobalKey();
+    delete window[globalKey];
 }
 
 type ObjectGetter = () => Object;
