@@ -17,7 +17,7 @@ var _strategies = require("./strategies");
 
 function packMessages(messages) {
   return {
-    [__POST_ROBOT__.__GLOBAL_KEY__]: messages
+    [(0, _global.getGlobalKey)()]: messages
   };
 }
 

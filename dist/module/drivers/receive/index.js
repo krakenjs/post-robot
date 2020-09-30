@@ -46,7 +46,7 @@ function deserializeMessages(message, source, origin, {
     return;
   }
 
-  const parseMessages = parsedMessage[__POST_ROBOT__.__GLOBAL_KEY__];
+  const parseMessages = parsedMessage[(0, _global.getGlobalKey)()];
 
   if (!Array.isArray(parseMessages)) {
     return;

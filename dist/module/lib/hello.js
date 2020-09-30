@@ -114,7 +114,8 @@ function initHello({
       sayHello(parent, {
         send
       }).catch(err => {
-        if (__TEST__ && parent[__POST_ROBOT__.__GLOBAL_KEY__]) {
+        // $FlowFixMe
+        if (__TEST__ && (0, _global.getGlobal)(parent)) {
           throw err;
         }
       });

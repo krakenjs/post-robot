@@ -778,6 +778,17 @@
             };
             return CrossDomainSafeWeakMap;
         }();
+        function getFunctionName(fn) {
+            return fn.name || fn.__name__ || fn.displayName || "anonymous";
+        }
+        function setFunctionName(fn, name) {
+            try {
+                delete fn.name;
+                fn.name = name;
+            } catch (err) {}
+            fn.__name__ = fn.displayName = name;
+            return fn;
+        }
         function uniqueID() {
             var chars = "0123456789abcdef";
             return "xxxxxxxxxx".replace(/./g, (function() {
@@ -809,6 +820,37 @@
                 throw new Error("Arguments not serializable -- can not be used to memoize");
             }
         }
+        var memoizedFunctions = [];
+        function memoize(method, options) {
+            var _this = this;
+            void 0 === options && (options = {});
+            var cacheMap = new weakmap_CrossDomainSafeWeakMap;
+            var memoizedFunction = function() {
+                for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) args[_key] = arguments[_key];
+                var cache = cacheMap.getOrSet(options.thisNamespace ? this : method, (function() {
+                    return {};
+                }));
+                var key = serializeArgs(args);
+                var cacheTime = options.time;
+                cache[key] && cacheTime && Date.now() - cache[key].time < cacheTime && delete cache[key];
+                if (cache[key]) return cache[key].value;
+                var time = Date.now();
+                var value = method.apply(this, arguments);
+                cache[key] = {
+                    time: time,
+                    value: value
+                };
+                return cache[key].value;
+            };
+            memoizedFunction.reset = function() {
+                cacheMap.delete(options.thisNamespace ? _this : method);
+            };
+            memoizedFunctions.push(memoizedFunction);
+            return setFunctionName(memoizedFunction, (options.name || getFunctionName(method)) + "::memoized");
+        }
+        memoize.clear = function() {
+            for (var _i2 = 0; _i2 < memoizedFunctions.length; _i2++) memoizedFunctions[_i2].reset();
+        };
         function memoizePromise(method) {
             var cache = {};
             function memoizedPromiseFunction() {
@@ -826,15 +868,7 @@
             memoizedPromiseFunction.reset = function() {
                 cache = {};
             };
-            return function(fn, name) {
-                try {
-                    delete fn.name;
-                    fn.name = name;
-                } catch (err) {}
-                fn.__name__ = fn.displayName = name;
-                return fn;
-            }(memoizedPromiseFunction, ((fn = method).name || fn.__name__ || fn.displayName || "anonymous") + "::promiseMemoized");
-            var fn;
+            return setFunctionName(memoizedPromiseFunction, getFunctionName(method) + "::promiseMemoized");
         }
         function src_util_noop() {}
         function stringifyError(err, level) {
@@ -867,10 +901,64 @@
             obj[key] = val;
             return val;
         }
+        memoize((function(obj) {
+            var result = [];
+            for (var key in obj) obj.hasOwnProperty(key) && result.push(obj[key]);
+            return result;
+        }));
+        function isDocumentReady() {
+            return Boolean(document.body) && "complete" === document.readyState;
+        }
+        function isDocumentInteractive() {
+            return Boolean(document.body) && "interactive" === document.readyState;
+        }
+        memoize((function() {
+            return new promise_ZalgoPromise((function(resolve) {
+                if (isDocumentReady() || isDocumentInteractive()) return resolve();
+                var interval = setInterval((function() {
+                    if (isDocumentReady() || isDocumentInteractive()) {
+                        clearInterval(interval);
+                        return resolve();
+                    }
+                }), 10);
+            }));
+        }));
         Object.create(Error.prototype);
+        var currentScript = "undefined" != typeof document ? document.currentScript : null;
+        var getCurrentScript = memoize((function() {
+            if (currentScript) return currentScript;
+            if (currentScript = function() {
+                try {
+                    var stack = function() {
+                        try {
+                            throw new Error("_");
+                        } catch (err) {
+                            return err.stack || "";
+                        }
+                    }();
+                    var stackDetails = /.*at [^(]*\((.*):(.+):(.+)\)$/gi.exec(stack);
+                    var scriptLocation = stackDetails && stackDetails[1];
+                    if (!scriptLocation) return;
+                    for (var _i20 = 0, _Array$prototype$slic2 = [].slice.call(document.getElementsByTagName("script")).reverse(); _i20 < _Array$prototype$slic2.length; _i20++) {
+                        var script = _Array$prototype$slic2[_i20];
+                        if (script.src && script.src === scriptLocation) return script;
+                    }
+                } catch (err) {}
+            }()) return currentScript;
+            throw new Error("Can not determine current script");
+        }));
+        memoize((function() {
+            var script = getCurrentScript();
+            var uid = script.getAttribute("data-uid");
+            if (uid && "string" == typeof uid) return uid;
+            uid = uniqueID();
+            script.setAttribute("data-uid", uid);
+            return uid;
+        }));
         function global_getGlobal(win) {
             void 0 === win && (win = window);
-            return win !== window ? win.__post_robot_10_0_39__ : win.__post_robot_10_0_39__ = win.__post_robot_10_0_39__ || {};
+            var globalKey = "__post_robot_10_0_40__";
+            return win !== window ? win[globalKey] : win[globalKey] = win[globalKey] || {};
         }
         var getObj = function() {
             return {};
@@ -1521,7 +1609,7 @@
                 domainBuffer.buffer.push(message);
                 domainBuffer.flush = domainBuffer.flush || promise_ZalgoPromise.flush().then((function() {
                     if (isWindowClosed(win)) throw new Error("Window is closed");
-                    var serializedMessage = serializeMessage(win, domain, ((_ref = {}).__post_robot_10_0_39__ = domainBuffer.buffer || [], 
+                    var serializedMessage = serializeMessage(win, domain, ((_ref = {}).__post_robot_10_0_40__ = domainBuffer.buffer || [], 
                     _ref), {
                         on: on,
                         send: send
@@ -1692,7 +1780,7 @@
                     return;
                 }
                 if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage) {
-                    var parseMessages = parsedMessage.__post_robot_10_0_39__;
+                    var parseMessages = parsedMessage.__post_robot_10_0_40__;
                     if (Array.isArray(parseMessages)) return parseMessages;
                 }
             }(event.data, source, origin, {
@@ -2094,7 +2182,7 @@
             }();
             (listener = globalStore().get("postMessageListener")) && listener.cancel();
             var listener;
-            delete window.__post_robot_10_0_39__;
+            delete window.__post_robot_10_0_40__;
         }
         var src_types_TYPES_0 = !0;
         function cleanUpWindow(win) {

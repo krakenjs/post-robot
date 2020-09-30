@@ -1,6 +1,7 @@
 "use strict";
 
 exports.__esModule = true;
+exports.getGlobalKey = getGlobalKey;
 exports.getGlobal = getGlobal;
 exports.deleteGlobal = deleteGlobal;
 exports.globalStore = globalStore;
@@ -12,17 +13,28 @@ var _src = require("cross-domain-safe-weakmap/src");
 
 var _src2 = require("belter/src");
 
+function getGlobalKey() {
+  if (__POST_ROBOT__.__SCRIPT_NAMESPACE__) {
+    return `${__POST_ROBOT__.__GLOBAL_KEY__}_${(0, _src2.getCurrentScriptUID)()}`;
+  } else {
+    return __POST_ROBOT__.__GLOBAL_KEY__;
+  }
+}
+
 function getGlobal(win = window) {
+  const globalKey = getGlobalKey();
+
   if (win !== window) {
-    return win[__POST_ROBOT__.__GLOBAL_KEY__];
+    return win[globalKey];
   }
 
-  const global = win[__POST_ROBOT__.__GLOBAL_KEY__] = win[__POST_ROBOT__.__GLOBAL_KEY__] || {};
+  const global = win[globalKey] = win[globalKey] || {};
   return global;
 }
 
 function deleteGlobal() {
-  delete window[__POST_ROBOT__.__GLOBAL_KEY__];
+  const globalKey = getGlobalKey();
+  delete window[globalKey];
 }
 
 const getObj = () => ({});
