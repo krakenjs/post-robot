@@ -12,6 +12,8 @@ export { setup, destroy, serializeMessage, deserializeMessage, createProxyWindow
 export { on, once, send } from './public';
 export { markWindowKnown } from './lib';
 export { cleanUpWindow } from './clean';
+
+// $FlowFixMe
 export let bridge;
 
 if (__POST_ROBOT__.__IE_POPUP_SUPPORT__) {

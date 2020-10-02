@@ -72,7 +72,7 @@ export function isBridge() : boolean {
     return Boolean(window.name && window.name === getBridgeName(getDomain()));
 }
 
-export const documentBodyReady = new ZalgoPromise(resolve => {
+export const documentBodyReady : ZalgoPromise<HTMLBodyElement> = new ZalgoPromise(resolve => {
 
     if (window.document && window.document.body) {
         return resolve(window.document.body);

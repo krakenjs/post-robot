@@ -53,7 +53,11 @@ export function on(name : string, options : ServerOptionsType | HandlerType, han
     };
 }
 
-export function once(name : string, options? : ServerOptionsType | HandlerType, handler? : HandlerType) : ZalgoPromise<{| source : mixed, origin : string, data : Object |}> {
+type CancelableZalgoPromise<T> = ZalgoPromise<T> & {|
+    cancel : () => void
+|};
+
+export function once(name : string, options? : ServerOptionsType | HandlerType, handler? : HandlerType) : CancelableZalgoPromise<{| source : mixed, origin : string, data : Object |}> {
     
     options = options || getDefaultServerOptions();
     if (typeof options === 'function') {
@@ -77,6 +81,9 @@ export function once(name : string, options? : ServerOptionsType | HandlerType, 
         }
     });
 
+    // $FlowFixMe
     promise.cancel = listener.cancel;
+
+    // $FlowFixMe
     return promise;
 }

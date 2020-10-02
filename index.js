@@ -1,7 +1,7 @@
 /* @flow */
 
-// eslint-disable-next-line import/no-commonjs
-module.exports = require('./dist/post-robot');
+// $FlowFixMe
+module.exports = require('./dist/post-robot'); // eslint-disable-line import/no-commonjs
 
-// eslint-disable-next-line import/no-commonjs
-module.exports.default = module.exports;
+// $FlowFixMe
+module.exports.default = module.exports; // eslint-disable-line import/no-commonjs

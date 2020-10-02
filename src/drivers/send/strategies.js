@@ -8,7 +8,11 @@ import { needsGlobalMessagingForBrowser } from '../../lib';
 import { getGlobal } from '../../global';
 import { sendBridgeMessage, needsBridgeForBrowser, isBridge } from '../../bridge';
 
-export const SEND_MESSAGE_STRATEGIES = {};
+type SendStrategies = {|
+    [$Values<typeof SEND_STRATEGY>] : (CrossDomainWindowType, string, string) => void
+|};
+
+export const SEND_MESSAGE_STRATEGIES : SendStrategies = {};
 
 SEND_MESSAGE_STRATEGIES[SEND_STRATEGY.POST_MESSAGE] = (win : CrossDomainWindowType, serializedMessage : string, domain : string) => {
     if (domain.indexOf(PROTOCOL.FILE) === 0) {
