@@ -108,14 +108,14 @@ function receiveMessage(event, {
 
     try {
       if (message.type === _conf.MESSAGE_TYPE.REQUEST) {
-        _types.RECEIVE_MESSAGE_TYPES[_conf.MESSAGE_TYPE.REQUEST](source, origin, message, {
+        (0, _types.handleRequest)(source, origin, message, {
           on,
           send
         });
       } else if (message.type === _conf.MESSAGE_TYPE.RESPONSE) {
-        _types.RECEIVE_MESSAGE_TYPES[_conf.MESSAGE_TYPE.RESPONSE](source, origin, message);
+        (0, _types.handleResponse)(source, origin, message);
       } else if (message.type === _conf.MESSAGE_TYPE.ACK) {
-        _types.RECEIVE_MESSAGE_TYPES[_conf.MESSAGE_TYPE.ACK](source, origin, message);
+        (0, _types.handleAck)(source, origin, message);
       }
     } catch (err) {
       setTimeout(() => {

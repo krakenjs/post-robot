@@ -892,6 +892,12 @@
         function stringify(item) {
             return "string" == typeof item ? item : item && item.toString && "function" == typeof item.toString ? item.toString() : {}.toString.call(item);
         }
+        memoize((function(obj) {
+            if (Object.values) return Object.values(obj);
+            var result = [];
+            for (var key in obj) obj.hasOwnProperty(key) && result.push(obj[key]);
+            return result;
+        }));
         function util_isRegex(item) {
             return "[object RegExp]" === {}.toString.call(item);
         }
@@ -901,11 +907,7 @@
             obj[key] = val;
             return val;
         }
-        memoize((function(obj) {
-            var result = [];
-            for (var key in obj) obj.hasOwnProperty(key) && result.push(obj[key]);
-            return result;
-        }));
+        Error;
         function isDocumentReady() {
             return Boolean(document.body) && "complete" === document.readyState;
         }
@@ -923,7 +925,6 @@
                 }), 10);
             }));
         }));
-        Object.create(Error.prototype);
         var currentScript = "undefined" != typeof document ? document.currentScript : null;
         var getCurrentScript = memoize((function() {
             if (currentScript) return currentScript;
@@ -947,8 +948,14 @@
             }()) return currentScript;
             throw new Error("Can not determine current script");
         }));
+        var currentUID = uniqueID();
         memoize((function() {
-            var script = getCurrentScript();
+            var script;
+            try {
+                script = getCurrentScript();
+            } catch (err) {
+                return currentUID;
+            }
             var uid = script.getAttribute("data-uid");
             if (uid && "string" == typeof uid) return uid;
             uid = uniqueID();
@@ -957,7 +964,7 @@
         }));
         function global_getGlobal(win) {
             void 0 === win && (win = window);
-            var globalKey = "__post_robot_10_0_40__";
+            var globalKey = "__post_robot_10_0_41__";
             return win !== window ? win[globalKey] : win[globalKey] = win[globalKey] || {};
         }
         var getObj = function() {
@@ -1609,7 +1616,7 @@
                 domainBuffer.buffer.push(message);
                 domainBuffer.flush = domainBuffer.flush || promise_ZalgoPromise.flush().then((function() {
                     if (isWindowClosed(win)) throw new Error("Window is closed");
-                    var serializedMessage = serializeMessage(win, domain, ((_ref = {}).__post_robot_10_0_40__ = domainBuffer.buffer || [], 
+                    var serializedMessage = serializeMessage(win, domain, ((_ref = {}).__post_robot_10_0_41__ = domainBuffer.buffer || [], 
                     _ref), {
                         on: on,
                         send: send
@@ -1670,8 +1677,7 @@
                 }
             }
         }
-        var _RECEIVE_MESSAGE_TYPE;
-        var RECEIVE_MESSAGE_TYPES = ((_RECEIVE_MESSAGE_TYPE = {}).postrobot_message_request = function(source, origin, message, _ref) {
+        function handleRequest(source, origin, message, _ref) {
             var on = _ref.on, send = _ref.send;
             var options = getRequestListener({
                 name: message.name,
@@ -1731,7 +1737,8 @@
                 if (options && options.handleError) return options.handleError(err);
                 throw err;
             }));
-        }, _RECEIVE_MESSAGE_TYPE.postrobot_message_ack = function(source, origin, message) {
+        }
+        function handleAck(source, origin, message) {
             if (!isResponseListenerErrored(message.hash)) {
                 var options = getResponseListener(message.hash);
                 if (!options) throw new Error("No handler found for post message ack for message: " + message.name + " from " + origin + " in " + window.location.protocol + "//" + window.location.host + window.location.pathname);
@@ -1743,7 +1750,8 @@
                 }
                 options.ack = !0;
             }
-        }, _RECEIVE_MESSAGE_TYPE.postrobot_message_response = function(source, origin, message) {
+        }
+        function handleResponse(source, origin, message) {
             if (!isResponseListenerErrored(message.hash)) {
                 var options = getResponseListener(message.hash);
                 if (!options) throw new Error("No handler found for post message response for message: " + message.name + " from " + origin + " in " + window.location.protocol + "//" + window.location.host + window.location.pathname);
@@ -1758,7 +1766,7 @@
                     data: message.data
                 });
             }
-        }, _RECEIVE_MESSAGE_TYPE);
+        }
         function receive_receiveMessage(event, _ref2) {
             var on = _ref2.on, send = _ref2.send;
             var receivedMessages = globalStore("receivedMessages");
@@ -1780,7 +1788,7 @@
                     return;
                 }
                 if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage) {
-                    var parseMessages = parsedMessage.__post_robot_10_0_40__;
+                    var parseMessages = parsedMessage.__post_robot_10_0_41__;
                     if (Array.isArray(parseMessages)) return parseMessages;
                 }
             }(event.data, source, origin, {
@@ -1796,10 +1804,10 @@
                     if (isWindowClosed(source) && !message.fireAndForget) return;
                     0 === message.origin.indexOf("file:") && (origin = "file://");
                     try {
-                        "postrobot_message_request" === message.type ? RECEIVE_MESSAGE_TYPES.postrobot_message_request(source, origin, message, {
+                        "postrobot_message_request" === message.type ? handleRequest(source, origin, message, {
                             on: on,
                             send: send
-                        }) : "postrobot_message_response" === message.type ? RECEIVE_MESSAGE_TYPES.postrobot_message_response(source, origin, message) : "postrobot_message_ack" === message.type && RECEIVE_MESSAGE_TYPES.postrobot_message_ack(source, origin, message);
+                        }) : "postrobot_message_response" === message.type ? handleResponse(source, origin, message) : "postrobot_message_ack" === message.type && handleAck(source, origin, message);
                     } catch (err) {
                         setTimeout((function() {
                             throw err;
@@ -2182,7 +2190,7 @@
             }();
             (listener = globalStore().get("postMessageListener")) && listener.cancel();
             var listener;
-            delete window.__post_robot_10_0_40__;
+            delete window.__post_robot_10_0_41__;
         }
         var src_types_TYPES_0 = !0;
         function cleanUpWindow(win) {

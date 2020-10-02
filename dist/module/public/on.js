@@ -81,7 +81,9 @@ function once(name, options, handler) {
     if (handler) {
       return handler(event);
     }
-  });
-  promise.cancel = listener.cancel;
+  }); // $FlowFixMe
+
+  promise.cancel = listener.cancel; // $FlowFixMe
+
   return promise;
 }

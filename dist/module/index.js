@@ -59,6 +59,7 @@ exports.markWindowKnown = _lib.markWindowKnown;
 var _clean = require("./clean");
 
 exports.cleanUpWindow = _clean.cleanUpWindow;
+// $FlowFixMe
 let bridge;
 exports.bridge = bridge;
 
