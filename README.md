@@ -106,6 +106,12 @@ var listener = postRobot.on('getUser', function(event) {
 listener.cancel();
 ```
 
+## Cancelling all listeners
+
+```javascript
+postRobot.cancelAll();
+```
+
 ## Listen for messages from a specific window
 
 ```javascript
