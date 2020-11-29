@@ -76,7 +76,11 @@ function receiveMessage(event, {
   } = event;
 
   if (__TEST__) {
-    // $FlowFixMe
+    if ((0, _src2.isWindowClosed)(source)) {
+      return;
+    } // $FlowFixMe
+
+
     origin = (0, _src2.getDomain)(source);
   }
 

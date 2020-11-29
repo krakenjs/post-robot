@@ -820,46 +820,61 @@
                 throw new Error("Arguments not serializable -- can not be used to memoize");
             }
         }
-        var memoizedFunctions = [];
+        function getEmptyObject() {
+            return {};
+        }
+        var memoizeGlobalIndex = 0;
+        var memoizeGlobalIndexValidFrom = 0;
         function memoize(method, options) {
-            var _this = this;
             void 0 === options && (options = {});
-            var cacheMap = new weakmap_CrossDomainSafeWeakMap;
+            var _options$thisNamespac = options.thisNamespace, thisNamespace = void 0 !== _options$thisNamespac && _options$thisNamespac, cacheTime = options.time;
+            var simpleCache;
+            var thisCache;
+            var memoizeIndex = memoizeGlobalIndex;
+            memoizeGlobalIndex += 1;
             var memoizedFunction = function() {
                 for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) args[_key] = arguments[_key];
-                var cache = cacheMap.getOrSet(options.thisNamespace ? this : method, (function() {
-                    return {};
-                }));
-                var key = serializeArgs(args);
-                var cacheTime = options.time;
-                cache[key] && cacheTime && Date.now() - cache[key].time < cacheTime && delete cache[key];
-                if (cache[key]) return cache[key].value;
+                if (memoizeIndex < memoizeGlobalIndexValidFrom) {
+                    simpleCache = null;
+                    thisCache = null;
+                    memoizeIndex = memoizeGlobalIndex;
+                    memoizeGlobalIndex += 1;
+                }
+                var cache;
+                cache = thisNamespace ? (thisCache = thisCache || new weakmap_CrossDomainSafeWeakMap).getOrSet(this, getEmptyObject) : simpleCache = simpleCache || {};
+                var cacheKey = serializeArgs(args);
+                var cacheResult = cache[cacheKey];
+                if (cacheResult && cacheTime && Date.now() - cacheResult.time < cacheTime) {
+                    delete cache[cacheKey];
+                    cacheResult = null;
+                }
+                if (cacheResult) return cacheResult.value;
                 var time = Date.now();
                 var value = method.apply(this, arguments);
-                cache[key] = {
+                cache[cacheKey] = {
                     time: time,
                     value: value
                 };
-                return cache[key].value;
+                return value;
             };
             memoizedFunction.reset = function() {
-                cacheMap.delete(options.thisNamespace ? _this : method);
+                simpleCache = null;
+                thisCache = null;
             };
-            memoizedFunctions.push(memoizedFunction);
             return setFunctionName(memoizedFunction, (options.name || getFunctionName(method)) + "::memoized");
         }
         memoize.clear = function() {
-            for (var _i2 = 0; _i2 < memoizedFunctions.length; _i2++) memoizedFunctions[_i2].reset();
+            memoizeGlobalIndexValidFrom = memoizeGlobalIndex;
         };
         function memoizePromise(method) {
             var cache = {};
             function memoizedPromiseFunction() {
-                var _arguments = arguments, _this2 = this;
+                var _arguments = arguments, _this = this;
                 for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) args[_key2] = arguments[_key2];
                 var key = serializeArgs(args);
                 if (cache.hasOwnProperty(key)) return cache[key];
                 cache[key] = promise_ZalgoPromise.try((function() {
-                    return method.apply(_this2, _arguments);
+                    return method.apply(_this, _arguments);
                 })).finally((function() {
                     delete cache[key];
                 }));
@@ -958,13 +973,14 @@
             }
             var uid = script.getAttribute("data-uid");
             if (uid && "string" == typeof uid) return uid;
+            if ((uid = script.getAttribute("data-uid-auto")) && "string" == typeof uid) return uid;
             uid = uniqueID();
-            script.setAttribute("data-uid", uid);
+            script.setAttribute("data-uid-auto", uid);
             return uid;
         }));
         function global_getGlobal(win) {
             void 0 === win && (win = window);
-            var globalKey = "__post_robot_10_0_41__";
+            var globalKey = "__post_robot_10_0_42__";
             return win !== window ? win[globalKey] : win[globalKey] = win[globalKey] || {};
         }
         var getObj = function() {
@@ -1616,7 +1632,7 @@
                 domainBuffer.buffer.push(message);
                 domainBuffer.flush = domainBuffer.flush || promise_ZalgoPromise.flush().then((function() {
                     if (isWindowClosed(win)) throw new Error("Window is closed");
-                    var serializedMessage = serializeMessage(win, domain, ((_ref = {}).__post_robot_10_0_41__ = domainBuffer.buffer || [], 
+                    var serializedMessage = serializeMessage(win, domain, ((_ref = {}).__post_robot_10_0_42__ = domainBuffer.buffer || [], 
                     _ref), {
                         on: on,
                         send: send
@@ -1788,7 +1804,7 @@
                     return;
                 }
                 if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage) {
-                    var parseMessages = parsedMessage.__post_robot_10_0_41__;
+                    var parseMessages = parsedMessage.__post_robot_10_0_42__;
                     if (Array.isArray(parseMessages)) return parseMessages;
                 }
             }(event.data, source, origin, {
@@ -2190,7 +2206,7 @@
             }();
             (listener = globalStore().get("postMessageListener")) && listener.cancel();
             var listener;
-            delete window.__post_robot_10_0_41__;
+            delete window.__post_robot_10_0_42__;
         }
         var src_types_TYPES_0 = !0;
         function cleanUpWindow(win) {
