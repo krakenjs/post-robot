@@ -53,6 +53,10 @@ export function receiveMessage(event : MessageEvent, { on, send } : {| on : OnTy
     let { source, origin, data } = event;
 
     if (__TEST__) {
+        if (isWindowClosed(source)) {
+            return;
+        }
+
         // $FlowFixMe
         origin = getDomain(source);
     }
