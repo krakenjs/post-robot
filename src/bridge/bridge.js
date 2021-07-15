@@ -80,6 +80,7 @@ export function setupOpenTunnelToParent({ send } : {| send : SendType |}) {
                     return;
                 }
     
+                // $FlowFixMe[object-this-reference]
                 tunnelWindow.sendMessage.apply(this, arguments);
             }
     

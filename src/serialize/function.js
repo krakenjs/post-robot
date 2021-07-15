@@ -168,6 +168,7 @@ export function deserializeFunction<T>(source : CrossDomainWindowType | ProxyWin
                 if (meth && meth.val !== crossDomainFunctionWrapper) {
                     return meth.val.apply({ source: window, origin: getDomain() }, arguments);
                 } else {
+                    // $FlowFixMe[method-unbinding]
                     const args = Array.prototype.slice.call(arguments);
 
                     if (opts.fireAndForget) {
