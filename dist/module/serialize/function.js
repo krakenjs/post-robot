@@ -213,6 +213,7 @@ function deserializeFunction(source, origin, {
             origin: (0, _src.getDomain)()
           }, arguments);
         } else {
+          // $FlowFixMe[method-unbinding]
           const args = Array.prototype.slice.call(arguments);
 
           if (opts.fireAndForget) {

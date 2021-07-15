@@ -92,7 +92,8 @@ function setupOpenTunnelToParent({
           tunnelWindow.canary();
         } catch (err) {
           return;
-        }
+        } // $FlowFixMe[object-this-reference]
+
 
         tunnelWindow.sendMessage.apply(this, arguments);
       }

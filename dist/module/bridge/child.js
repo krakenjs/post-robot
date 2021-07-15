@@ -92,7 +92,9 @@ function openTunnelToOpener({
           try {
             receiveMessage({
               data: message,
+              // $FlowFixMe[object-this-reference]
               origin: this.origin,
+              // $FlowFixMe[object-this-reference]
               source: this.source
             }, {
               on,
