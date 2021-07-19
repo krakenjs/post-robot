@@ -50,41 +50,51 @@ function getSerializedWindow(winPromise, {
   });
   windowNamePromise.catch(_src3.noop);
   windowTypePromise.catch(_src3.noop);
-  return {
-    id,
-    getType: () => {
-      return windowTypePromise;
-    },
-    getInstanceID: (0, _src3.memoizePromise)(() => winPromise.then(win => (0, _lib.getWindowInstanceID)(win, {
-      send
-    }))),
-    close: () => winPromise.then(_src.closeWindow),
-    getName: () => winPromise.then(win => {
-      if ((0, _src.isWindowClosed)(win)) {
-        return;
-      }
 
-      if ((0, _src.isSameDomain)(win)) {
-        return (0, _src.assertSameDomain)(win).name;
-      }
+  const getName = () => winPromise.then(win => {
+    if ((0, _src.isWindowClosed)(win)) {
+      return;
+    }
 
-      return windowNamePromise;
-    }),
-    focus: () => winPromise.then(win => {
-      win.focus();
-    }),
-    isClosed: () => winPromise.then(win => {
-      return (0, _src.isWindowClosed)(win);
-    }),
-    setLocation: href => winPromise.then(win => {
-      const domain = `${window.location.protocol}//${window.location.host}`;
+    if ((0, _src.isSameDomain)(win)) {
+      return (0, _src.assertSameDomain)(win).name;
+    }
 
-      if (href.indexOf('/') === 0) {
-        href = `${domain}${href}`;
-      } else if (!href.match(/^https?:\/\//) && href.indexOf(domain) !== 0) {
-        throw new Error(`Expected url to be http or https url, or absolute path, got ${JSON.stringify(href)}`);
-      }
+    return windowNamePromise;
+  });
 
+  const getDefaultSetLocationOptions = () => {
+    // $FlowFixMe
+    return {};
+  };
+
+  const setLocation = (href, opts = getDefaultSetLocationOptions()) => winPromise.then(win => {
+    const domain = `${window.location.protocol}//${window.location.host}`;
+    const {
+      method = _conf.METHOD.GET,
+      body
+    } = opts;
+
+    if (href.indexOf('/') === 0) {
+      href = `${domain}${href}`;
+    } else if (!href.match(/^https?:\/\//) && href.indexOf(domain) !== 0) {
+      throw new Error(`Expected url to be http or https url, or absolute path, got ${JSON.stringify(href)}`);
+    }
+
+    if (method === _conf.METHOD.POST) {
+      return getName().then(name => {
+        if (!name) {
+          throw new Error(`Can not post to window without target name`);
+        }
+
+        (0, _src3.submitForm)({
+          url: href,
+          target: name,
+          method,
+          body
+        });
+      });
+    } else if (method === _conf.METHOD.GET) {
       if ((0, _src.isSameDomain)(win)) {
         try {
           if (win.location && typeof win.location.replace === 'function') {
@@ -97,7 +107,28 @@ function getSerializedWindow(winPromise, {
       }
 
       win.location = href;
+    } else {
+      throw new Error(`Unsupported method: ${method}`);
+    }
+  });
+
+  return {
+    id,
+    getType: () => {
+      return windowTypePromise;
+    },
+    getInstanceID: (0, _src3.memoizePromise)(() => winPromise.then(win => (0, _lib.getWindowInstanceID)(win, {
+      send
+    }))),
+    close: () => winPromise.then(_src.closeWindow),
+    getName,
+    focus: () => winPromise.then(win => {
+      win.focus();
     }),
+    isClosed: () => winPromise.then(win => {
+      return (0, _src.isWindowClosed)(win);
+    }),
+    setLocation,
     setName: name => winPromise.then(win => {
       if (__POST_ROBOT__.__IE_POPUP_SUPPORT__) {
         (0, _bridge.linkWindow)({
@@ -164,8 +195,8 @@ class ProxyWindow {
     });
   }
 
-  setLocation(href) {
-    return this.serializedWindow.setLocation(href).then(() => this);
+  setLocation(href, opts) {
+    return this.serializedWindow.setLocation(href, opts).then(() => this);
   }
 
   getName() {

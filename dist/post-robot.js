@@ -924,6 +924,11 @@
             return val;
         }
         Error;
+        function getBody() {
+            var body = document.body;
+            if (!body) throw new Error("Body element not found");
+            return body;
+        }
         function isDocumentReady() {
             return Boolean(document.body) && "complete" === document.readyState;
         }
@@ -995,7 +1000,7 @@
         }));
         function global_getGlobal(win) {
             void 0 === win && (win = window);
-            var globalKey = "__post_robot_10_0_43__";
+            var globalKey = "__post_robot_10_0_44__";
             return win !== window ? win[globalKey] : win[globalKey] = win[globalKey] || {};
         }
         var getObj = function() {
@@ -1209,6 +1214,11 @@
             }));
             windowNamePromise.catch(src_util_noop);
             windowTypePromise.catch(src_util_noop);
+            var getName = function() {
+                return winPromise.then((function(win) {
+                    if (!isWindowClosed(win)) return isSameDomain(win) ? assertSameDomain(win).name : windowNamePromise;
+                }));
+            };
             return {
                 id: id,
                 getType: function() {
@@ -1224,11 +1234,7 @@
                 close: function() {
                     return winPromise.then(closeWindow);
                 },
-                getName: function() {
-                    return winPromise.then((function(win) {
-                        if (!isWindowClosed(win)) return isSameDomain(win) ? assertSameDomain(win).name : windowNamePromise;
-                    }));
-                },
+                getName: getName,
                 focus: function() {
                     return winPromise.then((function(win) {
                         win.focus();
@@ -1239,10 +1245,40 @@
                         return isWindowClosed(win);
                     }));
                 },
-                setLocation: function(href) {
+                setLocation: function(href, opts) {
+                    void 0 === opts && (opts = {});
                     return winPromise.then((function(win) {
                         var domain = window.location.protocol + "//" + window.location.host;
+                        var _opts$method = opts.method, method = void 0 === _opts$method ? "get" : _opts$method, body = opts.body;
                         if (0 === href.indexOf("/")) href = "" + domain + href; else if (!href.match(/^https?:\/\//) && 0 !== href.indexOf(domain)) throw new Error("Expected url to be http or https url, or absolute path, got " + JSON.stringify(href));
+                        if ("post" === method) return getName().then((function(name) {
+                            if (!name) throw new Error("Can not post to window without target name");
+                            !function(_ref3) {
+                                var url = _ref3.url, target = _ref3.target, body = _ref3.body, _ref3$method = _ref3.method, method = void 0 === _ref3$method ? "post" : _ref3$method;
+                                var form = document.createElement("form");
+                                form.setAttribute("target", target);
+                                form.setAttribute("method", method);
+                                form.setAttribute("action", url);
+                                form.style.display = "none";
+                                if (body) for (var _i24 = 0, _Object$keys4 = Object.keys(body); _i24 < _Object$keys4.length; _i24++) {
+                                    var _body$key;
+                                    var key = _Object$keys4[_i24];
+                                    var input = document.createElement("input");
+                                    input.setAttribute("name", key);
+                                    input.setAttribute("value", null == (_body$key = body[key]) ? void 0 : _body$key.toString());
+                                    form.appendChild(input);
+                                }
+                                getBody().appendChild(form);
+                                form.submit();
+                                getBody().removeChild(form);
+                            }({
+                                url: href,
+                                target: name,
+                                method: method,
+                                body: body
+                            });
+                        }));
+                        if ("get" !== method) throw new Error("Unsupported method: " + method);
                         if (isSameDomain(win)) try {
                             if (win.location && "function" == typeof win.location.replace) {
                                 win.location.replace(href);
@@ -1301,9 +1337,9 @@
                     return "popup" === type;
                 }));
             };
-            _proto.setLocation = function(href) {
+            _proto.setLocation = function(href, opts) {
                 var _this = this;
-                return this.serializedWindow.setLocation(href).then((function() {
+                return this.serializedWindow.setLocation(href, opts).then((function() {
                     return _this;
                 }));
             };
@@ -1647,7 +1683,7 @@
                 domainBuffer.buffer.push(message);
                 domainBuffer.flush = domainBuffer.flush || promise_ZalgoPromise.flush().then((function() {
                     if (isWindowClosed(win)) throw new Error("Window is closed");
-                    var serializedMessage = serializeMessage(win, domain, ((_ref = {}).__post_robot_10_0_43__ = domainBuffer.buffer || [], 
+                    var serializedMessage = serializeMessage(win, domain, ((_ref = {}).__post_robot_10_0_44__ = domainBuffer.buffer || [], 
                     _ref), {
                         on: on,
                         send: send
@@ -1819,7 +1855,7 @@
                     return;
                 }
                 if (parsedMessage && "object" == typeof parsedMessage && null !== parsedMessage) {
-                    var parseMessages = parsedMessage.__post_robot_10_0_43__;
+                    var parseMessages = parsedMessage.__post_robot_10_0_44__;
                     if (Array.isArray(parseMessages)) return parseMessages;
                 }
             }(event.data, source, origin, {
@@ -2221,7 +2257,7 @@
             }();
             (listener = globalStore().get("postMessageListener")) && listener.cancel();
             var listener;
-            delete window.__post_robot_10_0_43__;
+            delete window.__post_robot_10_0_44__;
         }
         var src_types_TYPES_0 = !0;
         function cleanUpWindow(win) {

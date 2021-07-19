@@ -1,7 +1,7 @@
 "use strict";
 
 exports.__esModule = true;
-exports.SERIALIZATION_TYPE = exports.WILDCARD = exports.POSTROBOT_PROXY = exports.BRIDGE_NAME_PREFIX = exports.SEND_STRATEGY = exports.MESSAGE_NAME = exports.MESSAGE_ACK = exports.MESSAGE_TYPE = void 0;
+exports.METHOD = exports.SERIALIZATION_TYPE = exports.WILDCARD = exports.POSTROBOT_PROXY = exports.BRIDGE_NAME_PREFIX = exports.SEND_STRATEGY = exports.MESSAGE_NAME = exports.MESSAGE_ACK = exports.MESSAGE_TYPE = void 0;
 const MESSAGE_TYPE = {
   REQUEST: 'postrobot_message_request',
   RESPONSE: 'postrobot_message_response',
@@ -37,3 +37,8 @@ const SERIALIZATION_TYPE = {
   CROSS_DOMAIN_WINDOW: 'cross_domain_window'
 };
 exports.SERIALIZATION_TYPE = SERIALIZATION_TYPE;
+const METHOD = {
+  GET: 'get',
+  POST: 'post'
+};
+exports.METHOD = METHOD;
