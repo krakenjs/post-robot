@@ -3,10 +3,10 @@
 import { isSameDomain, isWindowClosed, type CrossDomainWindowType, closeWindow,
     type DomainMatcher, getOpener, WINDOW_TYPE, isWindow, assertSameDomain, getFrameForWindow } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { uniqueID, memoizePromise, noop } from 'belter/src';
+import { uniqueID, memoizePromise, noop, submitForm } from 'belter/src';
 import { serializeType, type CustomSerializedType } from 'universal-serialize/src';
 
-import { SERIALIZATION_TYPE } from '../conf';
+import { SERIALIZATION_TYPE, METHOD } from '../conf';
 import { windowStore, globalStore } from '../global';
 import { getWindowInstanceID } from '../lib';
 import { linkWindow } from '../bridge';
@@ -22,13 +22,20 @@ function cleanupProxyWindows() {
     }
 }
 
+type SetLocationOptions = {|
+    method? : $Values<typeof METHOD>,
+    body? : {|
+        [string] : string | boolean
+    |}
+|};
+
 type SerializedWindowType = {|
     id : string,
     getType : () => ZalgoPromise<$Values<typeof WINDOW_TYPE>>,
     close : () => ZalgoPromise<void>,
     focus : () => ZalgoPromise<void>,
     isClosed : () => ZalgoPromise<boolean>,
-    setLocation : (string) => ZalgoPromise<void>,
+    setLocation : (url : string, opts? : SetLocationOptions) => ZalgoPromise<void>,
     getName : () => ZalgoPromise<?string>,
     setName : (string) => ZalgoPromise<void>,
     getInstanceID : () => ZalgoPromise<string>
@@ -53,39 +60,47 @@ function getSerializedWindow(winPromise : ZalgoPromise<CrossDomainWindowType>, {
     windowNamePromise.catch(noop);
     windowTypePromise.catch(noop);
 
-    return {
-        id,
-        getType: () => {
-            return windowTypePromise;
-        },
-        getInstanceID: memoizePromise(() => winPromise.then(win => getWindowInstanceID(win, { send }))),
-        close:         () => winPromise.then(closeWindow),
-        getName:       () => winPromise.then(win => {
-            if (isWindowClosed(win)) {
-                return;
-            }
+    const getName = () => winPromise.then(win => {
+        if (isWindowClosed(win)) {
+            return;
+        }
 
-            if (isSameDomain(win)) {
-                return assertSameDomain(win).name;
-            }
+        if (isSameDomain(win)) {
+            return assertSameDomain(win).name;
+        }
 
-            return windowNamePromise;
-        }),
-        focus:   () => winPromise.then(win => {
-            win.focus();
-        }),
-        isClosed: () => winPromise.then(win => {
-            return isWindowClosed(win);
-        }),
-        setLocation: (href) => winPromise.then(win => {
-            const domain = `${ window.location.protocol }//${ window.location.host }`;
+        return windowNamePromise;
+    });
 
-            if (href.indexOf('/') === 0) {
-                href = `${ domain }${ href }`;
-            } else if (!href.match(/^https?:\/\//) && href.indexOf(domain) !== 0) {
-                throw new Error(`Expected url to be http or https url, or absolute path, got ${ JSON.stringify(href) }`);
-            }
+    const getDefaultSetLocationOptions = () => {
+        // $FlowFixMe
+        return {};
+    };
 
+    const setLocation = (href : string, opts? : SetLocationOptions = getDefaultSetLocationOptions()) => winPromise.then(win => {
+        const domain = `${ window.location.protocol }//${ window.location.host }`;
+        const { method = METHOD.GET, body } = opts;
+
+        if (href.indexOf('/') === 0) {
+            href = `${ domain }${ href }`;
+        } else if (!href.match(/^https?:\/\//) && href.indexOf(domain) !== 0) {
+            throw new Error(`Expected url to be http or https url, or absolute path, got ${ JSON.stringify(href) }`);
+        }
+
+        if (method === METHOD.POST) {
+            return getName().then(name => {
+                if (!name) {
+                    throw new Error(`Can not post to window without target name`);
+                }
+
+                submitForm({
+                    url:    href,
+                    target: name,
+                    method,
+                    body
+                });
+            });
+        } else if (method === METHOD.GET) {
             if (isSameDomain(win)) {
                 try {
                     if (win.location && typeof win.location.replace === 'function') {
@@ -99,7 +114,27 @@ function getSerializedWindow(winPromise : ZalgoPromise<CrossDomainWindowType>, {
             }
 
             win.location = href;
+
+        } else {
+            throw new Error(`Unsupported method: ${ method }`);
+        }
+    });
+
+    return {
+        id,
+        getType: () => {
+            return windowTypePromise;
+        },
+        getInstanceID: memoizePromise(() => winPromise.then(win => getWindowInstanceID(win, { send }))),
+        close:         () => winPromise.then(closeWindow),
+        getName,
+        focus:         () => winPromise.then(win => {
+            win.focus();
         }),
+        isClosed: () => winPromise.then(win => {
+            return isWindowClosed(win);
+        }),
+        setLocation,
         setName: (name) => winPromise.then(win => {
             if (__POST_ROBOT__.__IE_POPUP_SUPPORT__) {
                 linkWindow({ win, name });
@@ -156,8 +191,8 @@ export class ProxyWindow {
         });
     }
 
-    setLocation(href : string) : ZalgoPromise<ProxyWindow> {
-        return this.serializedWindow.setLocation(href).then(() => this);
+    setLocation(href : string, opts? : SetLocationOptions) : ZalgoPromise<ProxyWindow> {
+        return this.serializedWindow.setLocation(href, opts).then(() => this);
     }
 
     getName() : ZalgoPromise<?string> {

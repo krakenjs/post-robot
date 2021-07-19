@@ -33,3 +33,8 @@ export const SERIALIZATION_TYPE = {
     CROSS_DOMAIN_FUNCTION:      ('cross_domain_function' : 'cross_domain_function'),
     CROSS_DOMAIN_WINDOW:        ('cross_domain_window' : 'cross_domain_window')
 };
+
+export const METHOD = {
+    GET:  ('get' : 'get'),
+    POST: ('post' : 'post')
+};
