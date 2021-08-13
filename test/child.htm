@@ -1,5 +1,5 @@
 <script>
-    var parentWindow = (window.opener || window.parent);
+    var parentWindow = window.opener || window.parent;
     window.__coverage__ = parentWindow.__coverage__;
     window.console = parentWindow.console;
     window.mockDomain = 'mock://test-post-robot-child.com';

@@ -1,0 +1,6 @@
+{
+    "extends": "grumbler-scripts/config/tsconfig.json",
+    "compilerOptions": {
+      "resolveJsonModule": true
+    }
+}
