@@ -1,4 +1,3 @@
-/* @flow */
 /* eslint import/no-commonjs: 0 */
 
 const pkg = require('./package.json');
