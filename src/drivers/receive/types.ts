@@ -46,8 +46,8 @@ export function handleRequest(
         message.data &&
         // @ts-ignore need a better type assertion over unknown
         typeof message.data.name === 'string'
-            // @ts-ignore need a better type assertion over unknown
-            ? `${ message.data.name }()`
+            ? // @ts-ignore need a better type assertion over unknown
+            `${ message.data.name }()`
             : message.name;
 
     if (__DEBUG__) {
@@ -249,8 +249,8 @@ export function handleResponse(
         message.data &&
         // @ts-ignore - narrowing failed
         typeof message.data.name === 'string'
-            // @ts-ignore - narrowing failed
-            ? `${ message.data.name }()`
+            ? // @ts-ignore - narrowing failed
+            `${ message.data.name }()`
             : message.name;
 
     if (message.ack === MESSAGE_ACK.ERROR) {

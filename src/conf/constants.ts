@@ -21,10 +21,9 @@ export const BRIDGE_NAME_PREFIX = '__postrobot_bridge__';
 export const POSTROBOT_PROXY = '__postrobot_proxy__';
 export const WILDCARD = '*';
 export const SERIALIZATION_TYPE = {
-    CROSS_DOMAIN_ZALGO_PROMISE:
-        'cross_domain_zalgo_promise' as const,
-    CROSS_DOMAIN_FUNCTION:'cross_domain_function' as const,
-    CROSS_DOMAIN_WINDOW:  'cross_domain_window' as const
+    CROSS_DOMAIN_ZALGO_PROMISE:'cross_domain_zalgo_promise' as const,
+    CROSS_DOMAIN_FUNCTION:     'cross_domain_function' as const,
+    CROSS_DOMAIN_WINDOW:       'cross_domain_window' as const
 };
 export const METHOD = {
     GET: 'get' as const,

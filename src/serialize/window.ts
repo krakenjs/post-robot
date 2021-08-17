@@ -58,11 +58,13 @@ function getSerializedWindow(
         id?: string;
     }
 ): SerializedWindowType {
-    let windowNamePromise: ZalgoPromise<string | undefined> = winPromise.then((win) => {
-        if (isSameDomain(win)) {
-            return assertSameDomain(win).name;
+    let windowNamePromise: ZalgoPromise<string | undefined> = winPromise.then(
+        (win) => {
+            if (isSameDomain(win)) {
+                return assertSameDomain(win).name;
+            }
         }
-    });
+    );
     const windowTypePromise = winPromise.then((window) => {
         if (!isWindowClosed(window)) {
             return getOpener(window) ? WINDOW_TYPE.POPUP : WINDOW_TYPE.IFRAME;
@@ -198,7 +200,9 @@ function getSerializedWindow(
                     frame.setAttribute('name', name);
                 }
 
-                windowNamePromise = ZalgoPromise.resolve<string |undefined>(name);
+                windowNamePromise = ZalgoPromise.resolve<string | undefined>(
+                    name
+                );
             })
     };
 }
@@ -365,8 +369,8 @@ export class ProxyWindow {
         win: CrossDomainWindowType | ProxyWindow
     ): CrossDomainWindowType | ProxyWindow {
         return ProxyWindow.isProxyWindow(win)
-            // @ts-ignore
-            ? win.unwrap()
+            ? // @ts-ignore
+            win.unwrap()
             : win;
     }
 
@@ -394,7 +398,9 @@ export class ProxyWindow {
     ): ProxyWindow {
         cleanupProxyWindows();
         return (
-            globalStore<ProxyWindow>('idToProxyWindow').get(serializedWindow.id) ||
+            globalStore<ProxyWindow>('idToProxyWindow').get(
+                serializedWindow.id
+            ) ||
             new ProxyWindow({
                 serializedWindow,
                 send

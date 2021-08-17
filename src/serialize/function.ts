@@ -100,106 +100,111 @@ function listenForFunctionCalls({
     on: OnType;
     send: SendType;
 }): CancelableType {
-    return globalStore<CancelableType>('builtinListeners').getOrSet('functionCalls', () => {
-        return on(
-            MESSAGE_NAME.METHOD,
-            {
-                domain: WILDCARD
-            },
-            ({
-                source,
-                origin,
-                data
-            }: {
-                source: CrossDomainWindowType;
-                origin: string;
-                data: Record<string, any>;
-            }) => {
-                const { id, name } = data;
-                const meth = lookupMethod(source, id);
+    return globalStore<CancelableType>('builtinListeners').getOrSet(
+        'functionCalls',
+        () => {
+            return on(
+                MESSAGE_NAME.METHOD,
+                {
+                    domain: WILDCARD
+                },
+                ({
+                    source,
+                    origin,
+                    data
+                }: {
+                    source: CrossDomainWindowType;
+                    origin: string;
+                    data: Record<string, any>;
+                }) => {
+                    const { id, name } = data;
+                    const meth = lookupMethod(source, id);
 
-                if (!meth) {
-                    throw new Error(
-                        `Could not find method '${ name }' with id: ${
-                            data.id
-                        } in ${ getDomain(window) }`
-                    );
-                }
-
-                const { source: methodSource, domain, val } = meth;
-                return ZalgoPromise.try(() => {
-                    if (!matchDomain(domain, origin)) {
+                    if (!meth) {
                         throw new Error(
-                            `Method '${ data.name }' domain ${ JSON.stringify(
-                                isRegex(meth.domain)
-                                    ? (meth.domain as RegExp).source
-                                    : meth.domain
-                            ) } does not match origin ${ origin } in ${ getDomain(
-                                window
-                            ) }`
+                            `Could not find method '${ name }' with id: ${
+                                data.id
+                            } in ${ getDomain(window) }`
                         );
                     }
 
-                    if (ProxyWindow.isProxyWindow(methodSource)) {
-                        return methodSource
-                            // @ts-ignore
-                            .matchWindow(source, {
-                                send
-                            })
-                            .then((match: any) => {
-                                if (!match) {
-                                    throw new Error(
-                                        `Method call '${
-                                            data.name
-                                        }' failed - proxy window does not match source in ${ getDomain(
-                                            window
-                                        ) }`
-                                    );
-                                }
-                            });
-                    }
-                })
-                    .then(
-                        () => {
-                            return val.apply(
-                                {
-                                    source,
-                                    origin
-                                },
-                                data.args
+                    const { source: methodSource, domain, val } = meth;
+                    return ZalgoPromise.try(() => {
+                        if (!matchDomain(domain, origin)) {
+                            throw new Error(
+                                `Method '${ data.name }' domain ${ JSON.stringify(
+                                    isRegex(meth.domain)
+                                        ? (meth.domain as RegExp).source
+                                        : meth.domain
+                                ) } does not match origin ${ origin } in ${ getDomain(
+                                    window
+                                ) }`
                             );
-                        },
-                        (err: any) => {
-                            return ZalgoPromise.try(() => {
-                                // @ts-ignore val returns any any
-                                if (val.onError) {
-                                    // @ts-ignore val returns any any
-                                    return val.onError(err);
-                                }
-                            }).then(() => {
-                                // @ts-ignore
-                                if (err.stack) {
-                                    // @ts-ignore
-                                    err.stack = `Remote call to ${ name }(${ stringifyArguments(
-                                        data.args
-                                    // @ts-ignore
-                                    ) }) failed\n\n${ err.stack }`;
-                                }
-
-                                throw err;
-                            });
                         }
-                    )
-                    .then((result) => {
-                        return {
-                            result,
-                            id,
-                            name
-                        };
-                    });
-            }
-        );
-    });
+
+                        if (ProxyWindow.isProxyWindow(methodSource)) {
+                            return (
+                                methodSource
+                                    // @ts-ignore
+                                    .matchWindow(source, {
+                                        send
+                                    })
+                                    .then((match: any) => {
+                                        if (!match) {
+                                            throw new Error(
+                                                `Method call '${
+                                                    data.name
+                                                }' failed - proxy window does not match source in ${ getDomain(
+                                                    window
+                                                ) }`
+                                            );
+                                        }
+                                    })
+                            );
+                        }
+                    })
+                        .then(
+                            () => {
+                                return val.apply(
+                                    {
+                                        source,
+                                        origin
+                                    },
+                                    data.args
+                                );
+                            },
+                            (err: any) => {
+                                return ZalgoPromise.try(() => {
+                                    // @ts-ignore val returns any any
+                                    if (val.onError) {
+                                        // @ts-ignore val returns any any
+                                        return val.onError(err);
+                                    }
+                                }).then(() => {
+                                    // @ts-ignore
+                                    if (err.stack) {
+                                        // @ts-ignore
+                                        err.stack = `Remote call to ${ name }(${ stringifyArguments(
+                                            data.args
+                                            // @ts-ignore
+                                        ) }) failed\n\n${ err.stack }`;
+                                    }
+
+                                    throw err;
+                                });
+                            }
+                        )
+                        .then((result) => {
+                            return {
+                                result,
+                                id,
+                                name
+                            };
+                        });
+                }
+            );
+        }
+    );
 }
 
 export type SerializedFunction = CustomSerializedType<
@@ -340,9 +345,9 @@ export function deserializeFunction<T>(
                     // @ts-ignore
                     if (__DEBUG__ && originalStack && err.stack) {
                         err.stack = `Remote call to ${ name }(${ stringifyArguments(
-                        // @ts-ignore
+                            // @ts-ignore
                             arguments
-                        // @ts-ignore
+                            // @ts-ignore
                         ) }) failed\n\n${ err.stack }\n\n${ originalStack }`;
                     }
 

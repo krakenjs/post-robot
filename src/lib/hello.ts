@@ -99,11 +99,14 @@ export function getWindowInstanceID(
         send: SendType;
     }
 ): ZalgoPromise<string> {
-    return windowStore<ZalgoPromise<any>>('windowInstanceIDPromises').getOrSet(win, () => {
-        return sayHello(win, {
-            send
-        }).then(({ instanceID }) => instanceID);
-    });
+    return windowStore<ZalgoPromise<any>>('windowInstanceIDPromises').getOrSet(
+        win,
+        () => {
+            return sayHello(win, {
+                send
+            }).then(({ instanceID }) => instanceID);
+        }
+    );
 }
 export function initHello({
     on,
@@ -112,24 +115,27 @@ export function initHello({
     on: OnType;
     send: SendType;
 }): CancelableType {
-    return globalStore<any>('builtinListeners').getOrSet('helloListener', () => {
-        const listener = listenForHello({
-            on
-        });
-        const parent = getAncestor();
-
-        if (parent) {
-            sayHello(parent, {
-                send
-            }).catch((err) => {
-                if (__TEST__ && getGlobal(parent)) {
-                    throw err;
-                }
+    return globalStore<any>('builtinListeners').getOrSet(
+        'helloListener',
+        () => {
+            const listener = listenForHello({
+                on
             });
-        }
+            const parent = getAncestor();
 
-        return listener;
-    });
+            if (parent) {
+                sayHello(parent, {
+                    send
+                }).catch((err) => {
+                    if (__TEST__ && getGlobal(parent)) {
+                        throw err;
+                    }
+                });
+            }
+
+            return listener;
+        }
+    );
 }
 export function awaitWindowHello(
     win: CrossDomainWindowType,

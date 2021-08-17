@@ -1,8 +1,5 @@
 import type { ZalgoPromise } from 'zalgo-promise';
-import type {
-    CrossDomainWindowType,
-    DomainMatcher
-} from 'cross-domain-utils';
+import type { CrossDomainWindowType, DomainMatcher } from 'cross-domain-utils';
 import { matchDomain } from 'cross-domain-utils';
 import { isRegex, getOrSet, CancelableType } from 'belter';
 
@@ -243,11 +240,14 @@ export function addRequestListener(
         }
     }
 
-    const nameListeners = requestListeners.getOrSet(win, () => ({})) as Record<string, any>;
+    const nameListeners = requestListeners.getOrSet(win, () => ({})) as Record<
+        string,
+        any
+    >;
     const domainListeners = getOrSet(nameListeners, name, () => ({}));
     const strDomain = domain.toString();
-    let regexListeners: {regex: RegExp, listener: any }[];
-    let regexListener: {regex: RegExp, listener: any};
+    let regexListeners: { regex: RegExp; listener: any }[];
+    let regexListener: { regex: RegExp; listener: any };
 
     if (isRegex(domain)) {
         regexListeners = getOrSet(domainListeners, __DOMAIN_REGEX__, () => []);

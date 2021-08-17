@@ -10,7 +10,12 @@ import {
 import { noop } from 'belter';
 
 import { getGlobal, windowStore } from '../global';
-import type { OnType, SendType, ReceiveMessageType, ResponseMessageEvent } from '../types';
+import type {
+    OnType,
+    SendType,
+    ReceiveMessageType,
+    ResponseMessageEvent
+} from '../types';
 
 import {
     needsBridge,
@@ -23,7 +28,9 @@ import {
 function awaitRemoteBridgeForWindow(
     win: CrossDomainWindowType
 ): ZalgoPromise<CrossDomainWindowType | null | undefined> {
-    return windowStore<ZalgoPromise<CrossDomainWindowType | null | undefined>>('remoteBridgeAwaiters').getOrSet(win, () => {
+    return windowStore<ZalgoPromise<CrossDomainWindowType | null | undefined>>(
+        'remoteBridgeAwaiters'
+    ).getOrSet(win, () => {
         return ZalgoPromise.try(() => {
             const frame = getFrameByName(win, getBridgeName(getDomain()));
 
@@ -39,7 +46,8 @@ function awaitRemoteBridgeForWindow(
                 let interval: any;
                 let timeout: any; // eslint-disable-line prefer-const
 
-                interval = setInterval(() => { // eslint-disable-line prefer-const
+                // eslint-disable-next-line prefer-const
+                interval = setInterval(() => {
                     if (
                         frame &&
                         isSameDomain(frame) &&

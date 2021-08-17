@@ -414,7 +414,7 @@ describe('[post-robot] serialization cases', () => {
                 if (err.code !== expectedErrorCode) {
                     // @ts-ignore
                     throw new Error(
-                    // @ts-ignore
+                        // @ts-ignore
                         `Expected function throw error with code ${ expectedErrorCode }, got ${ err.code }`
                     );
                 }
@@ -645,7 +645,7 @@ describe('[post-robot] serialization cases', () => {
                 // @ts-ignore
                 if (err2.code !== expectedErrorCode) {
                     throw new Error(
-                    // @ts-ignore
+                        // @ts-ignore
                         `Expected function throw error with code ${ expectedErrorCode }, got ${ err2.code }`
                     );
                 }
@@ -903,7 +903,11 @@ describe('[post-robot] serialization cases', () => {
             });
     });
     it('should pass a popup across the window boundary and change its location', () => {
-        const mywindow = window.open('', uniqueID(), 'width=500,height=500') as CrossDomainWindowType;
+        const mywindow = window.open(
+            '',
+            uniqueID(),
+            'width=500,height=500'
+        ) as CrossDomainWindowType;
         return send(childFrame, 'setupListener', {
             messageName:'foo',
             data:       {

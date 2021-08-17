@@ -100,7 +100,9 @@ export function findRemoteWindow(
         remoteDomain: string
     ) => void
 > {
-    const remoteWindowPromises = windowStore<ZalgoPromise<any>>('remoteWindowPromises');
+    const remoteWindowPromises = windowStore<ZalgoPromise<any>>(
+        'remoteWindowPromises'
+    );
     const remoteWinPromise = remoteWindowPromises.get(win);
 
     if (!remoteWinPromise) {
