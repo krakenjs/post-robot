@@ -55,7 +55,7 @@ export function handleRequest(
         console.info('receive::req', logName, origin, '\n\n', message.data);
     }
 
-    function sendAck(): ZalgoPromise<void | ZalgoPromise<void>> {
+    function sendAck(): ZalgoPromise<void | undefined> {
         return ZalgoPromise.flush().then(() => {
             if (message.fireAndForget || isWindowClosed(source)) {
                 return;
@@ -91,7 +91,7 @@ export function handleRequest(
         ack: $Values<typeof MESSAGE_ACK>,
         data: Record<string, any> | null | undefined,
         error?: unknown | null | undefined
-    ): ZalgoPromise<void | ZalgoPromise<void>> {
+    ): ZalgoPromise<void | undefined> {
         return ZalgoPromise.flush().then(() => {
             if (message.fireAndForget || isWindowClosed(source)) {
                 return;
