@@ -1,0 +1,55 @@
+/* @flow */
+/* eslint max-lines: 0, max-nested-callbacks: off */
+
+import { wrapPromise } from 'belter/src';
+
+import { on, send } from '../../src';
+import { getWindows } from '../common';
+
+describe('Window Proxy cases', () => {
+
+    it('Should send the a window in a message', () => {
+        return wrapPromise(({ expect }) => {
+            const { childFrame, otherChildFrame } = getWindows();
+
+            const listener = on('passProxyWindow', expect('passProxyWindow', ({ data }) => {
+                if (data.otherFrame.getWindow() !== otherChildFrame) {
+                    throw new Error(`Expected window to be correctly passed`);
+                }
+
+                listener.cancel();
+            }));
+
+            return send(childFrame, 'sendMessageToParent', {
+                messageName: 'passProxyWindow',
+                data:        {
+                    otherFrame: otherChildFrame
+                }
+            }).then(expect('sendSuccess'));
+        });
+    });
+
+    it('Should send the a window in a message, then call isPopup', () => {
+        return wrapPromise(({ expect }) => {
+            const { childFrame, otherChildFrame } = getWindows();
+
+            const listener = on('passProxyWindow', expect('passProxyWindow', ({ data }) => {
+                return data.otherFrame.isPopup().then(isPopup => {
+                    listener.cancel();
+                    if (isPopup !== false) {
+                        throw new Error(`Expected isPopup to be false but got ${ isPopup }`);
+                    }
+                });
+            }));
+
+            return send(childFrame, 'sendMessageToParent', {
+                messageName: 'passProxyWindow',
+                data:        {
+                    otherFrame: otherChildFrame
+                }
+            }).then(expect('sendSuccess'));
+        });
+    });
+});
+
+
