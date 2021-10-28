@@ -2,7 +2,7 @@
 
 import { ZalgoPromise } from 'zalgo-promise/src';
 
-import { addRequestListener, type RequestListenerType } from '../drivers';
+import { addRequestListener } from '../drivers';
 import { WILDCARD } from '../conf';
 import type { ServerOptionsType, HandlerType, CancelableType } from '../types';
 
@@ -27,24 +27,18 @@ export function on(name : string, options : ServerOptionsType | HandlerType, han
         throw new Error('Expected handler');
     }
 
-    options = options || {};
-    options.name = name;
-    options.handler = handler || options.handler;
+    const winOrProxyWin = options.window;
+    const domain = options.domain || WILDCARD;
 
-    const win = options.window;
-    const domain = options.domain;
+    const successHandler = handler || options.handler;
+    const errorHandler = options.errorHandler || (err => {
+        throw err;
+    });
 
-    const listenerOptions : RequestListenerType = {
-        handler:     options.handler,
-        handleError: options.errorHandler || (err => {
-            throw err;
-        }),
-        window: win,
-        domain: domain || WILDCARD,
-        name
-    };
-
-    const requestListener = addRequestListener({ name, win, domain }, listenerOptions);
+    const requestListener = addRequestListener({ name, win: winOrProxyWin, domain }, {
+        handler:     successHandler,
+        handleError: errorHandler
+    });
 
     return {
         cancel() {

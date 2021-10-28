@@ -3,6 +3,8 @@
 import type { ZalgoPromise } from 'zalgo-promise/src';
 import type { CrossDomainWindowType, DomainMatcher } from 'cross-domain-utils/src';
 
+import type { ProxyWindow } from './serialize/window';
+
 // export something to force webpack to see this as an ES module
 export const TYPES = true;
 
@@ -22,7 +24,7 @@ export type HandlerType = ({|
 export type ServerOptionsType = {|
     handler? : ?HandlerType,
     errorHandler? : ?ErrorHandlerType,
-    window? : CrossDomainWindowType,
+    window? : CrossDomainWindowType | ProxyWindow,
     name? : ?string,
     domain? : ?DomainMatcher,
     once? : ?boolean,
@@ -56,14 +58,14 @@ export type ResponseMessageEvent = {|
 |};
 
 type RegularSendType = (
-    win : CrossDomainWindowType,
+    win : CrossDomainWindowType | ProxyWindow,
     name : string,
     data : ?Object,
     options? : RegularRequestOptionsType
 ) => ZalgoPromise<ResponseMessageEvent>;
 
 type FireAndForgetSendType = (
-    win : CrossDomainWindowType,
+    win : CrossDomainWindowType | ProxyWindow,
     name : string,
     data : ?Object,
     options? : FireAndForgetRequestOptionsType

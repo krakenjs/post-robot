@@ -83,10 +83,6 @@ export function handleRequest(source : CrossDomainWindowType, origin : string, m
                 throw new Error(`No handler found for post message: ${ message.name } from ${ origin } in ${ window.location.protocol }//${ window.location.host }${ window.location.pathname }`);
             }
 
-            if (!matchDomain(options.domain, origin)) {
-                throw new Error(`Request origin ${ origin } does not match domain ${ options.domain.toString() }`);
-            }
-
             const data = message.data;
 
             return options.handler({ source, origin, data });
