@@ -2,297 +2,17 @@
 /* eslint max-lines: 0 */
 
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { type CrossDomainWindowType, WINDOW_TYPE } from 'cross-domain-utils/src';
-import { uniqueID, noop } from 'belter/src';
+import { WINDOW_TYPE } from 'cross-domain-utils/src';
+import { uniqueID, getBody } from 'belter/src';
 
-import { on, send, once, bridge } from '../src';
-import { awaitWindowHello } from '../src/lib';
+import { send } from '../../src';
+import { awaitWindowHello } from '../../src/lib';
+import { createIframe, getWindows } from '../common';
 
-import { enableIE8Mode } from './common';
+describe('Serialization cases', () => {
 
-window.mockDomain = 'mock://test-post-robot.com';
-
-function getBody() : HTMLBodyElement {
-    const body = document.body;
-    if (!body) {
-        throw new Error(`Can not find body`);
-    }
-    return body;
-}
-
-function createIframe(name, callback) : CrossDomainWindowType {
-    const frame = document.createElement('iframe');
-    frame.src = `/base/test/${  name }`;
-    frame.id = 'childframe';
-    frame.name = `${ Math.random().toString()  }_${  name.replace(/[^a-zA-Z0-9]+/g, '_') }`;
-    // $FlowFixMe
-    frame.addEventListener('load', callback);
-    getBody().appendChild(frame);
-    return frame.contentWindow;
-}
-
-function createPopup(name) : CrossDomainWindowType {
-    const popup = window.open(`mock://test-post-robot-child.com/base/test/${  name }`, `${ Math.random().toString()  }_${  name.replace(/[^a-zA-Z0-9]+/g, '_') }`);
-    window.focus();
-    return popup;
-}
-
-let childWindow,
-    childFrame,
-    otherChildFrame;
-
-before(() : ZalgoPromise<mixed> => {
-    if (!bridge) {
-        throw new Error(`Expected postRobot.bridge to be available`);
-    }
-
-    childWindow = createPopup('child.htm');
-    childFrame = createIframe('child.htm');
-    otherChildFrame = createIframe('child.htm');
-
-    return ZalgoPromise.all([
-        awaitWindowHello(childWindow),
-        awaitWindowHello(childFrame),
-        awaitWindowHello(otherChildFrame)
-    ]).then(noop);
-});
-
-after(() => {
-    if (!document.body) {
-        throw new Error(`Expected document.body to be available`);
-    }
-    const body = document.body;
-    // $FlowFixMe
-    if (!childFrame.frameElement) {
-        throw new Error(`Expected childFrame.frameElement to be available`);
-    }
-    body.removeChild(childFrame.frameElement);
-    // $FlowFixMe
-    if (!otherChildFrame.frameElement) {
-        throw new Error(`Expected otherChildFrame.frameElement to be available`);
-    }
-    body.removeChild(otherChildFrame.frameElement);
-    childWindow.close();
-});
-
-
-describe('[post-robot] happy cases', () => {
-
-    it('should set up a simple server and listen for a request', (done) => {
-
-        on('foobu', () => {
-            done();
-        });
-
-        send(childFrame, 'sendMessageToParent', {
-            messageName: 'foobu'
-        }).catch(done);
-    });
-
-    it('should set up a simple server and listen for multiple requests', () : ZalgoPromise<mixed> => {
-
-        let count = 0;
-
-        on('multilistener', () => {
-            count += 1;
-        });
-
-        return send(childFrame, 'sendMessageToParent', {
-            messageName: 'multilistener'
-        }).then(() => {
-            return send(childFrame, 'sendMessageToParent', {
-                messageName: 'multilistener'
-            });
-        }).then(() => {
-            if (count !== 2) {
-                throw new Error(`Expected count to be 2, got ${ count }`);
-            }
-        });
-    });
-
-    it('should message a child and expect a response', () : ZalgoPromise<mixed> => {
-
-        return send(childFrame, 'setupListener', {
-
-            messageName: 'foo',
-            data:        {
-                foo: 'bar'
-            }
-
-        }).then(() => {
-
-            return send(childFrame, 'foo').then(({ data }) => {
-                if (data.foo !== 'bar') {
-                    throw new Error(`Expected data.foo to be 'bar', got ${ data.foo }`);
-                }
-            });
-        });
-    });
-
-    it('should set up a simple server and listen for a request from a specific domain', (done) => {
-
-        on('domainspecificmessage', { domain: 'mock://test-post-robot-child.com' }, () => {
-            done();
-        });
-
-        send(childFrame, 'sendMessageToParent', {
-            messageName: 'domainspecificmessage'
-        }).catch(done);
-    });
-
-
-    it('should message a child with a specific domain and expect a response', () : ZalgoPromise<mixed> => {
-
-        return send(childFrame, 'setupListener', {
-
-            messageName: 'domainspecificmessage',
-            data:        {
-                foo: 'bar'
-            }
-
-        }, { domain: 'mock://test-post-robot-child.com' }).then(() => {
-
-            return send(childFrame, 'domainspecificmessage').then(({ data }) => {
-                if (data.foo !== 'bar') {
-                    throw new Error(`Expected data.foo to be 'bar', got ${ data.foo }`);
-                }
-            });
-        });
-    });
-
-    it('should set up a simple server and listen for a request from multiple domains', (done) => {
-
-        on('multidomainspecificmessage', { domain: [ 'mock://test-post-robot-child.com', 'mock://non-existant-domain.com' ] }, () => {
-            done();
-        });
-
-        send(childFrame, 'sendMessageToParent', {
-            messageName: 'multidomainspecificmessage'
-        }).catch(done);
-    });
-
-
-    it('should message a child with multiple domains and expect a response', () : ZalgoPromise<mixed> => {
-
-        return send(childFrame, 'setupListener', {
-
-            messageName: 'multidomainspecificmessage',
-            data:        {
-                foo: 'bar'
-            }
-
-        }, { domain: [ 'mock://test-post-robot-child.com', 'mock://non-existant-domain.com' ] }).then(() => {
-
-            return send(childFrame, 'multidomainspecificmessage').then(({ data }) => {
-                if (data.foo !== 'bar') {
-                    throw new Error(`Expected data.foo to be 'bar', got ${ data.foo }`);
-                }
-            });
-        });
-    });
-});
-
-
-describe('[post-robot] options', () => {
-
-    it('should be able to listen for a message only once', () : ZalgoPromise<mixed> => {
-
-        let count = 0;
-
-        once('foobuz', () => {
-            count += 1;
-        });
-
-        return send(childFrame, 'sendMessageToParent', {
-            messageName: 'foobuz'
-        }).then(() => {
-            return send(childFrame, 'sendMessageToParent', {
-                messageName: 'foobuz'
-            }).then(() => {
-                throw new Error('Expected success handler to not be called');
-            }, () => {
-                if (count !== 1) {
-                    throw new Error(`Expected count to be 1, got ${ count }`);
-                }
-            });
-        });
-    });
-
-    it('should be able to re-register the same once handler after the first is called', () : ZalgoPromise<mixed> => {
-
-        let count = 0;
-
-        once('foobuzz', ({ data }) => {
-            count += data.add;
-        });
-
-        return send(childFrame, 'sendMessageToParent', {
-            messageName: 'foobuzz',
-            data:        {
-                add: 2
-            }
-        }).then(() => {
-
-            once('foobuzz', ({ data }) => {
-                count += data.add;
-            });
-
-            return send(childFrame, 'sendMessageToParent', {
-                messageName: 'foobuzz',
-                data:        {
-                    add: 3
-                }
-            });
-
-        }).then(() => {
-            if (count !== 5) {
-                throw new Error(`Expected count to be 5, got ${ count }`);
-            }
-        });
-    });
-
-    it('should allow you to register the same listener twice providing it is to different windows', () => {
-
-        on('onceonlywindow', { window: childFrame }, () => {
-            // pass
-        });
-
-        on('onceonlywindow', { window: otherChildFrame }, () => {
-            // pass
-        });
-    });
-
-    it('should allow you to register a listener for a specific window', () : ZalgoPromise<mixed> => {
-
-        let count = 0;
-
-        on('specificchildlistener', { window: otherChildFrame }, () => {
-            count += 1;
-        });
-
-        return send(otherChildFrame, 'sendMessageToParent', {
-            messageName: 'specificchildlistener'
-        }).then(() => {
-            return send(childFrame, 'sendMessageToParent', {
-                messageName: 'specificchildlistener'
-            }).then(() => {
-                throw new Error('Expected success handler to not be called');
-            }, (err) => {
-                if (!err) {
-                    throw new Error(`Expected err`);
-                }
-                if (count !== 1) {
-                    throw new Error(`Expected count to be 1, got ${ count }`);
-                }
-            });
-        });
-    });
-});
-
-
-describe('[post-robot] serialization cases', () => {
-
-    it('should pass a function across windows and be able to call it later', (done) => {
+    it('should pass a function across windows and be able to call it later', () => {
+        const { childFrame } = getWindows();
 
         const expectedArgument = 567;
         let actualArgument;
@@ -303,7 +23,7 @@ describe('[post-robot] serialization cases', () => {
             return expectedReturn;
         };
 
-        send(childFrame, 'setupListener', {
+        return send(childFrame, 'setupListener', {
 
             messageName: 'foo',
             data:        {
@@ -324,12 +44,11 @@ describe('[post-robot] serialization cases', () => {
             if (result !== expectedReturn) {
                 throw new Error(`Expected function to return ${ expectedReturn }, got ${ result }`);
             }
-
-            done();
         });
     });
 
-    it('should pass a function across windows and be able to call it later and capture the exception', (done) => {
+    it('should pass a function across windows and be able to call it later and capture the exception', () => {
+        const { childFrame } = getWindows();
 
         const expectedErrorMessage = 'something went wrong';
         const expectedErrorCode = 'ERROR_567';
@@ -343,7 +62,7 @@ describe('[post-robot] serialization cases', () => {
             throw err;
         };
 
-        send(childFrame, 'setupListener', {
+        return send(childFrame, 'setupListener', {
 
             messageName: 'foo',
             data:        {
@@ -378,12 +97,11 @@ describe('[post-robot] serialization cases', () => {
             if (err.stack.indexOf(expectedErrorStack) === -1) {
                 throw new Error(`Expected function throw error with stack ${ expectedErrorStack }, got ${ err.stack }`);
             }
-
-            done();
         });
     });
 
-    it('should pass a function across windows and be able to call it instantly from its origin window', (done) => {
+    it('should pass a function across windows and be able to call it instantly from its origin window', () => {
+        const { childFrame } = getWindows();
 
         const expectedArgument = 567;
         let actualArgument;
@@ -394,7 +112,7 @@ describe('[post-robot] serialization cases', () => {
             return expectedReturn;
         };
 
-        send(childFrame, 'setupListener', {
+        return send(childFrame, 'setupListener', {
 
             messageName: 'foo',
             data:        {
@@ -418,12 +136,11 @@ describe('[post-robot] serialization cases', () => {
             if (result !== expectedReturn) {
                 throw new Error(`Expected function to return ${ expectedReturn }, got ${ result }`);
             }
-
-            done();
         });
     });
 
-    it('should pass a promise across windows and be able to call it later', (done) => {
+    it('should pass a promise across windows and be able to call it later', () => {
+        const { childFrame } = getWindows();
 
         const expectedValue = 123;
         let resolver;
@@ -433,7 +150,7 @@ describe('[post-robot] serialization cases', () => {
             resolver = resolve;
         });
 
-        send(childFrame, 'setupListener', {
+        const sendPromise = send(childFrame, 'setupListener', {
 
             messageName: 'foo',
             data:        {
@@ -450,8 +167,6 @@ describe('[post-robot] serialization cases', () => {
             if (result !== expectedValue) {
                 throw new Error(`Expected promise to resolve to ${ expectedValue }, got ${ result }`);
             }
-
-            done();
         });
 
         if (!resolver) {
@@ -459,9 +174,12 @@ describe('[post-robot] serialization cases', () => {
         }
 
         resolver(expectedValue);
+
+        return sendPromise;
     });
 
-    it('should pass a promise across windows and be able to reject it later', (done) => {
+    it('should pass a promise across windows and be able to reject it later', () => {
+        const { childFrame } = getWindows();
 
         const expectedErrorMessage = 'Oh no!';
         const expectedErrorCode = 'ABC123';
@@ -473,7 +191,7 @@ describe('[post-robot] serialization cases', () => {
             rejector = reject;
         });
 
-        send(childFrame, 'setupListener', {
+        const sendPromise = send(childFrame, 'setupListener', {
 
             messageName: 'foo',
             data:        {
@@ -508,8 +226,6 @@ describe('[post-robot] serialization cases', () => {
             if (err2.stack.indexOf(expectedErrorStack) === -1) {
                 throw new Error(`Expected function throw error with stack ${ expectedErrorStack }, got ${ err2.stack }`);
             }
-
-            done();
         });
 
         const err = new Error(expectedErrorMessage);
@@ -522,9 +238,12 @@ describe('[post-robot] serialization cases', () => {
         }
 
         rejector(err);
+
+        return sendPromise;
     });
 
-    it('should pass a zalgo promise across windows and be able to call it later', (done) => {
+    it('should pass a zalgo promise across windows and be able to call it later', () => {
+        const { childFrame } = getWindows();
 
         const expectedValue = 123;
         let resolver;
@@ -533,7 +252,7 @@ describe('[post-robot] serialization cases', () => {
             resolver = resolve;
         });
 
-        send(childFrame, 'setupListener', {
+        const sendPromise = send(childFrame, 'setupListener', {
 
             messageName: 'foo',
             data:        {
@@ -550,8 +269,6 @@ describe('[post-robot] serialization cases', () => {
             if (result !== expectedValue) {
                 throw new Error(`Expected promise to resolve to ${ expectedValue }, got ${ result }`);
             }
-
-            done();
         });
 
         if (!resolver) {
@@ -559,9 +276,12 @@ describe('[post-robot] serialization cases', () => {
         }
 
         resolver(expectedValue);
+
+        return sendPromise;
     });
 
-    it('should pass a zalgo promise across windows and be able to reject it later', (done) => {
+    it('should pass a zalgo promise across windows and be able to reject it later', () => {
+        const { childFrame } = getWindows();
 
         const expectedErrorMessage = 'Oh no!';
         const expectedErrorCode = 'ABC123';
@@ -572,7 +292,7 @@ describe('[post-robot] serialization cases', () => {
             rejector = reject;
         });
 
-        send(childFrame, 'setupListener', {
+        const sendPromise = send(childFrame, 'setupListener', {
 
             messageName: 'foo',
             data:        {
@@ -608,9 +328,7 @@ describe('[post-robot] serialization cases', () => {
             if (err2.stack.indexOf(expectedErrorStack) === -1) {
                 throw new Error(`Expected function throw error with stack ${ expectedErrorStack }, got ${ err2.stack }`);
             }
-
-            done();
-        }).catch(done);
+        });
 
         const err = new Error(expectedErrorMessage);
         // $FlowFixMe
@@ -622,9 +340,12 @@ describe('[post-robot] serialization cases', () => {
         }
 
         rejector(err);
+
+        return sendPromise;
     });
 
     it('should pass an iframe across the window boundary and focus it', () => {
+        const { childFrame } = getWindows();
 
         const iframe = document.createElement('iframe');
         getBody().appendChild(iframe);
@@ -646,6 +367,7 @@ describe('[post-robot] serialization cases', () => {
     });
 
     it('should pass an iframe across the window boundary and close it', () => {
+        const { childFrame } = getWindows();
 
         const iframe = document.createElement('iframe');
         getBody().appendChild(iframe);
@@ -668,6 +390,7 @@ describe('[post-robot] serialization cases', () => {
 
 
     it('should pass an iframe across the window boundary and change its location', () => {
+        const { childFrame } = getWindows();
 
         const iframe = document.createElement('iframe');
         getBody().appendChild(iframe);
@@ -709,6 +432,7 @@ describe('[post-robot] serialization cases', () => {
     });
 
     it('should pass an iframe across the window boundary and get its instance id', () => {
+        const { childFrame } = getWindows();
 
         const iframe = document.createElement('iframe');
         getBody().appendChild(iframe);
@@ -739,6 +463,7 @@ describe('[post-robot] serialization cases', () => {
     });
 
     it('should pass a popup across the window boundary and focus it', () => {
+        const { childFrame } = getWindows();
 
         const mywindow = window.open('', uniqueID(), 'width=500,height=500');
 
@@ -758,6 +483,7 @@ describe('[post-robot] serialization cases', () => {
     });
 
     it('should pass a popup across the window boundary and close it', () => {
+        const { childFrame } = getWindows();
 
         const mywindow = window.open('', uniqueID(), 'width=500,height=500');
 
@@ -782,6 +508,7 @@ describe('[post-robot] serialization cases', () => {
     });
 
     it('should get window type for popup even if window closed after serialization', () => {
+        const { childFrame } = getWindows();
 
         const mywindow = window.open('', uniqueID(), 'width=500,height=500');
 
@@ -807,6 +534,7 @@ describe('[post-robot] serialization cases', () => {
     });
 
     it('should get window type for iframe even if window closed after serialization', () => {
+        const { childFrame } = getWindows();
 
         const mywindow = createIframe('child.htm');
 
@@ -833,6 +561,7 @@ describe('[post-robot] serialization cases', () => {
     });
     
     it('should error getting window type for popup if window is closed prior to serialization', () => {
+        const { childFrame } = getWindows();
 
         const mywindow = window.open('', uniqueID(), 'width=500,height=500');
         mywindow.close();
@@ -861,6 +590,7 @@ describe('[post-robot] serialization cases', () => {
     });
 
     it('should error getting window type for iframe if window is closed prior to serialization', () => {
+        const { childFrame } = getWindows();
 
         const mywindow = createIframe('child.htm');
         // $FlowFixMe
@@ -891,6 +621,7 @@ describe('[post-robot] serialization cases', () => {
 
 
     it('should pass a popup across the window boundary and change its location', () => {
+        const { childFrame } = getWindows();
 
         const mywindow = window.open('', uniqueID(), 'width=500,height=500');
 
@@ -930,6 +661,7 @@ describe('[post-robot] serialization cases', () => {
     });
 
     it('should pass a popup across the window boundary and get its instance id', () => {
+        const { childFrame } = getWindows();
 
         const mywindow = window.open('', uniqueID(), 'width=500,height=500');
 
@@ -954,132 +686,6 @@ describe('[post-robot] serialization cases', () => {
             if (!instanceID || typeof instanceID !== 'string') {
                 throw new Error(`Expected instance id to be returned`);
             }
-        });
-    });
-});
-
-
-describe('[post-robot] error cases', () => {
-
-    it('should get an error when messaging with an unknown name', () : ZalgoPromise<mixed> => {
-
-        return send(childFrame, 'doesntexist').then(() => {
-            throw new Error('Expected success handler to not be called');
-        }, (err) => {
-            if (!err) {
-                throw new Error(`Expected err`);
-            }
-        });
-    });
-
-    it('should error out if you try to register the same listener name twice', () => {
-
-        on('onceonly', () => {
-            // pass
-        });
-
-        try {
-            on('onceonly', () => {
-                // pass
-            });
-        } catch (err) {
-            if (!err) {
-                throw new Error(`Expected err`);
-            }
-            return;
-        }
-
-        throw new Error('Expected error handler to be called');
-    });
-
-    it('should fail to send a message when the expected domain does not match', (done) => {
-
-        on('foobuzzzzz', { domain: 'http://www.zombo.com' }, () => {
-            done(new Error(`Expected handler to not be called`));
-        });
-
-        send(childFrame, 'sendMessageToParent', {
-            messageName: 'foobuzzzzz'
-        }).then(() => {
-            return done(new Error('Expected success handler to not be called'));
-        }, (err) => {
-            if (!err) {
-                throw new Error(`Expected err`);
-            }
-            done();
-        });
-    });
-
-    it('should fail to send a message when the target domain does not match', () : ZalgoPromise<mixed> => {
-
-        return send(childFrame, 'setupListener', {
-
-            messageName: 'foo',
-            data:        {
-                foo: 'bar'
-            }
-
-        }).then(() => {
-
-            return send(childFrame, 'foo', {}, { domain: 'http://www.zombo.com' }).then(() => {
-                throw new Error('Expected success handler to not be called');
-            }, (err) => {
-                if (!err) {
-                    throw new Error(`Expected err`);
-                }
-            });
-        });
-    });
-});
-
-
-describe('[post-robot] popup tests', () => {
-
-    it('should work with a popup window', () : ZalgoPromise<mixed> => {
-        return send(childWindow, 'setupListener', {
-
-            messageName: 'foo',
-            data:        {
-                foo: 'bar'
-            }
-
-        }).then(() => {
-
-            return send(childWindow, 'foo').then(({ data }) => {
-                if (data.foo !== 'bar') {
-                    throw new Error(`Expected data.foo to be 'bar', got ${ data.foo }`);
-                }
-            });
-        });
-    });
-
-    it('should succeed messaging popup when emulating IE', () : ZalgoPromise<mixed> => {
-        const ie8mode = enableIE8Mode();
-
-        if (!bridge) {
-            throw new Error(`Bridge not found`);
-        }
-
-        return bridge.openBridge('/base/test/bridge.htm', 'mock://test-post-robot-child.com').then(() => {
-            const ie8Window = createPopup('child.htm');
-
-            return awaitWindowHello(ie8Window).then(() => {
-                return send(ie8Window, 'setupListener', {
-    
-                    messageName: 'foo',
-                    data:        {
-                        foo: 'bar'
-                    }
-        
-                });
-    
-            }).then(() => {
-                return send(ie8Window, 'foo');
-    
-            }).then(() => {
-                ie8Window.close();
-                ie8mode.cancel();
-            });
         });
     });
 });
