@@ -213,7 +213,7 @@ export class ProxyWindow {
 
         const reopenPromise = ZalgoPromise.hash({ isPopup: isPopupPromise, name: getNamePromise }).then(({ isPopup, name }) => {
             if (isPopup && name) {
-                window.open('', name);
+                window.open('', name, 'noopener');
             }
         });
         const focusPromise = this.serializedWindow.focus();
