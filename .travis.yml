@@ -1,8 +1,0 @@
-language: node_js
-node_js:
-   - "lts/*"
-before_install:
-  - npm install -g codecov
-script: npm test
-after_success:
-  - codecov
