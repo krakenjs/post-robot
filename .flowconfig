@@ -5,6 +5,7 @@
 .*/node_modules/**/test
 .*/node_modules/jsonlint
 .*/**/dist/module
+.*/node_modules/resolve
 [include]
 [libs]
 flow-typed
