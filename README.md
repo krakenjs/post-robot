@@ -1,13 +1,7 @@
 # post-robot [:]-\\-<
 
-[![build status][build-badge]][build]
-[![code coverage][coverage-badge]][coverage]
 [![npm version][version-badge]][package]
 
-[build-badge]: https://img.shields.io/github/workflow/status/krakenjs/post-robot/build?logo=github&style=flat-square
-[build]: https://github.com/krakenjs/post-robot/actions?query=workflow%3Abuild
-[coverage-badge]: https://img.shields.io/codecov/c/github/krakenjs/post-robot.svg?style=flat-square
-[coverage]: https://codecov.io/github/krakenjs/post-robot/
 [version-badge]: https://img.shields.io/npm/v/post-robot.svg?style=flat-square
 [package]: https://www.npmjs.com/package/post-robot
 
