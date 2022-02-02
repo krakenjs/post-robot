@@ -1,13 +1,13 @@
 "use strict";
 
 exports.__esModule = true;
-exports.getGlobalKey = getGlobalKey;
-exports.getGlobal = getGlobal;
-exports.deleteGlobal = deleteGlobal;
-exports.globalStore = globalStore;
-exports.getWildcard = getWildcard;
-exports.windowStore = windowStore;
 exports.WildCard = void 0;
+exports.deleteGlobal = deleteGlobal;
+exports.getGlobal = getGlobal;
+exports.getGlobalKey = getGlobalKey;
+exports.getWildcard = getWildcard;
+exports.globalStore = globalStore;
+exports.windowStore = windowStore;
 
 var _src = require("cross-domain-safe-weakmap/src");
 

@@ -1,12 +1,12 @@
 "use strict";
 
 exports.__esModule = true;
-exports.serializeMessage = serializeMessage;
-exports.deserializeMessage = deserializeMessage;
 exports.createProxyWindow = createProxyWindow;
-exports.toProxyWindow = toProxyWindow;
-exports.setup = setup;
+exports.deserializeMessage = deserializeMessage;
 exports.destroy = destroy;
+exports.serializeMessage = serializeMessage;
+exports.setup = setup;
+exports.toProxyWindow = toProxyWindow;
 
 var _lib = require("./lib");
 

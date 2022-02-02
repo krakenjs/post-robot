@@ -1,7 +1,7 @@
 "use strict";
 
 exports.__esModule = true;
-exports.RESPONSE_CYCLE_TIME = exports.RES_TIMEOUT = exports.ACK_TIMEOUT_KNOWN = exports.ACK_TIMEOUT = exports.CHILD_WINDOW_TIMEOUT = exports.BRIDGE_TIMEOUT = void 0;
+exports.RES_TIMEOUT = exports.RESPONSE_CYCLE_TIME = exports.CHILD_WINDOW_TIMEOUT = exports.BRIDGE_TIMEOUT = exports.ACK_TIMEOUT_KNOWN = exports.ACK_TIMEOUT = void 0;
 const BRIDGE_TIMEOUT = 5000;
 exports.BRIDGE_TIMEOUT = BRIDGE_TIMEOUT;
 const CHILD_WINDOW_TIMEOUT = 5000;

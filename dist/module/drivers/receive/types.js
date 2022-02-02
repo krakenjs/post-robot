@@ -1,8 +1,8 @@
 "use strict";
 
 exports.__esModule = true;
-exports.handleRequest = handleRequest;
 exports.handleAck = handleAck;
+exports.handleRequest = handleRequest;
 exports.handleResponse = handleResponse;
 
 var _src = require("zalgo-promise/src");
@@ -93,10 +93,6 @@ function handleRequest(source, origin, message, {
   return _src.ZalgoPromise.all([sendAck(), _src.ZalgoPromise.try(() => {
     if (!options) {
       throw new Error(`No handler found for post message: ${message.name} from ${origin} in ${window.location.protocol}//${window.location.host}${window.location.pathname}`);
-    }
-
-    if (!(0, _src2.matchDomain)(options.domain, origin)) {
-      throw new Error(`Request origin ${origin} does not match domain ${options.domain.toString()}`);
     }
 
     const data = message.data;

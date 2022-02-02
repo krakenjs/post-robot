@@ -1,10 +1,10 @@
 "use strict";
 
 exports.__esModule = true;
-exports.sayHello = sayHello;
+exports.awaitWindowHello = awaitWindowHello;
 exports.getWindowInstanceID = getWindowInstanceID;
 exports.initHello = initHello;
-exports.awaitWindowHello = awaitWindowHello;
+exports.sayHello = sayHello;
 
 var _src = require("cross-domain-utils/src");
 

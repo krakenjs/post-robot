@@ -1,8 +1,8 @@
 "use strict";
 
 exports.__esModule = true;
-exports.serializeFunction = serializeFunction;
 exports.deserializeFunction = deserializeFunction;
+exports.serializeFunction = serializeFunction;
 
 var _src = require("cross-domain-utils/src");
 

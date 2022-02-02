@@ -1,15 +1,15 @@
 "use strict";
 
 exports.__esModule = true;
-exports.resetListeners = resetListeners;
-exports.addResponseListener = addResponseListener;
-exports.getResponseListener = getResponseListener;
-exports.deleteResponseListener = deleteResponseListener;
-exports.cancelResponseListeners = cancelResponseListeners;
-exports.markResponseListenerErrored = markResponseListenerErrored;
-exports.isResponseListenerErrored = isResponseListenerErrored;
-exports.getRequestListener = getRequestListener;
 exports.addRequestListener = addRequestListener;
+exports.addResponseListener = addResponseListener;
+exports.cancelResponseListeners = cancelResponseListeners;
+exports.deleteResponseListener = deleteResponseListener;
+exports.getRequestListener = getRequestListener;
+exports.getResponseListener = getResponseListener;
+exports.isResponseListenerErrored = isResponseListenerErrored;
+exports.markResponseListenerErrored = markResponseListenerErrored;
+exports.resetListeners = resetListeners;
 
 var _src = require("cross-domain-utils/src");
 
@@ -18,6 +18,8 @@ var _src2 = require("belter/src");
 var _global = require("../global");
 
 var _conf = require("../conf");
+
+var _window = require("../serialize/window");
 
 function resetListeners() {
   const responseListeners = (0, _global.globalStore)('responseListeners');
@@ -124,18 +126,40 @@ function getRequestListener({
       return domainListeners[_conf.WILDCARD];
     }
   }
-}
+} // eslint-disable-next-line complexity
+
 
 function addRequestListener({
   name,
-  win,
+  win: winCandidate,
   domain
 }, listener) {
   const requestListeners = (0, _global.windowStore)('requestListeners');
 
   if (!name || typeof name !== 'string') {
     throw new Error(`Name required to add request listener`);
-  }
+  } // $FlowFixMe
+
+
+  if (winCandidate && winCandidate !== _conf.WILDCARD && _window.ProxyWindow.isProxyWindow(winCandidate)) {
+    // $FlowFixMe
+    const proxyWin = winCandidate;
+    const requestListenerPromise = proxyWin.awaitWindow().then(actualWin => {
+      return addRequestListener({
+        name,
+        win: actualWin,
+        domain
+      }, listener);
+    });
+    return {
+      cancel: () => {
+        requestListenerPromise.then(requestListener => requestListener.cancel(), _src2.noop);
+      }
+    };
+  } // $FlowFixMe
+
+
+  let win = winCandidate;
 
   if (Array.isArray(win)) {
     const listenersCollection = [];
@@ -190,6 +214,7 @@ function addRequestListener({
   }
 
   domain = domain || _conf.WILDCARD;
+  const strDomain = domain.toString();
 
   if (existingListener) {
     if (win && domain) {
@@ -203,40 +228,39 @@ function addRequestListener({
     }
   }
 
-  const nameListeners = requestListeners.getOrSet(win, () => ({}));
-  const domainListeners = (0, _src2.getOrSet)(nameListeners, name, () => ({}));
-  const strDomain = domain.toString();
-  let regexListeners;
-  let regexListener;
+  const winNameListeners = requestListeners.getOrSet(win, () => ({}));
+  const winNameDomainListeners = (0, _src2.getOrSet)(winNameListeners, name, () => ({}));
+  let winNameDomainRegexListeners;
+  let winNameDomainRegexListener;
 
   if ((0, _src2.isRegex)(domain)) {
-    regexListeners = (0, _src2.getOrSet)(domainListeners, __DOMAIN_REGEX__, () => []);
-    regexListener = {
+    winNameDomainRegexListeners = (0, _src2.getOrSet)(winNameDomainListeners, __DOMAIN_REGEX__, () => []);
+    winNameDomainRegexListener = {
       regex: domain,
       listener
     };
-    regexListeners.push(regexListener);
+    winNameDomainRegexListeners.push(winNameDomainRegexListener);
   } else {
-    domainListeners[strDomain] = listener;
+    winNameDomainListeners[strDomain] = listener;
   }
 
   return {
     cancel() {
-      delete domainListeners[strDomain];
+      delete winNameDomainListeners[strDomain];
 
-      if (regexListener) {
-        regexListeners.splice(regexListeners.indexOf(regexListener, 1));
+      if (winNameDomainRegexListener) {
+        winNameDomainRegexListeners.splice(winNameDomainRegexListeners.indexOf(winNameDomainRegexListener, 1));
 
-        if (!regexListeners.length) {
-          delete domainListeners[__DOMAIN_REGEX__];
+        if (!winNameDomainRegexListeners.length) {
+          delete winNameDomainListeners[__DOMAIN_REGEX__];
         }
       }
 
-      if (!Object.keys(domainListeners).length) {
-        delete nameListeners[name];
+      if (!Object.keys(winNameDomainListeners).length) {
+        delete winNameListeners[name];
       }
 
-      if (win && !Object.keys(nameListeners).length) {
+      if (win && !Object.keys(winNameListeners).length) {
         requestListeners.del(win);
       }
     }

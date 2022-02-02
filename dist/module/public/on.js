@@ -31,25 +31,22 @@ function on(name, options, handler) {
     throw new Error('Expected handler');
   }
 
-  options = options || {};
-  options.name = name;
-  options.handler = handler || options.handler;
-  const win = options.window;
-  const domain = options.domain;
-  const listenerOptions = {
-    handler: options.handler,
-    handleError: options.errorHandler || (err => {
-      throw err;
-    }),
-    window: win,
-    domain: domain || _conf.WILDCARD,
-    name
-  };
+  const winOrProxyWin = options.window;
+  const domain = options.domain || _conf.WILDCARD;
+  const successHandler = handler || options.handler;
+
+  const errorHandler = options.errorHandler || (err => {
+    throw err;
+  });
+
   const requestListener = (0, _drivers.addRequestListener)({
     name,
-    win,
+    win: winOrProxyWin,
     domain
-  }, listenerOptions);
+  }, {
+    handler: successHandler,
+    handleError: errorHandler
+  });
   return {
     cancel() {
       requestListener.cancel();

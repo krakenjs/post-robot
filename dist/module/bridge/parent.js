@@ -1,13 +1,13 @@
 "use strict";
 
 exports.__esModule = true;
-exports.listenForOpenTunnel = listenForOpenTunnel;
-exports.hasBridge = hasBridge;
-exports.openBridge = openBridge;
-exports.linkWindow = linkWindow;
-exports.linkUrl = linkUrl;
-exports.listenForWindowOpen = listenForWindowOpen;
 exports.destroyBridges = destroyBridges;
+exports.hasBridge = hasBridge;
+exports.linkUrl = linkUrl;
+exports.linkWindow = linkWindow;
+exports.listenForOpenTunnel = listenForOpenTunnel;
+exports.listenForWindowOpen = listenForWindowOpen;
+exports.openBridge = openBridge;
 
 var _src = require("zalgo-promise/src");
 

@@ -1,8 +1,8 @@
 "use strict";
 
 exports.__esModule = true;
-exports.markWindowKnown = markWindowKnown;
 exports.isWindowKnown = isWindowKnown;
+exports.markWindowKnown = markWindowKnown;
 
 var _global = require("../global");
 

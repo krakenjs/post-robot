@@ -1,18 +1,18 @@
 "use strict";
 
 exports.__esModule = true;
-exports.needsBridgeForBrowser = needsBridgeForBrowser;
-exports.needsBridgeForWin = needsBridgeForWin;
-exports.needsBridgeForDomain = needsBridgeForDomain;
-exports.needsBridge = needsBridge;
+exports.documentBodyReady = void 0;
+exports.findRemoteWindow = findRemoteWindow;
 exports.getBridgeName = getBridgeName;
 exports.isBridge = isBridge;
-exports.registerRemoteWindow = registerRemoteWindow;
-exports.findRemoteWindow = findRemoteWindow;
+exports.needsBridge = needsBridge;
+exports.needsBridgeForBrowser = needsBridgeForBrowser;
+exports.needsBridgeForDomain = needsBridgeForDomain;
+exports.needsBridgeForWin = needsBridgeForWin;
 exports.registerRemoteSendMessage = registerRemoteSendMessage;
+exports.registerRemoteWindow = registerRemoteWindow;
 exports.rejectRemoteSendMessage = rejectRemoteSendMessage;
 exports.sendBridgeMessage = sendBridgeMessage;
-exports.documentBodyReady = void 0;
 
 var _src = require("zalgo-promise/src");
 

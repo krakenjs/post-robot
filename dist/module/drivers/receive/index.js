@@ -1,10 +1,10 @@
 "use strict";
 
 exports.__esModule = true;
+exports.listenForMessages = listenForMessages;
+exports.messageListener = messageListener;
 exports.receiveMessage = receiveMessage;
 exports.setupGlobalReceiveMessage = setupGlobalReceiveMessage;
-exports.messageListener = messageListener;
-exports.listenForMessages = listenForMessages;
 exports.stopListenForMessages = stopListenForMessages;
 
 var _src = require("zalgo-promise/src");

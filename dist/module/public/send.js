@@ -17,6 +17,8 @@ var _lib = require("../lib");
 
 var _global = require("../global");
 
+var _window = require("../serialize/window");
+
 var _on = require("./on");
 
 function validateOptions(name, win, domain) {
@@ -59,96 +61,100 @@ function normalizeDomain(win, targetDomain, actualDomain, {
   });
 }
 
-const send = (win, name, data, options) => {
+const send = (winOrProxyWin, name, data, options) => {
   options = options || {};
   const domainMatcher = options.domain || _conf.WILDCARD;
   const responseTimeout = options.timeout || _conf.RES_TIMEOUT;
   const childTimeout = options.timeout || _conf.CHILD_WINDOW_TIMEOUT;
-  const fireAndForget = options.fireAndForget || false; // $FlowFixMe
+  const fireAndForget = options.fireAndForget || false;
+  return _window.ProxyWindow.toProxyWindow(winOrProxyWin, {
+    send
+  }).awaitWindow().then(win => {
+    // $FlowFixMe
+    return _src.ZalgoPromise.try(() => {
+      validateOptions(name, win, domainMatcher);
 
-  return _src.ZalgoPromise.try(() => {
-    validateOptions(name, win, domainMatcher);
-
-    if ((0, _src2.isAncestor)(window, win)) {
-      return (0, _lib.awaitWindowHello)(win, childTimeout);
-    }
-  }).then(({
-    domain: actualDomain
-  } = {}) => {
-    return normalizeDomain(win, domainMatcher, actualDomain, {
-      send
-    });
-  }).then(targetDomain => {
-    const domain = targetDomain;
-    const logName = name === _conf.MESSAGE_NAME.METHOD && data && typeof data.name === 'string' ? `${data.name}()` : name;
-
-    if (__DEBUG__) {
-      console.info('send::req', logName, domain, '\n\n', data); // eslint-disable-line no-console
-    }
-
-    const promise = new _src.ZalgoPromise();
-    const hash = `${name}_${(0, _src3.uniqueID)()}`;
-
-    if (!fireAndForget) {
-      const responseListener = {
-        name,
-        win,
-        domain,
-        promise
-      };
-      (0, _drivers.addResponseListener)(hash, responseListener);
-      const reqPromises = (0, _global.windowStore)('requestPromises').getOrSet(win, () => []);
-      reqPromises.push(promise);
-      promise.catch(() => {
-        (0, _drivers.markResponseListenerErrored)(hash);
-        (0, _drivers.deleteResponseListener)(hash);
+      if ((0, _src2.isAncestor)(window, win)) {
+        return (0, _lib.awaitWindowHello)(win, childTimeout);
+      }
+    }).then(({
+      domain: actualDomain
+    } = {}) => {
+      return normalizeDomain(win, domainMatcher, actualDomain, {
+        send
       });
-      const totalAckTimeout = (0, _lib.isWindowKnown)(win) ? _conf.ACK_TIMEOUT_KNOWN : _conf.ACK_TIMEOUT;
-      const totalResTimeout = responseTimeout;
-      let ackTimeout = totalAckTimeout;
-      let resTimeout = totalResTimeout;
-      const interval = (0, _src3.safeInterval)(() => {
-        if ((0, _src2.isWindowClosed)(win)) {
-          return promise.reject(new Error(`Window closed for ${name} before ${responseListener.ack ? 'response' : 'ack'}`));
-        }
+    }).then(targetDomain => {
+      const domain = targetDomain;
+      const logName = name === _conf.MESSAGE_NAME.METHOD && data && typeof data.name === 'string' ? `${data.name}()` : name;
 
-        if (responseListener.cancelled) {
-          return promise.reject(new Error(`Response listener was cancelled for ${name}`));
-        }
+      if (__DEBUG__) {
+        console.info('send::req', logName, domain, '\n\n', data); // eslint-disable-line no-console
+      }
 
-        ackTimeout = Math.max(ackTimeout - _conf.RESPONSE_CYCLE_TIME, 0);
+      const promise = new _src.ZalgoPromise();
+      const hash = `${name}_${(0, _src3.uniqueID)()}`;
 
-        if (resTimeout !== -1) {
-          resTimeout = Math.max(resTimeout - _conf.RESPONSE_CYCLE_TIME, 0);
-        }
+      if (!fireAndForget) {
+        const responseListener = {
+          name,
+          win,
+          domain,
+          promise
+        };
+        (0, _drivers.addResponseListener)(hash, responseListener);
+        const reqPromises = (0, _global.windowStore)('requestPromises').getOrSet(win, () => []);
+        reqPromises.push(promise);
+        promise.catch(() => {
+          (0, _drivers.markResponseListenerErrored)(hash);
+          (0, _drivers.deleteResponseListener)(hash);
+        });
+        const totalAckTimeout = (0, _lib.isWindowKnown)(win) ? _conf.ACK_TIMEOUT_KNOWN : _conf.ACK_TIMEOUT;
+        const totalResTimeout = responseTimeout;
+        let ackTimeout = totalAckTimeout;
+        let resTimeout = totalResTimeout;
+        const interval = (0, _src3.safeInterval)(() => {
+          if ((0, _src2.isWindowClosed)(win)) {
+            return promise.reject(new Error(`Window closed for ${name} before ${responseListener.ack ? 'response' : 'ack'}`));
+          }
 
-        if (!responseListener.ack && ackTimeout === 0) {
-          return promise.reject(new Error(`No ack for postMessage ${logName} in ${(0, _src2.getDomain)()} in ${totalAckTimeout}ms`));
-        } else if (resTimeout === 0) {
-          return promise.reject(new Error(`No response for postMessage ${logName} in ${(0, _src2.getDomain)()} in ${totalResTimeout}ms`));
-        }
-      }, _conf.RESPONSE_CYCLE_TIME);
-      promise.finally(() => {
-        interval.cancel();
-        reqPromises.splice(reqPromises.indexOf(promise, 1));
-      }).catch(_src3.noop);
-    }
+          if (responseListener.cancelled) {
+            return promise.reject(new Error(`Response listener was cancelled for ${name}`));
+          }
 
-    return (0, _drivers.sendMessage)(win, domain, {
-      id: (0, _src3.uniqueID)(),
-      origin: (0, _src2.getDomain)(window),
-      type: _conf.MESSAGE_TYPE.REQUEST,
-      hash,
-      name,
-      data,
-      fireAndForget
-    }, {
-      on: _on.on,
-      send
-    }).then(() => {
-      return fireAndForget ? promise.resolve() : promise;
-    }, err => {
-      throw new Error(`Send request message failed for ${logName} in ${(0, _src2.getDomain)()}\n\n${(0, _src3.stringifyError)(err)}`);
+          ackTimeout = Math.max(ackTimeout - _conf.RESPONSE_CYCLE_TIME, 0);
+
+          if (resTimeout !== -1) {
+            resTimeout = Math.max(resTimeout - _conf.RESPONSE_CYCLE_TIME, 0);
+          }
+
+          if (!responseListener.ack && ackTimeout === 0) {
+            return promise.reject(new Error(`No ack for postMessage ${logName} in ${(0, _src2.getDomain)()} in ${totalAckTimeout}ms`));
+          } else if (resTimeout === 0) {
+            return promise.reject(new Error(`No response for postMessage ${logName} in ${(0, _src2.getDomain)()} in ${totalResTimeout}ms`));
+          }
+        }, _conf.RESPONSE_CYCLE_TIME);
+        promise.finally(() => {
+          interval.cancel();
+          reqPromises.splice(reqPromises.indexOf(promise, 1));
+        }).catch(_src3.noop);
+      }
+
+      return (0, _drivers.sendMessage)(win, domain, {
+        id: (0, _src3.uniqueID)(),
+        origin: (0, _src2.getDomain)(window),
+        type: _conf.MESSAGE_TYPE.REQUEST,
+        hash,
+        name,
+        data,
+        fireAndForget
+      }, {
+        on: _on.on,
+        send
+      }).then(() => {
+        return fireAndForget ? promise.resolve() : promise;
+      }, err => {
+        throw new Error(`Send request message failed for ${logName} in ${(0, _src2.getDomain)()}\n\n${(0, _src3.stringifyError)(err)}`);
+      });
     });
   });
 };

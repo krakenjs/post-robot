@@ -1,9 +1,9 @@
 "use strict";
 
 exports.__esModule = true;
-exports.serializeWindow = serializeWindow;
-exports.deserializeWindow = deserializeWindow;
 exports.ProxyWindow = void 0;
+exports.deserializeWindow = deserializeWindow;
+exports.serializeWindow = serializeWindow;
 
 var _src = require("cross-domain-utils/src");
 
@@ -223,7 +223,7 @@ class ProxyWindow {
       name
     }) => {
       if (isPopup && name) {
-        window.open('', name);
+        window.open('', name, 'noopener');
       }
     });
 

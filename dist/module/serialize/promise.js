@@ -1,8 +1,8 @@
 "use strict";
 
 exports.__esModule = true;
-exports.serializePromise = serializePromise;
 exports.deserializePromise = deserializePromise;
+exports.serializePromise = serializePromise;
 
 var _src = require("zalgo-promise/src");
 

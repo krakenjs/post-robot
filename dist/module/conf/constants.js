@@ -1,7 +1,7 @@
 "use strict";
 
 exports.__esModule = true;
-exports.METHOD = exports.SERIALIZATION_TYPE = exports.WILDCARD = exports.POSTROBOT_PROXY = exports.BRIDGE_NAME_PREFIX = exports.SEND_STRATEGY = exports.MESSAGE_NAME = exports.MESSAGE_ACK = exports.MESSAGE_TYPE = void 0;
+exports.WILDCARD = exports.SERIALIZATION_TYPE = exports.SEND_STRATEGY = exports.POSTROBOT_PROXY = exports.METHOD = exports.MESSAGE_TYPE = exports.MESSAGE_NAME = exports.MESSAGE_ACK = exports.BRIDGE_NAME_PREFIX = void 0;
 const MESSAGE_TYPE = {
   REQUEST: 'postrobot_message_request',
   RESPONSE: 'postrobot_message_response',
