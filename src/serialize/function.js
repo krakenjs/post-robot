@@ -1,6 +1,6 @@
 /* @flow */
 
-import { matchDomain, getDomain, type CrossDomainWindowType, type DomainMatcher } from 'cross-domain-utils/src';
+import { matchDomain, getDomain, type CrossDomainWindowType, type DomainMatcher } from '@krakenjs/cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { uniqueID, isRegex, arrayFrom } from 'belter/src';
 import { serializeType, type CustomSerializedType } from 'universal-serialize/src';
@@ -21,7 +21,7 @@ type StoredMethod = {|
 function addMethod(id : string, val : Function, name : string, source : CrossDomainWindowType | ProxyWindow, domain : DomainMatcher) {
     const methodStore = windowStore('methodStore');
     const proxyWindowMethods = globalStore('proxyWindowMethods');
-    
+
     if (ProxyWindow.isProxyWindow(source)) {
         proxyWindowMethods.set(id, { val, name, domain, source });
     } else {
@@ -72,19 +72,19 @@ function listenForFunctionCalls({ on, send } : {| on : OnType, send : SendType |
             const { id, name } = data;
 
             const meth = lookupMethod(source, id);
-    
+
             if (!meth) {
                 throw new Error(`Could not find method '${ name }' with id: ${ data.id } in ${ getDomain(window) }`);
             }
 
             const { source: methodSource, domain, val } = meth;
-            
+
             return ZalgoPromise.try(() => {
                 if (!matchDomain(domain, origin)) {
                     // $FlowFixMe
                     throw new Error(`Method '${ data.name }' domain ${ JSON.stringify(isRegex(meth.domain) ? meth.domain.source : meth.domain) } does not match origin ${ origin } in ${ getDomain(window) }`);
                 }
-                
+
                 if (ProxyWindow.isProxyWindow(methodSource)) {
                     // $FlowFixMe
                     return methodSource.matchWindow(source, { send }).then(match => {
@@ -130,7 +130,7 @@ type SerializableFunction<T> = {
 
 export function serializeFunction<T>(destination : CrossDomainWindowType | ProxyWindow, domain : DomainMatcher, val : SerializableFunction<T>, key : string, { on, send } : {| on : OnType, send : SendType |}) : SerializedFunction {
     listenForFunctionCalls({ on, send });
-    
+
     const id = val.__id__ || uniqueID();
     destination = ProxyWindow.unwrap(destination);
     let name = val.__name__ || val.name || key;
@@ -157,14 +157,14 @@ export function deserializeFunction<T>(source : CrossDomainWindowType | ProxyWin
     const getDeserializedFunction = (opts? : Object = {}) => {
         function crossDomainFunctionWrapper<X : mixed>() : ZalgoPromise<X> {
             let originalStack;
-    
+
             if (__DEBUG__) {
                 originalStack = (new Error(`Original call to ${ name }():`)).stack;
             }
-    
+
             return ProxyWindow.toProxyWindow(source, { send }).awaitWindow().then(win => {
                 const meth = lookupMethod(win, id);
-    
+
                 if (meth && meth.val !== crossDomainFunctionWrapper) {
                     return meth.val.apply({ source: window, origin: getDomain() }, arguments);
                 } else {
@@ -178,7 +178,7 @@ export function deserializeFunction<T>(source : CrossDomainWindowType | ProxyWin
                             .then(res => res.data.result);
                     }
                 }
-    
+
             }).catch(err => {
                 // $FlowFixMe
                 if (__DEBUG__ && originalStack && err.stack) {

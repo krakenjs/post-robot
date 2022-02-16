@@ -2,7 +2,7 @@
 /* eslint max-lines: 0 */
 
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { WINDOW_TYPE } from 'cross-domain-utils/src';
+import { WINDOW_TYPE } from '@krakenjs/cross-domain-utils/src';
 import { uniqueID, getBody } from 'belter/src';
 
 import { send } from '../../src';
@@ -144,7 +144,7 @@ describe('Serialization cases', () => {
 
         const expectedValue = 123;
         let resolver;
-        
+
         // eslint-disable-next-line promise/no-native, no-restricted-globals
         const promise = new Promise((resolve) => {
             resolver = resolve;
@@ -185,7 +185,7 @@ describe('Serialization cases', () => {
         const expectedErrorCode = 'ABC123';
         let expectedErrorStack; // eslint-disable-line prefer-const
         let rejector;
-        
+
         // eslint-disable-next-line promise/no-native, no-restricted-globals
         const promise = new Promise((resolve, reject) => {
             rejector = reject;
@@ -247,7 +247,7 @@ describe('Serialization cases', () => {
 
         const expectedValue = 123;
         let resolver;
-        
+
         const promise = new ZalgoPromise((resolve) => {
             resolver = resolve;
         });
@@ -287,7 +287,7 @@ describe('Serialization cases', () => {
         const expectedErrorCode = 'ABC123';
         let expectedErrorStack; // eslint-disable-line prefer-const
         let rejector;
-        
+
         const promise = new ZalgoPromise((resolve, reject) => {
             rejector = reject;
         });
@@ -559,7 +559,7 @@ describe('Serialization cases', () => {
             }
         });
     });
-    
+
     it('should error getting window type for popup if window is closed prior to serialization', () => {
         const { childFrame } = getWindows();
 

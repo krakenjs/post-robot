@@ -1,7 +1,7 @@
 /* @flow */
 
 import { isSameDomain, isWindowClosed, type CrossDomainWindowType, closeWindow,
-    type DomainMatcher, getOpener, WINDOW_TYPE, isWindow, assertSameDomain, getFrameForWindow } from 'cross-domain-utils/src';
+    type DomainMatcher, getOpener, WINDOW_TYPE, isWindow, assertSameDomain, getFrameForWindow } from '@krakenjs/cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { uniqueID, memoizePromise, noop, submitForm } from 'belter/src';
 import { serializeType, type CustomSerializedType } from 'universal-serialize/src';
@@ -42,13 +42,13 @@ type SerializedWindowType = {|
 |};
 
 function getSerializedWindow(winPromise : ZalgoPromise<CrossDomainWindowType>, { send, id = uniqueID() } : {| send : SendType, id? : string |}) : SerializedWindowType {
-    
+
     let windowNamePromise = winPromise.then(win => {
         if (isSameDomain(win)) {
             return assertSameDomain(win).name;
         }
     });
-    
+
     const windowTypePromise = winPromise.then(window => {
         if (!isWindowClosed(window)) {
             return getOpener(window) ? WINDOW_TYPE.POPUP : WINDOW_TYPE.IFRAME;
@@ -170,7 +170,7 @@ export class ProxyWindow {
     constructor({ send, win, serializedWindow } : {| win? : CrossDomainWindowType, serializedWindow? : SerializedWindowType, send : SendType |}) {
         this.actualWindowPromise = new ZalgoPromise();
         this.serializedWindow = serializedWindow || getSerializedWindow(this.actualWindowPromise, { send });
-        
+
         globalStore('idToProxyWindow').set(this.getID(), this);
         if (win) {
             this.setWindow(win, { send });
@@ -248,7 +248,7 @@ export class ProxyWindow {
             if (this.actualWindow) {
                 return win === this.actualWindow;
             }
-            
+
             return ZalgoPromise.hash({
                 proxyInstanceID:       this.getInstanceID(),
                 knownWindowInstanceID: getWindowInstanceID(win, { send })
@@ -312,7 +312,7 @@ export class ProxyWindow {
 
         // $FlowFixMe
         const actualWindow : CrossDomainWindowType = win;
-        
+
         return windowStore('winToProxyWindow').get(actualWindow) || new ProxyWindow({ win: actualWindow, send });
     }
 }
