@@ -1,7 +1,7 @@
 /* @flow */
 
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { getDomain, getFrameByName, isWindowClosed, getDomainFromUrl, normalizeMockUrl, type CrossDomainWindowType } from 'cross-domain-utils/src';
+import { getDomain, getFrameByName, isWindowClosed, getDomainFromUrl, normalizeMockUrl, type CrossDomainWindowType } from '@krakenjs/cross-domain-utils/src';
 
 import { BRIDGE_TIMEOUT, MESSAGE_NAME } from '../conf';
 import { awaitWindowHello } from '../lib';
