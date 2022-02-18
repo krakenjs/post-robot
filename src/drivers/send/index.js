@@ -1,7 +1,7 @@
 /* @flow */
 
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { isWindowClosed, type CrossDomainWindowType } from 'cross-domain-utils/src';
+import { isWindowClosed, type CrossDomainWindowType } from '@krakenjs/cross-domain-utils/src';
 import { stringifyError, noop } from 'belter/src';
 
 import { serializeMessage } from '../../serialize';

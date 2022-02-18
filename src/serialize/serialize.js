@@ -1,6 +1,6 @@
 /* @flow */
 
-import { type CrossDomainWindowType, isWindow, type DomainMatcher } from 'cross-domain-utils/src';
+import { type CrossDomainWindowType, isWindow, type DomainMatcher } from '@krakenjs/cross-domain-utils/src';
 import { TYPE, serialize, deserialize, type Thenable } from 'universal-serialize/src';
 
 import { SERIALIZATION_TYPE } from '../conf';

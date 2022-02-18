@@ -1,7 +1,7 @@
 /* @flow */
 
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { getDomain, isWindowClosed, matchDomain, stringifyDomainPattern, type CrossDomainWindowType } from 'cross-domain-utils/src';
+import { getDomain, isWindowClosed, matchDomain, stringifyDomainPattern, type CrossDomainWindowType } from '@krakenjs/cross-domain-utils/src';
 import { noop, stringifyError, uniqueID } from 'belter/src';
 
 import { MESSAGE_TYPE, MESSAGE_ACK, MESSAGE_NAME } from '../../conf';

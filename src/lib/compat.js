@@ -1,6 +1,6 @@
 /* @flow */
 
-import { getUserAgent } from 'cross-domain-utils/src';
+import { getUserAgent } from '@krakenjs/cross-domain-utils/src';
 
 export function needsGlobalMessagingForBrowser() : boolean {
 

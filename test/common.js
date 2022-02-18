@@ -2,7 +2,7 @@
 
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { getBody, noop } from 'belter/src';
-import { type CrossDomainWindowType } from 'cross-domain-utils/src';
+import { type CrossDomainWindowType } from '@krakenjs/cross-domain-utils/src';
 
 import { awaitWindowHello } from '../src/lib';
 

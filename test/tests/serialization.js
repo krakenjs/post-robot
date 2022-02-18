@@ -2,7 +2,7 @@
 /* eslint max-lines: 0 */
 
 import { ZalgoPromise } from 'zalgo-promise/src';
-import { WINDOW_TYPE } from 'cross-domain-utils/src';
+import { WINDOW_TYPE } from '@krakenjs/cross-domain-utils/src';
 import { uniqueID, getBody } from 'belter/src';
 
 import { send } from '../../src';
