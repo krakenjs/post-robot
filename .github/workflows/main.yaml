@@ -30,3 +30,5 @@ jobs:
       - name: ▶️ Run build script
         run: npm run build
 
+      - name: ⬆️ Upload karma coverage report
+        uses: codecov/codecov-action@v2
