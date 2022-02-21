@@ -58,7 +58,7 @@
   "devDependencies": {
     "auto-changelog": "^1.11.0",
     "flow-bin": "0.155.0",
-    "grumbler-scripts": "^3",
+    "grumbler-scripts": "^5.0.3",
     "mocha": "^4"
   },
   "dependencies": {
