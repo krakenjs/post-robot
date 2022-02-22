@@ -1,8 +1,8 @@
 /* @flow */
 
-import { type CrossDomainWindowType, type SameDomainWindowType } from 'cross-domain-utils/src';
-import { WeakMap } from 'cross-domain-safe-weakmap/src';
-import { getOrSet, getCurrentScriptUID } from 'belter/src';
+import { type CrossDomainWindowType, type SameDomainWindowType } from '@krakenjs/cross-domain-utils/src';
+import { WeakMap } from '@krakenjs/cross-domain-safe-weakmap/src';
+import { getOrSet, getCurrentScriptUID } from '@krakenjs/belter/src';
 
 export function getGlobalKey() : string {
     if (__POST_ROBOT__.__SCRIPT_NAMESPACE__) {

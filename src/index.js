@@ -4,7 +4,7 @@ import { setup } from './setup';
 import { setupBridge, openBridge, linkWindow, linkUrl, isBridge, needsBridge, needsBridgeForBrowser, hasBridge,
     needsBridgeForWin, needsBridgeForDomain, destroyBridges } from './bridge';
 
-export { ZalgoPromise as Promise } from 'zalgo-promise/src';
+export { ZalgoPromise as Promise } from '@krakenjs/zalgo-promise/src';
 
 export * from './types';
 export { ProxyWindow } from './serialize';

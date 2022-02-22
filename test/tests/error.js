@@ -1,8 +1,8 @@
 /* @flow */
 /* eslint max-lines: 0 */
 
-import { ZalgoPromise } from 'zalgo-promise/src';
-import { wrapPromise } from 'belter/src';
+import { ZalgoPromise } from '@krakenjs/zalgo-promise/src';
+import { wrapPromise } from '@krakenjs/belter/src';
 
 import { on, send } from '../../src';
 import { getWindows } from '../common';

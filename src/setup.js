@@ -1,6 +1,6 @@
 /* @flow */
 
-import type { CrossDomainWindowType, DomainMatcher } from 'cross-domain-utils/src';
+import type { CrossDomainWindowType, DomainMatcher } from '@krakenjs/cross-domain-utils/src';
 
 import { initHello } from './lib';
 import { listenForMessages, stopListenForMessages, receiveMessage, setupGlobalReceiveMessage, cancelResponseListeners } from './drivers';

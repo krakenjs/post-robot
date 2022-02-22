@@ -1,8 +1,8 @@
 /* @flow */
 
-import { ZalgoPromise } from 'zalgo-promise/src';
-import { getBody, noop } from 'belter/src';
-import { type CrossDomainWindowType } from 'cross-domain-utils/src';
+import { ZalgoPromise } from '@krakenjs/zalgo-promise/src';
+import { getBody, noop } from '@krakenjs/belter/src';
+import { type CrossDomainWindowType } from '@krakenjs/cross-domain-utils/src';
 
 import { awaitWindowHello } from '../src/lib';
 

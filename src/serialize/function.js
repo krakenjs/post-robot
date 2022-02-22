@@ -1,9 +1,9 @@
 /* @flow */
 
-import { matchDomain, getDomain, type CrossDomainWindowType, type DomainMatcher } from 'cross-domain-utils/src';
-import { ZalgoPromise } from 'zalgo-promise/src';
-import { uniqueID, isRegex, arrayFrom } from 'belter/src';
-import { serializeType, type CustomSerializedType } from 'universal-serialize/src';
+import { matchDomain, getDomain, type CrossDomainWindowType, type DomainMatcher } from '@krakenjs/cross-domain-utils/src';
+import { ZalgoPromise } from '@krakenjs/zalgo-promise/src';
+import { uniqueID, isRegex, arrayFrom } from '@krakenjs/belter/src';
+import { serializeType, type CustomSerializedType } from '@krakenjs/universal-serialize/src';
 
 import { MESSAGE_NAME, WILDCARD, SERIALIZATION_TYPE } from '../conf';
 import { windowStore, globalStore } from '../global';

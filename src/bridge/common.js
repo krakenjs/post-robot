@@ -1,8 +1,8 @@
 /* @flow */
 
-import { ZalgoPromise } from 'zalgo-promise/src';
-import { getDomain, isSameDomain, isOpener, isSameTopWindow, matchDomain, getUserAgent, getDomainFromUrl, type CrossDomainWindowType } from 'cross-domain-utils/src';
-import { noop } from 'belter/src';
+import { ZalgoPromise } from '@krakenjs/zalgo-promise/src';
+import { getDomain, isSameDomain, isOpener, isSameTopWindow, matchDomain, getUserAgent, getDomainFromUrl, type CrossDomainWindowType } from '@krakenjs/cross-domain-utils/src';
+import { noop } from '@krakenjs/belter/src';
 
 import { BRIDGE_NAME_PREFIX } from '../conf';
 import { windowStore } from '../global';

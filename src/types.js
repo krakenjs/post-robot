@@ -1,7 +1,7 @@
 /* @flow */
 
-import type { ZalgoPromise } from 'zalgo-promise/src';
-import type { CrossDomainWindowType, DomainMatcher } from 'cross-domain-utils/src';
+import type { ZalgoPromise } from '@krakenjs/zalgo-promise/src';
+import type { CrossDomainWindowType, DomainMatcher } from '@krakenjs/cross-domain-utils/src';
 
 import type { ProxyWindow } from './serialize/window';
 
