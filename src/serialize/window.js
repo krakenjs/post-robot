@@ -1,7 +1,7 @@
 /* @flow */
 
 import { isSameDomain, isWindowClosed, type CrossDomainWindowType, closeWindow,
-    type DomainMatcher, getOpener, WINDOW_TYPE, isWindow, assertSameDomain, getFrameForWindow } from '@krakenjs/cross-domain-utils/src';
+    type DomainMatcher, getOpener, WINDOW_TYPE, isWindow, assertSameDomain, getFrameForWindow } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { uniqueID, memoizePromise, noop, submitForm } from 'belter/src';
 import { serializeType, type CustomSerializedType } from 'universal-serialize/src';

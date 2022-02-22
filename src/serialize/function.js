@@ -1,6 +1,6 @@
 /* @flow */
 
-import { matchDomain, getDomain, type CrossDomainWindowType, type DomainMatcher } from '@krakenjs/cross-domain-utils/src';
+import { matchDomain, getDomain, type CrossDomainWindowType, type DomainMatcher } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { uniqueID, isRegex, arrayFrom } from 'belter/src';
 import { serializeType, type CustomSerializedType } from 'universal-serialize/src';

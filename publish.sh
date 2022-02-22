@@ -12,8 +12,8 @@ if ! git diff-index --quiet --cached HEAD; then
     exit 1;
 fi;
 
-rm -rf node_modules/cross-domain-safe-weakmap node_modules/zalgo-promise node_modules/@krakenjs/cross-domain-utils node_modules/belter
-npm install cross-domain-safe-weakmap zalgo-promise @krakenjs/cross-domain-utils belter
+rm -rf node_modules/cross-domain-safe-weakmap node_modules/zalgo-promise node_modules/cross-domain-utils node_modules/belter
+npm install cross-domain-safe-weakmap zalgo-promise cross-domain-utils belter
 
 npm run build -- --level=${1-patch};
 
