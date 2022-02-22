@@ -1,9 +1,9 @@
 /* @flow */
 /* eslint max-lines: 0 */
 
-import { ZalgoPromise } from 'zalgo-promise/src';
-import { WINDOW_TYPE } from 'cross-domain-utils/src';
-import { uniqueID, getBody } from 'belter/src';
+import { ZalgoPromise } from '@krakenjs/zalgo-promise/src';
+import { WINDOW_TYPE } from '@krakenjs/cross-domain-utils/src';
+import { uniqueID, getBody } from '@krakenjs/belter/src';
 
 import { send } from '../../src';
 import { awaitWindowHello } from '../../src/lib';

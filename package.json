@@ -1,5 +1,5 @@
 {
-  "name": "post-robot",
+  "name": "@krakenjs/post-robot",
   "version": "10.0.46",
   "description": "Simple postMessage based server.",
   "main": "index.js",
@@ -62,10 +62,10 @@
     "mocha": "^4"
   },
   "dependencies": {
-    "belter": "^1.0.41",
-    "cross-domain-safe-weakmap": "^1.0.1",
-    "cross-domain-utils": "^2.0.0",
-    "universal-serialize": "^1.0.4",
-    "zalgo-promise": "^1.0.3"
+    "@krakenjs/belter": "^2.0.0",
+    "@krakenjs/cross-domain-safe-weakmap": "^2.0.0",
+    "@krakenjs/cross-domain-utils": "^3.0.0",
+    "@krakenjs/universal-serialize": "^2.0.0",
+    "@krakenjs/zalgo-promise": "^2.0.0"
   }
 }

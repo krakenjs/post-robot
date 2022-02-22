@@ -1,8 +1,8 @@
 /* @flow */
 
-import { ZalgoPromise } from 'zalgo-promise/src';
-import { isAncestor, isWindowClosed, getDomain, matchDomain, type CrossDomainWindowType, type DomainMatcher } from 'cross-domain-utils/src';
-import { uniqueID, isRegex, noop, safeInterval, stringify, stringifyError } from 'belter/src';
+import { ZalgoPromise } from '@krakenjs/zalgo-promise/src';
+import { isAncestor, isWindowClosed, getDomain, matchDomain, type CrossDomainWindowType, type DomainMatcher } from '@krakenjs/cross-domain-utils/src';
+import { uniqueID, isRegex, noop, safeInterval, stringify, stringifyError } from '@krakenjs/belter/src';
 
 
 import { CHILD_WINDOW_TIMEOUT, MESSAGE_TYPE, WILDCARD, MESSAGE_NAME, ACK_TIMEOUT, RES_TIMEOUT, ACK_TIMEOUT_KNOWN, RESPONSE_CYCLE_TIME } from '../conf';

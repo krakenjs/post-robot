@@ -1,8 +1,8 @@
 /* @flow */
 
-import { ZalgoPromise } from 'zalgo-promise/src';
-import { isSameDomain, getOpener, getDomain, getFrameByName, assertSameDomain, type CrossDomainWindowType } from 'cross-domain-utils/src';
-import { noop } from 'belter/src';
+import { ZalgoPromise } from '@krakenjs/zalgo-promise/src';
+import { isSameDomain, getOpener, getDomain, getFrameByName, assertSameDomain, type CrossDomainWindowType } from '@krakenjs/cross-domain-utils/src';
+import { noop } from '@krakenjs/belter/src';
 
 import { getGlobal, windowStore } from '../global';
 import type { OnType, SendType, ReceiveMessageType } from '../types';

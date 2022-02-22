@@ -1,8 +1,8 @@
 /* @flow */
 
-import { type ZalgoPromise } from 'zalgo-promise/src';
-import { getParent, isWindowClosed, type CrossDomainWindowType } from 'cross-domain-utils/src';
-import { noop, uniqueID } from 'belter/src';
+import { type ZalgoPromise } from '@krakenjs/zalgo-promise/src';
+import { getParent, isWindowClosed, type CrossDomainWindowType } from '@krakenjs/cross-domain-utils/src';
+import { noop, uniqueID } from '@krakenjs/belter/src';
 
 import { MESSAGE_NAME, WILDCARD } from '../conf';
 import { getGlobal, globalStore } from '../global';

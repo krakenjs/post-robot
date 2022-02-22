@@ -1,8 +1,8 @@
 /* @flow */
 
-import { type ZalgoPromise } from 'zalgo-promise/src';
-import { matchDomain, type CrossDomainWindowType, type DomainMatcher } from 'cross-domain-utils/src';
-import { isRegex, getOrSet, noop } from 'belter/src';
+import { type ZalgoPromise } from '@krakenjs/zalgo-promise/src';
+import { matchDomain, type CrossDomainWindowType, type DomainMatcher } from '@krakenjs/cross-domain-utils/src';
+import { isRegex, getOrSet, noop } from '@krakenjs/belter/src';
 
 import { getWildcard, type WildCard, globalStore, windowStore } from '../global';
 import { WILDCARD } from '../conf';

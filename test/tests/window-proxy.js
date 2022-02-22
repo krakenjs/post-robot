@@ -1,7 +1,7 @@
 /* @flow */
 /* eslint max-lines: 0, max-nested-callbacks: off */
 
-import { wrapPromise } from 'belter/src';
+import { wrapPromise } from '@krakenjs/belter/src';
 
 import { on, send } from '../../src';
 import { getWindows } from '../common';

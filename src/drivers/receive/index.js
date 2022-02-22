@@ -1,8 +1,8 @@
 /* @flow */
 
-import { ZalgoPromise } from 'zalgo-promise/src';
-import { isWindowClosed, type CrossDomainWindowType, getDomain, isSameTopWindow, PROTOCOL  } from 'cross-domain-utils/src';
-import { addEventListener, noop } from 'belter/src';
+import { ZalgoPromise } from '@krakenjs/zalgo-promise/src';
+import { isWindowClosed, type CrossDomainWindowType, getDomain, isSameTopWindow, PROTOCOL  } from '@krakenjs/cross-domain-utils/src';
+import { addEventListener, noop } from '@krakenjs/belter/src';
 
 import type { Message } from '../types';
 import { MESSAGE_TYPE } from '../../conf';
