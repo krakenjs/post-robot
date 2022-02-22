@@ -1,6 +1,6 @@
 /* @flow */
 
-import { getAncestor, type CrossDomainWindowType } from '@krakenjs/cross-domain-utils/src';
+import { getAncestor, type CrossDomainWindowType } from 'cross-domain-utils/src';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { uniqueID } from 'belter/src';
 

@@ -1,7 +1,7 @@
 /* @flow */
 
 import { isSameDomain, isSameTopWindow, isActuallySameDomain, getActualDomain,
-    getDomain, type CrossDomainWindowType, PROTOCOL } from '@krakenjs/cross-domain-utils/src';
+    getDomain, type CrossDomainWindowType, PROTOCOL } from 'cross-domain-utils/src';
 
 import { SEND_STRATEGY, WILDCARD } from '../../conf';
 import { needsGlobalMessagingForBrowser } from '../../lib';

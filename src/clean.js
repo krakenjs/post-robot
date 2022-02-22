@@ -1,6 +1,6 @@
 /* @flow */
 
-import { type CrossDomainWindowType, isWindowClosed } from '@krakenjs/cross-domain-utils/src';
+import { type CrossDomainWindowType, isWindowClosed } from 'cross-domain-utils/src';
 import { noop } from 'belter/src';
 
 import { windowStore } from './global';
