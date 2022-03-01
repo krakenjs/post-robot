@@ -6,11 +6,11 @@ exports.getWindowInstanceID = getWindowInstanceID;
 exports.initHello = initHello;
 exports.sayHello = sayHello;
 
-var _src = require("cross-domain-utils/src");
+var _src = require("@krakenjs/cross-domain-utils/src");
 
-var _src2 = require("zalgo-promise/src");
+var _src2 = require("@krakenjs/zalgo-promise/src");
 
-var _src3 = require("belter/src");
+var _src3 = require("@krakenjs/belter/src");
 
 var _conf = require("../conf");
 

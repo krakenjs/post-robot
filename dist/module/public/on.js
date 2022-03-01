@@ -4,7 +4,7 @@ exports.__esModule = true;
 exports.on = on;
 exports.once = once;
 
-var _src = require("zalgo-promise/src");
+var _src = require("@krakenjs/zalgo-promise/src");
 
 var _drivers = require("../drivers");
 

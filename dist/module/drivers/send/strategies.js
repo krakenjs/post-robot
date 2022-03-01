@@ -3,7 +3,7 @@
 exports.__esModule = true;
 exports.SEND_MESSAGE_STRATEGIES = void 0;
 
-var _src = require("cross-domain-utils/src");
+var _src = require("@krakenjs/cross-domain-utils/src");
 
 var _conf = require("../../conf");
 

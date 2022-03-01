@@ -4,9 +4,9 @@ exports.__esModule = true;
 exports.deserializeMessage = deserializeMessage;
 exports.serializeMessage = serializeMessage;
 
-var _src = require("cross-domain-utils/src");
+var _src = require("@krakenjs/cross-domain-utils/src");
 
-var _src2 = require("universal-serialize/src");
+var _src2 = require("@krakenjs/universal-serialize/src");
 
 var _conf = require("../conf");
 

@@ -9,9 +9,9 @@ exports.getWildcard = getWildcard;
 exports.globalStore = globalStore;
 exports.windowStore = windowStore;
 
-var _src = require("cross-domain-safe-weakmap/src");
+var _src = require("@krakenjs/cross-domain-safe-weakmap/src");
 
-var _src2 = require("belter/src");
+var _src2 = require("@krakenjs/belter/src");
 
 function getGlobalKey() {
   if (__POST_ROBOT__.__SCRIPT_NAMESPACE__) {

@@ -14,11 +14,11 @@ exports.registerRemoteWindow = registerRemoteWindow;
 exports.rejectRemoteSendMessage = rejectRemoteSendMessage;
 exports.sendBridgeMessage = sendBridgeMessage;
 
-var _src = require("zalgo-promise/src");
+var _src = require("@krakenjs/zalgo-promise/src");
 
-var _src2 = require("cross-domain-utils/src");
+var _src2 = require("@krakenjs/cross-domain-utils/src");
 
-var _src3 = require("belter/src");
+var _src3 = require("@krakenjs/belter/src");
 
 var _conf = require("../conf");
 

@@ -9,9 +9,9 @@ exports.listenForOpenTunnel = listenForOpenTunnel;
 exports.listenForWindowOpen = listenForWindowOpen;
 exports.openBridge = openBridge;
 
-var _src = require("zalgo-promise/src");
+var _src = require("@krakenjs/zalgo-promise/src");
 
-var _src2 = require("cross-domain-utils/src");
+var _src2 = require("@krakenjs/cross-domain-utils/src");
 
 var _conf = require("../conf");
 

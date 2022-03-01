@@ -3,9 +3,9 @@
 exports.__esModule = true;
 exports.cleanUpWindow = cleanUpWindow;
 
-var _src = require("cross-domain-utils/src");
+var _src = require("@krakenjs/cross-domain-utils/src");
 
-var _src2 = require("belter/src");
+var _src2 = require("@krakenjs/belter/src");
 
 var _global = require("./global");
 

@@ -30,7 +30,7 @@ exports.toProxyWindow = _setup.toProxyWindow;
 
 var _bridge = require("./bridge");
 
-var _src = require("zalgo-promise/src");
+var _src = require("@krakenjs/zalgo-promise/src");
 
 exports.Promise = _src.ZalgoPromise;
 
