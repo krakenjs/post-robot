@@ -1,3 +1,17 @@
+# Changelog
+
+All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+## [11.0.0](https://github.com/krakenjs/post-robot/compare/v10.0.46...v11.0.0) (2022-03-01)
+
+
+### ⚠ BREAKING CHANGES
+
+* move to @krakenjs scope
+
+* add tooling for code coverage, changelogs, and conventional commits ([#103](https://github.com/krakenjs/post-robot/issues/103)) ([e3be73c](https://github.com/krakenjs/post-robot/commit/e3be73c8c9fdf05015931f7ec21124e7183c9180))
+* move to [@krakenjs](https://github.com/krakenjs) scope ([d707e26](https://github.com/krakenjs/post-robot/commit/d707e2613abdb2e81d0f18ddbf06fcae335d52a2))
+
 ### Changelog
 
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
