@@ -10,7 +10,7 @@
     "flow": "flow",
     "karma": "cross-env NODE_ENV=test babel-node --plugins=transform-es2015-modules-commonjs ./node_modules/.bin/karma start",
     "babel": "babel src/ --out-dir dist/module",
-    "webpack": "babel-node --config-file ./node_modules/grumbler-scripts/config/.babelrc-node --plugins=transform-es2015-modules-commonjs ./node_modules/.bin/webpack --display-optimization-bailout --progress",
+    "webpack": "babel-node --config-file ./node_modules/@krakenjs/grumbler-scripts/config/.babelrc-node --plugins=transform-es2015-modules-commonjs ./node_modules/.bin/webpack --display-optimization-bailout --progress",
     "test": "npm run lint && npm run flow-typed && npm run flow && npm run karma",
     "build": "npm run test && npm run babel && npm run webpack -- $@",
     "clean": "rimraf dist coverage",
@@ -89,8 +89,8 @@
   "devDependencies": {
     "@commitlint/cli": "^16.2.1",
     "@commitlint/config-conventional": "^16.2.1",
+    "@krakenjs/grumbler-scripts": "^6.0.2",
     "flow-bin": "0.155.0",
-    "grumbler-scripts": "^5.0.3",
     "husky": "^7.0.4",
     "mocha": "^4",
     "standard-version": "^9.3.2"
