@@ -1,24 +1,22 @@
 <!DOCTYPE html>
 
 <script>
-
-    window.mockDomain = 'mock://foo.com';
-
+  window.mockDomain = "mock://foo.com";
 </script>
 
 <script src="../dist/post-robot.ie.js"></script>
-
 
 <button onclick="sendMessage()">post</button>
 
 <div id="messages"></div>
 
 <script>
-	function sendMessage() {
-		postRobot.send(window.opener, 'foo', { message: Math.random().toString() }).then(function(event) {
-			var el = document.getElementById('messages');
-			el.innerHTML += '\n' + event.data.message;
-		});
-	}
-
+  function sendMessage() {
+    postRobot
+      .send(window.opener, "foo", { message: Math.random().toString() })
+      .then(function (event) {
+        var el = document.getElementById("messages");
+        el.innerHTML += "\n" + event.data.message;
+      });
+  }
 </script>

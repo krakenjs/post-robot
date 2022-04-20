@@ -1,8 +1,8 @@
 /* @flow */
 
-import './happy';
-import './options';
-import './serialization';
-import './popup';
-import './error';
-import './window-proxy';
+import "./happy";
+import "./options";
+import "./serialization";
+import "./popup";
+import "./error";
+import "./window-proxy";
