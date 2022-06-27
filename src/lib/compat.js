@@ -1,12 +1,11 @@
 /* @flow */
 
-import { getUserAgent } from '@krakenjs/cross-domain-utils/src';
+import { getUserAgent } from "@krakenjs/cross-domain-utils/src";
 
-export function needsGlobalMessagingForBrowser() : boolean {
+export function needsGlobalMessagingForBrowser(): boolean {
+  if (getUserAgent(window).match(/MSIE|rv:11|trident|edge\/12|edge\/13/i)) {
+    return true;
+  }
 
-    if (getUserAgent(window).match(/MSIE|rv:11|trident|edge\/12|edge\/13/i)) {
-        return true;
-    }
-
-    return false;
+  return false;
 }

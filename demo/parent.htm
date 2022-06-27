@@ -7,18 +7,22 @@
 <div id="messages"></div>
 
 <script>
-    postRobot.bridge.openBridge('./bridge.htm', 'mock://foo.com');
+  postRobot.bridge.openBridge("./bridge.htm", "mock://foo.com");
 
-	function openWindow() {
-		window.open('mock://foo.com|./child.htm', Math.random().toString().replace(/[^a-z0-9]+/g, ''));
-	}
+  function openWindow() {
+    window.open(
+      "mock://foo.com|./child.htm",
+      Math.random()
+        .toString()
+        .replace(/[^a-z0-9]+/g, "")
+    );
+  }
 
-	postRobot.on('foo', function(event) {
-		var el = document.getElementById('messages');
-		el.innerHTML += '\n' + event.data.message;
-		return {
-			message: event.data.message
-		}
-	});
-
+  postRobot.on("foo", function (event) {
+    var el = document.getElementById("messages");
+    el.innerHTML += "\n" + event.data.message;
+    return {
+      message: event.data.message,
+    };
+  });
 </script>

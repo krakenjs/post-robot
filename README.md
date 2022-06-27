@@ -43,75 +43,73 @@ post-robot will serialize and deserialize the following data types in messages:
 ```javascript
 // Set up a listener
 
-postRobot.on('getUser', function(event) {
+postRobot.on("getUser", function (event) {
+  // Have it return some data to the calling window
 
-    // Have it return some data to the calling window
+  return {
+    id: 1234,
+    name: "Zippy the Pinhead",
 
-    return {
-        id:   1234,
-        name: 'Zippy the Pinhead',
+    // Yep, we're even returning a function to the other window!
 
-        // Yep, we're even returning a function to the other window!
-
-        logout: function() {
-            return $currentUser.logout();
-        }
-    };
+    logout: function () {
+      return $currentUser.logout();
+    },
+  };
 });
 ```
 
 ```javascript
 // Call the listener, on a different window, on a different domain
 
-postRobot.send(someWindow, 'getUser', { id: 1337 }).then(function(event) {
+postRobot
+  .send(someWindow, "getUser", { id: 1337 })
+  .then(function (event) {
     var user = event.data;
 
-    console.log(event.source, event.origin, 'Got user:', user);
+    console.log(event.source, event.origin, "Got user:", user);
 
     // Call the user.logout function from the other window!
 
     user.logout();
-
-}).catch(function(err) {
-
+  })
+  .catch(function (err) {
     // Handle any errors that stopped our call from going through
 
     console.error(err);
-});
+  });
 ```
 
 ## Listener with promise response
 
 ```javascript
-postRobot.on('getUser', function(event) {
-
-    return getUser(event.data.id).then(function(user) {
-        return {
-            name: user.name
-        };
-    });
+postRobot.on("getUser", function (event) {
+  return getUser(event.data.id).then(function (user) {
+    return {
+      name: user.name,
+    };
+  });
 });
 ```
 
 ## One-off listener
 
 ```javascript
-postRobot.once('getUser', function(event) {
-
-    return {
-        name: 'Noggin the Nog'
-    };
+postRobot.once("getUser", function (event) {
+  return {
+    name: "Noggin the Nog",
+  };
 });
 ```
 
 ## Cancelling a listener
 
 ```javascript
-var listener = postRobot.on('getUser', function(event) {
-    return {
-        id:   event.data.id,
-        name: 'Zippy the Pinhead'
-    };
+var listener = postRobot.on("getUser", function (event) {
+  return {
+    id: event.data.id,
+    name: "Zippy the Pinhead",
+  };
 });
 
 listener.cancel();
@@ -120,65 +118,67 @@ listener.cancel();
 ## Listen for messages from a specific window
 
 ```javascript
-postRobot.on('getUser', { window: window.parent }, function(event) {
-
-    return {
-        name: 'Guybrush Threepwood'
-    };
+postRobot.on("getUser", { window: window.parent }, function (event) {
+  return {
+    name: "Guybrush Threepwood",
+  };
 });
 ```
 
 ## Listen for messages from a specific domain
 
 ```javascript
-postRobot.on('getUser', { domain: 'http://zombo.com' }, function(event) {
-
-    return {
-        name: 'Manny Calavera'
-    };
+postRobot.on("getUser", { domain: "http://zombo.com" }, function (event) {
+  return {
+    name: "Manny Calavera",
+  };
 });
 ```
 
 ## Set a timeout for a response
 
 ```javascript
-postRobot.send(someWindow, 'getUser', { id: 1337 }, { timeout: 5000 }).then(function(event) {
-    console.log(event.source, event.origin, 'Got user:', event.data.name);
-
-}).catch(function(err) {
+postRobot
+  .send(someWindow, "getUser", { id: 1337 }, { timeout: 5000 })
+  .then(function (event) {
+    console.log(event.source, event.origin, "Got user:", event.data.name);
+  })
+  .catch(function (err) {
     console.error(err);
-});
+  });
 ```
 
 ## Send a message to a specific domain
 
 ```javascript
-postRobot.send(someWindow, 'getUser', { id: 1337 }, { domain: 'http://zombo.com' }).then(function(event) {
-    console.log(event.source, event.origin, 'Got user:', event.data.name);
-});
+postRobot
+  .send(someWindow, "getUser", { id: 1337 }, { domain: "http://zombo.com" })
+  .then(function (event) {
+    console.log(event.source, event.origin, "Got user:", event.data.name);
+  });
 ```
 
 ## Async / Await
 
 ```javascript
-postRobot.on('getUser', async ({ source, origin, data }) => {
+postRobot.on("getUser", async ({ source, origin, data }) => {
+  let user = await getUser(data.id);
 
-    let user = await getUser(data.id);
-
-    return {
-        id:   data.id,
-        name: user.name
-    };
+  return {
+    id: data.id,
+    name: user.name,
+  };
 });
 ```
 
 ```javascript
 try {
-    let { source, origin, data } = await postRobot.send(someWindow, `getUser`, { id: 1337 });
-    console.log(source, origin, 'Got user:', data.name);
-
+  let { source, origin, data } = await postRobot.send(someWindow, `getUser`, {
+    id: 1337,
+  });
+  console.log(source, origin, "Got user:", data.name);
 } catch (err) {
-    console.error(err);
+  console.error(err);
 }
 ```
 
@@ -188,21 +188,27 @@ For security reasons, it is recommended that you always explicitly specify the w
 to and send messages to. This creates a secure message channel that only works between two windows on the specified domain:
 
 ```javascript
-postRobot.on('getUser', { window: childWindow, domain: 'http://zombo.com' }, function(event) {
+postRobot.on(
+  "getUser",
+  { window: childWindow, domain: "http://zombo.com" },
+  function (event) {
     return {
-        id:   event.data.id,
-        name: 'Frodo'
+      id: event.data.id,
+      name: "Frodo",
     };
-});
+  }
+);
 ```
 
 ```javascript
-postRobot.send(someWindow, 'getUser', { id: 1337 }, { domain: 'http://zombo.com' }).then(function(event) {
-    console.log(event.source, event.origin, 'Got user:', event.data.name);
-
-}).catch(function(err) {
+postRobot
+  .send(someWindow, "getUser", { id: 1337 }, { domain: "http://zombo.com" })
+  .then(function (event) {
+    console.log(event.source, event.origin, "Got user:", event.data.name);
+  })
+  .catch(function (err) {
     console.error(err);
-});
+  });
 ```
 
 ## Functions
@@ -212,25 +218,25 @@ Post robot lets you send across functions in your data payload, fairly seamlessl
 For example:
 
 ```javascript
-postRobot.on('getUser', function(event) {
-    return {
-        id:     event.data.id,
-        name:   'Nogbad the Bad',
+postRobot.on("getUser", function (event) {
+  return {
+    id: event.data.id,
+    name: "Nogbad the Bad",
 
-        logout: function() {
-            currentUser.logout();
-        }
-    };
+    logout: function () {
+      currentUser.logout();
+    },
+  };
 });
 ```
 
 ```javascript
-postRobot.send(myWindow, 'getUser', { id: 1337 }).then(function(event) {
-    var user = event.data;
+postRobot.send(myWindow, "getUser", { id: 1337 }).then(function (event) {
+  var user = event.data;
 
-    user.logout().then(function() {
-        console.log('User was logged out');
-    });
+  user.logout().then(function () {
+    console.log("User was logged out");
+  });
 });
 ```
 
@@ -238,7 +244,6 @@ The function `user.logout()` will be called on the **original** window. Post Rob
 original window, calls the function that was passed, then messages back with the result of the function.
 
 Because this uses post-messaging behind the scenes and is therefore always async, `user.logout()` will **always** return a promise, and must be `.then`'d or `await`ed.
-
 
 ## Parent to popup messaging
 
@@ -265,7 +270,6 @@ In order to use post-robot in IE9+ with popup windows, you will need to set up a
 +---------------------+
 ```
 
-
 a. Use the special `ie` build of post-robot: `dist/post-robot.ie.js`.
 
 b. Create a bridge path on the domain of your popup, for example `http://yy.com/bridge.html`, and include post-robot:
@@ -278,7 +282,7 @@ c. In the parent page on `xx.com` which opens the popup, include the following j
 
 ```html
 <script>
-    postRobot.bridge.openBridge('http://yy.com/bridge.html');
+  postRobot.bridge.openBridge("http://yy.com/bridge.html");
 </script>
 ```
 
