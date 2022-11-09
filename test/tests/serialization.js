@@ -154,7 +154,7 @@ describe("Serialization cases", () => {
     const expectedValue = 123;
     let resolver;
 
-    // eslint-disable-next-line promise/no-native, no-restricted-globals
+    // eslint-disable-next-line promise/no-native, no-restricted-globals, compat/compat
     const promise = new Promise((resolve) => {
       resolver = resolve;
     });
@@ -196,7 +196,7 @@ describe("Serialization cases", () => {
     let expectedErrorStack; // eslint-disable-line prefer-const
     let rejector;
 
-    // eslint-disable-next-line promise/no-native, no-restricted-globals
+    // eslint-disable-next-line promise/no-native, no-restricted-globals, compat/compat
     const promise = new Promise((resolve, reject) => {
       rejector = reject;
     });
