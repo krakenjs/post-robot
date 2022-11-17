@@ -9,3 +9,4 @@ declare var __POST_ROBOT__: {|
 |};
 
 declare var __TEST__: boolean;
+declare var __DEBUG__: boolean;
