@@ -2,7 +2,7 @@ import { ZalgoPromise } from "@krakenjs/zalgo-promise";
 import { on, send, once } from "../../src";
 import { getWindows } from "../common";
 describe("Options cases", () => {
-  it("should be able to listen for a message only once", (): ZalgoPromise<unknown> => {
+  it("should be able to listen for a message only once", () => {
     const { childFrame } = getWindows();
     let count = 0;
     once("foobuz", () => {
@@ -25,7 +25,7 @@ describe("Options cases", () => {
       );
     });
   });
-  it("should be able to re-register the same once handler after the first is called", (): ZalgoPromise<unknown> => {
+  it("should be able to re-register the same once handler after the first is called", () => {
     const { childFrame } = getWindows();
     let count = 0;
     once("foobuzz", ({ data }) => {
@@ -75,7 +75,7 @@ describe("Options cases", () => {
       }
     );
   });
-  it("should allow you to register a listener for a specific window", (): ZalgoPromise<unknown> => {
+  it("should allow you to register a listener for a specific window", () => {
     const { childFrame, otherChildFrame } = getWindows();
     let count = 0;
     on(

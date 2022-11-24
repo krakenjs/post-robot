@@ -3,7 +3,7 @@ import { send, bridge } from "../../src";
 import { awaitWindowHello } from "../../src/lib";
 import { enableIE8Mode, createPopup, getWindows } from "../common";
 describe("Popup cases", () => {
-  it("should work with a popup window", (): ZalgoPromise<unknown> => {
+  it("should work with a popup window", () => {
     const { childWindow } = getWindows();
     return send(childWindow, "setupListener", {
       messageName: "foo",
@@ -18,7 +18,7 @@ describe("Popup cases", () => {
       });
     });
   });
-  it("should succeed messaging popup when emulating IE", (): ZalgoPromise<unknown> => {
+  it("should succeed messaging popup when emulating IE", () => {
     const ie8mode = enableIE8Mode();
 
     if (!bridge) {

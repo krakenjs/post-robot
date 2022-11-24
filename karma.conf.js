@@ -8,5 +8,6 @@ export default function configKarma(karma) {
     webpack: WEBPACK_CONFIG_TEST,
   });
 
+  console.log(karmaConfig);
   karma.set(karmaConfig);
 }

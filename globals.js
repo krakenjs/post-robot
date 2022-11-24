@@ -1,7 +1,8 @@
 /* @flow */
 /* eslint import/no-commonjs: 0 */
 
-const pkg = require("./package.json");
+// const pkg = require("./package.json");
+const pkg = { version: "11.0.0" };
 
 const formatVersion = (version) => {
   return version.replace(/[^\d]+/g, "_");
