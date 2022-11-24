@@ -1,6 +1,8 @@
 import { wrapPromise } from "@krakenjs/belter";
+
 import { on, send } from "../../src";
 import { getWindows } from "../common";
+
 describe("Happy cases", () => {
   it("should set up a simple server and listen for a request", () => {
     return wrapPromise(({ expect }) => {
@@ -11,6 +13,7 @@ describe("Happy cases", () => {
       }).then(expect("sendSuccess"));
     });
   });
+
   it("should set up a simple server and listen for multiple requests", () => {
     const { childFrame } = getWindows();
     let count = 0;
@@ -31,6 +34,7 @@ describe("Happy cases", () => {
         }
       });
   });
+
   it("should message a child and expect a response", () => {
     const { childFrame } = getWindows();
     return send(childFrame, "setupListener", {
@@ -46,6 +50,7 @@ describe("Happy cases", () => {
       });
     });
   });
+
   it("should set up a simple server and listen for a request from a specific domain", () => {
     return wrapPromise(({ expect }) => {
       const { childFrame } = getWindows();
@@ -61,6 +66,7 @@ describe("Happy cases", () => {
       }).then(expect("sendSuccess"));
     });
   });
+
   it("should message a child with a specific domain and expect a response", () => {
     const { childFrame } = getWindows();
     return send(
@@ -83,6 +89,7 @@ describe("Happy cases", () => {
       });
     });
   });
+
   it("should set up a simple server and listen for a request from multiple domains", () => {
     return wrapPromise(({ expect }) => {
       const { childFrame } = getWindows();
@@ -96,11 +103,13 @@ describe("Happy cases", () => {
         },
         expect("onMultidomainspecificmessage")
       );
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       send(childFrame, "sendMessageToParent", {
         messageName: "multidomainspecificmessage",
       }).then(expect("sendSuccess"));
     });
   });
+
   it("should message a child with multiple domains and expect a response", () => {
     const { childFrame } = getWindows();
     return send(

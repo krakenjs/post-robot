@@ -1,9 +1,11 @@
 import { ZalgoPromise } from "@krakenjs/zalgo-promise";
 import { WINDOW_TYPE } from "@krakenjs/cross-domain-utils";
 import { uniqueID, getBody } from "@krakenjs/belter";
+
 import { send } from "../../src";
 import { awaitWindowHello } from "../../src/lib";
 import { createIframe, getWindows } from "../common";
+
 describe("Serialization cases", () => {
   it("should pass a function across windows and be able to call it later", () => {
     const { childFrame } = getWindows();
@@ -42,6 +44,7 @@ describe("Serialization cases", () => {
         }
       });
   });
+
   it("should pass a function across windows and be able to call it later and capture the exception", () => {
     const { childFrame } = getWindows();
     const expectedErrorMessage = "something went wrong";
@@ -90,7 +93,7 @@ describe("Serialization cases", () => {
           throw new Error(`Expected error to have stack`);
         }
 
-        if (err.stack.indexOf(expectedErrorStack) === -1) {
+        if (!err.stack.includes(expectedErrorStack)) {
           throw new Error(
             `Expected function throw error with stack ${expectedErrorStack}, got ${err.stack}`
           );
@@ -136,11 +139,11 @@ describe("Serialization cases", () => {
         }
       });
   });
+
   it("should pass a promise across windows and be able to call it later", () => {
     const { childFrame } = getWindows();
     const expectedValue = 123;
     let resolver;
-    // eslint-disable-next-line promise/no-native, no-restricted-globals, compat/compat
     const promise = new Promise((resolve) => {
       resolver = resolve;
     });
@@ -171,6 +174,7 @@ describe("Serialization cases", () => {
     resolver(expectedValue);
     return sendPromise;
   });
+
   it("should pass a promise across windows and be able to reject it later", () => {
     const { childFrame } = getWindows();
     const expectedErrorMessage = "Oh no!";
@@ -178,7 +182,6 @@ describe("Serialization cases", () => {
     let expectedErrorStack; // eslint-disable-line prefer-const
 
     let rejector;
-    // eslint-disable-next-line promise/no-native, no-restricted-globals, compat/compat
     const promise = new Promise((resolve, reject) => {
       rejector = reject;
     });
@@ -216,7 +219,7 @@ describe("Serialization cases", () => {
           throw new Error(`Expected error to have stack`);
         }
 
-        if (err2.stack.indexOf(expectedErrorStack) === -1) {
+        if (!err2.stack.includes(expectedErrorStack)) {
           throw new Error(
             `Expected function throw error with stack ${expectedErrorStack}, got ${err2.stack}`
           );
@@ -268,6 +271,7 @@ describe("Serialization cases", () => {
     resolver(expectedValue);
     return sendPromise;
   });
+
   it("should pass a zalgo promise across windows and be able to reject it later", () => {
     const { childFrame } = getWindows();
     const expectedErrorMessage = "Oh no!";
@@ -312,7 +316,7 @@ describe("Serialization cases", () => {
           throw new Error(`Expected error to have stack`);
         }
 
-        if (err2.stack.indexOf(expectedErrorStack) === -1) {
+        if (!err2.stack.includes(expectedErrorStack)) {
           throw new Error(
             `Expected function throw error with stack ${expectedErrorStack}, got ${err2.stack}`
           );
@@ -330,6 +334,7 @@ describe("Serialization cases", () => {
     rejector(err);
     return sendPromise;
   });
+
   it("should pass an iframe across the window boundary and focus it", () => {
     const { childFrame } = getWindows();
     const iframe = document.createElement("iframe");
@@ -366,6 +371,7 @@ describe("Serialization cases", () => {
         return data.mywindow.close();
       });
   });
+
   it("should pass an iframe across the window boundary and change its location", () => {
     const { childFrame } = getWindows();
     const iframe = document.createElement("iframe");
@@ -403,6 +409,7 @@ describe("Serialization cases", () => {
         }
       });
   });
+
   it("should pass an iframe across the window boundary and get its instance id", () => {
     const { childFrame } = getWindows();
     const iframe = document.createElement("iframe");
@@ -429,6 +436,7 @@ describe("Serialization cases", () => {
         }
       });
   });
+
   it("should pass a popup across the window boundary and focus it", () => {
     const { childFrame } = getWindows();
     const mywindow = window.open("", uniqueID(), "width=500,height=500");
@@ -445,6 +453,7 @@ describe("Serialization cases", () => {
         return data.mywindow.focus();
       });
   });
+
   it("should pass a popup across the window boundary and close it", () => {
     const { childFrame } = getWindows();
     const mywindow = window.open("", uniqueID(), "width=500,height=500");
@@ -466,6 +475,7 @@ describe("Serialization cases", () => {
         }
       });
   });
+
   it("should get window type for popup even if window closed after serialization", () => {
     const { childFrame } = getWindows();
     const mywindow = window.open("", uniqueID(), "width=500,height=500");
@@ -488,6 +498,7 @@ describe("Serialization cases", () => {
         }
       });
   });
+
   it("should get window type for iframe even if window closed after serialization", () => {
     const { childFrame } = getWindows();
     const mywindow = createIframe("child.htm");
@@ -511,6 +522,7 @@ describe("Serialization cases", () => {
         }
       });
   });
+
   it("should error getting window type for popup if window is closed prior to serialization", () => {
     const { childFrame } = getWindows();
     const mywindow = window.open("", uniqueID(), "width=500,height=500");
@@ -536,6 +548,7 @@ describe("Serialization cases", () => {
         }
       });
   });
+
   it("should error getting window type for iframe if window is closed prior to serialization", () => {
     const { childFrame } = getWindows();
     const mywindow = createIframe("child.htm");
@@ -562,6 +575,7 @@ describe("Serialization cases", () => {
         }
       });
   });
+
   it("should pass a popup across the window boundary and change its location", () => {
     const { childFrame } = getWindows();
     const mywindow = window.open("", uniqueID(), "width=500,height=500");
@@ -597,6 +611,7 @@ describe("Serialization cases", () => {
         }
       });
   });
+
   it("should pass a popup across the window boundary and get its instance id", () => {
     const { childFrame } = getWindows();
     const mywindow = window.open("", uniqueID(), "width=500,height=500");

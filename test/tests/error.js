@@ -1,5 +1,5 @@
-import { ZalgoPromise } from "@krakenjs/zalgo-promise";
 import { wrapPromise } from "@krakenjs/belter";
+
 import { on, send } from "../../src";
 import { getWindows } from "../common";
 
@@ -17,6 +17,7 @@ describe("Error cases", () => {
       }
     );
   });
+
   it("should error out if you try to register the same listener name twice", () => {
     on("onceonly", () => {
       // pass
@@ -36,6 +37,7 @@ describe("Error cases", () => {
 
     throw new Error("Expected error handler to be called");
   });
+
   it("should fail to send a message when the expected domain does not match", () => {
     return wrapPromise(({ expect, avoid }) => {
       const { childFrame } = getWindows();
@@ -58,6 +60,7 @@ describe("Error cases", () => {
       );
     });
   });
+
   it("should fail to send a message when the target domain does not match", () => {
     const { childFrame } = getWindows();
     return send(childFrame, "setupListener", {
