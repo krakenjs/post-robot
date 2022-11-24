@@ -1,6 +1,8 @@
 import { wrapPromise } from "@krakenjs/belter";
+
 import { on, send } from "../../src";
 import { getWindows } from "../common";
+
 describe("Window Proxy cases", () => {
   it("Should send the a window in a message", () => {
     return wrapPromise(({ expect }) => {
@@ -15,6 +17,7 @@ describe("Window Proxy cases", () => {
           listener.cancel();
         })
       );
+
       return send(childFrame, "sendMessageToParent", {
         messageName: "passProxyWindow",
         data: {
@@ -23,6 +26,7 @@ describe("Window Proxy cases", () => {
       }).then(expect("sendSuccess"));
     });
   });
+
   it("Should send the a window in a message, then call isPopup", () => {
     return wrapPromise(({ expect }) => {
       const { childFrame, otherChildFrame } = getWindows();
@@ -40,6 +44,7 @@ describe("Window Proxy cases", () => {
           });
         })
       );
+
       return send(childFrame, "sendMessageToParent", {
         messageName: "passProxyWindow",
         data: {
@@ -48,6 +53,7 @@ describe("Window Proxy cases", () => {
       }).then(expect("sendSuccess"));
     });
   });
+
   it("Should send a message to a proxy window", () => {
     return wrapPromise(({ expect }) => {
       const { childFrame, otherChildFrame } = getWindows();
@@ -64,12 +70,14 @@ describe("Window Proxy cases", () => {
           }).then(expect("sendSuccess"));
         })
       );
+
       const callListener = on(
         "callProxyWindow",
         expect("onCallProxyWindow", () => {
           callListener.cancel();
         })
       );
+
       return send(childFrame, "sendMessageToParent", {
         messageName: "passProxyWindow",
         data: {
@@ -78,6 +86,7 @@ describe("Window Proxy cases", () => {
       }).then(expect("sendSuccess"));
     });
   });
+
   it("Should receive a message from a proxy window", () => {
     return wrapPromise(({ expect }) => {
       const { childFrame, otherChildFrame } = getWindows();
@@ -98,11 +107,13 @@ describe("Window Proxy cases", () => {
               callListener.cancel();
             })
           );
+
           return send(data.otherFrame, "sendMessageToParent", {
             messageName: "callProxyWindow",
           }).then(expect("sendSuccess"));
         })
       );
+
       return send(childFrame, "sendMessageToParent", {
         messageName: "passProxyWindow",
         data: {

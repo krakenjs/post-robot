@@ -1,10 +1,11 @@
-import { ZalgoPromise } from "@krakenjs/zalgo-promise";
 import { on, send, once } from "../../src";
 import { getWindows } from "../common";
+
 describe("Options cases", () => {
   it("should be able to listen for a message only once", () => {
     const { childFrame } = getWindows();
     let count = 0;
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     once("foobuz", () => {
       count += 1;
     });
@@ -25,9 +26,11 @@ describe("Options cases", () => {
       );
     });
   });
+
   it("should be able to re-register the same once handler after the first is called", () => {
     const { childFrame } = getWindows();
     let count = 0;
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     once("foobuzz", ({ data }) => {
       count += data.add;
     });
@@ -38,6 +41,7 @@ describe("Options cases", () => {
       },
     })
       .then(() => {
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         once("foobuzz", ({ data }) => {
           count += data.add;
         });
@@ -54,6 +58,7 @@ describe("Options cases", () => {
         }
       });
   });
+
   it("should allow you to register the same listener twice providing it is to different windows", () => {
     const { childFrame, otherChildFrame } = getWindows();
     on(
@@ -75,6 +80,7 @@ describe("Options cases", () => {
       }
     );
   });
+
   it("should allow you to register a listener for a specific window", () => {
     const { childFrame, otherChildFrame } = getWindows();
     let count = 0;

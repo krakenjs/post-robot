@@ -29,6 +29,7 @@ export function enableIE8Mode() {
     },
   };
 }
+
 export function createIframe(name, callback) {
   const frame = document.createElement("iframe");
   frame.src = `/base/test/${name}`;
@@ -45,7 +46,9 @@ export function createIframe(name, callback) {
   getBody().appendChild(frame);
   return frame.contentWindow;
 }
+
 export function createPopup(name) {
+  // eslint-disable-next-line security/detect-non-literal-fs-filename
   const popup = window.open(
     `mock://test-post-robot-child.com/base/test/${name}`,
     `${Math.random().toString()}_${name.replace(/[^a-zA-Z0-9]+/g, "_")}`
@@ -53,6 +56,7 @@ export function createPopup(name) {
   window.focus();
   return popup;
 }
+
 let childWindow;
 let childFrame;
 let otherChildFrame;
@@ -67,6 +71,7 @@ export function getWindows() {
     otherChildFrame,
   };
 }
+
 before(() => {
   childWindow = createPopup("child.htm");
   childFrame = createIframe("child.htm");

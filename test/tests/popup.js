@@ -1,7 +1,7 @@
-import { ZalgoPromise } from "@krakenjs/zalgo-promise";
 import { send, bridge } from "../../src";
 import { awaitWindowHello } from "../../src/lib";
 import { enableIE8Mode, createPopup, getWindows } from "../common";
+
 describe("Popup cases", () => {
   it("should work with a popup window", () => {
     const { childWindow } = getWindows();
@@ -18,6 +18,7 @@ describe("Popup cases", () => {
       });
     });
   });
+
   it("should succeed messaging popup when emulating IE", () => {
     const ie8mode = enableIE8Mode();
 
