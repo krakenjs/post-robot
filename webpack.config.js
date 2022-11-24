@@ -1,7 +1,3 @@
-/* @flow */
-/* eslint import/no-nodejs-modules: off, import/no-default-export: off, import/default: off */
-
-import type { WebpackConfig } from "@krakenjs/webpack-config-grumbler/index.flow";
 import {
   getWebpackConfig,
   getNextVersion,
@@ -16,10 +12,12 @@ export const MODULE_NAME = "postRobot";
 
 const postRobotGlobals = {
   ...globals.__POST_ROBOT__,
+  // @ts-expect-error argv.level
   __GLOBAL_KEY__: `__post_robot_${getNextVersion(pkg, argv.level)}__`,
 };
 
-export const WEBPACK_CONFIG: WebpackConfig = getWebpackConfig({
+export const WEBPACK_CONFIG = getWebpackConfig({
+  entry: "src/index.ts",
   filename: `${FILE_NAME}.js`,
   modulename: MODULE_NAME,
   minify: false,
@@ -34,7 +32,8 @@ export const WEBPACK_CONFIG: WebpackConfig = getWebpackConfig({
   },
 });
 
-export const WEBPACK_CONFIG_MIN: WebpackConfig = getWebpackConfig({
+export const WEBPACK_CONFIG_MIN = getWebpackConfig({
+  entry: "src/index.ts",
   filename: `${FILE_NAME}.min.js`,
   modulename: MODULE_NAME,
   minify: true,
@@ -49,7 +48,8 @@ export const WEBPACK_CONFIG_MIN: WebpackConfig = getWebpackConfig({
   },
 });
 
-export const WEBPACK_CONFIG_IE: WebpackConfig = getWebpackConfig({
+export const WEBPACK_CONFIG_IE = getWebpackConfig({
+  entry: "src/index.ts",
   filename: `${FILE_NAME}.ie.js`,
   modulename: MODULE_NAME,
   minify: false,
@@ -59,7 +59,8 @@ export const WEBPACK_CONFIG_IE: WebpackConfig = getWebpackConfig({
   },
 });
 
-export const WEBPACK_CONFIG_IE_MIN: WebpackConfig = getWebpackConfig({
+export const WEBPACK_CONFIG_IE_MIN = getWebpackConfig({
+  entry: "src/index.ts",
   filename: `${FILE_NAME}.ie.min.js`,
   modulename: MODULE_NAME,
   minify: true,
@@ -69,7 +70,8 @@ export const WEBPACK_CONFIG_IE_MIN: WebpackConfig = getWebpackConfig({
   },
 });
 
-export const WEBPACK_CONFIG_TEST: WebpackConfig = getWebpackConfig({
+export const WEBPACK_CONFIG_TEST = getWebpackConfig({
+  entry: "src/index.ts",
   modulename: MODULE_NAME,
   minify: false,
   test: true,
