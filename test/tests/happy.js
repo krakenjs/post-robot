@@ -1,4 +1,3 @@
-import { ZalgoPromise } from "@krakenjs/zalgo-promise";
 import { wrapPromise } from "@krakenjs/belter";
 import { on, send } from "../../src";
 import { getWindows } from "../common";
@@ -12,7 +11,7 @@ describe("Happy cases", () => {
       }).then(expect("sendSuccess"));
     });
   });
-  it("should set up a simple server and listen for multiple requests", (): ZalgoPromise<unknown> => {
+  it("should set up a simple server and listen for multiple requests", () => {
     const { childFrame } = getWindows();
     let count = 0;
     on("multilistener", () => {
@@ -32,7 +31,7 @@ describe("Happy cases", () => {
         }
       });
   });
-  it("should message a child and expect a response", (): ZalgoPromise<unknown> => {
+  it("should message a child and expect a response", () => {
     const { childFrame } = getWindows();
     return send(childFrame, "setupListener", {
       messageName: "foo",
@@ -62,7 +61,7 @@ describe("Happy cases", () => {
       }).then(expect("sendSuccess"));
     });
   });
-  it("should message a child with a specific domain and expect a response", (): ZalgoPromise<unknown> => {
+  it("should message a child with a specific domain and expect a response", () => {
     const { childFrame } = getWindows();
     return send(
       childFrame,
@@ -102,7 +101,7 @@ describe("Happy cases", () => {
       }).then(expect("sendSuccess"));
     });
   });
-  it("should message a child with multiple domains and expect a response", (): ZalgoPromise<unknown> => {
+  it("should message a child with multiple domains and expect a response", () => {
     const { childFrame } = getWindows();
     return send(
       childFrame,

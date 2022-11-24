@@ -2,8 +2,9 @@ import { ZalgoPromise } from "@krakenjs/zalgo-promise";
 import { wrapPromise } from "@krakenjs/belter";
 import { on, send } from "../../src";
 import { getWindows } from "../common";
+
 describe("Error cases", () => {
-  it("should get an error when messaging with an unknown name", (): ZalgoPromise<unknown> => {
+  it("should get an error when messaging with an unknown name", () => {
     const { childFrame } = getWindows();
     return send(childFrame, "doesntexist").then(
       () => {
@@ -57,7 +58,7 @@ describe("Error cases", () => {
       );
     });
   });
-  it("should fail to send a message when the target domain does not match", (): ZalgoPromise<unknown> => {
+  it("should fail to send a message when the target domain does not match", () => {
     const { childFrame } = getWindows();
     return send(childFrame, "setupListener", {
       messageName: "foo",

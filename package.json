@@ -2,7 +2,7 @@
   "name": "@krakenjs/post-robot",
   "version": "11.0.0",
   "description": "Simple postMessage based server.",
-  "main": "index.js",
+  "main": "src/index.ts",
   "scripts": {
     "build": "npm run test && npm run babel && npm run webpack && npm run build:types",
     "build:flow": "find ./dist -type f -not -path './node_modules/*' -name '*.d.ts' -exec sh -c 'flowgen --add-flow-header $1 -o ${1%.*.*}.js.flow' _ '{}' \\;",
@@ -93,6 +93,7 @@
     "@commitlint/config-conventional": "^17.3.0",
     "@krakenjs/babel-config-grumbler": "^8.0.7",
     "@krakenjs/eslint-config-grumbler": "^8.0.7",
+    "@krakenjs/karma-config-grumbler": "^8.0.7",
     "@krakenjs/typescript-config-grumbler": "^8.0.7",
     "@krakenjs/webpack-config-grumbler": "^8.1.0-alpha.1",
     "cross-env": "^7.0.3",
@@ -111,6 +112,9 @@
     "@krakenjs/cross-domain-utils": "^4.0.0-typescript.1",
     "@krakenjs/universal-serialize": "file:../universal-serialize",
     "@krakenjs/zalgo-promise": "^3.0.0-typescript.1"
+  },
+  "overrides": {
+    "webpack-dev-server": "^3.1.14"
   },
   "lint-staged": {
     "*": "prettier --write --ignore-unknown"

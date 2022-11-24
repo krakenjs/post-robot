@@ -6,7 +6,7 @@ import {
   isWindowClosed,
   getDomainFromUrl,
   normalizeMockUrl,
-} from "@krakenjs/cross-domain-utils";
+} from "@krakenjs/cross-domain-utils/dist/esm";
 import { BRIDGE_TIMEOUT, MESSAGE_NAME } from "../conf";
 import { awaitWindowHello } from "../lib";
 import { windowStore, globalStore } from "../global";

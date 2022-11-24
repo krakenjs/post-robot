@@ -1,0 +1,80 @@
+{
+  files: [
+    { pattern: 'test/index.js', included: true, served: true },
+    { pattern: 'test/**/*.js', included: false, served: true },
+    { pattern: 'test/**/*.jsx', included: false, served: true },
+    { pattern: 'test/**/*.htm', included: false, served: true }
+  ],
+  preprocessors: {
+    'test/index.js': [ 'webpack', 'sourcemap' ],
+    'test/*.js': [ 'webpack', 'sourcemap' ],
+    'test/*.jsx': [ 'webpack', 'sourcemap' ],
+    'test/windows/**/*.js': [ 'webpack', 'sourcemap' ],
+    'test/windows/**/*.jsx': [ 'webpack', 'sourcemap' ],
+    'src/**/*.js': [ 'coverage', 'sourcemap' ],
+    'test/**/*.ts': [ 'webpack', 'sourcemap' ],
+    'test/**/*.tsx': [ 'webpack', 'sourcemap' ],
+    'test/windows/**/*.ts': [ 'webpack', 'sourcemap' ],
+    'test/windows/**/*.tsx': [ 'webpack', 'sourcemap' ],
+    'src/**/*.ts': [ 'coverage', 'sourcemap' ],
+    'src/**/*.tsx': [ 'coverage', 'sourcemap' ]
+  },
+  customLaunchers: { xChrome: { base: 'Chrome', flags: [Array], debug: false } },
+  reporters: [ 'spec', 'coverage' ],
+  autoWatch: false,
+  logLevel: 'WARN',
+  basePath: '/Users/westin/Code/post-robot',
+  frameworks: [ 'mocha' ],
+  client: { captureConsole: false, mocha: { timeout: 10000, bail: true } },
+  port: 9876,
+  colors: true,
+  webpackMiddleware: { noInfo: true, stats: true },
+  browserNoActivityTimeout: 3600000,
+  browserDisconnectTimeout: 30000,
+  browserDisconnectTolerance: 2,
+  captureTimeout: 120000,
+  reportSlowerThan: 10000,
+  browserConsoleLogOptions: { level: 'error', format: '%b %T: %m', terminal: true },
+  singleRun: true,
+  webpack: {
+    context: '/Users/westin/Code/post-robot',
+    mode: 'development',
+    entry: 'src/index.ts',
+    output: {
+      path: '/Users/westin/Code/post-robot/dist',
+      filename: undefined,
+      globalObject: "(typeof self !== 'undefined' ? self : this)",
+      umdNamedDefine: true,
+      library: 'postRobot',
+      pathinfo: false,
+      publicPath: undefined,
+      libraryTarget: 'umd'
+    },
+    node: {
+      console: false,
+      global: false,
+      process: false,
+      __filename: false,
+      __dirname: false,
+      Buffer: false,
+      setImmediate: false
+    },
+    resolve: { alias: [Object], extensions: [Array], modules: [Array] },
+    module: { rules: [Array] },
+    bail: true,
+    stats: { optimizationBailout: true },
+    optimization: {
+      minimize: true,
+      namedModules: true,
+      concatenateModules: true,
+      minimizer: [Array]
+    },
+    plugins: [ [DefinePlugin], [CircularDependencyPlugin] ],
+    devtool: ''
+  },
+  browsers: [ 'xChrome' ],
+  coverageReporter: {
+    instrumenterOptions: { istanbul: [Object] },
+    reporters: [ [Object], [Object] ]
+  }
+}
