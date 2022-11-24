@@ -1,6 +1,4 @@
-/* @flow */
-
-// eslint-disable-next-line import/no-commonjs
 module.exports = {
-  extends: "@krakenjs/babel-config-grumbler/babelrc-node",
+  extends: "@krakenjs/babel-config-grumbler/babelrc-browser",
+  presets: ["@krakenjs/babel-config-grumbler/flow-ts-babel-preset"],
 };

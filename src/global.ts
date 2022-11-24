@@ -1,0 +1,136 @@
+import type {
+  CrossDomainWindowType,
+  SameDomainWindowType,
+} from "@krakenjs/cross-domain-utils";
+import "@krakenjs/cross-domain-utils";
+import { WeakMap } from "@krakenjs/cross-domain-safe-weakmap";
+import { getOrSet, getCurrentScriptUID } from "@krakenjs/belter";
+export function getGlobalKey(): string {
+  if (__POST_ROBOT__.__SCRIPT_NAMESPACE__) {
+    return `${__POST_ROBOT__.__GLOBAL_KEY__}_${getCurrentScriptUID()}`;
+  } else {
+    return __POST_ROBOT__.__GLOBAL_KEY__;
+  }
+}
+
+export function getGlobal(
+  win: SameDomainWindowType = window
+): Record<string, any> {
+  const globalKey = getGlobalKey();
+
+  if (win !== window) {
+    return win[globalKey];
+  }
+
+  const global: Record<string, any> = (win[globalKey] = win[globalKey] || {});
+  return global;
+}
+
+export function deleteGlobal() {
+  const globalKey = getGlobalKey();
+  delete window[globalKey];
+}
+
+type ObjectGetter = () => Record<string, any>;
+
+const getObj: ObjectGetter = () => ({});
+
+type GetOrSet<T> = ((arg0: string, arg1: () => T) => T) &
+  ((arg0: string, arg1: () => void) => void);
+type GlobalStore<T> = {
+  get: ((arg0: string, arg1: T) => T) &
+    ((arg0: string, arg1: void) => T | void);
+  set: (arg0: string, arg1: T) => T;
+  has: (arg0: string) => boolean;
+  del: (arg0: string) => void;
+  getOrSet: GetOrSet<T>;
+  reset: () => void;
+  keys: () => readonly string[];
+};
+export function globalStore<T extends unknown>(
+  key = "store",
+  defStore: ObjectGetter = getObj
+): GlobalStore<T> {
+  return getOrSet(getGlobal(), key, () => {
+    let store = defStore();
+    return {
+      has: (storeKey) => {
+        return store.hasOwnProperty(storeKey);
+      },
+      get: (storeKey, defVal) => {
+        // $FlowFixMe
+        return store.hasOwnProperty(storeKey) ? store[storeKey] : defVal;
+      },
+      set: (storeKey, val) => {
+        store[storeKey] = val;
+        return val;
+      },
+      del: (storeKey) => {
+        delete store[storeKey];
+      },
+      getOrSet: (storeKey, getter) => {
+        // $FlowFixMe
+        return getOrSet(store, storeKey, getter);
+      },
+      reset: () => {
+        store = defStore();
+      },
+      keys: () => {
+        return Object.keys(store);
+      },
+    };
+  });
+}
+
+export class WildCard {}
+export function getWildcard(): WildCard {
+  const global = getGlobal();
+  global.WINDOW_WILDCARD = global.WINDOW_WILDCARD || new WildCard();
+  return global.WINDOW_WILDCARD;
+}
+
+type WindowStore<T> = {
+  get: ((arg0: CrossDomainWindowType | WildCard, arg1: T) => T) &
+    ((arg0: CrossDomainWindowType | WildCard, arg1: void) => T | void);
+  set: (arg0: CrossDomainWindowType | WildCard, arg1: T) => T;
+  has: (arg0: CrossDomainWindowType | WildCard) => boolean;
+  del: (arg0: CrossDomainWindowType | WildCard) => void;
+  getOrSet: (arg0: CrossDomainWindowType | WildCard, arg1: () => T) => T;
+};
+export function windowStore<T>(
+  key = "store",
+  defStore: ObjectGetter = getObj
+): WindowStore<T> {
+  return globalStore("windowStore").getOrSet(key, () => {
+    const winStore = new WeakMap();
+
+    const getStore = (win: CrossDomainWindowType | WildCard): ObjectGetter => {
+      return winStore.getOrSet(win, defStore);
+    };
+
+    return {
+      has: (win) => {
+        const store = getStore(win);
+        return store.hasOwnProperty(key);
+      },
+      get: (win, defVal) => {
+        const store = getStore(win);
+        // $FlowFixMe
+        return store.hasOwnProperty(key) ? store[key] : defVal;
+      },
+      set: (win, val) => {
+        const store = getStore(win);
+        store[key] = val;
+        return val;
+      },
+      del: (win) => {
+        const store = getStore(win);
+        delete store[key];
+      },
+      getOrSet: (win, getter) => {
+        const store = getStore(win);
+        return getOrSet(store, key, getter);
+      },
+    };
+  });
+}
