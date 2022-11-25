@@ -89,14 +89,12 @@ after(() => {
 
   const body = document.body;
 
-  // $FlowFixMe
   if (!childFrame.frameElement) {
     throw new Error(`Expected childFrame.frameElement to be available`);
   }
 
   body.removeChild(childFrame.frameElement);
 
-  // $FlowFixMe
   if (!otherChildFrame.frameElement) {
     throw new Error(`Expected otherChildFrame.frameElement to be available`);
   }

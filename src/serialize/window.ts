@@ -1,6 +1,5 @@
+/* eslint-disable @typescript-eslint/member-ordering */
 import type { $Values } from "utility-types";
-
-/* eslint no-use-before-define: off */
 import type {
   CrossDomainWindowType,
   DomainMatcher,
@@ -29,7 +28,6 @@ function cleanupProxyWindows() {
   const idToProxyWindow = globalStore("idToProxyWindow");
 
   for (const id of idToProxyWindow.keys()) {
-    // $FlowFixMe
     if (idToProxyWindow.get(id).shouldClean()) {
       idToProxyWindow.del(id);
     }
@@ -91,7 +89,6 @@ function getSerializedWindow(
     });
 
   const getDefaultSetLocationOptions = () => {
-    // $FlowFixMe
     return {};
   };
 
@@ -130,7 +127,6 @@ function getSerializedWindow(
         if (isSameDomain(win)) {
           try {
             if (win.location && typeof win.location.replace === "function") {
-              // $FlowFixMe
               win.location.replace(href);
               return;
             }
@@ -197,7 +193,7 @@ function getSerializedWindow(
 
 export class ProxyWindow {
   id: string;
-  isProxyWindow: true = true;
+  isProxyWindow = true;
   serializedWindow: SerializedWindowType;
   actualWindow: CrossDomainWindowType | null | undefined;
   actualWindowPromise: ZalgoPromise<CrossDomainWindowType>;
@@ -293,6 +289,7 @@ export class ProxyWindow {
     }
   ) {
     this.actualWindow = win;
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     this.actualWindowPromise.resolve(this.actualWindow);
     this.serializedWindow = getSerializedWindow(this.actualWindowPromise, {
       send,
@@ -356,9 +353,7 @@ export class ProxyWindow {
   static unwrap(
     win: CrossDomainWindowType | ProxyWindow
   ): CrossDomainWindowType | ProxyWindow {
-    return ProxyWindow.isProxyWindow(win) // $FlowFixMe
-      ? win.unwrap()
-      : win;
+    return ProxyWindow.isProxyWindow(win) ? win.unwrap() : win;
   }
 
   static serialize(
@@ -394,7 +389,7 @@ export class ProxyWindow {
   }
 
   static isProxyWindow(obj: CrossDomainWindowType | ProxyWindow): boolean {
-    // $FlowFixMe
+    // @ts-expect-error TODO: look into this
     return Boolean(obj && !isWindow(obj) && obj.isProxyWindow);
   }
 
@@ -409,11 +404,11 @@ export class ProxyWindow {
     cleanupProxyWindows();
 
     if (ProxyWindow.isProxyWindow(win)) {
-      // $FlowFixMe
+      // @ts-expect-error TODO: look into this
       return win;
     }
 
-    // $FlowFixMe
+    // @ts-expect-error - TODO: look into this
     const actualWindow: CrossDomainWindowType = win;
     return (
       windowStore("winToProxyWindow").get(actualWindow) ||

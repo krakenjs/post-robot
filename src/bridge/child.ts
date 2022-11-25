@@ -46,11 +46,13 @@ function awaitRemoteBridgeForWindow(
           ) {
             clearInterval(interval);
             clearTimeout(timeout);
+            // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
             return resolve(frame);
           }
         }, 100);
         timeout = setTimeout(() => {
           clearInterval(interval);
+          // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
           return resolve();
         }, 2000);
       });
@@ -121,9 +123,7 @@ export function openTunnelToOpener({
               receiveMessage(
                 {
                   data: message,
-                  // $FlowFixMe[object-this-reference]
                   origin: this.origin,
-                  // $FlowFixMe[object-this-reference]
                   source: this.source,
                 },
                 {
@@ -132,7 +132,7 @@ export function openTunnelToOpener({
                 }
               );
             } catch (err) {
-              ZalgoPromise.reject(err);
+              void ZalgoPromise.reject(err);
             }
           },
         })
@@ -143,8 +143,8 @@ export function openTunnelToOpener({
 
           registerRemoteSendMessage(source, origin, data.sendMessage);
         })
-        .catch((err) => {
-          rejectRemoteSendMessage(opener, err);
+        .catch((err: unknown) => {
+          rejectRemoteSendMessage(opener, err as Error);
           throw err;
         });
     });

@@ -7,6 +7,7 @@ import {
   PROTOCOL,
 } from "@krakenjs/cross-domain-utils";
 import { addEventListener, noop } from "@krakenjs/belter";
+
 import type { Message } from "../types";
 import { MESSAGE_TYPE } from "../../conf";
 import { markWindowKnown, needsGlobalMessagingForBrowser } from "../../lib";
@@ -80,6 +81,7 @@ export function receiveMessage(
     return;
   }
 
+  // eslint-disable-next-line prefer-const
   let { source, origin, data } = event;
 
   if (__TEST__) {
@@ -119,11 +121,13 @@ export function receiveMessage(
 
     try {
       if (message.type === MESSAGE_TYPE.REQUEST) {
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         handleRequest(source, origin, message, {
           on,
           send,
         });
       } else if (message.type === MESSAGE_TYPE.RESPONSE) {
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         handleResponse(source, origin, message);
       } else if (message.type === MESSAGE_TYPE.ACK) {
         handleAck(source, origin, message);
@@ -174,6 +178,7 @@ export function messageListener(
     send: SendType;
   }
 ) {
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
   ZalgoPromise.try(() => {
     try {
       noop(event.source);
@@ -201,6 +206,7 @@ export function messageListener(
     if (__TEST__) {
       if (
         needsGlobalMessagingForBrowser() &&
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-boolean-literal-compare
         isSameTopWindow(source, window) === false
       ) {
         return;

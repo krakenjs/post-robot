@@ -23,8 +23,8 @@ export type ResponseMessage = {
   ack: $Values<typeof MESSAGE_ACK>;
   name: string;
   hash: string;
-  data: unknown | null | undefined;
-  error: unknown | null | undefined;
+  data: unknown;
+  error: unknown;
 };
 export type Message = RequestMessage | AckResponseMessage | ResponseMessage;
 export type PackedMessages = {

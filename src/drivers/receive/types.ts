@@ -8,6 +8,7 @@ import {
   stringifyDomainPattern,
 } from "@krakenjs/cross-domain-utils";
 import { noop, stringifyError, uniqueID } from "@krakenjs/belter";
+
 import { MESSAGE_TYPE, MESSAGE_ACK, MESSAGE_NAME } from "../../conf";
 import { sendMessage } from "../send";
 import {
@@ -22,6 +23,7 @@ import type {
   ResponseMessage,
 } from "../types";
 import type { OnType, SendType } from "../../types";
+
 export function handleRequest(
   source: CrossDomainWindowType,
   origin: string,
@@ -85,8 +87,8 @@ export function handleRequest(
 
   function sendResponse(
     ack: $Values<typeof MESSAGE_ACK>,
-    data: Record<string, any> | null | undefined,
-    error: unknown | null | undefined
+    data: Record<string, any> | undefined,
+    error: unknown
   ): ZalgoPromise<void> {
     return ZalgoPromise.flush().then(() => {
       if (message.fireAndForget || isWindowClosed(source)) {
@@ -160,6 +162,7 @@ export function handleRequest(
         options.handleError(err);
         return;
       } else {
+        // eslint-disable-next-line @typescript-eslint/no-throw-literal
         throw err;
       }
     });
@@ -193,6 +196,7 @@ export function handleAck(
       throw new Error(`Ack source does not match registered window`);
     }
   } catch (err) {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     options.promise.reject(err);
   }
 
@@ -241,12 +245,14 @@ export function handleResponse(
       console.error("receive::err", logName, origin, "\n\n", message.error); // eslint-disable-line no-console
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     options.promise.reject(message.error);
   } else if (message.ack === MESSAGE_ACK.SUCCESS) {
     if (__DEBUG__) {
       console.info("receive::res", logName, origin, "\n\n", message.data); // eslint-disable-line no-console
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     options.promise.resolve({
       source,
       origin,

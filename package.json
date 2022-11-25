@@ -104,17 +104,15 @@
     "prettier": "2.7.1",
     "standard-version": "^9.5.0",
     "ts-node": "^10.9.1",
-    "typescript": "4.9.3"
+    "typescript": "4.9.3",
+    "utility-types": "^3.10.0"
   },
   "dependencies": {
     "@krakenjs/belter": "^3.0.0-typescript.1",
     "@krakenjs/cross-domain-safe-weakmap": "^3.0.0-alpha.2",
     "@krakenjs/cross-domain-utils": "^4.0.0-typescript.1",
-    "@krakenjs/universal-serialize": "file:../universal-serialize",
+    "@krakenjs/universal-serialize": "3.0.0-typescript.3",
     "@krakenjs/zalgo-promise": "^3.0.0-typescript.1"
-  },
-  "overrides": {
-    "webpack-dev-server": "^3.1.14"
   },
   "lint-staged": {
     "*": "prettier --write --ignore-unknown"

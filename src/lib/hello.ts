@@ -46,6 +46,7 @@ function listenForHello({ on }: { on: OnType }): CancelableType {
       domain: WILDCARD,
     },
     ({ source, origin }) => {
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       resolveHelloPromise(source, {
         domain: origin,
       });
@@ -79,6 +80,7 @@ export function sayHello(
       timeout: -1,
     }
   ).then(({ origin, data: { instanceID } }) => {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     resolveHelloPromise(win, {
       domain: origin,
     });
@@ -124,6 +126,7 @@ export function initHello({
       }).catch((err) => {
         // $FlowFixMe
         if (__TEST__ && getGlobal(parent)) {
+          // eslint-disable-next-line @typescript-eslint/no-throw-literal
           throw err;
         }
       });
