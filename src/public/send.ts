@@ -2,13 +2,13 @@ import { ZalgoPromise } from "@krakenjs/zalgo-promise";
 import type {
   CrossDomainWindowType,
   DomainMatcher,
-} from "@krakenjs/cross-domain-utils";
+} from "@krakenjs/cross-domain-utils/dist/esm";
 import {
   isAncestor,
   isWindowClosed,
   getDomain,
   matchDomain,
-} from "@krakenjs/cross-domain-utils";
+} from "@krakenjs/cross-domain-utils/dist/esm";
 import {
   uniqueID,
   isRegex,
@@ -16,7 +16,8 @@ import {
   safeInterval,
   stringify,
   stringifyError,
-} from "@krakenjs/belter";
+} from "@krakenjs/belter/dist/esm";
+
 import {
   CHILD_WINDOW_TIMEOUT,
   MESSAGE_TYPE,

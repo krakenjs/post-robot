@@ -2,9 +2,9 @@ import type { ZalgoPromise } from "@krakenjs/zalgo-promise";
 import type {
   CrossDomainWindowType,
   DomainMatcher,
-} from "@krakenjs/cross-domain-utils";
-import { matchDomain } from "@krakenjs/cross-domain-utils";
-import { isRegex, getOrSet, noop } from "@krakenjs/belter";
+} from "@krakenjs/cross-domain-utils/dist/esm";
+import { matchDomain } from "@krakenjs/cross-domain-utils/dist/esm";
+import { isRegex, getOrSet, noop } from "@krakenjs/belter/dist/esm";
 
 import type { WildCard } from "../global";
 import { getWildcard, globalStore, windowStore } from "../global";

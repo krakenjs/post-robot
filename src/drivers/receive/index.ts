@@ -1,12 +1,12 @@
 import { ZalgoPromise } from "@krakenjs/zalgo-promise";
-import type { CrossDomainWindowType } from "@krakenjs/cross-domain-utils";
+import type { CrossDomainWindowType } from "@krakenjs/cross-domain-utils/dist/esm";
 import {
   isWindowClosed,
   getDomain,
   isSameTopWindow,
   PROTOCOL,
-} from "@krakenjs/cross-domain-utils";
-import { addEventListener, noop } from "@krakenjs/belter";
+} from "@krakenjs/cross-domain-utils/dist/esm";
+import { addEventListener, noop } from "@krakenjs/belter/dist/esm";
 
 import type { Message } from "../types";
 import { MESSAGE_TYPE } from "../../conf";

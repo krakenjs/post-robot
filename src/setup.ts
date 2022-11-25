@@ -1,7 +1,8 @@
 import type {
   CrossDomainWindowType,
   DomainMatcher,
-} from "@krakenjs/cross-domain-utils";
+} from "@krakenjs/cross-domain-utils/dist/esm";
+
 import { initHello } from "./lib";
 
 import {

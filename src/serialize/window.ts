@@ -3,7 +3,7 @@ import type { $Values } from "utility-types";
 import type {
   CrossDomainWindowType,
   DomainMatcher,
-} from "@krakenjs/cross-domain-utils";
+} from "@krakenjs/cross-domain-utils/dist/esm";
 import {
   isSameDomain,
   isWindowClosed,
@@ -13,11 +13,17 @@ import {
   isWindow,
   assertSameDomain,
   getFrameForWindow,
-} from "@krakenjs/cross-domain-utils";
+} from "@krakenjs/cross-domain-utils/dist/esm";
 import { ZalgoPromise } from "@krakenjs/zalgo-promise";
-import { uniqueID, memoizePromise, noop, submitForm } from "@krakenjs/belter";
-import type { CustomSerializedType } from "@krakenjs/universal-serialize";
-import { serializeType } from "@krakenjs/universal-serialize";
+import {
+  uniqueID,
+  memoizePromise,
+  noop,
+  submitForm,
+} from "@krakenjs/belter/dist/esm";
+import type { CustomSerializedType } from "@krakenjs/universal-serialize/dist/esm";
+import { serializeType } from "@krakenjs/universal-serialize/dist/esm";
+
 import { SERIALIZATION_TYPE, METHOD } from "../conf";
 import { windowStore, globalStore } from "../global";
 import { getWindowInstanceID } from "../lib";

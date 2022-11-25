@@ -1,5 +1,5 @@
 import type { $Values } from "utility-types";
-import type { CrossDomainWindowType } from "@krakenjs/cross-domain-utils";
+import type { CrossDomainWindowType } from "@krakenjs/cross-domain-utils/dist/esm";
 import {
   isSameDomain,
   isSameTopWindow,
@@ -7,7 +7,7 @@ import {
   getActualDomain,
   getDomain,
   PROTOCOL,
-} from "@krakenjs/cross-domain-utils";
+} from "@krakenjs/cross-domain-utils/dist/esm";
 
 import { SEND_STRATEGY, WILDCARD } from "../../conf";
 import { needsGlobalMessagingForBrowser } from "../../lib";

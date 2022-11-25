@@ -1,7 +1,11 @@
 import type { ZalgoPromise } from "@krakenjs/zalgo-promise";
-import type { CrossDomainWindowType } from "@krakenjs/cross-domain-utils";
-import { getParent, isWindowClosed } from "@krakenjs/cross-domain-utils";
-import { noop, uniqueID } from "@krakenjs/belter";
+import type { CrossDomainWindowType } from "@krakenjs/cross-domain-utils/dist/esm";
+import {
+  getParent,
+  isWindowClosed,
+} from "@krakenjs/cross-domain-utils/dist/esm";
+import { noop, uniqueID } from "@krakenjs/belter/dist/esm";
+
 import { MESSAGE_NAME, WILDCARD } from "../conf";
 import { getGlobal, globalStore } from "../global";
 import type { SendType, ResponseMessageEvent } from "../types";

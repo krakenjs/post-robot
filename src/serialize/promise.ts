@@ -1,14 +1,14 @@
 import type {
   CrossDomainWindowType,
   DomainMatcher,
-} from "@krakenjs/cross-domain-utils";
-import "@krakenjs/cross-domain-utils";
+} from "@krakenjs/cross-domain-utils/dist/esm";
+import "@krakenjs/cross-domain-utils/dist/esm";
 import { ZalgoPromise } from "@krakenjs/zalgo-promise";
 import type {
   CustomSerializedType,
   Thenable,
-} from "@krakenjs/universal-serialize";
-import { serializeType } from "@krakenjs/universal-serialize";
+} from "@krakenjs/universal-serialize/dist/esm";
+import { serializeType } from "@krakenjs/universal-serialize/dist/esm";
 import { SERIALIZATION_TYPE } from "../conf";
 import type { OnType, SendType } from "../types";
 import type { SerializedFunction } from "./function";
