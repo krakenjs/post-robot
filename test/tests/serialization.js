@@ -53,7 +53,6 @@ describe("Serialization cases", () => {
 
     const myfunction = () => {
       const err = new Error(expectedErrorMessage);
-      // $FlowFixMe
       err.code = expectedErrorCode;
       expectedErrorStack = err.stack;
       throw err;
@@ -82,9 +81,8 @@ describe("Serialization cases", () => {
           );
         }
 
-        // $FlowFixMe
         if (err.code !== expectedErrorCode) {
-          throw new Error( // $FlowFixMe
+          throw new Error(
             `Expected function throw error with code ${expectedErrorCode}, got ${err.code}`
           );
         }
@@ -208,9 +206,8 @@ describe("Serialization cases", () => {
           );
         }
 
-        // $FlowFixMe
         if (err2.code !== expectedErrorCode) {
-          throw new Error( // $FlowFixMe
+          throw new Error(
             `Expected function throw error with code ${expectedErrorCode}, got ${err2.code}`
           );
         }
@@ -226,7 +223,6 @@ describe("Serialization cases", () => {
         }
       });
     const err = new Error(expectedErrorMessage);
-    // $FlowFixMe
     err.code = expectedErrorCode;
     expectedErrorStack = err.stack;
 
@@ -305,9 +301,8 @@ describe("Serialization cases", () => {
           );
         }
 
-        // $FlowFixMe
         if (err2.code !== expectedErrorCode) {
-          throw new Error( // $FlowFixMe
+          throw new Error(
             `Expected function throw error with code ${expectedErrorCode}, got ${err2.code}`
           );
         }
@@ -323,7 +318,6 @@ describe("Serialization cases", () => {
         }
       });
     const err = new Error(expectedErrorMessage);
-    // $FlowFixMe
     err.code = expectedErrorCode;
     expectedErrorStack = err.stack;
 
@@ -512,7 +506,6 @@ describe("Serialization cases", () => {
         return send(childFrame, "foo");
       })
       .then(({ data }) => {
-        // $FlowFixMe
         mywindow.frameElement.parentNode.removeChild(mywindow.frameElement);
         return data.mywindow.getType();
       })
@@ -552,7 +545,6 @@ describe("Serialization cases", () => {
   it("should error getting window type for iframe if window is closed prior to serialization", () => {
     const { childFrame } = getWindows();
     const mywindow = createIframe("child.htm");
-    // $FlowFixMe
     mywindow.frameElement.parentNode.removeChild(mywindow.frameElement);
     let error;
     return send(childFrame, "setupListener", {

@@ -8,6 +8,7 @@ import {
   getDomain,
   PROTOCOL,
 } from "@krakenjs/cross-domain-utils";
+
 import { SEND_STRATEGY, WILDCARD } from "../../conf";
 import { needsGlobalMessagingForBrowser } from "../../lib";
 import { getGlobal } from "../../global";
@@ -34,6 +35,7 @@ SEND_MESSAGE_STRATEGIES[SEND_STRATEGY.POST_MESSAGE] = (
   if (__TEST__) {
     if (
       needsGlobalMessagingForBrowser() &&
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-boolean-literal-compare
       isSameTopWindow(window, win) === false
     ) {
       return;
@@ -46,7 +48,6 @@ SEND_MESSAGE_STRATEGIES[SEND_STRATEGY.POST_MESSAGE] = (
         );
       }
 
-      // $FlowFixMe
       const windowDomain = getDomain(win);
 
       if (windowDomain !== domain) {
@@ -55,7 +56,6 @@ SEND_MESSAGE_STRATEGIES[SEND_STRATEGY.POST_MESSAGE] = (
         );
       }
 
-      // $FlowFixMe
       domain = getActualDomain(win);
     }
   }
@@ -79,12 +79,14 @@ if (__POST_ROBOT__.__IE_POPUP_SUPPORT__) {
       );
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-boolean-literal-compare
     if (isSameTopWindow(window, win) !== false) {
       throw new Error(
         `Can only use bridge to communicate between two different windows, not between frames`
       );
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     sendBridgeMessage(win, domain, serializedMessage);
   };
 }
@@ -107,6 +109,7 @@ if (
       );
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-boolean-literal-compare
     if (isSameTopWindow(window, win) !== false) {
       throw new Error(
         `Can only use global to communicate between two different windows, not between frames`

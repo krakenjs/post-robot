@@ -10,6 +10,7 @@ function cleanTunnelWindows() {
   const tunnelWindows = globalStore("tunnelWindows");
 
   for (const key of tunnelWindows.keys()) {
+    // @ts-expect-error move to key in for better type safety
     const tunnelWindow = tunnelWindows[key];
 
     try {
@@ -57,7 +58,7 @@ export function setupOpenTunnelToParent({ send }: { send: SendType }) {
     canary,
     sendMessage,
   }: TunnelWindowDataType): ZalgoPromise<ResponseMessageEvent> {
-    const tunnelWindows = globalStore("tunnelWindows");
+    const tunnelWindows = globalStore<Record<string, Window>>("tunnelWindows");
     const parentWindow = getParent(window);
 
     if (!parentWindow) {
@@ -96,12 +97,14 @@ export function setupOpenTunnelToParent({ send }: { send: SendType }) {
           }
 
           try {
+            // @ts-expect-error window.canary() doesn't exist
             tunnelWindow.canary();
           } catch (err) {
             return;
           }
 
-          // $FlowFixMe[object-this-reference]
+          // @ts-expect-error lots wrong here
+          // eslint-disable-next-line prefer-rest-params
           tunnelWindow.sendMessage.apply(this, arguments);
         },
       },

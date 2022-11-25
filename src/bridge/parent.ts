@@ -116,6 +116,7 @@ export function listenForOpenTunnel({
               }
             );
           } catch (err) {
+            // eslint-disable-next-line @typescript-eslint/no-floating-promises
             ZalgoPromise.reject(err);
           }
         },

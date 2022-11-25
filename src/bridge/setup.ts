@@ -2,6 +2,7 @@ import type { OnType, SendType, ReceiveMessageType } from "../types";
 import { listenForWindowOpen, listenForOpenTunnel } from "./parent";
 import { setupOpenTunnelToParent } from "./bridge";
 import { openTunnelToOpener } from "./child";
+
 export function setupBridge({
   on,
   send,
@@ -17,9 +18,12 @@ export function setupBridge({
     send,
     receiveMessage,
   });
+
   setupOpenTunnelToParent({
     send,
   });
+
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
   openTunnelToOpener({
     on,
     send,

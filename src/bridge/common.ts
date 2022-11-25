@@ -12,7 +12,9 @@ import {
 import { noop } from "@krakenjs/belter";
 import { BRIDGE_NAME_PREFIX } from "../conf";
 import { windowStore } from "../global";
+
 export function needsBridgeForBrowser(): boolean {
+  // eslint-disable-next-line @typescript-eslint/prefer-regexp-exec
   if (getUserAgent(window).match(/MSIE|trident|edge\/12|edge\/13/i)) {
     return true;
   }
@@ -81,12 +83,14 @@ export function isBridge(): boolean {
 export const documentBodyReady = new ZalgoPromise<HTMLBodyElement>(
   (resolve) => {
     if (window.document && window.document.body) {
+      // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
       return resolve(window.document.body);
     }
 
     const interval = setInterval(() => {
       if (window.document && window.document.body) {
         clearInterval(interval);
+        // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
         return resolve(window.document.body);
       }
     }, 10);
@@ -143,6 +147,7 @@ export function registerRemoteSendMessage(
     sendMessage.fireAndForget(message);
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
   findRemoteWindow(win).resolve(sendMessageWrapper);
 }
 
@@ -168,6 +173,7 @@ export function sendBridgeMessage(
   }
 
   return findRemoteWindow(win).then((sendMessage) => {
+    // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
     return sendMessage(win, domain, message);
   });
 }

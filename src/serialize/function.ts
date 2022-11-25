@@ -7,10 +7,12 @@ import { ZalgoPromise } from "@krakenjs/zalgo-promise";
 import { uniqueID, isRegex, arrayFrom } from "@krakenjs/belter";
 import type { CustomSerializedType } from "@krakenjs/universal-serialize";
 import { serializeType } from "@krakenjs/universal-serialize";
+
 import { MESSAGE_NAME, WILDCARD, SERIALIZATION_TYPE } from "../conf";
 import { windowStore, globalStore } from "../global";
 import type { OnType, SendType, CancelableType } from "../types";
 import { ProxyWindow } from "./window";
+
 type StoredMethod = {
   name: string;
   domain: DomainMatcher;
@@ -37,7 +39,6 @@ function addMethod(
     });
   } else {
     proxyWindowMethods.del(id);
-    // $FlowFixMe
     const methods = methodStore.getOrSet(source, () => ({}));
     methods[id] = {
       domain,
@@ -60,7 +61,7 @@ function lookupMethod(
 
 function stringifyArguments(args: readonly unknown[] = []): string {
   return arrayFrom(args)
-    .map((arg) => {
+    .map((arg: unknown) => {
       if (typeof arg === "string") {
         return `'${arg}'`;
       }
@@ -101,100 +102,101 @@ function listenForFunctionCalls({
   on: OnType;
   send: SendType;
 }): CancelableType {
-  return globalStore("builtinListeners").getOrSet("functionCalls", () => {
-    return on(
-      MESSAGE_NAME.METHOD,
-      {
-        domain: WILDCARD,
-      },
-      ({
-        source,
-        origin,
-        data,
-      }: {
-        source: CrossDomainWindowType;
-        origin: string;
-        data: Record<string, any>;
-      }) => {
-        const { id, name } = data;
-        const meth = lookupMethod(source, id);
+  return globalStore<CancelableType>("builtinListeners").getOrSet(
+    "functionCalls",
+    () => {
+      return on(
+        MESSAGE_NAME.METHOD,
+        {
+          domain: WILDCARD,
+        },
+        ({
+          source,
+          origin,
+          data,
+        }: {
+          source: CrossDomainWindowType;
+          origin: string;
+          data: Record<string, any>;
+        }) => {
+          const { id, name } = data;
+          const meth = lookupMethod(source, id);
 
-        if (!meth) {
-          throw new Error(
-            `Could not find method '${name}' with id: ${data.id} in ${getDomain(
-              window
-            )}`
-          );
-        }
-
-        const { source: methodSource, domain, val } = meth;
-        return ZalgoPromise.try(() => {
-          if (!matchDomain(domain, origin)) {
+          if (!meth) {
             throw new Error(
-              `Method '${data.name}' domain ${JSON.stringify(
-                // $FlowFixMe
-                isRegex(meth.domain) ? meth.domain.source : meth.domain
-              )} does not match origin ${origin} in ${getDomain(window)}`
+              `Could not find method '${name}' with id: ${
+                data.id
+              } in ${getDomain(window)}`
             );
           }
 
-          if (ProxyWindow.isProxyWindow(methodSource)) {
-            // $FlowFixMe
-            return methodSource
-              .matchWindow(source, {
-                send,
-              })
-              .then((match) => {
-                if (!match) {
-                  throw new Error(
-                    `Method call '${
-                      data.name
-                    }' failed - proxy window does not match source in ${getDomain(
-                      window
-                    )}`
-                  );
-                }
-              });
-          }
-        })
-          .then(
-            () => {
-              return val.apply(
-                {
-                  source,
-                  origin,
-                },
-                data.args
+          const { source: methodSource, domain, val } = meth;
+          return ZalgoPromise.try(() => {
+            if (!matchDomain(domain, origin)) {
+              throw new Error(
+                `Method '${data.name}' domain ${JSON.stringify(
+                  isRegex(meth.domain) ? meth.domain.source : meth.domain
+                )} does not match origin ${origin} in ${getDomain(window)}`
               );
-            },
-            (err) => {
-              return ZalgoPromise.try(() => {
-                if (val.onError) {
-                  return val.onError(err);
-                }
-              }).then(() => {
-                // $FlowFixMe
-                if (err.stack) {
-                  // $FlowFixMe
-                  err.stack = `Remote call to ${name}(${stringifyArguments(
-                    data.args // $FlowFixMe
-                  )}) failed\n\n${err.stack}`;
-                }
-
-                throw err;
-              });
             }
-          )
-          .then((result) => {
-            return {
-              result,
-              id,
-              name,
-            };
-          });
-      }
-    );
-  });
+
+            if (ProxyWindow.isProxyWindow(methodSource)) {
+              return methodSource
+                .matchWindow(source, {
+                  send,
+                })
+                .then((match: string) => {
+                  if (!match) {
+                    throw new Error(
+                      `Method call '${
+                        data.name
+                      }' failed - proxy window does not match source in ${getDomain(
+                        window
+                      )}`
+                    );
+                  }
+                });
+            }
+          })
+            .then(
+              () => {
+                return val.apply(
+                  {
+                    source,
+                    origin,
+                  },
+                  data.args
+                );
+              },
+              (err: Error) => {
+                return ZalgoPromise.try(() => {
+                  if (val.onError) {
+                    return val.onError(err);
+                  }
+                }).then(() => {
+                  // $FlowFixMe
+                  if (err.stack) {
+                    // $FlowFixMe
+                    err.stack = `Remote call to ${name}(${stringifyArguments(
+                      data.args // $FlowFixMe
+                    )}) failed\n\n${err.stack}`;
+                  }
+
+                  throw err;
+                });
+              }
+            )
+            .then((result) => {
+              return {
+                result,
+                id,
+                name,
+              };
+            });
+        }
+      );
+    }
+  );
 }
 
 export type SerializedFunction = CustomSerializedType<
@@ -204,8 +206,8 @@ export type SerializedFunction = CustomSerializedType<
     name: string;
   }
 >;
-// eslint-disable-next-line flowtype/require-exact-type
-type SerializableFunction<T> = {
+
+export type SerializableFunction<T> = {
   (): ZalgoPromise<T> | T;
   __id__?: string;
   __name__?: string;
@@ -272,8 +274,8 @@ export function deserializeFunction<T>(
   }
 ): (...args: readonly unknown[]) => ZalgoPromise<T> {
   const getDeserializedFunction = (opts: Record<string, any> = {}) => {
-    function crossDomainFunctionWrapper<X extends unknown>(): ZalgoPromise<X> {
-      let originalStack;
+    function crossDomainFunctionWrapper<X>(): ZalgoPromise<X> {
+      let originalStack: string | undefined;
 
       if (__DEBUG__) {
         originalStack = new Error(`Original call to ${name}():`).stack;
@@ -283,7 +285,7 @@ export function deserializeFunction<T>(
         send,
       })
         .awaitWindow()
-        .then((win) => {
+        .then((win: CrossDomainWindowType) => {
           const meth = lookupMethod(win, id);
 
           if (meth && meth.val !== crossDomainFunctionWrapper) {
@@ -292,10 +294,13 @@ export function deserializeFunction<T>(
                 source: window,
                 origin: getDomain(),
               },
+              // @ts-expect-error usage of arguments
+              // eslint-disable-next-line prefer-rest-params
               arguments
             );
           } else {
-            // $FlowFixMe[method-unbinding]
+            // @ts-expect-error usage of arguments
+            // eslint-disable-next-line prefer-rest-params
             const args = Array.prototype.slice.call(arguments);
 
             if (opts.fireAndForget) {
@@ -329,13 +334,13 @@ export function deserializeFunction<T>(
             }
           }
         })
-        .catch((err) => {
-          // $FlowFixMe
-          if (__DEBUG__ && originalStack && err.stack) {
-            // $FlowFixMe
-            err.stack = `Remote call to ${name}(${stringifyArguments(
-              arguments // $FlowFixMe
-            )}) failed\n\n${err.stack}\n\n${originalStack}`;
+        .catch((err: unknown) => {
+          if (__DEBUG__ && originalStack && (err as Error).stack) {
+            (err as Error).stack = `Remote call to ${name}(${stringifyArguments(
+              // @ts-expect-error did we really do `arguments` in a catch? is this a zoo?
+              // eslint-disable-next-line prefer-rest-params
+              arguments
+            )}) failed\n\n${(err as Error).stack}\n\n${originalStack}`;
           }
 
           throw err;
@@ -351,6 +356,7 @@ export function deserializeFunction<T>(
   };
 
   const crossDomainFunctionWrapper = getDeserializedFunction();
+  // @ts-expect-error fireAndForget does not exist on this type
   crossDomainFunctionWrapper.fireAndForget = getDeserializedFunction({
     fireAndForget: true,
   });

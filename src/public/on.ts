@@ -1,10 +1,14 @@
 import { ZalgoPromise } from "@krakenjs/zalgo-promise";
 import { addRequestListener } from "../drivers";
 import { WILDCARD } from "../conf";
-import type { ServerOptionsType, HandlerType, CancelableType } from "../types";
+import type {
+  ServerOptionsType,
+  HandlerType,
+  CancelableType,
+  OnType,
+} from "../types";
 
 const getDefaultServerOptions = (): ServerOptionsType => {
-  // $FlowFixMe
   return {};
 };
 
@@ -12,7 +16,7 @@ export function on(
   name: string,
   options: ServerOptionsType | HandlerType,
   handler?: HandlerType
-): CancelableType {
+): ReturnType<OnType> {
   if (!name) {
     throw new Error("Expected name");
   }
@@ -59,6 +63,8 @@ export function on(
 type CancelableZalgoPromise<T> = ZalgoPromise<T> & {
   cancel: () => void;
 };
+
+// TODO: Why is once in here and not in belter
 export function once(
   name: string,
   options?: ServerOptionsType | HandlerType,
@@ -76,23 +82,23 @@ export function once(
   }
 
   const promise = new ZalgoPromise();
-  let listener; // eslint-disable-line prefer-const
+  let listener: CancelableType; // eslint-disable-line prefer-const
 
   options.errorHandler = (err) => {
     listener.cancel();
-    promise.reject(err);
+    void promise.reject(err);
   };
 
   listener = on(name, options, (event) => {
     listener.cancel();
-    promise.resolve(event);
+    void promise.resolve(event);
 
     if (handler) {
       return handler(event);
     }
   });
-  // $FlowFixMe
+
   promise.cancel = listener.cancel;
-  // $FlowFixMe
+
   return promise;
 }

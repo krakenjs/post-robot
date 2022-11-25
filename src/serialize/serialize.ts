@@ -13,7 +13,8 @@ import type { SerializedPromise } from "./promise";
 import { serializePromise, deserializePromise } from "./promise";
 import type { SerializedWindow } from "./window";
 import { serializeWindow, deserializeWindow, ProxyWindow } from "./window";
-export function serializeMessage<T extends unknown>(
+
+export function serializeMessage<T>(
   destination: CrossDomainWindowType | ProxyWindow,
   domain: DomainMatcher,
   obj: T,
@@ -31,10 +32,8 @@ export function serializeMessage<T extends unknown>(
         on,
         send,
       }),
-    [TYPE.FUNCTION]: (
-      val: (...args: any[]) => any,
-      key: string
-    ): SerializedFunction =>
+    // TODO: these types are a complete mess
+    [TYPE.FUNCTION]: (val: any, key: string): SerializedFunction =>
       serializeFunction(destination, domain, val, key, {
         on,
         send,
@@ -51,7 +50,7 @@ export function serializeMessage<T extends unknown>(
   });
 }
 
-export function deserializeMessage<T extends unknown>(
+export function deserializeMessage<T>(
   source: CrossDomainWindowType | ProxyWindow,
   origin: string,
   message: string,

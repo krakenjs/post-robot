@@ -3,6 +3,7 @@ import type {
   DomainMatcher,
 } from "@krakenjs/cross-domain-utils";
 import { initHello } from "./lib";
+
 import {
   listenForMessages,
   stopListenForMessages,
@@ -18,6 +19,7 @@ import {
   deserializeMessage as internalDeserializeMessage,
   ProxyWindow,
 } from "./serialize";
+
 export function serializeMessage<T>(
   destination: CrossDomainWindowType | ProxyWindow,
   domain: DomainMatcher,
@@ -29,7 +31,7 @@ export function serializeMessage<T>(
   });
 }
 
-export function deserializeMessage<T extends unknown>(
+export function deserializeMessage<T>(
   source: CrossDomainWindowType | ProxyWindow,
   origin: string,
   message: string

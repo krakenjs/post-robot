@@ -35,8 +35,11 @@ type ObjectGetter = () => Record<string, any>;
 
 const getObj: ObjectGetter = () => ({});
 
-type GetOrSet<T> = ((arg0: string, arg1: () => T) => T) &
-  ((arg0: string, arg1: () => void) => void);
+// This get or set is incompatible with belter so unsure what was originally intended here
+// type GetOrSet<T> = ((arg0: string, arg1: () => T) => T) &
+//   ((arg0: string, arg1: () => void) => void);
+type GetOrSet<T> = (arg0: string, arg1: () => T) => T;
+
 type GlobalStore<T> = {
   get: ((arg0: string, arg1: T) => T) &
     ((arg0: string, arg1: void) => T | void);
@@ -47,18 +50,18 @@ type GlobalStore<T> = {
   reset: () => void;
   keys: () => readonly string[];
 };
-export function globalStore<T extends unknown>(
+
+export function globalStore<T>(
   key = "store",
   defStore: ObjectGetter = getObj
 ): GlobalStore<T> {
-  return getOrSet(getGlobal(), key, () => {
+  return getOrSet<Record<string, T>, GlobalStore<T>>(getGlobal(), key, () => {
     let store = defStore();
     return {
       has: (storeKey) => {
         return store.hasOwnProperty(storeKey);
       },
       get: (storeKey, defVal) => {
-        // $FlowFixMe
         return store.hasOwnProperty(storeKey) ? store[storeKey] : defVal;
       },
       set: (storeKey, val) => {
@@ -69,7 +72,6 @@ export function globalStore<T extends unknown>(
         delete store[storeKey];
       },
       getOrSet: (storeKey, getter) => {
-        // $FlowFixMe
         return getOrSet(store, storeKey, getter);
       },
       reset: () => {
@@ -82,6 +84,7 @@ export function globalStore<T extends unknown>(
   });
 }
 
+// eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export class WildCard {}
 export function getWildcard(): WildCard {
   const global = getGlobal();
@@ -90,12 +93,12 @@ export function getWildcard(): WildCard {
 }
 
 type WindowStore<T> = {
-  get: ((arg0: CrossDomainWindowType | WildCard, arg1: T) => T) &
-    ((arg0: CrossDomainWindowType | WildCard, arg1: void) => T | void);
-  set: (arg0: CrossDomainWindowType | WildCard, arg1: T) => T;
-  has: (arg0: CrossDomainWindowType | WildCard) => boolean;
-  del: (arg0: CrossDomainWindowType | WildCard) => void;
-  getOrSet: (arg0: CrossDomainWindowType | WildCard, arg1: () => T) => T;
+  get: ((arg0: CrossDomainWindowType, arg1: T) => T) &
+    ((arg0: CrossDomainWindowType, arg1: void) => T | void);
+  set: (arg0: CrossDomainWindowType, arg1: T) => T;
+  has: (arg0: CrossDomainWindowType) => boolean;
+  del: (arg0: CrossDomainWindowType) => void;
+  getOrSet: (arg0: CrossDomainWindowType, arg1: () => T) => T;
 };
 export function windowStore<T>(
   key = "store",

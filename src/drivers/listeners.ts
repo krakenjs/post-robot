@@ -5,6 +5,7 @@ import type {
 } from "@krakenjs/cross-domain-utils";
 import { matchDomain } from "@krakenjs/cross-domain-utils";
 import { isRegex, getOrSet, noop } from "@krakenjs/belter";
+
 import type { WildCard } from "../global";
 import { getWildcard, globalStore, windowStore } from "../global";
 import { WILDCARD } from "../conf";
@@ -22,7 +23,7 @@ export type RequestListenerType = {
     source: CrossDomainWindowType;
     origin: string;
     data: unknown;
-  }) => unknown | ZalgoPromise<unknown>;
+  }) => ZalgoPromise<unknown>;
   handleError: (err: unknown) => void;
 };
 export type ResponseListenerType = {
@@ -178,6 +179,7 @@ export function addRequestListener(
     return {
       cancel: () => {
         requestListenerPromise.then(
+          // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
           (requestListener) => requestListener.cancel(),
           noop
         );
