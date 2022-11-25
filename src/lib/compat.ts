@@ -1,4 +1,4 @@
-import { getUserAgent } from "@krakenjs/cross-domain-utils";
+import { getUserAgent } from "@krakenjs/cross-domain-utils/dist/esm";
 
 export function needsGlobalMessagingForBrowser(): boolean {
   // eslint-disable-next-line @typescript-eslint/prefer-regexp-exec

@@ -1,7 +1,8 @@
-import type { CrossDomainWindowType } from "@krakenjs/cross-domain-utils";
-import { getAncestor } from "@krakenjs/cross-domain-utils";
+import type { CrossDomainWindowType } from "@krakenjs/cross-domain-utils/dist/esm";
+import { getAncestor } from "@krakenjs/cross-domain-utils/dist/esm";
 import { ZalgoPromise } from "@krakenjs/zalgo-promise";
-import { uniqueID } from "@krakenjs/belter";
+import { uniqueID } from "@krakenjs/belter/dist/esm";
+
 import { MESSAGE_NAME, WILDCARD } from "../conf";
 import { windowStore, globalStore, getGlobal } from "../global";
 import type { OnType, SendType, CancelableType } from "../types";

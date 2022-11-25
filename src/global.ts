@@ -1,10 +1,11 @@
 import type {
   CrossDomainWindowType,
   SameDomainWindowType,
-} from "@krakenjs/cross-domain-utils";
-import "@krakenjs/cross-domain-utils";
-import { WeakMap } from "@krakenjs/cross-domain-safe-weakmap";
-import { getOrSet, getCurrentScriptUID } from "@krakenjs/belter";
+} from "@krakenjs/cross-domain-utils/dist/esm";
+import "@krakenjs/cross-domain-utils/dist/esm";
+import { WeakMap } from "@krakenjs/cross-domain-safe-weakmap/dist/esm";
+import { getOrSet, getCurrentScriptUID } from "@krakenjs/belter/dist/esm";
+
 export function getGlobalKey(): string {
   if (__POST_ROBOT__.__SCRIPT_NAMESPACE__) {
     return `${__POST_ROBOT__.__GLOBAL_KEY__}_${getCurrentScriptUID()}`;

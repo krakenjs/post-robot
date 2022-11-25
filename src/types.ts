@@ -2,7 +2,7 @@ import type { ZalgoPromise } from "@krakenjs/zalgo-promise";
 import type {
   CrossDomainWindowType,
   DomainMatcher,
-} from "@krakenjs/cross-domain-utils";
+} from "@krakenjs/cross-domain-utils/dist/esm";
 
 import type { ProxyWindow } from "./serialize/window";
 

@@ -1,5 +1,7 @@
 import type { $Values } from "utility-types";
+
 import type { MESSAGE_TYPE, MESSAGE_ACK } from "../conf";
+
 export type RequestMessage = {
   id: string;
   origin: string;

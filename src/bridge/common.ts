@@ -1,5 +1,5 @@
 import { ZalgoPromise } from "@krakenjs/zalgo-promise";
-import type { CrossDomainWindowType } from "@krakenjs/cross-domain-utils";
+import type { CrossDomainWindowType } from "@krakenjs/cross-domain-utils/dist/esm";
 import {
   getDomain,
   isSameDomain,
@@ -8,8 +8,9 @@ import {
   matchDomain,
   getUserAgent,
   getDomainFromUrl,
-} from "@krakenjs/cross-domain-utils";
-import { noop } from "@krakenjs/belter";
+} from "@krakenjs/cross-domain-utils/dist/esm";
+import { noop } from "@krakenjs/belter/dist/esm";
+
 import { BRIDGE_NAME_PREFIX } from "../conf";
 import { windowStore } from "../global";
 
@@ -120,7 +121,7 @@ export function findRemoteWindow(
   return remoteWinPromise;
 }
 
-type SendMessageType = {
+export type SendMessageType = {
   (arg0: string): void;
   fireAndForget: (arg0: string) => void;
 };

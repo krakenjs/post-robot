@@ -1,13 +1,14 @@
 import { ZalgoPromise } from "@krakenjs/zalgo-promise";
-import type { CrossDomainWindowType } from "@krakenjs/cross-domain-utils";
+import type { CrossDomainWindowType } from "@krakenjs/cross-domain-utils/dist/esm";
 import {
   isSameDomain,
   getOpener,
   getDomain,
   getFrameByName,
   assertSameDomain,
-} from "@krakenjs/cross-domain-utils";
-import { noop } from "@krakenjs/belter";
+} from "@krakenjs/cross-domain-utils/dist/esm";
+import { noop } from "@krakenjs/belter/dist/esm";
+
 import { getGlobal, windowStore } from "../global";
 import type { OnType, SendType, ReceiveMessageType } from "../types";
 import {
@@ -16,6 +17,7 @@ import {
   rejectRemoteSendMessage,
   registerRemoteSendMessage,
   getBridgeName,
+  type SendMessageType,
 } from "./common";
 
 function awaitRemoteBridgeForWindow(
@@ -33,10 +35,11 @@ function awaitRemoteBridgeForWindow(
         return frame;
       }
 
-      return new ZalgoPromise((resolve) => {
-        let interval;
+      // @ts-expect-error resolve seems to be untyped. That is strange
+      return new ZalgoPromise<CrossDomainWindowType>((resolve) => {
+        let interval: NodeJS.Timer;
         // eslint-disable-next-line prefer-const
-        let timeout;
+        let timeout: NodeJS.Timeout;
         // eslint-disable-next-line prefer-const
         interval = setInterval(() => {
           if (
@@ -82,71 +85,85 @@ export function openTunnelToOpener({
     }
 
     registerRemoteWindow(opener);
-    return awaitRemoteBridgeForWindow(opener).then((bridge) => {
-      if (!bridge) {
-        rejectRemoteSendMessage(
-          opener,
-          new Error(`Can not register with opener: no bridge found in opener`)
-        );
-        return;
+    return awaitRemoteBridgeForWindow(opener).then(
+      (bridge: CrossDomainWindowType) => {
+        if (!bridge) {
+          rejectRemoteSendMessage(
+            opener,
+            new Error(`Can not register with opener: no bridge found in opener`)
+          );
+          return;
+        }
+
+        if (!window.name) {
+          rejectRemoteSendMessage(
+            opener,
+            new Error(
+              `Can not register with opener: window does not have a name`
+            )
+          );
+          return;
+        }
+
+        return getGlobal(assertSameDomain(bridge))
+          .openTunnelToParent({
+            name: window.name,
+            source: window,
+
+            canary() {
+              // pass
+            },
+
+            sendMessage(message: string) {
+              try {
+                noop(window);
+              } catch (err) {
+                return;
+              }
+
+              if (!window || window.closed) {
+                return;
+              }
+
+              try {
+                receiveMessage(
+                  {
+                    data: message,
+                    origin: this.origin,
+                    source: this.source,
+                  },
+                  {
+                    on,
+                    send,
+                  }
+                );
+              } catch (err) {
+                void ZalgoPromise.reject(err);
+              }
+            },
+          })
+          .then(
+            ({
+              source,
+              origin,
+              data,
+            }: {
+              source: CrossDomainWindowType;
+              origin: string;
+              data: { sendMessage: SendMessageType };
+            }) => {
+              if (source !== opener) {
+                throw new Error(`Source does not match opener`);
+              }
+
+              registerRemoteSendMessage(source, origin, data.sendMessage);
+            }
+          )
+          .catch((err: unknown) => {
+            rejectRemoteSendMessage(opener, err as Error);
+            throw err;
+          });
       }
-
-      if (!window.name) {
-        rejectRemoteSendMessage(
-          opener,
-          new Error(`Can not register with opener: window does not have a name`)
-        );
-        return;
-      }
-
-      return getGlobal(assertSameDomain(bridge))
-        .openTunnelToParent({
-          name: window.name,
-          source: window,
-
-          canary() {
-            // pass
-          },
-
-          sendMessage(message) {
-            try {
-              noop(window);
-            } catch (err) {
-              return;
-            }
-
-            if (!window || window.closed) {
-              return;
-            }
-
-            try {
-              receiveMessage(
-                {
-                  data: message,
-                  origin: this.origin,
-                  source: this.source,
-                },
-                {
-                  on,
-                  send,
-                }
-              );
-            } catch (err) {
-              void ZalgoPromise.reject(err);
-            }
-          },
-        })
-        .then(({ source, origin, data }) => {
-          if (source !== opener) {
-            throw new Error(`Source does not match opener`);
-          }
-
-          registerRemoteSendMessage(source, origin, data.sendMessage);
-        })
-        .catch((err: unknown) => {
-          rejectRemoteSendMessage(opener, err as Error);
-          throw err;
-        });
-    });
+    );
   });
 }

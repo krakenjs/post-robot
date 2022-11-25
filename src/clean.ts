@@ -1,7 +1,9 @@
-import type { CrossDomainWindowType } from "@krakenjs/cross-domain-utils";
-import { isWindowClosed } from "@krakenjs/cross-domain-utils";
-import { noop } from "@krakenjs/belter";
+import type { CrossDomainWindowType } from "@krakenjs/cross-domain-utils/dist/esm";
+import { isWindowClosed } from "@krakenjs/cross-domain-utils/dist/esm";
+import { noop } from "@krakenjs/belter/dist/esm";
+
 import { windowStore } from "./global";
+
 export function cleanUpWindow(win: CrossDomainWindowType) {
   const requestPromises = windowStore("requestPromises");
 

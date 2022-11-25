@@ -1,7 +1,8 @@
 import { ZalgoPromise } from "@krakenjs/zalgo-promise";
-import type { CrossDomainWindowType } from "@krakenjs/cross-domain-utils";
-import { isWindowClosed } from "@krakenjs/cross-domain-utils";
-import { stringifyError, noop } from "@krakenjs/belter";
+import type { CrossDomainWindowType } from "@krakenjs/cross-domain-utils/dist/esm";
+import { isWindowClosed } from "@krakenjs/cross-domain-utils/dist/esm";
+import { stringifyError, noop } from "@krakenjs/belter/dist/esm";
+
 import { serializeMessage } from "../../serialize";
 import { windowStore, getGlobalKey } from "../../global";
 import type { Message, PackedMessages } from "../types";

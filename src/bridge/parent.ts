@@ -1,5 +1,5 @@
 import { ZalgoPromise } from "@krakenjs/zalgo-promise";
-import type { CrossDomainWindowType } from "@krakenjs/cross-domain-utils";
+import type { CrossDomainWindowType } from "@krakenjs/cross-domain-utils/dist/esm";
 import {
   getDomain,
   getFrameByName,
@@ -7,6 +7,7 @@ import {
   getDomainFromUrl,
   normalizeMockUrl,
 } from "@krakenjs/cross-domain-utils/dist/esm";
+
 import { BRIDGE_TIMEOUT, MESSAGE_NAME } from "../conf";
 import { awaitWindowHello } from "../lib";
 import { windowStore, globalStore } from "../global";

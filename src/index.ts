@@ -26,6 +26,7 @@ export {
 export { on, once, send } from "./public";
 export { markWindowKnown } from "./lib";
 export { cleanUpWindow } from "./clean";
+
 // @ts-expect-error TODO: look into this
 export let bridge;
 

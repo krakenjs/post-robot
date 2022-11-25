@@ -1,10 +1,14 @@
 import type {
   CrossDomainWindowType,
   DomainMatcher,
-} from "@krakenjs/cross-domain-utils";
-import { isWindow } from "@krakenjs/cross-domain-utils";
-import type { Thenable } from "@krakenjs/universal-serialize";
-import { TYPE, serialize, deserialize } from "@krakenjs/universal-serialize";
+} from "@krakenjs/cross-domain-utils/dist/esm";
+import { isWindow } from "@krakenjs/cross-domain-utils/dist/esm";
+import type { Thenable } from "@krakenjs/universal-serialize/dist/esm";
+import {
+  TYPE,
+  serialize,
+  deserialize,
+} from "@krakenjs/universal-serialize/dist/esm";
 import { SERIALIZATION_TYPE } from "../conf";
 import type { OnType, SendType } from "../types";
 import type { SerializedFunction } from "./function";

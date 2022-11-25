@@ -1,13 +1,13 @@
 import type { $Values } from "utility-types";
 import { ZalgoPromise } from "@krakenjs/zalgo-promise";
-import type { CrossDomainWindowType } from "@krakenjs/cross-domain-utils";
+import type { CrossDomainWindowType } from "@krakenjs/cross-domain-utils/dist/esm";
 import {
   getDomain,
   isWindowClosed,
   matchDomain,
   stringifyDomainPattern,
-} from "@krakenjs/cross-domain-utils";
-import { noop, stringifyError, uniqueID } from "@krakenjs/belter";
+} from "@krakenjs/cross-domain-utils/dist/esm";
+import { noop, stringifyError, uniqueID } from "@krakenjs/belter/dist/esm";
 
 import { MESSAGE_TYPE, MESSAGE_ACK, MESSAGE_NAME } from "../../conf";
 import { sendMessage } from "../send";

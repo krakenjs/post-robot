@@ -1,12 +1,12 @@
 import type {
   CrossDomainWindowType,
   DomainMatcher,
-} from "@krakenjs/cross-domain-utils";
-import { matchDomain, getDomain } from "@krakenjs/cross-domain-utils";
+} from "@krakenjs/cross-domain-utils/dist/esm";
+import { matchDomain, getDomain } from "@krakenjs/cross-domain-utils/dist/esm";
 import { ZalgoPromise } from "@krakenjs/zalgo-promise";
-import { uniqueID, isRegex, arrayFrom } from "@krakenjs/belter";
-import type { CustomSerializedType } from "@krakenjs/universal-serialize";
-import { serializeType } from "@krakenjs/universal-serialize";
+import { uniqueID, isRegex, arrayFrom } from "@krakenjs/belter/dist/esm";
+import type { CustomSerializedType } from "@krakenjs/universal-serialize/dist/esm";
+import { serializeType } from "@krakenjs/universal-serialize/dist/esm";
 
 import { MESSAGE_NAME, WILDCARD, SERIALIZATION_TYPE } from "../conf";
 import { windowStore, globalStore } from "../global";
