@@ -91,11 +91,11 @@
   "devDependencies": {
     "@commitlint/cli": "^17.3.0",
     "@commitlint/config-conventional": "^17.3.0",
-    "@krakenjs/babel-config-grumbler": "^8.0.7",
-    "@krakenjs/eslint-config-grumbler": "^8.0.7",
-    "@krakenjs/karma-config-grumbler": "^8.0.7",
-    "@krakenjs/typescript-config-grumbler": "^8.0.7",
-    "@krakenjs/webpack-config-grumbler": "^8.1.0-alpha.1",
+    "@krakenjs/babel-config-grumbler": "^8.1.0",
+    "@krakenjs/eslint-config-grumbler": "^8.1.0",
+    "@krakenjs/karma-config-grumbler": "^8.1.0",
+    "@krakenjs/typescript-config-grumbler": "^8.1.0",
+    "@krakenjs/webpack-config-grumbler": "^8.1.0",
     "cross-env": "^7.0.3",
     "flowgen": "^1.20.1",
     "happy-dom": "^7.7.0",
@@ -109,7 +109,7 @@
   },
   "dependencies": {
     "@krakenjs/belter": "^3.0.0-typescript.1",
-    "@krakenjs/cross-domain-safe-weakmap": "^3.0.0-alpha.2",
+    "@krakenjs/cross-domain-safe-weakmap": "^3.0.0-typescript.1",
     "@krakenjs/cross-domain-utils": "^4.0.0-typescript.1",
     "@krakenjs/universal-serialize": "3.0.0-typescript.3",
     "@krakenjs/zalgo-promise": "^3.0.0-typescript.1"

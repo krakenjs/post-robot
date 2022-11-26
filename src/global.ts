@@ -20,15 +20,18 @@ export function getGlobal(
   const globalKey = getGlobalKey();
 
   if (win !== window) {
+    // @ts-expect-error indexing dynamically in win
     return win[globalKey];
   }
 
+  // @ts-expect-error indexing dynamically in win
   const global: Record<string, any> = (win[globalKey] = win[globalKey] || {});
   return global;
 }
 
 export function deleteGlobal() {
   const globalKey = getGlobalKey();
+  // @ts-expect-error deleting dynamically in win
   delete window[globalKey];
 }
 
@@ -101,6 +104,7 @@ type WindowStore<T> = {
   del: (arg0: CrossDomainWindowType) => void;
   getOrSet: (arg0: CrossDomainWindowType, arg1: () => T) => T;
 };
+
 export function windowStore<T>(
   key = "store",
   defStore: ObjectGetter = getObj

@@ -233,7 +233,7 @@ export const send: SendType = (winOrProxyWin, name, data, options) => {
             () => {
               return fireAndForget ? promise.resolve() : promise;
             },
-            (err) => {
+            (err: unknown) => {
               throw new Error(
                 `Send request message failed for ${logName} in ${getDomain()}\n\n${stringifyError(
                   err

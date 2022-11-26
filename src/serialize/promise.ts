@@ -37,6 +37,7 @@ export function serializePromise(
     then: serializeFunction(
       destination,
       domain,
+      // @ts-expect-error guess we are making promiselike things now
       (resolve, reject) => val.then(resolve, reject),
       key,
       {

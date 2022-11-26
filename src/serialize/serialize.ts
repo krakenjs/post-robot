@@ -42,6 +42,7 @@ export function serializeMessage<T>(
         on,
         send,
       }),
+    // @ts-expect-error record and window are too different
     [TYPE.OBJECT]: (
       val: CrossDomainWindowType
     ): Record<string, any> | SerializedWindow => {

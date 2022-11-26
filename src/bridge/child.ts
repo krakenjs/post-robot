@@ -23,7 +23,10 @@ import {
 function awaitRemoteBridgeForWindow(
   win: CrossDomainWindowType
 ): ZalgoPromise<CrossDomainWindowType> {
-  return windowStore("remoteBridgeAwaiters").getOrSet(win, () => {
+  // @ts-expect-error how does this become a zalgo-promise?
+  return windowStore<ZalgoPromise<Window | ZalgoPromise<Window> | undefined>>(
+    "remoteBridgeAwaiters"
+  ).getOrSet(win, () => {
     return ZalgoPromise.try(() => {
       const frame = getFrameByName(win, getBridgeName(getDomain()));
 
@@ -35,7 +38,6 @@ function awaitRemoteBridgeForWindow(
         return frame;
       }
 
-      // @ts-expect-error resolve seems to be untyped. That is strange
       return new ZalgoPromise<CrossDomainWindowType>((resolve) => {
         let interval: NodeJS.Timer;
         // eslint-disable-next-line prefer-const
@@ -55,6 +57,7 @@ function awaitRemoteBridgeForWindow(
         }, 100);
         timeout = setTimeout(() => {
           clearInterval(interval);
+          // @ts-expect-error expected 1 argument but got 0. need to update zalgo's resolve
           // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
           return resolve();
         }, 2000);
