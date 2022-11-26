@@ -31,9 +31,10 @@ import { linkWindow } from "../bridge";
 import type { SendType } from "../types";
 
 function cleanupProxyWindows() {
-  const idToProxyWindow = globalStore("idToProxyWindow");
+  const idToProxyWindow = globalStore<ProxyWindow>("idToProxyWindow");
 
   for (const id of idToProxyWindow.keys()) {
+    // @ts-expect-error should clean does not exist on void | ProxyWindow. Need to narrow
     if (idToProxyWindow.get(id).shouldClean()) {
       idToProxyWindow.del(id);
     }
@@ -51,7 +52,9 @@ type SerializedWindowType = {
   focus: () => ZalgoPromise<void>;
   isClosed: () => ZalgoPromise<boolean>;
   setLocation: (url: string, opts?: SetLocationOptions) => ZalgoPromise<void>;
-  getName: () => ZalgoPromise<string | null | undefined>;
+  getName: () =>
+    | ZalgoPromise<string | ZalgoPromise<string | undefined> | undefined>
+    | undefined;
   setName: (arg0: string) => ZalgoPromise<void>;
   getInstanceID: () => ZalgoPromise<string>;
 };
@@ -66,12 +69,12 @@ function getSerializedWindow(
     id?: string;
   }
 ): SerializedWindowType {
-  let windowNamePromise = winPromise.then((win) => {
+  let windowNamePromise = winPromise.then((win: Window) => {
     if (isSameDomain(win)) {
       return assertSameDomain(win).name;
     }
   });
-  const windowTypePromise = winPromise.then((window) => {
+  const windowTypePromise = winPromise.then((window: Window) => {
     if (!isWindowClosed(window)) {
       return getOpener(window) ? WINDOW_TYPE.POPUP : WINDOW_TYPE.IFRAME;
     } else {
@@ -82,7 +85,7 @@ function getSerializedWindow(
   windowTypePromise.catch(noop);
 
   const getName = () =>
-    winPromise.then((win) => {
+    winPromise.then((win: Window) => {
       if (isWindowClosed(win)) {
         return;
       }
@@ -102,7 +105,7 @@ function getSerializedWindow(
     href: string,
     opts: SetLocationOptions = getDefaultSetLocationOptions()
   ) =>
-    winPromise.then((win) => {
+    winPromise.then((win: Window) => {
       const domain = `${window.location.protocol}//${window.location.host}`;
       const { method = METHOD.GET, body } = opts;
 
@@ -169,6 +172,7 @@ function getSerializedWindow(
       winPromise.then((win) => {
         return isWindowClosed(win);
       }),
+    // @ts-expect-error the object shape doesnt match type. in code we pass href but type expectes url
     setLocation,
     setName: (name) =>
       winPromise.then((win) => {
@@ -198,13 +202,13 @@ function getSerializedWindow(
 }
 
 export class ProxyWindow {
-  id: string;
+  id: string | undefined;
   isProxyWindow = true;
   serializedWindow: SerializedWindowType;
   actualWindow: CrossDomainWindowType | null | undefined;
   actualWindowPromise: ZalgoPromise<CrossDomainWindowType>;
-  send: SendType;
-  name: string;
+  send: SendType | undefined;
+  name: string | undefined;
 
   constructor({
     send,
@@ -252,6 +256,7 @@ export class ProxyWindow {
   }
 
   getName(): ZalgoPromise<string | null | undefined> {
+    // @ts-expect-error getName's signature is crazy inconsistent with null handling unfortunately
     return this.serializedWindow.getName();
   }
 
@@ -315,7 +320,7 @@ export class ProxyWindow {
     }: {
       send: SendType;
     }
-  ): ZalgoPromise<boolean> {
+  ): ZalgoPromise<boolean | ZalgoPromise<boolean>> {
     return ZalgoPromise.try(() => {
       if (this.actualWindow) {
         return win === this.actualWindow;
@@ -326,7 +331,7 @@ export class ProxyWindow {
         knownWindowInstanceID: getWindowInstanceID(win, {
           send,
         }),
-      }).then(({ proxyInstanceID, knownWindowInstanceID }) => {
+      }).then(({ proxyInstanceID, knownWindowInstanceID }: any) => {
         const match = proxyInstanceID === knownWindowInstanceID;
 
         if (match) {
@@ -359,6 +364,7 @@ export class ProxyWindow {
   static unwrap(
     win: CrossDomainWindowType | ProxyWindow
   ): CrossDomainWindowType | ProxyWindow {
+    // @ts-expect-error unwrap exists on ProxyWindow but not Window and type is not narrowed
     return ProxyWindow.isProxyWindow(win) ? win.unwrap() : win;
   }
 
@@ -386,7 +392,7 @@ export class ProxyWindow {
   ): ProxyWindow {
     cleanupProxyWindows();
     return (
-      globalStore("idToProxyWindow").get(serializedWindow.id) ||
+      globalStore<ProxyWindow>("idToProxyWindow").get(serializedWindow.id) ||
       new ProxyWindow({
         serializedWindow,
         send,
@@ -417,7 +423,7 @@ export class ProxyWindow {
     // @ts-expect-error - TODO: look into this
     const actualWindow: CrossDomainWindowType = win;
     return (
-      windowStore("winToProxyWindow").get(actualWindow) ||
+      windowStore<ProxyWindow>("winToProxyWindow").get(actualWindow) ||
       new ProxyWindow({
         win: actualWindow,
         send,

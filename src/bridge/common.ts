@@ -81,37 +81,37 @@ export function isBridge(): boolean {
   return Boolean(window.name && window.name === getBridgeName(getDomain()));
 }
 
-export const documentBodyReady = new ZalgoPromise<HTMLBodyElement>(
-  (resolve) => {
+export const documentBodyReady = new ZalgoPromise<HTMLElement>((resolve) => {
+  if (window.document && window.document.body) {
+    // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
+    return resolve(window.document.body);
+  }
+
+  const interval = setInterval(() => {
     if (window.document && window.document.body) {
+      clearInterval(interval);
       // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
       return resolve(window.document.body);
     }
-
-    const interval = setInterval(() => {
-      if (window.document && window.document.body) {
-        clearInterval(interval);
-        // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
-        return resolve(window.document.body);
-      }
-    }, 10);
-  }
-);
+  }, 10);
+});
 export function registerRemoteWindow(win: CrossDomainWindowType) {
   const remoteWindowPromises = windowStore("remoteWindowPromises");
   remoteWindowPromises.getOrSet(win, () => new ZalgoPromise());
 }
 
+type RemoteWindowStore = (
+  remoteWin: CrossDomainWindowType,
+  message: string,
+  remoteDomain: string
+) => void;
+
 export function findRemoteWindow(
   win: CrossDomainWindowType
-): ZalgoPromise<
-  (
-    remoteWin: CrossDomainWindowType,
-    message: string,
-    remoteDomain: string
-  ) => void
-> {
-  const remoteWindowPromises = windowStore("remoteWindowPromises");
+): ZalgoPromise<RemoteWindowStore> {
+  const remoteWindowPromises = windowStore<ZalgoPromise<RemoteWindowStore>>(
+    "remoteWindowPromises"
+  );
   const remoteWinPromise = remoteWindowPromises.get(win);
 
   if (!remoteWinPromise) {

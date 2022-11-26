@@ -33,7 +33,7 @@ export type ServerOptionsType = {
 export type OnType = (
   name: string,
   options: ServerOptionsType | HandlerType,
-  handler: HandlerType | undefined
+  handler?: HandlerType
 ) => CancelableType;
 
 type RegularRequestOptionsType = {
