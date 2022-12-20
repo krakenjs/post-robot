@@ -4,7 +4,7 @@
 [![code coverage][coverage-badge]][coverage]
 [![npm version][version-badge]][package]
 
-[build-badge]: https://img.shields.io/github/workflow/status/krakenjs/post-robot/build?logo=github&style=flat-square
+[build-badge]: https://img.shields.io/github/actions/workflow/status/krakenjs/post-robot/main.yaml?branch=main&logo=github&style=flat-square
 [build]: https://github.com/krakenjs/post-robot/actions?query=workflow%3Abuild
 [coverage-badge]: https://img.shields.io/codecov/c/github/krakenjs/post-robot.svg?style=flat-square
 [coverage]: https://codecov.io/github/krakenjs/post-robot/
