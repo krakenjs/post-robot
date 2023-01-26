@@ -9,8 +9,10 @@ import {
   serialize,
   deserialize,
 } from "@krakenjs/universal-serialize/dist/esm";
+
 import { SERIALIZATION_TYPE } from "../conf";
 import type { OnType, SendType } from "../types";
+
 import type { SerializedFunction } from "./function";
 import { serializeFunction, deserializeFunction } from "./function";
 import type { SerializedPromise } from "./promise";

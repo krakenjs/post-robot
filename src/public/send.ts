@@ -38,7 +38,8 @@ import {
 import { awaitWindowHello, sayHello, isWindowKnown } from "../lib";
 import { windowStore } from "../global";
 import { ProxyWindow } from "../serialize/window";
-import type { SendType } from "../types";
+import type { ResponseMessageEvent, SendType } from "../types";
+
 import { on } from "./on";
 
 function validateOptions(
@@ -79,6 +80,7 @@ function normalizeDomain(
     send: SendType;
   }
 ): ZalgoPromise<string> {
+  // @ts-expect-error TODO: get promise unfurling working in Zalgo types
   return ZalgoPromise.try(() => {
     if (typeof targetDomain === "string") {
       return targetDomain;
@@ -105,18 +107,19 @@ function normalizeDomain(
   });
 }
 
+// @ts-expect-error TODO: investigate why TS isnt happy with this intersected type
 export const send: SendType = (winOrProxyWin, name, data, options) => {
   options = options || {};
   const domainMatcher = options.domain || WILDCARD;
   const responseTimeout = options.timeout || RES_TIMEOUT;
   const childTimeout = options.timeout || CHILD_WINDOW_TIMEOUT;
   const fireAndForget = options.fireAndForget || false;
+
   return ProxyWindow.toProxyWindow(winOrProxyWin, {
     send,
   })
     .awaitWindow()
     .then((win) => {
-      // $FlowFixMe
       return ZalgoPromise.try(() => {
         validateOptions(name, win, domainMatcher);
 
@@ -131,6 +134,7 @@ export const send: SendType = (winOrProxyWin, name, data, options) => {
         })
         .then((targetDomain) => {
           const domain = targetDomain;
+
           const logName =
             name === MESSAGE_NAME.METHOD &&
             data &&
@@ -142,7 +146,7 @@ export const send: SendType = (winOrProxyWin, name, data, options) => {
             console.info("send::req", logName, domain, "\n\n", data); // eslint-disable-line no-console
           }
 
-          const promise = new ZalgoPromise();
+          const promise = new ZalgoPromise<ResponseMessageEvent>();
           const hash = `${name}_${uniqueID()}`;
 
           if (!fireAndForget) {
@@ -153,21 +157,25 @@ export const send: SendType = (winOrProxyWin, name, data, options) => {
               promise,
             };
             addResponseListener(hash, responseListener);
-            const reqPromises = windowStore("requestPromises").getOrSet(
-              win,
-              () => []
-            );
+
+            const reqPromises = windowStore<Array<ZalgoPromise<unknown>>>(
+              "requestPromises"
+            ).getOrSet(win, () => []);
             reqPromises.push(promise);
+
             promise.catch(() => {
               markResponseListenerErrored(hash);
               deleteResponseListener(hash);
             });
+
             const totalAckTimeout = isWindowKnown(win)
               ? ACK_TIMEOUT_KNOWN
               : ACK_TIMEOUT;
             const totalResTimeout = responseTimeout;
+
             let ackTimeout = totalAckTimeout;
             let resTimeout = totalResTimeout;
+
             const interval = safeInterval(() => {
               if (isWindowClosed(win)) {
                 return promise.reject(
@@ -186,7 +194,6 @@ export const send: SendType = (winOrProxyWin, name, data, options) => {
               }
 
               ackTimeout = Math.max(ackTimeout - RESPONSE_CYCLE_TIME, 0);
-
               if (resTimeout !== -1) {
                 resTimeout = Math.max(resTimeout - RESPONSE_CYCLE_TIME, 0);
               }
@@ -205,6 +212,7 @@ export const send: SendType = (winOrProxyWin, name, data, options) => {
                 );
               }
             }, RESPONSE_CYCLE_TIME);
+
             promise
               .finally(() => {
                 interval.cancel();
@@ -231,6 +239,7 @@ export const send: SendType = (winOrProxyWin, name, data, options) => {
             }
           ).then(
             () => {
+              // @ts-expect-error ZalgoPromise.resolve requires one argument
               return fireAndForget ? promise.resolve() : promise;
             },
             (err: unknown) => {

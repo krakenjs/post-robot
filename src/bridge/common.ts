@@ -72,8 +72,11 @@ export function needsBridge({
 
 export function getBridgeName(domain: string): string {
   domain = domain || getDomainFromUrl(domain);
+
   const sanitizedDomain = domain.replace(/[^a-zA-Z0-9]+/g, "_");
+
   const id = `${BRIDGE_NAME_PREFIX}_${sanitizedDomain}`;
+
   return id;
 }
 
@@ -95,6 +98,7 @@ export const documentBodyReady = new ZalgoPromise<HTMLElement>((resolve) => {
     }
   }, 10);
 });
+
 export function registerRemoteWindow(win: CrossDomainWindowType) {
   const remoteWindowPromises = windowStore("remoteWindowPromises");
   remoteWindowPromises.getOrSet(win, () => new ZalgoPromise());
@@ -125,6 +129,7 @@ export type SendMessageType = {
   (arg0: string): void;
   fireAndForget: (arg0: string) => void;
 };
+
 export function registerRemoteSendMessage(
   win: CrossDomainWindowType,
   domain: string,

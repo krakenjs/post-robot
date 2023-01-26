@@ -10,6 +10,8 @@ import type { WildCard } from "../global";
 import { getWildcard, globalStore, windowStore } from "../global";
 import { WILDCARD } from "../conf";
 import { ProxyWindow } from "../serialize/window";
+import type { CancelableType } from "../types";
+
 export function resetListeners() {
   const responseListeners = globalStore("responseListeners");
   const erroredResponseListeners = globalStore("erroredResponseListeners");
@@ -17,7 +19,8 @@ export function resetListeners() {
   erroredResponseListeners.reset();
 }
 
-const __DOMAIN_REGEX__ = "__domain_regex__";
+const __DOMAIN_REGEX__ = "__domain_regex__" as const;
+
 export type RequestListenerType = {
   handler: (arg0: {
     source: CrossDomainWindowType;
@@ -26,6 +29,7 @@ export type RequestListenerType = {
   }) => ZalgoPromise<unknown>;
   handleError: (err: unknown) => void;
 };
+
 export type ResponseListenerType = {
   name: string;
   win: CrossDomainWindowType;
@@ -34,6 +38,7 @@ export type ResponseListenerType = {
   ack?: boolean | null | undefined;
   cancelled?: boolean | null | undefined;
 };
+
 export function addResponseListener(
   hash: string,
   listener: ResponseListenerType
@@ -45,17 +50,20 @@ export function addResponseListener(
 export function getResponseListener(
   hash: string
 ): ResponseListenerType | null | undefined {
-  const responseListeners = globalStore("responseListeners");
+  const responseListeners =
+    globalStore<ResponseListenerType>("responseListeners");
   return responseListeners.get(hash);
 }
 
 export function deleteResponseListener(hash: string) {
-  const responseListeners = globalStore("responseListeners");
+  const responseListeners =
+    globalStore<ResponseListenerType>("responseListeners");
   responseListeners.del(hash);
 }
 
 export function cancelResponseListeners() {
-  const responseListeners = globalStore("responseListeners");
+  const responseListeners =
+    globalStore<ResponseListenerType>("responseListeners");
 
   for (const hash of responseListeners.keys()) {
     const listener = responseListeners.get(hash);
@@ -78,16 +86,26 @@ export function isResponseListenerErrored(hash: string): boolean {
   return erroredResponseListeners.has(hash);
 }
 
+type WinNameDomainRegexListener = {
+  regex: DomainMatcher;
+  listener: RequestListenerType;
+};
+
+type RequestListenerStore = Record<string, RequestListenerType> & {
+  __domain_regex__: WinNameDomainRegexListener[];
+};
+
 export function getRequestListener({
   name,
   win,
   domain,
 }: {
   name: string;
-  win: (CrossDomainWindowType | WildCard) | null | undefined;
-  domain: (string | RegExp) | null | undefined;
+  win: CrossDomainWindowType | WildCard | null | undefined;
+  domain: string | RegExp | null | undefined;
 }): RequestListenerType | null | undefined {
-  const requestListeners = windowStore("requestListeners");
+  const requestListeners =
+    windowStore<Record<string, RequestListenerStore>>("requestListeners");
 
   if (win === WILDCARD) {
     win = null;
@@ -153,7 +171,8 @@ export function addRequestListener(
 ): {
   cancel: () => void;
 } {
-  const requestListeners = windowStore("requestListeners");
+  const requestListeners =
+    windowStore<Record<string, RequestListenerType>>("requestListeners");
 
   if (!name || typeof name !== "string") {
     throw new Error(`Name required to add request listener`);
@@ -161,11 +180,13 @@ export function addRequestListener(
 
   if (
     winCandidate &&
-    winCandidate !== WILDCARD && // $FlowFixMe
+    winCandidate !== WILDCARD &&
+    // @ts-expect-error TS still thinks winCandidate can be WildCard type here, but conditional above should prevent that
     ProxyWindow.isProxyWindow(winCandidate)
   ) {
-    // $FlowFixMe
+    // @ts-expect-error again, TS doesnt understand type narrowing above, winCandidate should always be ProxyWindow type here
     const proxyWin: ProxyWindow = winCandidate;
+
     const requestListenerPromise = proxyWin.awaitWindow().then((actualWin) => {
       return addRequestListener(
         {
@@ -176,6 +197,7 @@ export function addRequestListener(
         listener
       );
     });
+
     return {
       cancel: () => {
         requestListenerPromise.then(
@@ -187,11 +209,10 @@ export function addRequestListener(
     };
   }
 
-  // $FlowFixMe
   let win: (CrossDomainWindowType | WildCard) | null | undefined = winCandidate;
 
   if (Array.isArray(win)) {
-    const listenersCollection = [];
+    const listenersCollection: CancelableType[] = [];
 
     for (const item of win) {
       listenersCollection.push(
@@ -216,7 +237,7 @@ export function addRequestListener(
   }
 
   if (Array.isArray(domain)) {
-    const listenersCollection = [];
+    const listenersCollection: CancelableType[] = [];
 
     for (const item of domain) {
       listenersCollection.push(
@@ -243,6 +264,7 @@ export function addRequestListener(
   const existingListener = getRequestListener({
     name,
     win,
+    // @ts-expect-error TS doesnt understand this type narrowing- we've already checked if 'domain' is an array so it should be fine here
     domain,
   });
 
@@ -276,9 +298,14 @@ export function addRequestListener(
   }
 
   const winNameListeners = requestListeners.getOrSet(win, () => ({}));
-  const winNameDomainListeners = getOrSet(winNameListeners, name, () => ({}));
-  let winNameDomainRegexListeners;
-  let winNameDomainRegexListener;
+  const winNameDomainListeners: Record<string, RequestListenerType> = getOrSet(
+    winNameListeners,
+    name,
+    () => ({})
+  );
+
+  let winNameDomainRegexListeners: WinNameDomainRegexListener[];
+  let winNameDomainRegexListener: WinNameDomainRegexListener | undefined;
 
   if (isRegex(domain)) {
     winNameDomainRegexListeners = getOrSet(

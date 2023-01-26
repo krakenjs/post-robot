@@ -12,17 +12,20 @@ import { BRIDGE_TIMEOUT, MESSAGE_NAME } from "../conf";
 import { awaitWindowHello } from "../lib";
 import { windowStore, globalStore } from "../global";
 import type { OnType, SendType, ReceiveMessageType } from "../types";
+
 import {
   getBridgeName,
   documentBodyReady,
   registerRemoteSendMessage,
   registerRemoteWindow,
 } from "./common";
+
 type WinDetails = {
   win: CrossDomainWindowType;
   domain?: string | null | undefined;
   name?: string | null | undefined;
 };
+
 export function listenForOpenTunnel({
   on,
   send,
@@ -32,9 +35,11 @@ export function listenForOpenTunnel({
   send: SendType;
   receiveMessage: ReceiveMessageType;
 }) {
-  const popupWindowsByName = globalStore("popupWindowsByName");
+  const popupWindowsByName = globalStore<WinDetails>("popupWindowsByName");
+
   on(MESSAGE_NAME.OPEN_TUNNEL, ({ source, origin, data }) => {
-    const bridgePromise = globalStore("bridges").get(origin);
+    const bridgePromise =
+      globalStore<ZalgoPromise<unknown>>("bridges").get(origin);
 
     if (!bridgePromise) {
       throw new Error(`Can not find bridge promise for domain ${origin}`);
@@ -65,7 +70,7 @@ export function listenForOpenTunnel({
 
       const getWindowDetails = (): WinDetails => {
         const winDetails = popupWindowsByName.get(data.name);
-        // $FlowFixMe
+        // @ts-expect-error winDetails could be undefined
         return winDetails;
       };
 
@@ -88,8 +93,9 @@ export function listenForOpenTunnel({
         origin,
         data.sendMessage
       );
+
       return {
-        sendMessage(message) {
+        sendMessage(message: string) {
           if (!window || window.closed) {
             return;
           }
@@ -128,8 +134,10 @@ export function listenForOpenTunnel({
 
 function openBridgeFrame(name: string, url: string): HTMLIFrameElement {
   const iframe = document.createElement(`iframe`);
+
   iframe.setAttribute(`name`, name);
   iframe.setAttribute(`id`, name);
+
   iframe.setAttribute(
     `style`,
     `display: none; margin: 0; padding: 0; border: 0px none; overflow: hidden;`
@@ -138,11 +146,14 @@ function openBridgeFrame(name: string, url: string): HTMLIFrameElement {
   iframe.setAttribute(`border`, `0`);
   iframe.setAttribute(`scrolling`, `no`);
   iframe.setAttribute(`allowTransparency`, `true`);
+
   iframe.setAttribute(`tabindex`, `-1`);
   iframe.setAttribute(`hidden`, `true`);
   iframe.setAttribute(`title`, ``);
   iframe.setAttribute(`role`, `presentation`);
+
   iframe.src = url;
+
   return iframe;
 }
 
@@ -154,10 +165,15 @@ export function hasBridge(url: string, domain: string): boolean {
 export function openBridge(
   url: string,
   domain: string
-): ZalgoPromise<CrossDomainWindowType> {
-  const bridges = globalStore("bridges");
+): ZalgoPromise<CrossDomainWindowType | null | undefined> {
+  const bridges =
+    globalStore<ZalgoPromise<CrossDomainWindowType | null | undefined>>(
+      "bridges"
+    );
   const bridgeFrames = globalStore("bridgeFrames");
+
   domain = domain || getDomainFromUrl(url);
+
   return bridges.getOrSet(domain, () =>
     ZalgoPromise.try(() => {
       if (getDomain() === domain) {
@@ -175,14 +191,17 @@ export function openBridge(
 
       const iframe = openBridgeFrame(name, url);
       bridgeFrames.set(domain, iframe);
+
       return documentBodyReady.then((body) => {
         body.appendChild(iframe);
         const bridge = iframe.contentWindow;
+
         return new ZalgoPromise((resolve, reject) => {
           iframe.addEventListener("load", resolve);
           iframe.addEventListener("error", reject);
         })
           .then(() => {
+            // @ts-expect-error bridge can be null
             return awaitWindowHello(bridge, BRIDGE_TIMEOUT, `Bridge ${url}`);
           })
           .then(() => {
@@ -194,8 +213,8 @@ export function openBridge(
 }
 
 export function linkWindow({ win, name, domain }: WinDetails): WinDetails {
-  const popupWindowsByName = globalStore("popupWindowsByName");
-  const popupWindowsByWin = windowStore("popupWindowsByWin");
+  const popupWindowsByName = globalStore<WinDetails>("popupWindowsByName");
+  const popupWindowsByWin = windowStore<WinDetails>("popupWindowsByWin");
 
   for (const winName of popupWindowsByName.keys()) {
     const details = popupWindowsByName.get(winName);
@@ -220,7 +239,6 @@ export function linkWindow({ win, name, domain }: WinDetails): WinDetails {
       };
     }
 
-    // $FlowFixMe
     return popupWindowsByName.getOrSet(name, (): WinDetails => {
       return {
         win,
@@ -246,6 +264,7 @@ export function linkWindow({ win, name, domain }: WinDetails): WinDetails {
   }
 
   popupWindowsByWin.set(win, details);
+
   return details;
 }
 
@@ -259,17 +278,19 @@ export function linkUrl(win: CrossDomainWindowType, url: string) {
 export function listenForWindowOpen() {
   const windowOpen = window.open;
 
+  // @ts-expect-error windowOpenWrapper has different signature types than default window.open
   window.open = function windowOpenWrapper(
     url: string,
     name: string,
     options: string,
     last: unknown
-  ): unknown {
+  ): Window | null {
     const win = windowOpen.call(
       this,
       normalizeMockUrl(url),
       name,
       options,
+      // @ts-expect-error not sure why there's a 5th argument here, TS doesn't know either
       last
     );
 
@@ -282,13 +303,14 @@ export function listenForWindowOpen() {
       name,
       domain: url ? getDomainFromUrl(url) : null,
     });
+
     return win;
   };
 }
 
 export function destroyBridges() {
-  const bridges = globalStore("bridges");
-  const bridgeFrames = globalStore("bridgeFrames");
+  const bridges = globalStore<CrossDomainWindowType>("bridges");
+  const bridgeFrames = globalStore<HTMLIFrameElement>("bridgeFrames");
 
   for (const domain of bridgeFrames.keys()) {
     const frame = bridgeFrames.get(domain);

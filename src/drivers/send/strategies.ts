@@ -17,10 +17,13 @@ import {
   needsBridgeForBrowser,
   isBridge,
 } from "../../bridge";
+
 type SendStrategies = Record<
   $Values<typeof SEND_STRATEGY>,
   (arg0: CrossDomainWindowType, arg1: string, arg2: string) => void
 >;
+
+// @ts-expect-error SEND_MESSAGE_STRATEGIES is initialized without required methods
 export const SEND_MESSAGE_STRATEGIES: SendStrategies = {};
 
 SEND_MESSAGE_STRATEGIES[SEND_STRATEGY.POST_MESSAGE] = (
@@ -32,6 +35,7 @@ SEND_MESSAGE_STRATEGIES[SEND_STRATEGY.POST_MESSAGE] = (
     domain = WILDCARD;
   }
 
+  // @ts-expect-error TODO: remove this when belter issue is resolved
   if (__TEST__) {
     if (
       needsGlobalMessagingForBrowser() &&
@@ -116,7 +120,6 @@ if (
       );
     }
 
-    // $FlowFixMe
     const foreignGlobal = getGlobal(win);
 
     if (!foreignGlobal) {

@@ -1,19 +1,19 @@
 import {
   getWebpackConfig,
-  // @ts-expect-error fixing later
   getNextVersion,
 } from "@krakenjs/webpack-config-grumbler";
 import { argv } from "yargs";
 
 // import pkg from "./package.json";
 const pkg = { version: "11.0.0" };
-import globals from "./globals";
+import { globals } from "./globals";
 
 export const FILE_NAME = "post-robot";
 export const MODULE_NAME = "postRobot";
 
 const postRobotGlobals = {
   ...globals.__POST_ROBOT__,
+  // @ts-expect-error argv.level has type 'unknown', not string
   __GLOBAL_KEY__: `__post_robot_${getNextVersion(pkg, argv.level)}__`,
 };
 
@@ -73,6 +73,7 @@ export const WEBPACK_CONFIG_IE_MIN = getWebpackConfig({
 
 export const WEBPACK_CONFIG_TEST = getWebpackConfig({
   entry: "./src/index.ts",
+  // @ts-expect-error WebpackConfigOptions is missing "mode" property
   mode: "test",
   modulename: MODULE_NAME,
   minify: false,

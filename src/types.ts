@@ -18,7 +18,7 @@ export type HandlerType = (arg0: {
   source: CrossDomainWindowType;
   origin: string;
   data: any;
-}) => void | ZalgoPromise<any>;
+}) => any;
 
 export type ServerOptionsType = {
   handler?: HandlerType | null | undefined;
@@ -61,14 +61,14 @@ export type ResponseMessageEvent = {
 type RegularSendType = (
   win: CrossDomainWindowType | ProxyWindow,
   name: string,
-  data?: Record<string, any>,
+  data?: Record<string, unknown>,
   options?: RegularRequestOptionsType
 ) => ZalgoPromise<ResponseMessageEvent>;
 
 type FireAndForgetSendType = (
   win: CrossDomainWindowType | ProxyWindow,
   name: string,
-  data?: Record<string, any>,
+  data?: Record<string, unknown>,
   options?: FireAndForgetRequestOptionsType
 ) => ZalgoPromise<void>;
 

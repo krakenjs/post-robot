@@ -11,12 +11,16 @@ import { serializeType } from "@krakenjs/universal-serialize/dist/esm";
 import { MESSAGE_NAME, WILDCARD, SERIALIZATION_TYPE } from "../conf";
 import { windowStore, globalStore } from "../global";
 import type { OnType, SendType, CancelableType } from "../types";
+
 import { ProxyWindow } from "./window";
 
 type StoredMethod = {
   name: string;
   domain: DomainMatcher;
-  val: (...args: any[]) => any;
+  val: {
+    (...args: any[]): any;
+    onError?: (arg0: Error) => any;
+  };
   source: CrossDomainWindowType | ProxyWindow;
 };
 
@@ -27,7 +31,7 @@ function addMethod(
   source: CrossDomainWindowType | ProxyWindow,
   domain: DomainMatcher
 ) {
-  const methodStore = windowStore("methodStore");
+  const methodStore = windowStore<Record<string, StoredMethod>>("methodStore");
   const proxyWindowMethods = globalStore("proxyWindowMethods");
 
   if (ProxyWindow.isProxyWindow(source)) {
@@ -53,8 +57,9 @@ function lookupMethod(
   source: CrossDomainWindowType,
   id: string
 ): StoredMethod | null | undefined {
-  const methodStore = windowStore("methodStore");
-  const proxyWindowMethods = globalStore("proxyWindowMethods");
+  const methodStore =
+    windowStore<Record<string, StoredMethod | void>>("methodStore");
+  const proxyWindowMethods = globalStore<StoredMethod>("proxyWindowMethods");
   const methods = methodStore.getOrSet(source, () => ({}));
   return methods[id] || proxyWindowMethods.get(id);
 }
@@ -120,6 +125,7 @@ function listenForFunctionCalls({
           data: Record<string, any>;
         }) => {
           const { id, name } = data;
+
           const meth = lookupMethod(source, id);
 
           if (!meth) {
@@ -131,31 +137,36 @@ function listenForFunctionCalls({
           }
 
           const { source: methodSource, domain, val } = meth;
+
           return ZalgoPromise.try(() => {
             if (!matchDomain(domain, origin)) {
               throw new Error(
                 `Method '${data.name}' domain ${JSON.stringify(
+                  // @ts-expect-error TS doesn't understand type narrowing, meth.domain should be regex if we access source property
                   isRegex(meth.domain) ? meth.domain.source : meth.domain
                 )} does not match origin ${origin} in ${getDomain(window)}`
               );
             }
 
             if (ProxyWindow.isProxyWindow(methodSource)) {
-              return methodSource
-                .matchWindow(source, {
-                  send,
-                })
-                .then((match: string) => {
-                  if (!match) {
-                    throw new Error(
-                      `Method call '${
-                        data.name
-                      }' failed - proxy window does not match source in ${getDomain(
-                        window
-                      )}`
-                    );
-                  }
-                });
+              return (
+                methodSource
+                  // @ts-expect-error TS doesn't understand type narrowing, methodSource should always have matchWindow method here
+                  .matchWindow(source, {
+                    send,
+                  })
+                  .then((match: string) => {
+                    if (!match) {
+                      throw new Error(
+                        `Method call '${
+                          data.name
+                        }' failed - proxy window does not match source in ${getDomain(
+                          window
+                        )}`
+                      );
+                    }
+                  })
+              );
             }
           })
             .then(
@@ -174,11 +185,9 @@ function listenForFunctionCalls({
                     return val.onError(err);
                   }
                 }).then(() => {
-                  // $FlowFixMe
                   if (err.stack) {
-                    // $FlowFixMe
                     err.stack = `Remote call to ${name}(${stringifyArguments(
-                      data.args // $FlowFixMe
+                      data.args
                     )}) failed\n\n${err.stack}`;
                   }
 
@@ -212,6 +221,7 @@ export type SerializableFunction<T> = {
   __id__?: string;
   __name__?: string;
 };
+
 export function serializeFunction<T>(
   destination: CrossDomainWindowType | ProxyWindow,
   domain: DomainMatcher,
@@ -229,6 +239,7 @@ export function serializeFunction<T>(
     on,
     send,
   });
+
   const id = val.__id__ || uniqueID();
   destination = ProxyWindow.unwrap(destination);
   let name = val.__name__ || val.name || key;
@@ -243,8 +254,9 @@ export function serializeFunction<T>(
 
   if (ProxyWindow.isProxyWindow(destination)) {
     addMethod(id, val, name, destination, domain);
-    // $FlowFixMe
-    destination.awaitWindow().then((win) => {
+
+    // @ts-expect-error TS doesnt understand type narrowing above, destination should always have awaitWindow method
+    destination.awaitWindow().then((win: Window) => {
       addMethod(id, val, name, win, domain);
     });
   } else {
@@ -351,7 +363,9 @@ export function deserializeFunction<T>(
     crossDomainFunctionWrapper.__origin__ = origin;
     crossDomainFunctionWrapper.__source__ = source;
     crossDomainFunctionWrapper.__id__ = id;
+
     crossDomainFunctionWrapper.origin = origin;
+
     return crossDomainFunctionWrapper;
   };
 
@@ -360,5 +374,6 @@ export function deserializeFunction<T>(
   crossDomainFunctionWrapper.fireAndForget = getDeserializedFunction({
     fireAndForget: true,
   });
+
   return crossDomainFunctionWrapper;
 }

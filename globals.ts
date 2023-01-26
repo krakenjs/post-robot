@@ -1,11 +1,10 @@
-// const pkg = require("./package.json");
-const pkg = { version: "11.0.0" };
+import pkg from "./package.json";
 
-const formatVersion = (version) => {
+const formatVersion = (version: string) => {
   return version.replace(/[^\d]+/g, "_");
 };
 
-module.exports = {
+export const globals = {
   __POST_ROBOT__: {
     __GLOBAL_KEY__: `__post_robot_${formatVersion(pkg.version)}__`,
     __AUTO_SETUP__: true,

@@ -33,7 +33,7 @@ describe("Window Proxy cases", () => {
       const listener = on(
         "passProxyWindow",
         expect("passProxyWindow", ({ data }) => {
-          return data.otherFrame.isPopup().then((isPopup) => {
+          return data.otherFrame.isPopup().then((isPopup: unknown) => {
             listener.cancel();
 
             if (isPopup !== false) {

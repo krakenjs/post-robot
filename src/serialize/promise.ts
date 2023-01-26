@@ -8,18 +8,22 @@ import type {
   CustomSerializedType,
   Thenable,
 } from "@krakenjs/universal-serialize/dist/esm";
+
 import { serializeType } from "@krakenjs/universal-serialize/dist/esm";
 import { SERIALIZATION_TYPE } from "../conf";
 import type { OnType, SendType } from "../types";
+
 import type { SerializedFunction } from "./function";
 import { serializeFunction } from "./function";
 import type { ProxyWindow } from "./window";
+
 export type SerializedPromise = CustomSerializedType<
   typeof SERIALIZATION_TYPE.CROSS_DOMAIN_ZALGO_PROMISE,
   {
     then: SerializedFunction;
   }
 >;
+
 export function serializePromise(
   destination: CrossDomainWindowType | ProxyWindow,
   domain: DomainMatcher,

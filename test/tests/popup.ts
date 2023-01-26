@@ -30,8 +30,10 @@ describe("Popup cases", () => {
       .openBridge("/base/test/bridge.htm", "mock://test-post-robot-child.com")
       .then(() => {
         const ie8Window = createPopup("child.htm");
+        // @ts-expect-error ie8Window can be null
         return awaitWindowHello(ie8Window)
           .then(() => {
+            // @ts-expect-error ie8Window can be null
             return send(ie8Window, "setupListener", {
               messageName: "foo",
               data: {
@@ -40,9 +42,11 @@ describe("Popup cases", () => {
             });
           })
           .then(() => {
+            // @ts-expect-error ie8Window can be null
             return send(ie8Window, "foo");
           })
           .then(() => {
+            // @ts-expect-error ie8Window can be null
             ie8Window.close();
             ie8mode.cancel();
           });

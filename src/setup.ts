@@ -4,7 +4,6 @@ import type {
 } from "@krakenjs/cross-domain-utils/dist/esm";
 
 import { initHello } from "./lib";
-
 import {
   listenForMessages,
   stopListenForMessages,
@@ -61,6 +60,7 @@ export function toProxyWindow(
 export function setup() {
   if (!getGlobal().initialized) {
     getGlobal().initialized = true;
+
     setupGlobalReceiveMessage({
       on,
       send,

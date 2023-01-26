@@ -46,7 +46,7 @@ type GetOrSet<T> = (arg0: string, arg1: () => T) => T;
 
 type GlobalStore<T> = {
   get: ((arg0: string, arg1: T) => T) &
-    ((arg0: string, arg1: void) => T | void);
+    ((arg0: string, arg1: void) => T | null | undefined);
   set: (arg0: string, arg1: T) => T;
   has: (arg0: string) => boolean;
   del: (arg0: string) => void;
@@ -61,6 +61,7 @@ export function globalStore<T>(
 ): GlobalStore<T> {
   return getOrSet<Record<string, T>, GlobalStore<T>>(getGlobal(), key, () => {
     let store = defStore();
+
     return {
       has: (storeKey) => {
         return store.hasOwnProperty(storeKey);
@@ -90,6 +91,7 @@ export function globalStore<T>(
 
 // eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export class WildCard {}
+
 export function getWildcard(): WildCard {
   const global = getGlobal();
   global.WINDOW_WILDCARD = global.WINDOW_WILDCARD || new WildCard();
@@ -97,22 +99,30 @@ export function getWildcard(): WildCard {
 }
 
 type WindowStore<T> = {
-  get: ((arg0: CrossDomainWindowType, arg1: T) => T) &
-    ((arg0: CrossDomainWindowType, arg1: void) => T | void);
+  get: ((arg0: CrossDomainWindowType | WildCard, arg1: T) => T) &
+    ((
+      arg0: CrossDomainWindowType | WildCard,
+      arg1: void
+    ) => T | null | undefined);
   set: (arg0: CrossDomainWindowType, arg1: T) => T;
   has: (arg0: CrossDomainWindowType) => boolean;
-  del: (arg0: CrossDomainWindowType) => void;
-  getOrSet: (arg0: CrossDomainWindowType, arg1: () => T) => T;
+  del: (arg0: CrossDomainWindowType | WildCard) => void;
+  getOrSet: (arg0: CrossDomainWindowType | WildCard, arg1: () => T) => T;
 };
 
 export function windowStore<T>(
   key = "store",
   defStore: ObjectGetter = getObj
 ): WindowStore<T> {
-  return globalStore("windowStore").getOrSet(key, () => {
-    const winStore = new WeakMap();
+  // @ts-expect-error the overload for the 'get' method doesnt work quite right
+  // should be an easy fix if we convert globalStore to es6 class but otherwise
+  // I cannot get it working for the life of me
+  return globalStore<WindowStore<T>>("windowStore").getOrSet(key, () => {
+    const winStore = new WeakMap<any, Record<string, T>>();
 
-    const getStore = (win: CrossDomainWindowType | WildCard): ObjectGetter => {
+    const getStore = (
+      win: CrossDomainWindowType | WildCard
+    ): Record<string, T> => {
       return winStore.getOrSet(win, defStore);
     };
 
@@ -123,7 +133,6 @@ export function windowStore<T>(
       },
       get: (win, defVal) => {
         const store = getStore(win);
-        // $FlowFixMe
         return store.hasOwnProperty(key) ? store[key] : defVal;
       },
       set: (win, val) => {

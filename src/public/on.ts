@@ -1,4 +1,5 @@
 import { ZalgoPromise } from "@krakenjs/zalgo-promise";
+
 import { addRequestListener } from "../drivers";
 import { WILDCARD } from "../conf";
 import type {
@@ -22,7 +23,6 @@ export function on(
   }
 
   options = options || getDefaultServerOptions();
-
   if (typeof options === "function") {
     handler = options;
     options = getDefaultServerOptions();
@@ -34,8 +34,8 @@ export function on(
 
   const winOrProxyWin = options.window;
   const domain = options.domain || WILDCARD;
-  const successHandler = handler || options.handler;
 
+  const successHandler = handler || options.handler;
   const errorHandler =
     options.errorHandler ||
     ((err) => {
@@ -53,6 +53,7 @@ export function on(
       handleError: errorHandler,
     }
   );
+
   return {
     cancel() {
       requestListener.cancel();
@@ -64,16 +65,18 @@ type CancelableZalgoPromise<T> = ZalgoPromise<T> & {
   cancel: () => void;
 };
 
+type OnceHandler = CancelableZalgoPromise<{
+  source: unknown;
+  origin: string;
+  data: Record<string, any>;
+}>;
+
 // TODO: Why is once in here and not in belter
 export function once(
   name: string,
   options?: ServerOptionsType | HandlerType,
   handler?: HandlerType
-): CancelableZalgoPromise<{
-  source: unknown;
-  origin: string;
-  data: Record<string, any>;
-}> {
+): OnceHandler {
   options = options || getDefaultServerOptions();
 
   if (typeof options === "function") {
@@ -81,8 +84,10 @@ export function once(
     options = getDefaultServerOptions();
   }
 
-  const promise = new ZalgoPromise();
-  let listener: CancelableType; // eslint-disable-line prefer-const
+  // @ts-expect-error promise is missing required properties on initialization
+  const promise: OnceHanlder = new ZalgoPromise<{}>();
+  // eslint-disable-next-line prefer-const
+  let listener: CancelableType;
 
   options.errorHandler = (err) => {
     listener.cancel();

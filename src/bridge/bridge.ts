@@ -75,6 +75,7 @@ export function setupOpenTunnelToParent({ send }: { send: SendType }) {
       canary,
       sendMessage,
     });
+
     return send(
       parentWindow,
       MESSAGE_NAME.OPEN_TUNNEL,

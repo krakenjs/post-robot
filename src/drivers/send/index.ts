@@ -7,6 +7,7 @@ import { serializeMessage } from "../../serialize";
 import { windowStore, getGlobalKey } from "../../global";
 import type { Message, PackedMessages } from "../types";
 import type { OnType, SendType } from "../../types";
+
 import { SEND_MESSAGE_STRATEGIES } from "./strategies";
 
 function packMessages(messages: readonly Message[]): PackedMessages {
@@ -14,6 +15,11 @@ function packMessages(messages: readonly Message[]): PackedMessages {
     [getGlobalKey()]: messages,
   };
 }
+
+type DomainBuffer = {
+  buffer?: Message[];
+  flush?: ZalgoPromise<void>;
+};
 
 export function sendMessage(
   win: CrossDomainWindowType,
@@ -28,10 +34,13 @@ export function sendMessage(
   }
 ): ZalgoPromise<void> {
   return ZalgoPromise.try(() => {
-    const messageBuffer = windowStore();
+    const messageBuffer = windowStore<DomainBuffer>();
+
     const domainBuffer = messageBuffer.getOrSet(win, () => ({}));
+
     domainBuffer.buffer = domainBuffer.buffer || [];
     domainBuffer.buffer.push(message);
+
     domainBuffer.flush =
       domainBuffer.flush ||
       ZalgoPromise.flush().then(() => {
@@ -49,10 +58,13 @@ export function sendMessage(
           }
         );
         delete domainBuffer.buffer;
+
         const strategies = Object.keys(SEND_MESSAGE_STRATEGIES);
         const errors = [];
 
-        for (const strategyName of strategies) {
+        for (const strategyName of strategies as Array<
+          keyof typeof SEND_MESSAGE_STRATEGIES
+        >) {
           try {
             SEND_MESSAGE_STRATEGIES[strategyName](
               win,
@@ -72,6 +84,7 @@ export function sendMessage(
           );
         }
       });
+
     return domainBuffer.flush.then(() => {
       delete domainBuffer.flush;
     });

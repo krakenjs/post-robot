@@ -45,6 +45,7 @@ type SetLocationOptions = {
   method?: $Values<typeof METHOD>;
   body?: Record<string, string | boolean>;
 };
+
 type SerializedWindowType = {
   id: string;
   getType: () => ZalgoPromise<$Values<typeof WINDOW_TYPE>>;
@@ -74,6 +75,7 @@ function getSerializedWindow(
       return assertSameDomain(win).name;
     }
   });
+
   const windowTypePromise = winPromise.then((window: Window) => {
     if (!isWindowClosed(window)) {
       return getOpener(window) ? WINDOW_TYPE.POPUP : WINDOW_TYPE.IFRAME;
@@ -81,6 +83,7 @@ function getSerializedWindow(
       throw new Error(`Window is closed, can not determine type`);
     }
   });
+
   windowNamePromise.catch(noop);
   windowTypePromise.catch(noop);
 
@@ -127,6 +130,7 @@ function getSerializedWindow(
 
           submitForm({
             url: href,
+            // @ts-expect-error getName can return other types besides string
             target: name,
             method,
             body,
@@ -225,8 +229,8 @@ export class ProxyWindow {
       getSerializedWindow(this.actualWindowPromise, {
         send,
       });
-    globalStore("idToProxyWindow").set(this.getID(), this);
 
+    globalStore("idToProxyWindow").set(this.getID(), this);
     if (win) {
       this.setWindow(win, {
         send,
@@ -271,6 +275,7 @@ export class ProxyWindow {
   focus(): ZalgoPromise<ProxyWindow> {
     const isPopupPromise = this.isPopup();
     const getNamePromise = this.getName();
+
     const reopenPromise = ZalgoPromise.hash({
       isPopup: isPopupPromise,
       name: getNamePromise,
@@ -280,6 +285,7 @@ export class ProxyWindow {
       }
     });
     const focusPromise = this.serializedWindow.focus();
+
     return ZalgoPromise.all([reopenPromise, focusPromise]).then(() => this);
   }
 
@@ -431,10 +437,12 @@ export class ProxyWindow {
     );
   }
 }
+
 export type SerializedWindow = CustomSerializedType<
   typeof SERIALIZATION_TYPE.CROSS_DOMAIN_WINDOW,
   SerializedWindowType
 >;
+
 export function serializeWindow(
   destination: CrossDomainWindowType | ProxyWindow,
   domain: DomainMatcher,

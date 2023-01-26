@@ -36,10 +36,15 @@ function deserializeMessages(
   let parsedMessage;
 
   try {
-    parsedMessage = deserializeMessage(source, origin, message, {
-      on,
-      send,
-    });
+    parsedMessage = deserializeMessage<Record<string, unknown>>(
+      source,
+      origin,
+      message,
+      {
+        on,
+        send,
+      }
+    );
   } catch (err) {
     return;
   }
@@ -84,12 +89,12 @@ export function receiveMessage(
   // eslint-disable-next-line prefer-const
   let { source, origin, data } = event;
 
+  // @ts-expect-error TODO: remove this when belter issue is resolved
   if (__TEST__) {
     if (isWindowClosed(source)) {
       return;
     }
 
-    // $FlowFixMe
     origin = getDomain(source);
   }
 
@@ -111,6 +116,7 @@ export function receiveMessage(
 
     receivedMessages.set(message.id, true);
 
+    // @ts-expect-error fireAndForget only exists on some Message sub-types
     if (isWindowClosed(source) && !message.fireAndForget) {
       return;
     }
@@ -151,7 +157,7 @@ export function setupGlobalReceiveMessage({
 
   global.receiveMessage =
     global.receiveMessage ||
-    ((message) => {
+    ((message: MessageEvent) => {
       receiveMessage(message, {
         on,
         send,
@@ -168,6 +174,7 @@ type ListenerEvent = {
     origin: string;
   };
 };
+
 export function messageListener(
   event: ListenerEvent,
   {
@@ -203,6 +210,7 @@ export function messageListener(
       throw new Error(`Post message did not have origin domain`);
     }
 
+    // @ts-expect-error TODO: remove this when belter issue is resolved
     if (__TEST__) {
       if (
         needsGlobalMessagingForBrowser() &&
@@ -234,9 +242,9 @@ export function listenForMessages({
   on: OnType;
   send: SendType;
 }): CancelableType {
-  return globalStore().getOrSet("postMessageListener", () => {
-    return addEventListener(window, "message", (event) => {
-      // $FlowFixMe
+  return globalStore<CancelableType>().getOrSet("postMessageListener", () => {
+    // @ts-expect-error TODO: modify addEventListener arg types in Belter to accept window?
+    return addEventListener(window, "message", (event: ListenerEvent) => {
       messageListener(event, {
         on,
         send,
@@ -246,7 +254,7 @@ export function listenForMessages({
 }
 
 export function stopListenForMessages() {
-  const listener = globalStore().get("postMessageListener");
+  const listener = globalStore<CancelableType>().get("postMessageListener");
 
   if (listener) {
     listener.cancel();

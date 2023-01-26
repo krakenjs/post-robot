@@ -8,26 +8,26 @@ import { windowStore, globalStore, getGlobal } from "../global";
 import type { OnType, SendType, CancelableType } from "../types";
 
 function getInstanceID(): string {
-  return globalStore("instance").getOrSet("instanceID", uniqueID);
+  return globalStore<string>("instance").getOrSet("instanceID", uniqueID);
 }
 
-function getHelloPromise(win: CrossDomainWindowType): ZalgoPromise<{
+type HelloPromise = ZalgoPromise<{
   domain: string;
-}> {
-  const helloPromises = windowStore("helloPromises");
+}>;
+
+function getHelloPromise(win: CrossDomainWindowType): HelloPromise {
+  const helloPromises = windowStore<HelloPromise>("helloPromises");
   return helloPromises.getOrSet(win, () => new ZalgoPromise());
 }
 
 function resolveHelloPromise(
   win: CrossDomainWindowType,
-  { domain }
-): ZalgoPromise<{
-  domain: string;
-}> {
-  const helloPromises = windowStore("helloPromises");
+  { domain }: { domain: string }
+): HelloPromise {
+  const helloPromises = windowStore<HelloPromise>("helloPromises");
   const existingPromise = helloPromises.get(win);
-
   if (existingPromise) {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     existingPromise.resolve({
       domain,
     });
@@ -36,6 +36,7 @@ function resolveHelloPromise(
   const newPromise = ZalgoPromise.resolve({
     domain,
   });
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
   helloPromises.set(win, newPromise);
   return newPromise;
 }
@@ -93,6 +94,8 @@ export function sayHello(
   });
 }
 
+type WindowInstanceID = ZalgoPromise<string>;
+
 export function getWindowInstanceID(
   win: CrossDomainWindowType,
   {
@@ -100,12 +103,15 @@ export function getWindowInstanceID(
   }: {
     send: SendType;
   }
-): ZalgoPromise<string> {
-  return windowStore("windowInstanceIDPromises").getOrSet(win, () => {
-    return sayHello(win, {
-      send,
-    }).then(({ instanceID }) => instanceID);
-  });
+): WindowInstanceID {
+  return windowStore<WindowInstanceID>("windowInstanceIDPromises").getOrSet(
+    win,
+    () => {
+      return sayHello(win, {
+        send,
+      }).then(({ instanceID }) => instanceID);
+    }
+  );
 }
 
 export function initHello({
@@ -115,26 +121,29 @@ export function initHello({
   on: OnType;
   send: SendType;
 }): CancelableType {
-  return globalStore("builtinListeners").getOrSet("helloListener", () => {
-    const listener = listenForHello({
-      on,
-    });
-    const parent = getAncestor();
-
-    if (parent) {
-      sayHello(parent, {
-        send,
-      }).catch((err) => {
-        // $FlowFixMe
-        if (__TEST__ && getGlobal(parent)) {
-          // eslint-disable-next-line @typescript-eslint/no-throw-literal
-          throw err;
-        }
+  return globalStore<CancelableType>("builtinListeners").getOrSet(
+    "helloListener",
+    () => {
+      const listener = listenForHello({
+        on,
       });
-    }
 
-    return listener;
-  });
+      const parent = getAncestor();
+      if (parent) {
+        sayHello(parent, {
+          send,
+        }).catch((err) => {
+          // @ts-expect-error TODO: remove this when belter issue is resolved
+          if (__TEST__ && getGlobal(parent)) {
+            // eslint-disable-next-line @typescript-eslint/no-throw-literal
+            throw err;
+          }
+        });
+      }
+
+      return listener;
+    }
+  );
 }
 
 export function awaitWindowHello(
@@ -142,7 +151,7 @@ export function awaitWindowHello(
   timeout = 5000,
   name = "Window"
 ): ZalgoPromise<{
-  domain: string;
+  domain?: string;
 }> {
   let promise = getHelloPromise(win);
 

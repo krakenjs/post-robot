@@ -41,6 +41,7 @@ export function handleRequest(
     win: source,
     domain: origin,
   });
+
   const logName =
     message.name === MESSAGE_NAME.METHOD &&
     message.data &&
@@ -54,6 +55,7 @@ export function handleRequest(
   }
 
   function sendAck(): ZalgoPromise<void> {
+    // @ts-expect-error TODO: get promise unfurling working in Zalgo types
     return ZalgoPromise.flush().then(() => {
       if (message.fireAndForget || isWindowClosed(source)) {
         return;
@@ -87,9 +89,10 @@ export function handleRequest(
 
   function sendResponse(
     ack: $Values<typeof MESSAGE_ACK>,
-    data: Record<string, any> | undefined,
-    error: unknown
+    data: Record<string, any> | null | undefined,
+    error?: unknown
   ): ZalgoPromise<void> {
+    // @ts-expect-error TODO: get promise unfurling working in Zalgo types
     return ZalgoPromise.flush().then(() => {
       if (message.fireAndForget || isWindowClosed(source)) {
         return;
@@ -134,6 +137,7 @@ export function handleRequest(
 
   return ZalgoPromise.all([
     sendAck(),
+
     ZalgoPromise.try(() => {
       if (!options) {
         throw new Error(
@@ -142,6 +146,7 @@ export function handleRequest(
       }
 
       const data = message.data;
+
       return options.handler({
         source,
         origin,
@@ -149,9 +154,10 @@ export function handleRequest(
       });
     }).then(
       (data) => {
+        // @ts-expect-error handler returns unknown type
         return sendResponse(MESSAGE_ACK.SUCCESS, data);
       },
-      (error) => {
+      (error: unknown) => {
         return sendResponse(MESSAGE_ACK.ERROR, null, error);
       }
     ),
@@ -233,6 +239,7 @@ export function handleResponse(
   }
 
   deleteResponseListener(message.hash);
+
   const logName =
     message.name === MESSAGE_NAME.METHOD &&
     message.data &&

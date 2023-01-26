@@ -42,6 +42,7 @@ function awaitRemoteBridgeForWindow(
         let interval: NodeJS.Timer;
         // eslint-disable-next-line prefer-const
         let timeout: NodeJS.Timeout;
+
         // eslint-disable-next-line prefer-const
         interval = setInterval(() => {
           if (
@@ -55,6 +56,7 @@ function awaitRemoteBridgeForWindow(
             return resolve(frame);
           }
         }, 100);
+
         timeout = setTimeout(() => {
           clearInterval(interval);
           // @ts-expect-error expected 1 argument but got 0. need to update zalgo's resolve
@@ -88,6 +90,7 @@ export function openTunnelToOpener({
     }
 
     registerRemoteWindow(opener);
+
     return awaitRemoteBridgeForWindow(opener).then(
       (bridge: CrossDomainWindowType) => {
         if (!bridge) {
@@ -111,6 +114,7 @@ export function openTunnelToOpener({
         return getGlobal(assertSameDomain(bridge))
           .openTunnelToParent({
             name: window.name,
+
             source: window,
 
             canary() {
