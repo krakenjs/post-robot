@@ -27,7 +27,7 @@ export {
   createProxyWindow,
   toProxyWindow,
 } from "./setup";
-export { on, once, send } from "./public";
+export { on, once, send, listenerExists } from "./public";
 export { markWindowKnown } from "./lib";
 export { cleanUpWindow } from "./clean";
 
