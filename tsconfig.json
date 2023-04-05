@@ -1,0 +1,6 @@
+{
+  "extends": "@krakenjs/typescript-config-grumbler/tsconfig.json",
+  "compilerOptions": {
+    "resolveJsonModule": true
+  }
+}
