@@ -7,13 +7,11 @@ import { initHello } from "./lib";
 import {
   listenForMessages,
   stopListenForMessages,
-  receiveMessage,
   setupGlobalReceiveMessage,
   cancelResponseListeners,
 } from "./drivers";
 import { getGlobal, deleteGlobal } from "./global";
 import { on, send } from "./public";
-import { setupBridge } from "./bridge";
 import {
   serializeMessage as internalSerializeMessage,
   deserializeMessage as internalDeserializeMessage,
@@ -69,14 +67,6 @@ export function setup() {
       on,
       send,
     });
-
-    if (__POST_ROBOT__.__IE_POPUP_SUPPORT__) {
-      setupBridge({
-        on,
-        send,
-        receiveMessage,
-      });
-    }
 
     initHello({
       on,

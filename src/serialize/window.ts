@@ -27,7 +27,6 @@ import { serializeType } from "@krakenjs/universal-serialize/dist/esm";
 import { SERIALIZATION_TYPE, METHOD } from "../conf";
 import { windowStore, globalStore } from "../global";
 import { getWindowInstanceID } from "../lib";
-import { linkWindow } from "../bridge";
 import type { SendType } from "../types";
 
 function cleanupProxyWindows() {
@@ -180,13 +179,6 @@ function getSerializedWindow(
     setLocation,
     setName: (name) =>
       winPromise.then((win) => {
-        if (__POST_ROBOT__.__IE_POPUP_SUPPORT__) {
-          linkWindow({
-            win,
-            name,
-          });
-        }
-
         const sameDomain = isSameDomain(win);
         const frame = getFrameForWindow(win);
 

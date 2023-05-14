@@ -27,7 +27,6 @@ export const WEBPACK_CONFIG = getWebpackConfig({
 
     __POST_ROBOT__: {
       ...postRobotGlobals,
-      __IE_POPUP_SUPPORT__: false,
       __GLOBAL_MESSAGE_SUPPORT__: false,
     },
   },
@@ -43,7 +42,6 @@ export const WEBPACK_CONFIG_MIN = getWebpackConfig({
 
     __POST_ROBOT__: {
       ...postRobotGlobals,
-      __IE_POPUP_SUPPORT__: false,
       __GLOBAL_MESSAGE_SUPPORT__: false,
     },
   },

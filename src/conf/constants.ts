@@ -17,7 +17,7 @@ export const MESSAGE_NAME = {
 
 export const SEND_STRATEGY = {
   POST_MESSAGE: "postrobot_post_message",
-  BRIDGE: "postrobot_bridge",
+  BRIDGE: "postrobot_bridge", // TODO: can this be removed
   GLOBAL: "postrobot_global",
 } as const;
 

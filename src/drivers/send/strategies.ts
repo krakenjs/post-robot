@@ -12,11 +12,6 @@ import {
 import { SEND_STRATEGY, WILDCARD } from "../../conf";
 import { needsGlobalMessagingForBrowser } from "../../lib";
 import { getGlobal } from "../../global";
-import {
-  sendBridgeMessage,
-  needsBridgeForBrowser,
-  isBridge,
-} from "../../bridge";
 
 type SendStrategies = Record<
   $Values<typeof SEND_STRATEGY>,
@@ -67,38 +62,7 @@ SEND_MESSAGE_STRATEGIES[SEND_STRATEGY.POST_MESSAGE] = (
   win.postMessage(serializedMessage, domain);
 };
 
-if (__POST_ROBOT__.__IE_POPUP_SUPPORT__) {
-  SEND_MESSAGE_STRATEGIES[SEND_STRATEGY.BRIDGE] = (
-    win: CrossDomainWindowType,
-    serializedMessage: string,
-    domain: string
-  ) => {
-    if (!needsBridgeForBrowser() && !isBridge()) {
-      throw new Error(`Bridge not needed for browser`);
-    }
-
-    if (isSameDomain(win)) {
-      throw new Error(
-        `Post message through bridge disabled between same domain windows`
-      );
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-boolean-literal-compare
-    if (isSameTopWindow(window, win) !== false) {
-      throw new Error(
-        `Can only use bridge to communicate between two different windows, not between frames`
-      );
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    sendBridgeMessage(win, domain, serializedMessage);
-  };
-}
-
-if (
-  __POST_ROBOT__.__IE_POPUP_SUPPORT__ ||
-  __POST_ROBOT__.__GLOBAL_MESSAGE_SUPPORT__
-) {
+if (__POST_ROBOT__.__GLOBAL_MESSAGE_SUPPORT__) {
   SEND_MESSAGE_STRATEGIES[SEND_STRATEGY.GLOBAL] = (
     win: CrossDomainWindowType,
     serializedMessage: string
