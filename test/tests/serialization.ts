@@ -1,4 +1,3 @@
-import { ZalgoPromise } from "@krakenjs/zalgo-promise";
 import { WINDOW_TYPE } from "@krakenjs/cross-domain-utils";
 import { uniqueID, getBody } from "@krakenjs/belter";
 
@@ -247,11 +246,11 @@ describe("Serialization cases", () => {
     return sendPromise;
   });
 
-  it("should pass a zalgo promise across windows and be able to call it later", () => {
+  it("should pass a promise across windows and be able to call it later", () => {
     const { childFrame } = getWindows();
     const expectedValue = 123;
     let resolver: (result: unknown) => void;
-    const promise = new ZalgoPromise((resolve) => {
+    const promise = new Promise((resolve) => {
       resolver = resolve;
     });
     const sendPromise = send(childFrame, "setupListener", {
@@ -284,14 +283,14 @@ describe("Serialization cases", () => {
     return sendPromise;
   });
 
-  it("should pass a zalgo promise across windows and be able to reject it later", () => {
+  it("should pass a promise across windows and be able to reject it later", () => {
     const { childFrame } = getWindows();
     const expectedErrorMessage = "Oh no!";
     const expectedErrorCode = "ABC123";
     let expectedErrorStack: string | undefined; // eslint-disable-line prefer-const
 
     let rejector;
-    const promise = new ZalgoPromise((resolve, reject) => {
+    const promise = new Promise((resolve, reject) => {
       rejector = reject;
     });
     const sendPromise = send(childFrame, "setupListener", {

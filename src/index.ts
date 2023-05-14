@@ -1,5 +1,4 @@
 import { setup } from "./setup";
-export { ZalgoPromise as Promise } from "@krakenjs/zalgo-promise";
 export * from "./types";
 export { ProxyWindow } from "./serialize";
 export {

@@ -33,5 +33,7 @@ module.exports = {
     "@typescript-eslint/prefer-for-of": "off",
     // Generic Object Injection Sink
     "security/detect-object-injection": "off",
+    // testing
+    "@typescript-eslint/promise-function-async": "off",
   },
 };

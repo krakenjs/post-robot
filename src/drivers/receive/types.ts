@@ -1,5 +1,4 @@
 import type { $Values } from "utility-types";
-import { ZalgoPromise } from "@krakenjs/zalgo-promise";
 import type { CrossDomainWindowType } from "@krakenjs/cross-domain-utils/dist/esm";
 import {
   getDomain,
@@ -23,6 +22,7 @@ import type {
   ResponseMessage,
 } from "../types";
 import type { OnType, SendType } from "../../types";
+import { flushPromises, promiseTry } from "../../promiseUtils";
 
 export function handleRequest(
   source: CrossDomainWindowType,
@@ -35,7 +35,7 @@ export function handleRequest(
     on: OnType;
     send: SendType;
   }
-): ZalgoPromise<void> {
+): Promise<void> {
   const options = getRequestListener({
     name: message.name,
     win: source,
@@ -54,9 +54,8 @@ export function handleRequest(
     console.info("receive::req", logName, origin, "\n\n", message.data);
   }
 
-  function sendAck(): ZalgoPromise<void> {
-    // @ts-expect-error TODO: get promise unfurling working in Zalgo types
-    return ZalgoPromise.flush().then(() => {
+  function sendAck(): Promise<void> {
+    return flushPromises().then(() => {
       if (message.fireAndForget || isWindowClosed(source)) {
         return;
       }
@@ -91,9 +90,8 @@ export function handleRequest(
     ack: $Values<typeof MESSAGE_ACK>,
     data: Record<string, any> | null | undefined,
     error?: unknown
-  ): ZalgoPromise<void> {
-    // @ts-expect-error TODO: get promise unfurling working in Zalgo types
-    return ZalgoPromise.flush().then(() => {
+  ): Promise<void> {
+    return flushPromises().then(() => {
       if (message.fireAndForget || isWindowClosed(source)) {
         return;
       }
@@ -135,10 +133,10 @@ export function handleRequest(
     });
   }
 
-  return ZalgoPromise.all([
+  return Promise.all([
     sendAck(),
 
-    ZalgoPromise.try(() => {
+    promiseTry(() => {
       if (!options) {
         throw new Error(
           `No handler found for post message: ${message.name} from ${origin} in ${window.location.protocol}//${window.location.host}${window.location.pathname}`
@@ -203,7 +201,7 @@ export function handleAck(
     }
   } catch (err) {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    options.promise.reject(err);
+    Promise.reject(err);
   }
 
   options.ack = true;
@@ -213,7 +211,7 @@ export function handleResponse(
   source: CrossDomainWindowType,
   origin: string,
   message: ResponseMessage
-): void | ZalgoPromise<void> {
+): void | Promise<void> {
   if (isResponseListenerErrored(message.hash)) {
     return;
   }
@@ -253,17 +251,23 @@ export function handleResponse(
     }
 
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    options.promise.reject(message.error);
+    Promise.reject(message.error);
   } else if (message.ack === MESSAGE_ACK.SUCCESS) {
     if (__DEBUG__) {
       console.info("receive::res", logName, origin, "\n\n", message.data); // eslint-disable-line no-console
     }
 
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    options.promise.resolve({
+    options.promise = Promise.resolve({
       source,
       origin,
       data: message.data,
     });
+
+    // options.promise.resolve({
+    //   source,
+    //   origin,
+    //   data: message.data,
+    // });
   }
 }

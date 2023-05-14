@@ -3,7 +3,6 @@ import type {
   DomainMatcher,
 } from "@krakenjs/cross-domain-utils/dist/esm";
 import "@krakenjs/cross-domain-utils/dist/esm";
-import { ZalgoPromise } from "@krakenjs/zalgo-promise";
 import type {
   CustomSerializedType,
   Thenable,
@@ -60,6 +59,6 @@ export function deserializePromise<T>(
   }: {
     then: (...args: any[]) => any;
   }
-): ZalgoPromise<T> {
-  return new ZalgoPromise(then);
+): Promise<T> {
+  return new Promise(then);
 }

@@ -1,4 +1,3 @@
-import { ZalgoPromise } from "@krakenjs/zalgo-promise";
 import { getBody, noop } from "@krakenjs/belter";
 // import type { CrossDomainWindowType } from "@krakenjs/cross-domain-utils";
 import "@krakenjs/cross-domain-utils";
@@ -75,7 +74,7 @@ before(() => {
   childWindow = createPopup("child.htm");
   childFrame = createIframe("child.htm");
   otherChildFrame = createIframe("child.htm");
-  return ZalgoPromise.all([
+  return Promise.all([
     // @ts-expect-error childWindow is possibly null
     awaitWindowHello(childWindow),
     // @ts-expect-error childFrame is possibly null

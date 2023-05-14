@@ -1,4 +1,3 @@
-import type { ZalgoPromise } from "@krakenjs/zalgo-promise";
 import type {
   CrossDomainWindowType,
   DomainMatcher,
@@ -63,14 +62,14 @@ type RegularSendType = (
   name: string,
   data?: Record<string, unknown>,
   options?: RegularRequestOptionsType
-) => ZalgoPromise<ResponseMessageEvent>;
+) => Promise<ResponseMessageEvent>;
 
 type FireAndForgetSendType = (
   win: CrossDomainWindowType | ProxyWindow,
   name: string,
   data?: Record<string, unknown>,
   options?: FireAndForgetRequestOptionsType
-) => ZalgoPromise<void>;
+) => Promise<void>;
 
 export type SendType = RegularSendType & FireAndForgetSendType;
 
@@ -81,8 +80,8 @@ export type MessageEvent = {
 };
 
 export type CrossDomainFunctionType<A, R> = {
-  (...args: A[]): ZalgoPromise<R>;
-  fireAndForget: (...args: A[]) => ZalgoPromise<void>;
+  (...args: A[]): Promise<R>;
+  fireAndForget: (...args: A[]) => Promise<void>;
   __id__?: string;
   __name__?: string;
 };

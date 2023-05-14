@@ -3,7 +3,6 @@ import type {
   DomainMatcher,
 } from "@krakenjs/cross-domain-utils/dist/esm";
 import { matchDomain, getDomain } from "@krakenjs/cross-domain-utils/dist/esm";
-import { ZalgoPromise } from "@krakenjs/zalgo-promise";
 import { uniqueID, isRegex, arrayFrom } from "@krakenjs/belter/dist/esm";
 import type { CustomSerializedType } from "@krakenjs/universal-serialize/dist/esm";
 import { serializeType } from "@krakenjs/universal-serialize/dist/esm";
@@ -13,6 +12,7 @@ import { windowStore, globalStore } from "../global";
 import type { OnType, SendType, CancelableType } from "../types";
 
 import { ProxyWindow } from "./window";
+import { promiseTry } from "../promiseUtils";
 
 type StoredMethod = {
   name: string;
@@ -138,7 +138,7 @@ function listenForFunctionCalls({
 
           const { source: methodSource, domain, val } = meth;
 
-          return ZalgoPromise.try(() => {
+          return promiseTry(() => {
             if (!matchDomain(domain, origin)) {
               throw new Error(
                 `Method '${data.name}' domain ${JSON.stringify(
@@ -180,7 +180,7 @@ function listenForFunctionCalls({
                 );
               },
               (err: Error) => {
-                return ZalgoPromise.try(() => {
+                return promiseTry(() => {
                   if (val.onError) {
                     return val.onError(err);
                   }
@@ -217,7 +217,7 @@ export type SerializedFunction = CustomSerializedType<
 >;
 
 export type SerializableFunction<T> = {
-  (): ZalgoPromise<T> | T;
+  (): Promise<T> | T;
   __id__?: string;
   __name__?: string;
 };
@@ -284,9 +284,9 @@ export function deserializeFunction<T>(
   }: {
     send: SendType;
   }
-): (...args: readonly unknown[]) => ZalgoPromise<T> {
+): (...args: readonly unknown[]) => Promise<T> {
   const getDeserializedFunction = (opts: Record<string, any> = {}) => {
-    function crossDomainFunctionWrapper<X>(): ZalgoPromise<X> {
+    function crossDomainFunctionWrapper<X>(): Promise<X> {
       let originalStack: string | undefined;
 
       if (__DEBUG__) {

@@ -1,4 +1,3 @@
-import { ZalgoPromise } from "@krakenjs/zalgo-promise";
 import type { CrossDomainWindowType } from "@krakenjs/cross-domain-utils/dist/esm";
 import { isWindowClosed } from "@krakenjs/cross-domain-utils/dist/esm";
 import { stringifyError, noop } from "@krakenjs/belter/dist/esm";
@@ -9,6 +8,7 @@ import type { Message, PackedMessages } from "../types";
 import type { OnType, SendType } from "../../types";
 
 import { SEND_MESSAGE_STRATEGIES } from "./strategies";
+import { flushPromises, promiseTry } from "../../promiseUtils";
 
 function packMessages(messages: readonly Message[]): PackedMessages {
   return {
@@ -18,7 +18,7 @@ function packMessages(messages: readonly Message[]): PackedMessages {
 
 type DomainBuffer = {
   buffer?: Message[];
-  flush?: ZalgoPromise<void>;
+  flush?: Promise<void>;
 };
 
 export function sendMessage(
@@ -32,8 +32,8 @@ export function sendMessage(
     on: OnType;
     send: SendType;
   }
-): ZalgoPromise<void> {
-  return ZalgoPromise.try(() => {
+): Promise<void> {
+  return promiseTry(() => {
     const messageBuffer = windowStore<DomainBuffer>();
 
     const domainBuffer = messageBuffer.getOrSet(win, () => ({}));
@@ -43,7 +43,7 @@ export function sendMessage(
 
     domainBuffer.flush =
       domainBuffer.flush ||
-      ZalgoPromise.flush().then(() => {
+      flushPromises().then(() => {
         if (isWindowClosed(win)) {
           throw new Error("Window is closed");
         }

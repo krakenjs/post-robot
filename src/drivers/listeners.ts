@@ -1,4 +1,3 @@
-import type { ZalgoPromise } from "@krakenjs/zalgo-promise";
 import type {
   CrossDomainWindowType,
   DomainMatcher,
@@ -26,7 +25,7 @@ export type RequestListenerType = {
     source: CrossDomainWindowType;
     origin: string;
     data: unknown;
-  }) => ZalgoPromise<unknown>;
+  }) => Promise<unknown>;
   handleError: (err: unknown) => void;
 };
 
@@ -34,7 +33,7 @@ export type ResponseListenerType = {
   name: string;
   win: CrossDomainWindowType;
   domain: DomainMatcher;
-  promise: ZalgoPromise<any>;
+  promise: Promise<any>;
   ack?: boolean | null | undefined;
   cancelled?: boolean | null | undefined;
 };

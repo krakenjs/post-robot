@@ -1,4 +1,3 @@
-import { ZalgoPromise } from "@krakenjs/zalgo-promise";
 import type { CrossDomainWindowType } from "@krakenjs/cross-domain-utils/dist/esm";
 import {
   isWindowClosed,
@@ -19,6 +18,7 @@ import type {
   CancelableType,
 } from "../../types";
 import { handleRequest, handleResponse, handleAck } from "./types";
+import { promiseTry } from "../../promiseUtils";
 
 function deserializeMessages(
   message: string,
@@ -185,7 +185,7 @@ export function messageListener(
   }
 ) {
   // eslint-disable-next-line @typescript-eslint/no-floating-promises
-  ZalgoPromise.try(() => {
+  promiseTry(() => {
     try {
       noop(event.source);
     } catch (err) {

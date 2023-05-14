@@ -14,7 +14,6 @@ import {
   assertSameDomain,
   getFrameForWindow,
 } from "@krakenjs/cross-domain-utils/dist/esm";
-import { ZalgoPromise } from "@krakenjs/zalgo-promise";
 import {
   uniqueID,
   memoizePromise,
@@ -28,6 +27,7 @@ import { SERIALIZATION_TYPE, METHOD } from "../conf";
 import { windowStore, globalStore } from "../global";
 import { getWindowInstanceID } from "../lib";
 import type { SendType } from "../types";
+import { hashPromises, promiseTry } from "../promiseUtils";
 
 function cleanupProxyWindows() {
   const idToProxyWindow = globalStore<ProxyWindow>("idToProxyWindow");
@@ -47,20 +47,20 @@ type SetLocationOptions = {
 
 type SerializedWindowType = {
   id: string;
-  getType: () => ZalgoPromise<$Values<typeof WINDOW_TYPE>>;
-  close: () => ZalgoPromise<void>;
-  focus: () => ZalgoPromise<void>;
-  isClosed: () => ZalgoPromise<boolean>;
-  setLocation: (url: string, opts?: SetLocationOptions) => ZalgoPromise<void>;
+  getType: () => Promise<$Values<typeof WINDOW_TYPE>>;
+  close: () => Promise<void>;
+  focus: () => Promise<void>;
+  isClosed: () => Promise<boolean>;
+  setLocation: (url: string, opts?: SetLocationOptions) => Promise<void>;
   getName: () =>
-    | ZalgoPromise<string | ZalgoPromise<string | undefined> | undefined>
+    | Promise<string | Promise<string | undefined> | undefined>
     | undefined;
-  setName: (arg0: string) => ZalgoPromise<void>;
-  getInstanceID: () => ZalgoPromise<string>;
+  setName: (arg0: string) => Promise<void>;
+  getInstanceID: () => Promise<string>;
 };
 
 function getSerializedWindow(
-  winPromise: ZalgoPromise<CrossDomainWindowType>,
+  winPromise: Promise<CrossDomainWindowType>,
   {
     send,
     id = uniqueID(),
@@ -129,7 +129,6 @@ function getSerializedWindow(
 
           submitForm({
             url: href,
-            // @ts-expect-error getName can return other types besides string
             target: name,
             method,
             body,
@@ -158,7 +157,9 @@ function getSerializedWindow(
     getType: () => {
       return windowTypePromise;
     },
+    // @ts-expect-error - this belter thing takes a ZalgoPromise
     getInstanceID: memoizePromise(() =>
+      // @ts-expect-error - idk something with zalgo still
       winPromise.then((win) =>
         getWindowInstanceID(win, {
           send,
@@ -175,7 +176,6 @@ function getSerializedWindow(
       winPromise.then((win) => {
         return isWindowClosed(win);
       }),
-    // @ts-expect-error the object shape doesnt match type. in code we pass href but type expectes url
     setLocation,
     setName: (name) =>
       winPromise.then((win) => {
@@ -192,7 +192,7 @@ function getSerializedWindow(
           frame.setAttribute("name", name);
         }
 
-        windowNamePromise = ZalgoPromise.resolve(name);
+        windowNamePromise = Promise.resolve(name);
       }),
   };
 }
@@ -202,7 +202,9 @@ export class ProxyWindow {
   isProxyWindow = true;
   serializedWindow: SerializedWindowType;
   actualWindow: CrossDomainWindowType | null | undefined;
-  actualWindowPromise: ZalgoPromise<CrossDomainWindowType>;
+  actualWindowPromiseResolve: any;
+  actualWindowPromiseReject: any;
+  actualWindowPromise: Promise<CrossDomainWindowType>;
   send: SendType | undefined;
   name: string | undefined;
 
@@ -215,7 +217,10 @@ export class ProxyWindow {
     serializedWindow?: SerializedWindowType;
     send: SendType;
   }) {
-    this.actualWindowPromise = new ZalgoPromise();
+    this.actualWindowPromise = new Promise((resolve, reject) => {
+      this.actualWindowPromiseResolve = resolve;
+      this.actualWindowPromiseReject = reject;
+    });
     this.serializedWindow =
       serializedWindow ||
       getSerializedWindow(this.actualWindowPromise, {
@@ -234,41 +239,38 @@ export class ProxyWindow {
     return this.serializedWindow.id;
   }
 
-  getType(): ZalgoPromise<$Values<typeof WINDOW_TYPE>> {
+  getType(): Promise<$Values<typeof WINDOW_TYPE>> {
     return this.serializedWindow.getType();
   }
 
-  isPopup(): ZalgoPromise<boolean> {
+  isPopup(): Promise<boolean> {
     return this.getType().then((type) => {
       return type === WINDOW_TYPE.POPUP;
     });
   }
 
-  setLocation(
-    href: string,
-    opts?: SetLocationOptions
-  ): ZalgoPromise<ProxyWindow> {
+  setLocation(href: string, opts?: SetLocationOptions): Promise<ProxyWindow> {
     return this.serializedWindow.setLocation(href, opts).then(() => this);
   }
 
-  getName(): ZalgoPromise<string | null | undefined> {
+  getName(): Promise<string | null | undefined> {
     // @ts-expect-error getName's signature is crazy inconsistent with null handling unfortunately
     return this.serializedWindow.getName();
   }
 
-  setName(name: string): ZalgoPromise<ProxyWindow> {
+  setName(name: string): Promise<ProxyWindow> {
     return this.serializedWindow.setName(name).then(() => this);
   }
 
-  close(): ZalgoPromise<ProxyWindow> {
+  close(): Promise<ProxyWindow> {
     return this.serializedWindow.close().then(() => this);
   }
 
-  focus(): ZalgoPromise<ProxyWindow> {
+  focus(): Promise<ProxyWindow> {
     const isPopupPromise = this.isPopup();
     const getNamePromise = this.getName();
 
-    const reopenPromise = ZalgoPromise.hash({
+    const reopenPromise = hashPromises({
       isPopup: isPopupPromise,
       name: getNamePromise,
     }).then(({ isPopup, name }) => {
@@ -278,10 +280,10 @@ export class ProxyWindow {
     });
     const focusPromise = this.serializedWindow.focus();
 
-    return ZalgoPromise.all([reopenPromise, focusPromise]).then(() => this);
+    return Promise.all([reopenPromise, focusPromise]).then(() => this);
   }
 
-  isClosed(): ZalgoPromise<boolean> {
+  isClosed(): Promise<boolean> {
     return this.serializedWindow.isClosed();
   }
 
@@ -299,7 +301,7 @@ export class ProxyWindow {
   ) {
     this.actualWindow = win;
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    this.actualWindowPromise.resolve(this.actualWindow);
+    this.actualWindowPromiseResolve(this.actualWindow);
     this.serializedWindow = getSerializedWindow(this.actualWindowPromise, {
       send,
       id: this.getID(),
@@ -307,7 +309,7 @@ export class ProxyWindow {
     windowStore("winToProxyWindow").set(win, this);
   }
 
-  awaitWindow(): ZalgoPromise<CrossDomainWindowType> {
+  awaitWindow(): Promise<CrossDomainWindowType> {
     return this.actualWindowPromise;
   }
 
@@ -318,13 +320,14 @@ export class ProxyWindow {
     }: {
       send: SendType;
     }
-  ): ZalgoPromise<boolean | ZalgoPromise<boolean>> {
-    return ZalgoPromise.try(() => {
+  ): Promise<boolean | Promise<boolean>> {
+    // @ts-expect-error - promiseTry is always unknown
+    return promiseTry(() => {
       if (this.actualWindow) {
         return win === this.actualWindow;
       }
 
-      return ZalgoPromise.hash({
+      return hashPromises({
         proxyInstanceID: this.getInstanceID(),
         knownWindowInstanceID: getWindowInstanceID(win, {
           send,
@@ -347,7 +350,7 @@ export class ProxyWindow {
     return this.actualWindow || this;
   }
 
-  getInstanceID(): ZalgoPromise<string> {
+  getInstanceID(): Promise<string> {
     return this.serializedWindow.getInstanceID();
   }
 

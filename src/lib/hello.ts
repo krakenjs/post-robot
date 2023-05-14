@@ -1,23 +1,32 @@
 import type { CrossDomainWindowType } from "@krakenjs/cross-domain-utils/dist/esm";
 import { getAncestor } from "@krakenjs/cross-domain-utils/dist/esm";
-import { ZalgoPromise } from "@krakenjs/zalgo-promise";
 import { uniqueID } from "@krakenjs/belter/dist/esm";
 
 import { MESSAGE_NAME, WILDCARD } from "../conf";
 import { windowStore, globalStore, getGlobal } from "../global";
 import type { OnType, SendType, CancelableType } from "../types";
+import { promiseTimeout } from "../promiseUtils";
 
 function getInstanceID(): string {
   return globalStore<string>("instance").getOrSet("instanceID", uniqueID);
 }
 
-type HelloPromise = ZalgoPromise<{
+type HelloPromise = Promise<{
   domain: string;
 }>;
 
 function getHelloPromise(win: CrossDomainWindowType): HelloPromise {
   const helloPromises = windowStore<HelloPromise>("helloPromises");
-  return helloPromises.getOrSet(win, () => new ZalgoPromise());
+  return helloPromises.getOrSet(win, () => Promise.reject("not found"));
+}
+
+function setHelloPromise(
+  win: CrossDomainWindowType,
+  promise: Promise<unknown>
+): HelloPromise {
+  const helloPromises = windowStore<HelloPromise>("helloPromises");
+  // @ts-expect-error - no args
+  return helloPromises.set(win, promise);
 }
 
 function resolveHelloPromise(
@@ -25,15 +34,17 @@ function resolveHelloPromise(
   { domain }: { domain: string }
 ): HelloPromise {
   const helloPromises = windowStore<HelloPromise>("helloPromises");
-  const existingPromise = helloPromises.get(win);
+  let existingPromise = helloPromises.get(win);
   if (existingPromise) {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    existingPromise.resolve({
-      domain,
-    });
+    existingPromise = Promise.resolve({ domain });
+    void helloPromises.set(win, existingPromise);
+    // existingPromise.resolve({
+    //   domain,
+    // });
   }
 
-  const newPromise = ZalgoPromise.resolve({
+  const newPromise = Promise.resolve({
     domain,
   });
   // eslint-disable-next-line @typescript-eslint/no-floating-promises
@@ -66,7 +77,7 @@ export function sayHello(
   }: {
     send: SendType;
   }
-): ZalgoPromise<{
+): Promise<{
   win: CrossDomainWindowType;
   domain: string;
   instanceID: string;
@@ -94,7 +105,7 @@ export function sayHello(
   });
 }
 
-type WindowInstanceID = ZalgoPromise<string>;
+type WindowInstanceID = Promise<string>;
 
 export function getWindowInstanceID(
   win: CrossDomainWindowType,
@@ -150,16 +161,24 @@ export function awaitWindowHello(
   win: CrossDomainWindowType,
   timeout = 5000,
   name = "Window"
-): ZalgoPromise<{
+): Promise<{
   domain?: string;
 }> {
   let promise = getHelloPromise(win);
 
   if (timeout !== -1) {
-    promise = promise.timeout(
-      timeout,
-      new Error(`${name} did not load after ${timeout}ms`)
-    );
+    const error = new Error(`${name} did not load after ${timeout}ms`);
+    promise = promiseTimeout(promise, timeout);
+    // .catch(() => {
+    //   throw error;
+    // });
+
+    void setHelloPromise(win, promise);
+
+    // promise = promise.timeout(
+    //   timeout,
+    //   error
+    // );
   }
 
   return promise;

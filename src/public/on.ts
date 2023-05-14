@@ -1,5 +1,3 @@
-import { ZalgoPromise } from "@krakenjs/zalgo-promise";
-
 import { addRequestListener } from "../drivers";
 import { WILDCARD } from "../conf";
 import type {
@@ -61,7 +59,7 @@ export function on(
   };
 }
 
-type CancelableZalgoPromise<T> = ZalgoPromise<T> & {
+type CancelableZalgoPromise<T> = Promise<T> & {
   cancel: () => void;
 };
 
@@ -85,7 +83,7 @@ export function once(
   }
 
   // @ts-expect-error promise is missing required properties on initialization
-  const promise: OnceHanlder = new ZalgoPromise<{}>();
+  const promise: OnceHanlder = new Promise<{}>();
   // eslint-disable-next-line prefer-const
   let listener: CancelableType;
 

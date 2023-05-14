@@ -1,4 +1,3 @@
-import { ZalgoPromise } from "@krakenjs/zalgo-promise";
 import type {
   CrossDomainWindowType,
   DomainMatcher,
@@ -41,6 +40,7 @@ import { ProxyWindow } from "../serialize/window";
 import type { ResponseMessageEvent, SendType } from "../types";
 
 import { on } from "./on";
+import { promiseTry } from "../promiseUtils";
 
 function validateOptions(
   name: string,
@@ -79,14 +79,14 @@ function normalizeDomain(
   }: {
     send: SendType;
   }
-): ZalgoPromise<string> {
+): Promise<string> {
   // @ts-expect-error TODO: get promise unfurling working in Zalgo types
-  return ZalgoPromise.try(() => {
+  return promiseTry(() => {
     if (typeof targetDomain === "string") {
       return targetDomain;
     }
 
-    return ZalgoPromise.try(() => {
+    return promiseTry(() => {
       return (
         actualDomain ||
         sayHello(win, {
@@ -107,7 +107,6 @@ function normalizeDomain(
   });
 }
 
-// @ts-expect-error TODO: investigate why TS isnt happy with this intersected type
 export const send: SendType = (winOrProxyWin, name, data, options) => {
   options = options || {};
   const domainMatcher = options.domain || WILDCARD;
@@ -120,136 +119,142 @@ export const send: SendType = (winOrProxyWin, name, data, options) => {
   })
     .awaitWindow()
     .then((win) => {
-      return ZalgoPromise.try(() => {
-        validateOptions(name, win, domainMatcher);
+      return (
+        promiseTry(() => {
+          validateOptions(name, win, domainMatcher);
 
-        if (isAncestor(window, win)) {
-          return awaitWindowHello(win, childTimeout);
-        }
-      })
-        .then(({ domain: actualDomain } = {}) => {
-          return normalizeDomain(win, domainMatcher, actualDomain, {
-            send,
-          });
+          if (isAncestor(window, win)) {
+            return awaitWindowHello(win, childTimeout);
+          }
         })
-        .then((targetDomain) => {
-          const domain = targetDomain;
-
-          const logName =
-            name === MESSAGE_NAME.METHOD &&
-            data &&
-            typeof data.name === "string"
-              ? `${data.name}()`
-              : name;
-
-          if (__DEBUG__) {
-            console.info("send::req", logName, domain, "\n\n", data); // eslint-disable-line no-console
-          }
-
-          const promise = new ZalgoPromise<ResponseMessageEvent>();
-          const hash = `${name}_${uniqueID()}`;
-
-          if (!fireAndForget) {
-            const responseListener: ResponseListenerType = {
-              name,
-              win,
-              domain,
-              promise,
-            };
-            addResponseListener(hash, responseListener);
-
-            const reqPromises = windowStore<Array<ZalgoPromise<unknown>>>(
-              "requestPromises"
-            ).getOrSet(win, () => []);
-            reqPromises.push(promise);
-
-            promise.catch(() => {
-              markResponseListenerErrored(hash);
-              deleteResponseListener(hash);
-            });
-
-            const totalAckTimeout = isWindowKnown(win)
-              ? ACK_TIMEOUT_KNOWN
-              : ACK_TIMEOUT;
-            const totalResTimeout = responseTimeout;
-
-            let ackTimeout = totalAckTimeout;
-            let resTimeout = totalResTimeout;
-
-            const interval = safeInterval(() => {
-              if (isWindowClosed(win)) {
-                return promise.reject(
-                  new Error(
-                    `Window closed for ${name} before ${
-                      responseListener.ack ? "response" : "ack"
-                    }`
-                  )
-                );
-              }
-
-              if (responseListener.cancelled) {
-                return promise.reject(
-                  new Error(`Response listener was cancelled for ${name}`)
-                );
-              }
-
-              ackTimeout = Math.max(ackTimeout - RESPONSE_CYCLE_TIME, 0);
-              if (resTimeout !== -1) {
-                resTimeout = Math.max(resTimeout - RESPONSE_CYCLE_TIME, 0);
-              }
-
-              if (!responseListener.ack && ackTimeout === 0) {
-                return promise.reject(
-                  new Error(
-                    `No ack for postMessage ${logName} in ${getDomain()} in ${totalAckTimeout}ms`
-                  )
-                );
-              } else if (resTimeout === 0) {
-                return promise.reject(
-                  new Error(
-                    `No response for postMessage ${logName} in ${getDomain()} in ${totalResTimeout}ms`
-                  )
-                );
-              }
-            }, RESPONSE_CYCLE_TIME);
-
-            promise
-              .finally(() => {
-                interval.cancel();
-                reqPromises.splice(reqPromises.indexOf(promise, 1));
-              })
-              .catch(noop);
-          }
-
-          return sendMessage(
-            win,
-            domain,
-            {
-              id: uniqueID(),
-              origin: getDomain(window),
-              type: MESSAGE_TYPE.REQUEST,
-              hash,
-              name,
-              data,
-              fireAndForget,
-            },
-            {
-              on,
+          // @ts-expect-error - idk this is new
+          .then(({ domain: actualDomain } = {}) => {
+            return normalizeDomain(win, domainMatcher, actualDomain, {
               send,
+            });
+          })
+          .then((targetDomain) => {
+            const domain = targetDomain;
+
+            const logName =
+              name === MESSAGE_NAME.METHOD &&
+              data &&
+              typeof data.name === "string"
+                ? `${data.name}()`
+                : name;
+
+            if (__DEBUG__) {
+              console.info("send::req", logName, domain, "\n\n", data); // eslint-disable-line no-console
             }
-          ).then(
-            () => {
-              // @ts-expect-error ZalgoPromise.resolve requires one argument
-              return fireAndForget ? promise.resolve() : promise;
-            },
-            (err: unknown) => {
-              throw new Error(
-                `Send request message failed for ${logName} in ${getDomain()}\n\n${stringifyError(
-                  err
-                )}`
-              );
+
+            // @ts-expect-error - expected args
+            const promise = new Promise<ResponseMessageEvent>();
+            const hash = `${name}_${uniqueID()}`;
+
+            if (!fireAndForget) {
+              const responseListener: ResponseListenerType = {
+                name,
+                win,
+                // @ts-expect-error - domain is unknown not DomainMatcher
+                domain,
+                promise,
+              };
+              addResponseListener(hash, responseListener);
+
+              const reqPromises = windowStore<Array<Promise<unknown>>>(
+                "requestPromises"
+              ).getOrSet(win, () => []);
+              reqPromises.push(promise);
+
+              promise.catch(() => {
+                markResponseListenerErrored(hash);
+                deleteResponseListener(hash);
+              });
+
+              const totalAckTimeout = isWindowKnown(win)
+                ? ACK_TIMEOUT_KNOWN
+                : ACK_TIMEOUT;
+              const totalResTimeout = responseTimeout;
+
+              let ackTimeout = totalAckTimeout;
+              let resTimeout = totalResTimeout;
+
+              const interval = safeInterval(() => {
+                if (isWindowClosed(win)) {
+                  return Promise.reject(
+                    new Error(
+                      `Window closed for ${name} before ${
+                        responseListener.ack ? "response" : "ack"
+                      }`
+                    )
+                  );
+                }
+
+                if (responseListener.cancelled) {
+                  return Promise.reject(
+                    new Error(`Response listener was cancelled for ${name}`)
+                  );
+                }
+
+                ackTimeout = Math.max(ackTimeout - RESPONSE_CYCLE_TIME, 0);
+                if (resTimeout !== -1) {
+                  resTimeout = Math.max(resTimeout - RESPONSE_CYCLE_TIME, 0);
+                }
+
+                if (!responseListener.ack && ackTimeout === 0) {
+                  return Promise.reject(
+                    new Error(
+                      `No ack for postMessage ${logName} in ${getDomain()} in ${totalAckTimeout}ms`
+                    )
+                  );
+                } else if (resTimeout === 0) {
+                  return Promise.reject(
+                    new Error(
+                      `No response for postMessage ${logName} in ${getDomain()} in ${totalResTimeout}ms`
+                    )
+                  );
+                }
+              }, RESPONSE_CYCLE_TIME);
+
+              promise
+                .finally(() => {
+                  interval.cancel();
+                  reqPromises.splice(reqPromises.indexOf(promise, 1));
+                })
+                .catch(noop);
             }
-          );
-        });
+
+            return sendMessage(
+              win,
+              // @ts-expect-error - domain is unknown not DomainMatcher
+              domain,
+              {
+                id: uniqueID(),
+                origin: getDomain(window),
+                type: MESSAGE_TYPE.REQUEST,
+                hash,
+                name,
+                data,
+                fireAndForget,
+              },
+              {
+                on,
+                send,
+              }
+            ).then(
+              () => {
+                // @ts-expect-error ZalgoPromise.resolve requires one argument
+                return fireAndForget ? promise.resolve() : promise;
+              },
+              (err: unknown) => {
+                throw new Error(
+                  `Send request message failed for ${logName} in ${getDomain()}\n\n${stringifyError(
+                    err
+                  )}`
+                );
+              }
+            );
+          })
+      );
     });
 };
