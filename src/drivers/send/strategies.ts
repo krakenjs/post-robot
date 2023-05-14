@@ -3,14 +3,11 @@ import type { CrossDomainWindowType } from "@krakenjs/cross-domain-utils/dist/es
 import {
   isSameDomain,
   isSameTopWindow,
-  isActuallySameDomain,
-  getActualDomain,
   getDomain,
   PROTOCOL,
 } from "@krakenjs/cross-domain-utils/dist/esm";
 
 import { SEND_STRATEGY, WILDCARD } from "../../conf";
-import { needsGlobalMessagingForBrowser } from "../../lib";
 import { getGlobal } from "../../global";
 
 type SendStrategies = Record<
@@ -30,35 +27,6 @@ SEND_MESSAGE_STRATEGIES[SEND_STRATEGY.POST_MESSAGE] = (
     domain = WILDCARD;
   }
 
-  // @ts-expect-error TODO: remove this when belter issue is resolved
-  if (__TEST__) {
-    if (
-      needsGlobalMessagingForBrowser() &&
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-boolean-literal-compare
-      isSameTopWindow(window, win) === false
-    ) {
-      return;
-    }
-
-    if (domain.startsWith(PROTOCOL.MOCK)) {
-      if (!isActuallySameDomain(win)) {
-        throw new Error(
-          `Attempting to send message to mock domain ${domain}, but window is actually cross-domain`
-        );
-      }
-
-      const windowDomain = getDomain(win);
-
-      if (windowDomain !== domain) {
-        throw new Error(
-          `Mock domain target ${domain} does not match window domain ${windowDomain}`
-        );
-      }
-
-      domain = getActualDomain(win);
-    }
-  }
-
   win.postMessage(serializedMessage, domain);
 };
 
@@ -67,10 +35,6 @@ if (__POST_ROBOT__.__GLOBAL_MESSAGE_SUPPORT__) {
     win: CrossDomainWindowType,
     serializedMessage: string
   ) => {
-    if (!needsGlobalMessagingForBrowser()) {
-      throw new Error(`Global messaging not needed for browser`);
-    }
-
     if (!isSameDomain(win)) {
       throw new Error(
         `Post message through global disabled between different domain windows`

@@ -3,14 +3,13 @@ import type { CrossDomainWindowType } from "@krakenjs/cross-domain-utils/dist/es
 import {
   isWindowClosed,
   getDomain,
-  isSameTopWindow,
   PROTOCOL,
 } from "@krakenjs/cross-domain-utils/dist/esm";
 import { addEventListener, noop } from "@krakenjs/belter/dist/esm";
 
 import type { Message } from "../types";
 import { MESSAGE_TYPE } from "../../conf";
-import { markWindowKnown, needsGlobalMessagingForBrowser } from "../../lib";
+import { markWindowKnown } from "../../lib";
 import { deserializeMessage } from "../../serialize";
 import { getGlobal, globalStore, getGlobalKey } from "../../global";
 import type {
@@ -208,17 +207,6 @@ export function messageListener(
 
     if (!origin) {
       throw new Error(`Post message did not have origin domain`);
-    }
-
-    // @ts-expect-error TODO: remove this when belter issue is resolved
-    if (__TEST__) {
-      if (
-        needsGlobalMessagingForBrowser() &&
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-boolean-literal-compare
-        isSameTopWindow(source, window) === false
-      ) {
-        return;
-      }
     }
 
     receiveMessage(
