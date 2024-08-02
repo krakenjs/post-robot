@@ -15,9 +15,12 @@ window.mockDomain = 'mock://test-post-robot.com';
 
 function createIframe(name, callback) : CrossDomainWindowType {
     let frame = document.createElement('iframe');
-    frame.src = `/base/test/${  name }`;
+    frame.src = `/base/test/${ name }`;
     frame.id = 'childframe';
-    frame.name = `${ Math.random().toString()  }_${  name.replace(/[^a-zA-Z0-9]+/g, '_') }`;
+    frame.name = `${ Math.random().toString() }_${ name.replace(
+        /[^a-zA-Z0-9]+/g,
+        '_'
+    ) }`;
     frame.onload = callback;
     if (!document.body) {
         throw new Error(`Expected document.body to be available`);
@@ -27,7 +30,10 @@ function createIframe(name, callback) : CrossDomainWindowType {
 }
 
 function createPopup(name) : CrossDomainWindowType {
-    let popup = window.open(`mock://test-post-robot-child.com|/base/test/${  name }`, `${ Math.random().toString()  }_${  name.replace(/[^a-zA-Z0-9]+/g, '_') }`);
+    let popup = window.open(
+        `mock://test-post-robot-child.com|/base/test/${ name }`,
+        `${ Math.random().toString() }_${ name.replace(/[^a-zA-Z0-9]+/g, '_') }`
+    );
     window.focus();
     return popup;
 }
@@ -47,24 +53,48 @@ before(() : ZalgoPromise<mixed> => {
     if (!postRobot.bridge) {
         throw new Error(`Expected postRobot.bridge to be available`);
     }
-    
-    return postRobot.bridge.openBridge('/base/test/bridge.htm', 'mock://test-post-robot-child.com').then(frame => {
-        bridge = frame;
-    }).then(() => {
 
-        childWindow = createPopup('child.htm');
-        childFrame = createIframe('child.htm');
-        otherChildFrame = createIframe('child.htm');
-        frameElement = document.getElementById('childframe');
+    return postRobot.bridge
+        .openBridge('/base/test/bridge.htm', 'mock://test-post-robot-child.com')
+        .then((frame) => {
+            bridge = frame;
+        })
+        .then(() => {
+            childWindow = createPopup('child.htm');
+            childFrame = createIframe('child.htm');
+            otherChildFrame = createIframe('child.htm');
+            frameElement = document.getElementById('childframe');
+            const bridgeIFrame = document.querySelector(`iframe[name=${ name }`);
+            const styles = {
+                display:  'none',
+                margin:   '0px',
+                padding:  '0px',
+                border:   '0px none',
+                overflow: 'hidden'
+            };
 
-        return ZalgoPromise.all([
-            onChildWindowReady(childWindow),
-            onChildWindowReady(childFrame),
-            onChildWindowReady(otherChildFrame)
-        ]);
-    }).then(() => {
-        // pass
-    });
+            if (
+                bridgeIFrame &&
+        !Object.entries(bridgeIFrame.style).every(([ key, value ]) => {
+            if (!(key in styles)) {
+                return true;
+            }
+
+            return styles[key] === value;
+        })
+            ) {
+                throw new Error('bridge iframe styles must match styles in openBridge');
+            }
+
+            return ZalgoPromise.all([
+                onChildWindowReady(childWindow),
+                onChildWindowReady(childFrame),
+                onChildWindowReady(otherChildFrame)
+            ]);
+        })
+        .then(() => {
+            // pass
+        });
 });
 
 after(() => {
@@ -85,230 +115,255 @@ after(() => {
     childWindow.close();
 });
 
-
 describe('[post-robot] happy cases', () => {
-
     it('should set up a simple server and listen for a request', (done) => {
-
         postRobot.on('foobu', () => {
             done();
         });
 
-        postRobot.send(childFrame, 'sendMessageToParent', {
-            messageName: 'foobu'
-        }).catch(done);
+        postRobot
+            .send(childFrame, 'sendMessageToParent', {
+                messageName: 'foobu'
+            })
+            .catch(done);
     });
 
     it('should set up a simple server and listen for multiple requests', () : ZalgoPromise<mixed> => {
-
         let count = 0;
 
         postRobot.on('multilistener', () => {
             count += 1;
         });
 
-        return postRobot.send(childFrame, 'sendMessageToParent', {
-            messageName: 'multilistener'
-        }).then(() => {
-            return postRobot.send(childFrame, 'sendMessageToParent', {
+        return postRobot
+            .send(childFrame, 'sendMessageToParent', {
                 messageName: 'multilistener'
+            })
+            .then(() => {
+                return postRobot.send(childFrame, 'sendMessageToParent', {
+                    messageName: 'multilistener'
+                });
+            })
+            .then(() => {
+                assert.equal(count, 2);
             });
-        }).then(() => {
-            assert.equal(count, 2);
-        });
     });
 
     it('should message a child and expect a response', () : ZalgoPromise<mixed> => {
-
-        return postRobot.send(childFrame, 'setupListener', {
-
-            messageName: 'foo',
-            data:        {
-                foo: 'bar'
-            }
-
-        }).then(() => {
-
-            return postRobot.send(childFrame, 'foo').then(({ data }) => {
-                assert.equal(data.foo, 'bar');
+        return postRobot
+            .send(childFrame, 'setupListener', {
+                messageName: 'foo',
+                data:        {
+                    foo: 'bar'
+                }
+            })
+            .then(() => {
+                return postRobot.send(childFrame, 'foo').then(({ data }) => {
+                    assert.equal(data.foo, 'bar');
+                });
             });
-        });
     });
 
     it('should pass a function across windows and be able to call it later', (done) => {
-        postRobot.send(childFrame, 'setupListener', {
-
-            messageName: 'foo',
-            data:        {
-                done
-            }
-
-        }).then(() => {
-
-            return postRobot.send(childFrame, 'foo').then(({ data }) => {
-                data.done();
+        postRobot
+            .send(childFrame, 'setupListener', {
+                messageName: 'foo',
+                data:        {
+                    done
+                }
+            })
+            .then(() => {
+                return postRobot.send(childFrame, 'foo').then(({ data }) => {
+                    data.done();
+                });
             });
-        });
     });
 
     it('should set up a simple server and listen for a request from a specific domain', (done) => {
+        postRobot.on(
+            'domainspecificmessage',
+            { domain: 'mock://test-post-robot-child.com' },
+            () => {
+                done();
+            }
+        );
 
-        postRobot.on('domainspecificmessage', { domain: 'mock://test-post-robot-child.com' }, () => {
-            done();
-        });
-
-        postRobot.send(childFrame, 'sendMessageToParent', {
-            messageName: 'domainspecificmessage'
-        }).catch(done);
+        postRobot
+            .send(childFrame, 'sendMessageToParent', {
+                messageName: 'domainspecificmessage'
+            })
+            .catch(done);
     });
 
-
     it('should message a child with a specific domain and expect a response', () : ZalgoPromise<mixed> => {
-
-        return postRobot.send(childFrame, 'setupListener', {
-
-            messageName: 'domainspecificmessage',
-            data:        {
-                foo: 'bar'
-            }
-
-        }, { domain: 'mock://test-post-robot-child.com' }).then(() => {
-
-            return postRobot.send(childFrame, 'domainspecificmessage').then(({ data }) => {
-                assert.equal(data.foo, 'bar');
+        return postRobot
+            .send(
+                childFrame,
+                'setupListener',
+                {
+                    messageName: 'domainspecificmessage',
+                    data:        {
+                        foo: 'bar'
+                    }
+                },
+                { domain: 'mock://test-post-robot-child.com' }
+            )
+            .then(() => {
+                return postRobot
+                    .send(childFrame, 'domainspecificmessage')
+                    .then(({ data }) => {
+                        assert.equal(data.foo, 'bar');
+                    });
             });
-        });
     });
 
     it('should set up a simple server and listen for a request from multiple domains', (done) => {
+        postRobot.on(
+            'multidomainspecificmessage',
+            {
+                domain: [
+                    'mock://test-post-robot-child.com',
+                    'mock://non-existant-domain.com'
+                ]
+            },
+            () => {
+                done();
+            }
+        );
 
-        postRobot.on('multidomainspecificmessage', { domain: [ 'mock://test-post-robot-child.com', 'mock://non-existant-domain.com' ] }, () => {
-            done();
-        });
-
-        postRobot.send(childFrame, 'sendMessageToParent', {
-            messageName: 'multidomainspecificmessage'
-        }).catch(done);
+        postRobot
+            .send(childFrame, 'sendMessageToParent', {
+                messageName: 'multidomainspecificmessage'
+            })
+            .catch(done);
     });
 
-
     it('should message a child with multiple domains and expect a response', () : ZalgoPromise<mixed> => {
-
-        return postRobot.send(childFrame, 'setupListener', {
-
-            messageName: 'multidomainspecificmessage',
-            data:        {
-                foo: 'bar'
-            }
-
-        }, { domain: [ 'mock://test-post-robot-child.com', 'mock://non-existant-domain.com' ] }).then(() => {
-
-            return postRobot.send(childFrame, 'multidomainspecificmessage').then(({ data }) => {
-                assert.equal(data.foo, 'bar');
+        return postRobot
+            .send(
+                childFrame,
+                'setupListener',
+                {
+                    messageName: 'multidomainspecificmessage',
+                    data:        {
+                        foo: 'bar'
+                    }
+                },
+                {
+                    domain: [
+                        'mock://test-post-robot-child.com',
+                        'mock://non-existant-domain.com'
+                    ]
+                }
+            )
+            .then(() => {
+                return postRobot
+                    .send(childFrame, 'multidomainspecificmessage')
+                    .then(({ data }) => {
+                        assert.equal(data.foo, 'bar');
+                    });
             });
-        });
     });
 });
 
-
 describe('[post-robot] options', () => {
-
     it('should work when referencing the child by id', () : ZalgoPromise<mixed> => {
-
-        return postRobot.send(childFrame, 'setupListener', {
-
-            messageName: 'foo',
-            data:        {
-                foo: 'bar'
-            }
-
-        }).then(() => {
-
-            return postRobot.send('childframe', 'foo').then(({ data }) => {
-                assert.equal(data.foo, 'bar');
+        return postRobot
+            .send(childFrame, 'setupListener', {
+                messageName: 'foo',
+                data:        {
+                    foo: 'bar'
+                }
+            })
+            .then(() => {
+                return postRobot.send('childframe', 'foo').then(({ data }) => {
+                    assert.equal(data.foo, 'bar');
+                });
             });
-        });
     });
 
     it('should work when referencing the child by element reference', () : ZalgoPromise<mixed> => {
-
         if (!(frameElement instanceof HTMLIFrameElement)) {
             throw new TypeError(`Expected frame to be HTMLIFrameElement`);
         }
 
-        return postRobot.send(frameElement, 'setupListener', {
+        return postRobot
+            .send(frameElement, 'setupListener', {
+                messageName: 'foo',
+                data:        {
+                    foo: 'bar'
+                }
+            })
+            .then(() => {
+                if (!(frameElement instanceof HTMLIFrameElement)) {
+                    throw new TypeError(`Expected frame to be HTMLIFrameElement`);
+                }
 
-            messageName: 'foo',
-            data:        {
-                foo: 'bar'
-            }
-
-        }).then(() => {
-
-            if (!(frameElement instanceof HTMLIFrameElement)) {
-                throw new TypeError(`Expected frame to be HTMLIFrameElement`);
-            }
-
-            return postRobot.send(frameElement, 'foo').then(({ data }) => {
-                assert.equal(data.foo, 'bar');
+                return postRobot.send(frameElement, 'foo').then(({ data }) => {
+                    assert.equal(data.foo, 'bar');
+                });
             });
-        });
     });
 
     it('should be able to listen for a message only once', () : ZalgoPromise<mixed> => {
-
         let count = 0;
 
         postRobot.once('foobuz', () => {
             count += 1;
         });
 
-        return postRobot.send(childFrame, 'sendMessageToParent', {
-            messageName: 'foobuz'
-        }).then(() => {
-            return postRobot.send(childFrame, 'sendMessageToParent', {
+        return postRobot
+            .send(childFrame, 'sendMessageToParent', {
                 messageName: 'foobuz'
-            }).then(() => {
-                throw new Error('Expected success handler to not be called');
-            }, () => {
-                assert.equal(count, 1);
+            })
+            .then(() => {
+                return postRobot
+                    .send(childFrame, 'sendMessageToParent', {
+                        messageName: 'foobuz'
+                    })
+                    .then(
+                        () => {
+                            throw new Error('Expected success handler to not be called');
+                        },
+                        () => {
+                            assert.equal(count, 1);
+                        }
+                    );
             });
-        });
     });
 
     it('should be able to re-register the same once handler after the first is called', () : ZalgoPromise<mixed> => {
-
         let count = 0;
 
         postRobot.once('foobuzz', ({ data }) => {
             count += data.add;
         });
 
-        return postRobot.send(childFrame, 'sendMessageToParent', {
-            messageName: 'foobuzz',
-            data:        {
-                add: 2
-            }
-        }).then(() => {
-
-            postRobot.once('foobuzz', ({ data }) => {
-                count += data.add;
-            });
-
-            return postRobot.send(childFrame, 'sendMessageToParent', {
+        return postRobot
+            .send(childFrame, 'sendMessageToParent', {
                 messageName: 'foobuzz',
                 data:        {
-                    add: 3
+                    add: 2
                 }
-            });
+            })
+            .then(() => {
+                postRobot.once('foobuzz', ({ data }) => {
+                    count += data.add;
+                });
 
-        }).then(() => {
-            assert.equal(count, 5);
-        });
+                return postRobot.send(childFrame, 'sendMessageToParent', {
+                    messageName: 'foobuzz',
+                    data:        {
+                        add: 3
+                    }
+                });
+            })
+            .then(() => {
+                assert.equal(count, 5);
+            });
     });
 
     it('should allow you to register the same listener twice providing it is to different windows', () => {
-
         postRobot.on('onceonlywindow', { window: childFrame }, () => {
             // pass
         });
@@ -319,42 +374,47 @@ describe('[post-robot] options', () => {
     });
 
     it('should allow you to register a listener for a specific window', () : ZalgoPromise<mixed> => {
-
         let count = 0;
 
         postRobot.on('specificchildlistener', { window: otherChildFrame }, () => {
             count += 1;
         });
 
-        return postRobot.send(otherChildFrame, 'sendMessageToParent', {
-            messageName: 'specificchildlistener'
-        }).then(() => {
-            return postRobot.send(childFrame, 'sendMessageToParent', {
+        return postRobot
+            .send(otherChildFrame, 'sendMessageToParent', {
                 messageName: 'specificchildlistener'
-            }).then(() => {
-                throw new Error('Expected success handler to not be called');
-            }, (err) => {
-                assert.ok(err);
-                assert.equal(count, 1);
+            })
+            .then(() => {
+                return postRobot
+                    .send(childFrame, 'sendMessageToParent', {
+                        messageName: 'specificchildlistener'
+                    })
+                    .then(
+                        () => {
+                            throw new Error('Expected success handler to not be called');
+                        },
+                        (err) => {
+                            assert.ok(err);
+                            assert.equal(count, 1);
+                        }
+                    );
             });
-        });
     });
 });
 
-
 describe('[post-robot] error cases', () => {
-
     it('should get an error when messaging with an unknown name', () : ZalgoPromise<mixed> => {
-
-        return postRobot.send(childFrame, 'doesntexist').then(() => {
-            throw new Error('Expected success handler to not be called');
-        }, (err) => {
-            assert.ok(err);
-        });
+        return postRobot.send(childFrame, 'doesntexist').then(
+            () => {
+                throw new Error('Expected success handler to not be called');
+            },
+            (err) => {
+                assert.ok(err);
+            }
+        );
     });
 
     it('should error out if you try to register the same listener name twice', () => {
-
         postRobot.on('onceonly', () => {
             // pass
         });
@@ -372,88 +432,106 @@ describe('[post-robot] error cases', () => {
     });
 
     it('should fail when no post message strategies are allowed', () : ZalgoPromise<mixed> => {
-
         let allowedStrategies = postRobot.CONFIG.ALLOWED_POST_MESSAGE_METHODS;
 
         postRobot.CONFIG.ALLOWED_POST_MESSAGE_METHODS = {};
 
-        return postRobot.send(childFrame, 'sendMessageToParent', {
-            messageName: 'foobuzzz'
-        }).then(() => {
-            throw new Error('Expected success handler to not be called');
-        }, (err) => {
-            assert.ok(err);
-            postRobot.CONFIG.ALLOWED_POST_MESSAGE_METHODS = allowedStrategies;
-        });
+        return postRobot
+            .send(childFrame, 'sendMessageToParent', {
+                messageName: 'foobuzzz'
+            })
+            .then(
+                () => {
+                    throw new Error('Expected success handler to not be called');
+                },
+                (err) => {
+                    assert.ok(err);
+                    postRobot.CONFIG.ALLOWED_POST_MESSAGE_METHODS = allowedStrategies;
+                }
+            );
     });
 
     it('should fail messaging popup when emulating IE and only allowing post messages', () : ZalgoPromise<mixed> => {
-
         let allowedStrategies = postRobot.CONFIG.ALLOWED_POST_MESSAGE_METHODS;
 
         postRobot.CONFIG.ALLOWED_POST_MESSAGE_METHODS = {
-            [ postRobot.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE ]: true
+            [postRobot.CONSTANTS.SEND_STRATEGIES.POST_MESSAGE]: true
         };
 
         postRobot.CONFIG.ALLOW_POSTMESSAGE_POPUP = false;
 
-        return postRobot.send(childWindow, 'sendMessageToParent', {
-            messageName: 'foobuzzzz'
-        }).then(() => {
-            throw new Error('Expected success handler to not be called');
-        }, (err) => {
-            assert.ok(err);
-            postRobot.CONFIG.ALLOW_POSTMESSAGE_POPUP = true;
-            postRobot.CONFIG.ALLOWED_POST_MESSAGE_METHODS = allowedStrategies;
-        });
+        return postRobot
+            .send(childWindow, 'sendMessageToParent', {
+                messageName: 'foobuzzzz'
+            })
+            .then(
+                () => {
+                    throw new Error('Expected success handler to not be called');
+                },
+                (err) => {
+                    assert.ok(err);
+                    postRobot.CONFIG.ALLOW_POSTMESSAGE_POPUP = true;
+                    postRobot.CONFIG.ALLOWED_POST_MESSAGE_METHODS = allowedStrategies;
+                }
+            );
     });
 
     it('should fail to send a message when the expected domain does not match', (done) => {
-
         postRobot.on('foobuzzzzz', { domain: 'http://www.zombo.com' }, () => {
             done(new Error(`Expected handler to not be called`));
         });
 
-        postRobot.send(childFrame, 'sendMessageToParent', {
-            messageName: 'foobuzzzzz'
-        }).then(() => {
-            return done(new Error('Expected success handler to not be called'));
-        }, (err) => {
-            assert.ok(err);
-            done();
-        });
+        postRobot
+            .send(childFrame, 'sendMessageToParent', {
+                messageName: 'foobuzzzzz'
+            })
+            .then(
+                () => {
+                    return done(new Error('Expected success handler to not be called'));
+                },
+                (err) => {
+                    assert.ok(err);
+                    done();
+                }
+            );
     });
 
     it('should fail to send a message when the target domain does not match', () : ZalgoPromise<mixed> => {
-
-        return postRobot.send(childFrame, 'setupListener', {
-
-            messageName: 'foo',
-            data:        {
-                foo: 'bar'
-            }
-
-        }).then(() => {
-
-            return postRobot.send(childFrame, 'foo', {}, { domain: 'http://www.zombo.com' }).then(() => {
-                throw new Error('Expected success handler to not be called');
-            }, (err) => {
-                assert.ok(err instanceof Error);
+        return postRobot
+            .send(childFrame, 'setupListener', {
+                messageName: 'foo',
+                data:        {
+                    foo: 'bar'
+                }
+            })
+            .then(() => {
+                return postRobot
+                    .send(childFrame, 'foo', {}, { domain: 'http://www.zombo.com' })
+                    .then(
+                        () => {
+                            throw new Error('Expected success handler to not be called');
+                        },
+                        (err) => {
+                            assert.ok(err instanceof Error);
+                        }
+                    );
             });
-        });
     });
 
     it('should call the error handler if the target window closes', (done) => {
-
         let targetWindow = createPopup('child.htm');
 
         let errorHandler = () => {
             done();
         };
 
-        postRobot.on('foobar', { window: targetWindow, errorHandler, errorOnClose: true }, () => {
-            throw new Error('Expected handler to not be called');
-        });
+        postRobot.on(
+            'foobar',
+            { window: targetWindow, errorHandler, errorOnClose: true },
+            () => {
+                throw new Error('Expected handler to not be called');
+            }
+        );
 
         setTimeout(() => {
             targetWindow.close();
@@ -461,67 +539,57 @@ describe('[post-robot] error cases', () => {
     });
 });
 
-
 describe('[post-robot] popup tests', () => {
-
     it('should work with a child window', () : ZalgoPromise<mixed> => {
-
-        return postRobot.send(childWindow, 'setupListener', {
-
-            messageName: 'foo',
-            data:        {
-                foo: 'bar'
-            }
-
-        }).then(() => {
-
-            return postRobot.send(childWindow, 'foo').then(({ data }) => {
-                assert.equal(data.foo, 'bar');
-            });
-        });
-    });
-
-    it('should succeed messaging popup when emulating IE with all strategies enabled', () : ZalgoPromise<mixed> => {
-
-        return postRobot.send(childWindow, 'enableIE8Mode').then((event) => {
-
-            let ie8mode = enableIE8Mode();
-            let remoteIE8mode = event.data;
-
-            return postRobot.send(childWindow, 'setupListener', {
-
+        return postRobot
+            .send(childWindow, 'setupListener', {
                 messageName: 'foo',
                 data:        {
                     foo: 'bar'
                 }
-
-            }).then(() => {
-
-                // eslint-disable-next-line max-nested-callbacks
-                return postRobot.send(childWindow, 'foo').then(() => {
-                    let remote = remoteIE8mode.cancel();
-                    ie8mode.cancel();
-                    return remote;
+            })
+            .then(() => {
+                return postRobot.send(childWindow, 'foo').then(({ data }) => {
+                    assert.equal(data.foo, 'bar');
                 });
             });
+    });
+
+    it('should succeed messaging popup when emulating IE with all strategies enabled', () : ZalgoPromise<mixed> => {
+        return postRobot.send(childWindow, 'enableIE8Mode').then((event) => {
+            let ie8mode = enableIE8Mode();
+            let remoteIE8mode = event.data;
+
+            return postRobot
+                .send(childWindow, 'setupListener', {
+                    messageName: 'foo',
+                    data:        {
+                        foo: 'bar'
+                    }
+                })
+                .then(() => {
+                    // eslint-disable-next-line max-nested-callbacks
+                    return postRobot.send(childWindow, 'foo').then(() => {
+                        let remote = remoteIE8mode.cancel();
+                        ie8mode.cancel();
+                        return remote;
+                    });
+                });
         });
     });
 
     it('should succeed in opening and messaging the bridge', () : ZalgoPromise<mixed> => {
-
-        return postRobot.send(bridge, 'setupListener', {
-
-            messageName: 'foo',
-            data:        {
-                foo: 'bar'
-            }
-
-        }).then(() => {
-
-            return postRobot.send(bridge, 'foo').then(({ data }) => {
-                assert.equal(data.foo, 'bar');
+        return postRobot
+            .send(bridge, 'setupListener', {
+                messageName: 'foo',
+                data:        {
+                    foo: 'bar'
+                }
+            })
+            .then(() => {
+                return postRobot.send(bridge, 'foo').then(({ data }) => {
+                    assert.equal(data.foo, 'bar');
+                });
             });
-        });
-
     });
 });
