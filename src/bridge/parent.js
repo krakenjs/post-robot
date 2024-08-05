@@ -14,12 +14,7 @@ import { CONFIG, CONSTANTS } from '../conf';
 import { onChildWindowReady } from '../lib';
 import { global } from '../global';
 
-import {
-    getBridgeName,
-    documentBodyReady,
-    registerRemoteSendMessage,
-    registerRemoteWindow
-} from './common';
+import { getBridgeName, documentBodyReady, registerRemoteSendMessage, registerRemoteWindow } from './common';
 
 global.bridges = global.bridges || {};
 global.bridgeFrames = global.bridgeFrames || {};
@@ -28,75 +23,61 @@ global.popupWindowsByWin = global.popupWindowsByWin || new WeakMap();
 global.popupWindowsByName = global.popupWindowsByName || {};
 
 function listenForRegister(source, domain) {
-    global.on(
-        CONSTANTS.POST_MESSAGE_NAMES.OPEN_TUNNEL,
-        { window: source, domain },
-        ({ origin, data }) => {
-            if (origin !== domain) {
-                throw new Error(`Domain ${ domain } does not match origin ${ origin }`);
-            }
-
-            if (!data.name) {
-                throw new Error(`Register window expected to be passed window name`);
-            }
-
-            if (!data.sendMessage) {
-                throw new Error(
-                    `Register window expected to be passed sendMessage method`
-                );
-            }
-
-            if (!global.popupWindowsByName[data.name]) {
-                throw new Error(
-                    `Window with name ${ data.name } does not exist, or was not opened by this window`
-                );
-            }
-
-            if (!global.popupWindowsByName[data.name].domain) {
-                throw new Error(
-                    `We do not have a registered domain for window ${ data.name }`
-                );
-            }
-
-            if (global.popupWindowsByName[data.name].domain !== origin) {
-                throw new Error(
-                    `Message origin ${ origin } does not matched registered window origin ${
-                        global.popupWindowsByName[data.name].domain
-                    }`
-                );
-            }
-
-            registerRemoteSendMessage(
-                global.popupWindowsByName[data.name].win,
-                domain,
-                data.sendMessage
-            );
-
-            return {
-                sendMessage(message) {
-                    if (!window || window.closed) {
-                        return;
-                    }
-
-                    let winDetails = global.popupWindowsByName[data.name];
-
-                    if (!winDetails) {
-                        return;
-                    }
-
-                    try {
-                        global.receiveMessage({
-                            data:   message,
-                            origin: winDetails.domain,
-                            source: winDetails.win
-                        });
-                    } catch (err) {
-                        ZalgoPromise.reject(err);
-                    }
-                }
-            };
+    global.on(CONSTANTS.POST_MESSAGE_NAMES.OPEN_TUNNEL, { window: source, domain }, ({ origin, data }) => {
+        if (origin !== domain) {
+            throw new Error(`Domain ${ domain } does not match origin ${ origin }`);
         }
-    );
+
+        if (!data.name) {
+            throw new Error(`Register window expected to be passed window name`);
+        }
+
+        if (!data.sendMessage) {
+            throw new Error(`Register window expected to be passed sendMessage method`);
+        }
+
+        if (!global.popupWindowsByName[data.name]) {
+            throw new Error(`Window with name ${ data.name } does not exist, or was not opened by this window`);
+        }
+
+        if (!global.popupWindowsByName[data.name].domain) {
+            throw new Error(`We do not have a registered domain for window ${ data.name }`);
+        }
+
+        if (global.popupWindowsByName[data.name].domain !== origin) {
+            throw new Error(
+                `Message origin ${ origin } does not matched registered window origin ${
+                    global.popupWindowsByName[data.name].domain
+                }`
+            );
+        }
+
+        registerRemoteSendMessage(global.popupWindowsByName[data.name].win, domain, data.sendMessage);
+
+        return {
+            sendMessage(message) {
+                if (!window || window.closed) {
+                    return;
+                }
+
+                let winDetails = global.popupWindowsByName[data.name];
+
+                if (!winDetails) {
+                    return;
+                }
+
+                try {
+                    global.receiveMessage({
+                        data:   message,
+                        origin: winDetails.domain,
+                        source: winDetails.win
+                    });
+                } catch (err) {
+                    ZalgoPromise.reject(err);
+                }
+            }
+        };
+    });
 }
 function setElementStyles(
     element : HTMLElement,
@@ -151,10 +132,7 @@ export function hasBridge(url : string, domain : string) : boolean {
     return Boolean(global.bridges[domain]);
 }
 
-export function openBridge(
-    url : string,
-    domain : string
-) : ZalgoPromise<CrossDomainWindowType> {
+export function openBridge(url : string, domain : string) : ZalgoPromise<CrossDomainWindowType> {
     domain = domain || getDomainFromUrl(url);
 
     if (global.bridges[domain]) {
@@ -163,9 +141,7 @@ export function openBridge(
 
     global.bridges[domain] = ZalgoPromise.try(() => {
         if (getDomain() === domain) {
-            throw new Error(
-                `Can not open bridge on the same domain as current domain: ${ domain }`
-            );
+            throw new Error(`Can not open bridge on the same domain as current domain: ${ domain }`);
         }
 
         let name = getBridgeName(domain);
@@ -190,11 +166,7 @@ export function openBridge(
                 iframe.onerror = reject;
             })
                 .then(() => {
-                    return onChildWindowReady(
-                        bridge,
-                        CONFIG.BRIDGE_TIMEOUT,
-                        `Bridge ${ url }`
-                    );
+                    return onChildWindowReady(bridge, CONFIG.BRIDGE_TIMEOUT, `Bridge ${ url }`);
                 })
                 .then(() => {
                     return bridge;
@@ -207,12 +179,7 @@ export function openBridge(
 
 let windowOpen = window.open;
 
-window.open = function windowOpenWrapper(
-    url : string,
-    name : string,
-    options : string,
-    last : mixed
-) : mixed {
+window.open = function windowOpenWrapper(url : string, name : string, options : string, last : mixed) : mixed {
     let domain = url;
 
     if (url && url.indexOf(CONSTANTS.MOCK_PROTOCOL) === 0) {
@@ -240,10 +207,7 @@ window.open = function windowOpenWrapper(
     }
 
     if (name && win) {
-        let winOptions =
-      global.popupWindowsByWin.get(win) ||
-      global.popupWindowsByName[name] ||
-      {};
+        let winOptions = global.popupWindowsByWin.get(win) || global.popupWindowsByName[name] || {};
 
         winOptions.name = winOptions.name || name;
         winOptions.win = winOptions.win || win;

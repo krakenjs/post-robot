@@ -17,10 +17,7 @@ function createIframe(name, callback) : CrossDomainWindowType {
     let frame = document.createElement('iframe');
     frame.src = `/base/test/${ name }`;
     frame.id = 'childframe';
-    frame.name = `${ Math.random().toString() }_${ name.replace(
-        /[^a-zA-Z0-9]+/g,
-        '_'
-    ) }`;
+    frame.name = `${ Math.random().toString() }_${ name.replace(/[^a-zA-Z0-9]+/g, '_') }`;
     frame.onload = callback;
     if (!document.body) {
         throw new Error(`Expected document.body to be available`);
@@ -180,13 +177,9 @@ describe('[post-robot] happy cases', () => {
     });
 
     it('should set up a simple server and listen for a request from a specific domain', (done) => {
-        postRobot.on(
-            'domainspecificmessage',
-            { domain: 'mock://test-post-robot-child.com' },
-            () => {
-                done();
-            }
-        );
+        postRobot.on('domainspecificmessage', { domain: 'mock://test-post-robot-child.com' }, () => {
+            done();
+        });
 
         postRobot
             .send(childFrame, 'sendMessageToParent', {
@@ -209,11 +202,9 @@ describe('[post-robot] happy cases', () => {
                 { domain: 'mock://test-post-robot-child.com' }
             )
             .then(() => {
-                return postRobot
-                    .send(childFrame, 'domainspecificmessage')
-                    .then(({ data }) => {
-                        assert.equal(data.foo, 'bar');
-                    });
+                return postRobot.send(childFrame, 'domainspecificmessage').then(({ data }) => {
+                    assert.equal(data.foo, 'bar');
+                });
             });
     });
 
@@ -221,10 +212,7 @@ describe('[post-robot] happy cases', () => {
         postRobot.on(
             'multidomainspecificmessage',
             {
-                domain: [
-                    'mock://test-post-robot-child.com',
-                    'mock://non-existant-domain.com'
-                ]
+                domain: [ 'mock://test-post-robot-child.com', 'mock://non-existant-domain.com' ]
             },
             () => {
                 done();
@@ -250,18 +238,13 @@ describe('[post-robot] happy cases', () => {
                     }
                 },
                 {
-                    domain: [
-                        'mock://test-post-robot-child.com',
-                        'mock://non-existant-domain.com'
-                    ]
+                    domain: [ 'mock://test-post-robot-child.com', 'mock://non-existant-domain.com' ]
                 }
             )
             .then(() => {
-                return postRobot
-                    .send(childFrame, 'multidomainspecificmessage')
-                    .then(({ data }) => {
-                        assert.equal(data.foo, 'bar');
-                    });
+                return postRobot.send(childFrame, 'multidomainspecificmessage').then(({ data }) => {
+                    assert.equal(data.foo, 'bar');
+                });
             });
     });
 });
@@ -505,16 +488,14 @@ describe('[post-robot] error cases', () => {
                 }
             })
             .then(() => {
-                return postRobot
-                    .send(childFrame, 'foo', {}, { domain: 'http://www.zombo.com' })
-                    .then(
-                        () => {
-                            throw new Error('Expected success handler to not be called');
-                        },
-                        (err) => {
-                            assert.ok(err instanceof Error);
-                        }
-                    );
+                return postRobot.send(childFrame, 'foo', {}, { domain: 'http://www.zombo.com' }).then(
+                    () => {
+                        throw new Error('Expected success handler to not be called');
+                    },
+                    (err) => {
+                        assert.ok(err instanceof Error);
+                    }
+                );
             });
     });
 
@@ -525,13 +506,9 @@ describe('[post-robot] error cases', () => {
             done();
         };
 
-        postRobot.on(
-            'foobar',
-            { window: targetWindow, errorHandler, errorOnClose: true },
-            () => {
-                throw new Error('Expected handler to not be called');
-            }
-        );
+        postRobot.on('foobar', { window: targetWindow, errorHandler, errorOnClose: true }, () => {
+            throw new Error('Expected handler to not be called');
+        });
 
         setTimeout(() => {
             targetWindow.close();
