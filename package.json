@@ -48,6 +48,7 @@
   ],
   "readmeFilename": "README.md",
   "devDependencies": {
+    "eslint-plugin-flowtype": "^2.30.0",
     "flow-bin": "^0.76",
     "grumbler-scripts": "^2.0.18",
     "mocha": "^4"
