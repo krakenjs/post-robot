@@ -1,3 +1,5 @@
+# manually run this action using the GitHub UI
+# https://github.blog/changelog/2020-07-06-github-actions-manual-triggers-with-workflow_dispatch/
 name: publish to npm
 on: workflow_dispatch
 jobs:
@@ -5,13 +7,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: ⬇️ Checkout repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
-          fetch-depth: 0
+          ref: ${{ github.head_ref }}
 
       - name: ⎔ Setup node
         # sets up the .npmrc file to publish to npm
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: "16"
           registry-url: "https://registry.npmjs.org"
@@ -25,7 +27,9 @@ jobs:
         run: |
           git config --global user.email ${{ github.actor }}@users.noreply.github.com
           git config --global user.name ${{ github.actor }}
-      - name: Publish to npm
+      - name: 📦 Publish to npm using existing scripts
         run: npm run release
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          # actions/setup-node uses this NODE_AUTH_TOKEN environment variable for npm publishing
+          # https://docs.github.com/en/actions/tutorials/publish-packages/publish-nodejs-packages
+          NODE_AUTH_TOKEN: ${{ secrets.KRAKENJS_PAYPAL_SDK_NPM_AUTH_TOKEN }}
