@@ -261,8 +261,9 @@ export class ProxyWindow {
       isPopup: isPopupPromise,
       name: getNamePromise,
     }).then(({ isPopup, name }) => {
-      if (isPopup && name) {
-        window.open("", name, "noopener");
+      const win = this.getWindow();
+      if (isPopup && name && !win) {
+        window.open("", name);
       }
     });
     const focusPromise = this.serializedWindow.focus();
