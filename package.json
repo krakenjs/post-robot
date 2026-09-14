@@ -1,6 +1,6 @@
 {
   "name": "@krakenjs/post-robot",
-  "version": "11.0.0",
+  "version": "11.0.1",
   "description": "Simple postMessage based server.",
   "main": "index.js",
   "scripts": {

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### 11.0.1 (2026-09-14)
+
+
+### Bug Fixes
+
+* focus firefox popup issue ([#123](https://github.com/krakenjs/post-robot/issues/123)) ([b7b6505](https://github.com/krakenjs/post-robot/commit/b7b6505cb182d1dd65ac9829fd2c5aee48096db0))
+
 ## [11.0.0](https://github.com/krakenjs/post-robot/compare/v10.0.46...v11.0.0) (2022-03-01)
 
 
