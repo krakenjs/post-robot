@@ -6,29 +6,19 @@ exports.messageListener = messageListener;
 exports.receiveMessage = receiveMessage;
 exports.setupGlobalReceiveMessage = setupGlobalReceiveMessage;
 exports.stopListenForMessages = stopListenForMessages;
-
 var _src = require("@krakenjs/zalgo-promise/src");
-
 var _src2 = require("@krakenjs/cross-domain-utils/src");
-
 var _src3 = require("@krakenjs/belter/src");
-
 var _conf = require("../../conf");
-
 var _lib = require("../../lib");
-
 var _serialize = require("../../serialize");
-
 var _global = require("../../global");
-
 var _types = require("./types");
-
 function deserializeMessages(message, source, origin, {
   on,
   send
 }) {
   let parsedMessage;
-
   try {
     parsedMessage = (0, _serialize.deserializeMessage)(source, origin, message, {
       on,
@@ -37,30 +27,23 @@ function deserializeMessages(message, source, origin, {
   } catch (err) {
     return;
   }
-
   if (!parsedMessage) {
     return;
   }
-
-  if (typeof parsedMessage !== 'object' || parsedMessage === null) {
+  if (typeof parsedMessage !== "object" || parsedMessage === null) {
     return;
   }
-
   const parseMessages = parsedMessage[(0, _global.getGlobalKey)()];
-
   if (!Array.isArray(parseMessages)) {
     return;
   }
-
   return parseMessages;
 }
-
 function receiveMessage(event, {
   on,
   send
 }) {
-  const receivedMessages = (0, _global.globalStore)('receivedMessages');
-
+  const receivedMessages = (0, _global.globalStore)("receivedMessages");
   try {
     if (!window || window.closed || !event.source) {
       return;
@@ -68,48 +51,36 @@ function receiveMessage(event, {
   } catch (err) {
     return;
   }
-
   let {
     source,
     origin,
     data
   } = event;
-
   if (__TEST__) {
     if ((0, _src2.isWindowClosed)(source)) {
       return;
-    } // $FlowFixMe
-
-
+    }
     origin = (0, _src2.getDomain)(source);
   }
-
   const messages = deserializeMessages(data, source, origin, {
     on,
     send
   });
-
   if (!messages) {
     return;
   }
-
   (0, _lib.markWindowKnown)(source);
-
   for (const message of messages) {
     if (receivedMessages.has(message.id)) {
       return;
     }
-
     receivedMessages.set(message.id, true);
-
     if ((0, _src2.isWindowClosed)(source) && !message.fireAndForget) {
       return;
     }
-
     if (message.origin.indexOf(_src2.PROTOCOL.FILE) === 0) {
       origin = `${_src2.PROTOCOL.FILE}//`;
     }
-
     try {
       if (message.type === _conf.MESSAGE_TYPE.REQUEST) {
         (0, _types.handleRequest)(source, origin, message, {
@@ -128,19 +99,16 @@ function receiveMessage(event, {
     }
   }
 }
-
 function setupGlobalReceiveMessage({
   on,
   send
 }) {
   const global = (0, _global.getGlobal)();
-
   global.receiveMessage = global.receiveMessage || (message => receiveMessage(message, {
     on,
     send
   }));
 }
-
 function messageListener(event, {
   on,
   send
@@ -151,29 +119,23 @@ function messageListener(event, {
     } catch (err) {
       return;
     }
-
     const source = event.source || event.sourceElement;
     let origin = event.origin || event.originalEvent && event.originalEvent.origin;
     const data = event.data;
-
-    if (origin === 'null') {
+    if (origin === "null") {
       origin = `${_src2.PROTOCOL.FILE}//`;
     }
-
     if (!source) {
       return;
     }
-
     if (!origin) {
       throw new Error(`Post message did not have origin domain`);
     }
-
     if (__TEST__) {
       if ((0, _lib.needsGlobalMessagingForBrowser)() && (0, _src2.isSameTopWindow)(source, window) === false) {
         return;
       }
     }
-
     receiveMessage({
       source,
       origin,
@@ -184,14 +146,12 @@ function messageListener(event, {
     });
   });
 }
-
 function listenForMessages({
   on,
   send
 }) {
-  return (0, _global.globalStore)().getOrSet('postMessageListener', () => {
-    return (0, _src3.addEventListener)(window, 'message', event => {
-      // $FlowFixMe
+  return (0, _global.globalStore)().getOrSet("postMessageListener", () => {
+    return (0, _src3.addEventListener)(window, "message", event => {
       messageListener(event, {
         on,
         send
@@ -199,10 +159,8 @@ function listenForMessages({
     });
   });
 }
-
 function stopListenForMessages() {
-  const listener = (0, _global.globalStore)().get('postMessageListener');
-
+  const listener = (0, _global.globalStore)().get("postMessageListener");
   if (listener) {
     listener.cancel();
   }

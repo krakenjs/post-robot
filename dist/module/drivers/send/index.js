@@ -2,25 +2,17 @@
 
 exports.__esModule = true;
 exports.sendMessage = sendMessage;
-
 var _src = require("@krakenjs/zalgo-promise/src");
-
 var _src2 = require("@krakenjs/cross-domain-utils/src");
-
 var _src3 = require("@krakenjs/belter/src");
-
 var _serialize = require("../../serialize");
-
 var _global = require("../../global");
-
 var _strategies = require("./strategies");
-
 function packMessages(messages) {
   return {
     [(0, _global.getGlobalKey)()]: messages
   };
 }
-
 function sendMessage(win, domain, message, {
   on,
   send
@@ -32,9 +24,8 @@ function sendMessage(win, domain, message, {
     domainBuffer.buffer.push(message);
     domainBuffer.flush = domainBuffer.flush || _src.ZalgoPromise.flush().then(() => {
       if ((0, _src2.isWindowClosed)(win)) {
-        throw new Error('Window is closed');
+        throw new Error("Window is closed");
       }
-
       const serializedMessage = (0, _serialize.serializeMessage)(win, domain, packMessages(domainBuffer.buffer || []), {
         on,
         send
@@ -42,7 +33,6 @@ function sendMessage(win, domain, message, {
       delete domainBuffer.buffer;
       const strategies = Object.keys(_strategies.SEND_MESSAGE_STRATEGIES);
       const errors = [];
-
       for (const strategyName of strategies) {
         try {
           _strategies.SEND_MESSAGE_STRATEGIES[strategyName](win, serializedMessage, domain);
@@ -50,9 +40,8 @@ function sendMessage(win, domain, message, {
           errors.push(err);
         }
       }
-
       if (errors.length === strategies.length) {
-        throw new Error(`All post-robot messaging strategies failed:\n\n${errors.map((err, i) => `${i}. ${(0, _src3.stringifyError)(err)}`).join('\n\n')}`);
+        throw new Error(`All post-robot messaging strategies failed:\n\n${errors.map((err, i) => `${i}. ${(0, _src3.stringifyError)(err)}`).join("\n\n")}`);
       }
     });
     return domainBuffer.flush.then(() => {

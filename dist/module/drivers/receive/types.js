@@ -4,19 +4,12 @@ exports.__esModule = true;
 exports.handleAck = handleAck;
 exports.handleRequest = handleRequest;
 exports.handleResponse = handleResponse;
-
 var _src = require("@krakenjs/zalgo-promise/src");
-
 var _src2 = require("@krakenjs/cross-domain-utils/src");
-
 var _src3 = require("@krakenjs/belter/src");
-
 var _conf = require("../../conf");
-
 var _send = require("../send");
-
 var _listeners = require("../listeners");
-
 function handleRequest(source, origin, message, {
   on,
   send
@@ -26,19 +19,15 @@ function handleRequest(source, origin, message, {
     win: source,
     domain: origin
   });
-  const logName = message.name === _conf.MESSAGE_NAME.METHOD && message.data && typeof message.data.name === 'string' ? `${message.data.name}()` : message.name;
-
+  const logName = message.name === _conf.MESSAGE_NAME.METHOD && message.data && typeof message.data.name === "string" ? `${message.data.name}()` : message.name;
   if (__DEBUG__) {
-    // eslint-disable-next-line no-console
-    console.info('receive::req', logName, origin, '\n\n', message.data);
+    console.info("receive::req", logName, origin, "\n\n", message.data);
   }
-
   function sendAck() {
     return _src.ZalgoPromise.flush().then(() => {
       if (message.fireAndForget || (0, _src2.isWindowClosed)(source)) {
         return;
       }
-
       try {
         return (0, _send.sendMessage)(source, origin, {
           id: (0, _src3.uniqueID)(),
@@ -55,21 +44,18 @@ function handleRequest(source, origin, message, {
       }
     });
   }
-
   function sendResponse(ack, data, error) {
     return _src.ZalgoPromise.flush().then(() => {
       if (message.fireAndForget || (0, _src2.isWindowClosed)(source)) {
         return;
       }
-
       if (__DEBUG__) {
         if (ack === _conf.MESSAGE_ACK.SUCCESS) {
-          console.info('respond::res', logName, origin, '\n\n', data); // eslint-disable-line no-console
+          console.info("respond::res", logName, origin, "\n\n", data);
         } else if (ack === _conf.MESSAGE_ACK.ERROR) {
-          console.error('respond::err', logName, origin, '\n\n', error); // eslint-disable-line no-console
+          console.error("respond::err", logName, origin, "\n\n", error);
         }
       }
-
       try {
         return (0, _send.sendMessage)(source, origin, {
           id: (0, _src3.uniqueID)(),
@@ -89,12 +75,10 @@ function handleRequest(source, origin, message, {
       }
     });
   }
-
   return _src.ZalgoPromise.all([sendAck(), _src.ZalgoPromise.try(() => {
     if (!options) {
       throw new Error(`No handler found for post message: ${message.name} from ${origin} in ${window.location.protocol}//${window.location.host}${window.location.pathname}`);
     }
-
     const data = message.data;
     return options.handler({
       source,
@@ -113,66 +97,51 @@ function handleRequest(source, origin, message, {
     }
   });
 }
-
 function handleAck(source, origin, message) {
   if ((0, _listeners.isResponseListenerErrored)(message.hash)) {
     return;
   }
-
   const options = (0, _listeners.getResponseListener)(message.hash);
-
   if (!options) {
     throw new Error(`No handler found for post message ack for message: ${message.name} from ${origin} in ${window.location.protocol}//${window.location.host}${window.location.pathname}`);
   }
-
   try {
     if (!(0, _src2.matchDomain)(options.domain, origin)) {
       throw new Error(`Ack origin ${origin} does not match domain ${options.domain.toString()}`);
     }
-
     if (source !== options.win) {
       throw new Error(`Ack source does not match registered window`);
     }
   } catch (err) {
     options.promise.reject(err);
   }
-
   options.ack = true;
 }
-
 function handleResponse(source, origin, message) {
   if ((0, _listeners.isResponseListenerErrored)(message.hash)) {
     return;
   }
-
   const options = (0, _listeners.getResponseListener)(message.hash);
-
   if (!options) {
     throw new Error(`No handler found for post message response for message: ${message.name} from ${origin} in ${window.location.protocol}//${window.location.host}${window.location.pathname}`);
   }
-
   if (!(0, _src2.matchDomain)(options.domain, origin)) {
     throw new Error(`Response origin ${origin} does not match domain ${(0, _src2.stringifyDomainPattern)(options.domain)}`);
   }
-
   if (source !== options.win) {
     throw new Error(`Response source does not match registered window`);
   }
-
   (0, _listeners.deleteResponseListener)(message.hash);
-  const logName = message.name === _conf.MESSAGE_NAME.METHOD && message.data && typeof message.data.name === 'string' ? `${message.data.name}()` : message.name;
-
+  const logName = message.name === _conf.MESSAGE_NAME.METHOD && message.data && typeof message.data.name === "string" ? `${message.data.name}()` : message.name;
   if (message.ack === _conf.MESSAGE_ACK.ERROR) {
     if (__DEBUG__) {
-      console.error('receive::err', logName, origin, '\n\n', message.error); // eslint-disable-line no-console
+      console.error("receive::err", logName, origin, "\n\n", message.error);
     }
-
     options.promise.reject(message.error);
   } else if (message.ack === _conf.MESSAGE_ACK.SUCCESS) {
     if (__DEBUG__) {
-      console.info('receive::res', logName, origin, '\n\n', message.data); // eslint-disable-line no-console
+      console.info("receive::res", logName, origin, "\n\n", message.data);
     }
-
     options.promise.resolve({
       source,
       origin,

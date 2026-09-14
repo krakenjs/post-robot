@@ -3,19 +3,12 @@
 exports.__esModule = true;
 exports.deserializeMessage = deserializeMessage;
 exports.serializeMessage = serializeMessage;
-
 var _src = require("@krakenjs/cross-domain-utils/src");
-
 var _src2 = require("@krakenjs/universal-serialize/src");
-
 var _conf = require("../conf");
-
 var _function = require("./function");
-
 var _promise = require("./promise");
-
 var _window = require("./window");
-
 function serializeMessage(destination, domain, obj, {
   on,
   send
@@ -36,7 +29,6 @@ function serializeMessage(destination, domain, obj, {
     }
   });
 }
-
 function deserializeMessage(source, origin, message, {
   send
 }) {

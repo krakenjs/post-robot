@@ -4,35 +4,22 @@ exports.__esModule = true;
 exports.ProxyWindow = void 0;
 exports.deserializeWindow = deserializeWindow;
 exports.serializeWindow = serializeWindow;
-
 var _src = require("@krakenjs/cross-domain-utils/src");
-
 var _src2 = require("@krakenjs/zalgo-promise/src");
-
 var _src3 = require("@krakenjs/belter/src");
-
 var _src4 = require("@krakenjs/universal-serialize/src");
-
 var _conf = require("../conf");
-
 var _global = require("../global");
-
 var _lib = require("../lib");
-
 var _bridge = require("../bridge");
-
-/* eslint no-use-before-define: off */
 function cleanupProxyWindows() {
-  const idToProxyWindow = (0, _global.globalStore)('idToProxyWindow');
-
+  const idToProxyWindow = (0, _global.globalStore)("idToProxyWindow");
   for (const id of idToProxyWindow.keys()) {
-    // $FlowFixMe
     if (idToProxyWindow.get(id).shouldClean()) {
       idToProxyWindow.del(id);
     }
   }
 }
-
 function getSerializedWindow(winPromise, {
   send,
   id = (0, _src3.uniqueID)()
@@ -51,43 +38,34 @@ function getSerializedWindow(winPromise, {
   });
   windowNamePromise.catch(_src3.noop);
   windowTypePromise.catch(_src3.noop);
-
   const getName = () => winPromise.then(win => {
     if ((0, _src.isWindowClosed)(win)) {
       return;
     }
-
     if ((0, _src.isSameDomain)(win)) {
       return (0, _src.assertSameDomain)(win).name;
     }
-
     return windowNamePromise;
   });
-
   const getDefaultSetLocationOptions = () => {
-    // $FlowFixMe
     return {};
   };
-
   const setLocation = (href, opts = getDefaultSetLocationOptions()) => winPromise.then(win => {
     const domain = `${window.location.protocol}//${window.location.host}`;
     const {
       method = _conf.METHOD.GET,
       body
     } = opts;
-
-    if (href.indexOf('/') === 0) {
+    if (href.indexOf("/") === 0) {
       href = `${domain}${href}`;
     } else if (!href.match(/^https?:\/\//) && href.indexOf(domain) !== 0) {
       throw new Error(`Expected url to be http or https url, or absolute path, got ${JSON.stringify(href)}`);
     }
-
     if (method === _conf.METHOD.POST) {
       return getName().then(name => {
         if (!name) {
           throw new Error(`Can not post to window without target name`);
         }
-
         (0, _src3.submitForm)({
           url: href,
           target: name,
@@ -98,21 +76,17 @@ function getSerializedWindow(winPromise, {
     } else if (method === _conf.METHOD.GET) {
       if ((0, _src.isSameDomain)(win)) {
         try {
-          if (win.location && typeof win.location.replace === 'function') {
-            // $FlowFixMe
+          if (win.location && typeof win.location.replace === "function") {
             win.location.replace(href);
             return;
           }
-        } catch (err) {// pass
-        }
+        } catch (err) {}
       }
-
       win.location = href;
     } else {
       throw new Error(`Unsupported method: ${method}`);
     }
   });
-
   return {
     id,
     getType: () => {
@@ -137,25 +111,19 @@ function getSerializedWindow(winPromise, {
           name
         });
       }
-
       const sameDomain = (0, _src.isSameDomain)(win);
       const frame = (0, _src.getFrameForWindow)(win);
-
       if (!sameDomain) {
         throw new Error(`Can not set name for cross-domain window: ${name}`);
       }
-
       (0, _src.assertSameDomain)(win).name = name;
-
       if (frame) {
-        frame.setAttribute('name', name);
+        frame.setAttribute("name", name);
       }
-
       windowNamePromise = _src2.ZalgoPromise.resolve(name);
     })
   };
 }
-
 class ProxyWindow {
   constructor({
     send,
@@ -173,49 +141,39 @@ class ProxyWindow {
     this.serializedWindow = serializedWindow || getSerializedWindow(this.actualWindowPromise, {
       send
     });
-    (0, _global.globalStore)('idToProxyWindow').set(this.getID(), this);
-
+    (0, _global.globalStore)("idToProxyWindow").set(this.getID(), this);
     if (win) {
       this.setWindow(win, {
         send
       });
     }
   }
-
   getID() {
     return this.serializedWindow.id;
   }
-
   getType() {
     return this.serializedWindow.getType();
   }
-
   isPopup() {
     return this.getType().then(type => {
       return type === _src.WINDOW_TYPE.POPUP;
     });
   }
-
   setLocation(href, opts) {
     return this.serializedWindow.setLocation(href, opts).then(() => this);
   }
-
   getName() {
     return this.serializedWindow.getName();
   }
-
   setName(name) {
     return this.serializedWindow.setName(name).then(() => this);
   }
-
   close() {
     return this.serializedWindow.close().then(() => this);
   }
-
   focus() {
     const isPopupPromise = this.isPopup();
     const getNamePromise = this.getName();
-
     const reopenPromise = _src2.ZalgoPromise.hash({
       isPopup: isPopupPromise,
       name: getNamePromise
@@ -223,23 +181,20 @@ class ProxyWindow {
       isPopup,
       name
     }) => {
-      if (isPopup && name) {
-        window.open('', name, 'noopener');
+      const win = this.getWindow();
+      if (isPopup && name && !win) {
+        window.open("", name);
       }
     });
-
     const focusPromise = this.serializedWindow.focus();
     return _src2.ZalgoPromise.all([reopenPromise, focusPromise]).then(() => this);
   }
-
   isClosed() {
     return this.serializedWindow.isClosed();
   }
-
   getWindow() {
     return this.actualWindow;
   }
-
   setWindow(win, {
     send
   }) {
@@ -249,13 +204,11 @@ class ProxyWindow {
       send,
       id: this.getID()
     });
-    (0, _global.windowStore)('winToProxyWindow').set(win, this);
+    (0, _global.windowStore)("winToProxyWindow").set(win, this);
   }
-
   awaitWindow() {
     return this.actualWindowPromise;
   }
-
   matchWindow(win, {
     send
   }) {
@@ -263,7 +216,6 @@ class ProxyWindow {
       if (this.actualWindow) {
         return win === this.actualWindow;
       }
-
       return _src2.ZalgoPromise.hash({
         proxyInstanceID: this.getInstanceID(),
         knownWindowInstanceID: (0, _lib.getWindowInstanceID)(win, {
@@ -274,39 +226,30 @@ class ProxyWindow {
         knownWindowInstanceID
       }) => {
         const match = proxyInstanceID === knownWindowInstanceID;
-
         if (match) {
           this.setWindow(win, {
             send
           });
         }
-
         return match;
       });
     });
   }
-
   unwrap() {
     return this.actualWindow || this;
   }
-
   getInstanceID() {
     return this.serializedWindow.getInstanceID();
   }
-
   shouldClean() {
     return Boolean(this.actualWindow && (0, _src.isWindowClosed)(this.actualWindow));
   }
-
   serialize() {
     return this.serializedWindow;
   }
-
   static unwrap(win) {
-    return ProxyWindow.isProxyWindow(win) // $FlowFixMe
-    ? win.unwrap() : win;
+    return ProxyWindow.isProxyWindow(win) ? win.unwrap() : win;
   }
-
   static serialize(win, {
     send
   }) {
@@ -315,44 +258,33 @@ class ProxyWindow {
       send
     }).serialize();
   }
-
   static deserialize(serializedWindow, {
     send
   }) {
     cleanupProxyWindows();
-    return (0, _global.globalStore)('idToProxyWindow').get(serializedWindow.id) || new ProxyWindow({
+    return (0, _global.globalStore)("idToProxyWindow").get(serializedWindow.id) || new ProxyWindow({
       serializedWindow,
       send
     });
   }
-
   static isProxyWindow(obj) {
-    // $FlowFixMe
     return Boolean(obj && !(0, _src.isWindow)(obj) && obj.isProxyWindow);
   }
-
   static toProxyWindow(win, {
     send
   }) {
     cleanupProxyWindows();
-
     if (ProxyWindow.isProxyWindow(win)) {
-      // $FlowFixMe
       return win;
-    } // $FlowFixMe
-
-
+    }
     const actualWindow = win;
-    return (0, _global.windowStore)('winToProxyWindow').get(actualWindow) || new ProxyWindow({
+    return (0, _global.windowStore)("winToProxyWindow").get(actualWindow) || new ProxyWindow({
       win: actualWindow,
       send
     });
   }
-
 }
-
 exports.ProxyWindow = ProxyWindow;
-
 function serializeWindow(destination, domain, win, {
   send
 }) {
@@ -360,7 +292,6 @@ function serializeWindow(destination, domain, win, {
     send
   }));
 }
-
 function deserializeWindow(source, origin, win, {
   send
 }) {

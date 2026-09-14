@@ -2,49 +2,35 @@
 
 exports.__esModule = true;
 exports.send = void 0;
-
 var _src = require("@krakenjs/zalgo-promise/src");
-
 var _src2 = require("@krakenjs/cross-domain-utils/src");
-
 var _src3 = require("@krakenjs/belter/src");
-
 var _conf = require("../conf");
-
 var _drivers = require("../drivers");
-
 var _lib = require("../lib");
-
 var _global = require("../global");
-
 var _window = require("../serialize/window");
-
 var _on = require("./on");
-
 function validateOptions(name, win, domain) {
   if (!name) {
-    throw new Error('Expected name');
+    throw new Error("Expected name");
   }
-
   if (domain) {
-    if (typeof domain !== 'string' && !Array.isArray(domain) && !(0, _src3.isRegex)(domain)) {
+    if (typeof domain !== "string" && !Array.isArray(domain) && !(0, _src3.isRegex)(domain)) {
       throw new TypeError(`Can not send ${name}. Expected domain ${JSON.stringify(domain)} to be a string, array, or regex`);
     }
   }
-
   if ((0, _src2.isWindowClosed)(win)) {
     throw new Error(`Can not send ${name}. Target window is closed`);
   }
 }
-
 function normalizeDomain(win, targetDomain, actualDomain, {
   send
 }) {
   return _src.ZalgoPromise.try(() => {
-    if (typeof targetDomain === 'string') {
+    if (typeof targetDomain === "string") {
       return targetDomain;
     }
-
     return _src.ZalgoPromise.try(() => {
       return actualDomain || (0, _lib.sayHello)(win, {
         send
@@ -55,12 +41,10 @@ function normalizeDomain(win, targetDomain, actualDomain, {
       if (!(0, _src2.matchDomain)(targetDomain, targetDomain)) {
         throw new Error(`Domain ${(0, _src3.stringify)(targetDomain)} does not match ${(0, _src3.stringify)(targetDomain)}`);
       }
-
       return normalizedDomain;
     });
   });
 }
-
 const send = (winOrProxyWin, name, data, options) => {
   options = options || {};
   const domainMatcher = options.domain || _conf.WILDCARD;
@@ -70,10 +54,8 @@ const send = (winOrProxyWin, name, data, options) => {
   return _window.ProxyWindow.toProxyWindow(winOrProxyWin, {
     send
   }).awaitWindow().then(win => {
-    // $FlowFixMe
     return _src.ZalgoPromise.try(() => {
       validateOptions(name, win, domainMatcher);
-
       if ((0, _src2.isAncestor)(window, win)) {
         return (0, _lib.awaitWindowHello)(win, childTimeout);
       }
@@ -85,15 +67,12 @@ const send = (winOrProxyWin, name, data, options) => {
       });
     }).then(targetDomain => {
       const domain = targetDomain;
-      const logName = name === _conf.MESSAGE_NAME.METHOD && data && typeof data.name === 'string' ? `${data.name}()` : name;
-
+      const logName = name === _conf.MESSAGE_NAME.METHOD && data && typeof data.name === "string" ? `${data.name}()` : name;
       if (__DEBUG__) {
-        console.info('send::req', logName, domain, '\n\n', data); // eslint-disable-line no-console
+        console.info("send::req", logName, domain, "\n\n", data);
       }
-
       const promise = new _src.ZalgoPromise();
       const hash = `${name}_${(0, _src3.uniqueID)()}`;
-
       if (!fireAndForget) {
         const responseListener = {
           name,
@@ -102,7 +81,7 @@ const send = (winOrProxyWin, name, data, options) => {
           promise
         };
         (0, _drivers.addResponseListener)(hash, responseListener);
-        const reqPromises = (0, _global.windowStore)('requestPromises').getOrSet(win, () => []);
+        const reqPromises = (0, _global.windowStore)("requestPromises").getOrSet(win, () => []);
         reqPromises.push(promise);
         promise.catch(() => {
           (0, _drivers.markResponseListenerErrored)(hash);
@@ -114,19 +93,15 @@ const send = (winOrProxyWin, name, data, options) => {
         let resTimeout = totalResTimeout;
         const interval = (0, _src3.safeInterval)(() => {
           if ((0, _src2.isWindowClosed)(win)) {
-            return promise.reject(new Error(`Window closed for ${name} before ${responseListener.ack ? 'response' : 'ack'}`));
+            return promise.reject(new Error(`Window closed for ${name} before ${responseListener.ack ? "response" : "ack"}`));
           }
-
           if (responseListener.cancelled) {
             return promise.reject(new Error(`Response listener was cancelled for ${name}`));
           }
-
           ackTimeout = Math.max(ackTimeout - _conf.RESPONSE_CYCLE_TIME, 0);
-
           if (resTimeout !== -1) {
             resTimeout = Math.max(resTimeout - _conf.RESPONSE_CYCLE_TIME, 0);
           }
-
           if (!responseListener.ack && ackTimeout === 0) {
             return promise.reject(new Error(`No ack for postMessage ${logName} in ${(0, _src2.getDomain)()} in ${totalAckTimeout}ms`));
           } else if (resTimeout === 0) {
@@ -138,7 +113,6 @@ const send = (winOrProxyWin, name, data, options) => {
           reqPromises.splice(reqPromises.indexOf(promise, 1));
         }).catch(_src3.noop);
       }
-
       return (0, _drivers.sendMessage)(win, domain, {
         id: (0, _src3.uniqueID)(),
         origin: (0, _src2.getDomain)(window),
@@ -158,5 +132,4 @@ const send = (winOrProxyWin, name, data, options) => {
     });
   });
 };
-
 exports.send = send;

@@ -5,46 +5,34 @@ exports.awaitWindowHello = awaitWindowHello;
 exports.getWindowInstanceID = getWindowInstanceID;
 exports.initHello = initHello;
 exports.sayHello = sayHello;
-
 var _src = require("@krakenjs/cross-domain-utils/src");
-
 var _src2 = require("@krakenjs/zalgo-promise/src");
-
 var _src3 = require("@krakenjs/belter/src");
-
 var _conf = require("../conf");
-
 var _global = require("../global");
-
 function getInstanceID() {
-  return (0, _global.globalStore)('instance').getOrSet('instanceID', _src3.uniqueID);
+  return (0, _global.globalStore)("instance").getOrSet("instanceID", _src3.uniqueID);
 }
-
 function getHelloPromise(win) {
-  const helloPromises = (0, _global.windowStore)('helloPromises');
+  const helloPromises = (0, _global.windowStore)("helloPromises");
   return helloPromises.getOrSet(win, () => new _src2.ZalgoPromise());
 }
-
 function resolveHelloPromise(win, {
   domain
 }) {
-  const helloPromises = (0, _global.windowStore)('helloPromises');
+  const helloPromises = (0, _global.windowStore)("helloPromises");
   const existingPromise = helloPromises.get(win);
-
   if (existingPromise) {
     existingPromise.resolve({
       domain
     });
   }
-
   const newPromise = _src2.ZalgoPromise.resolve({
     domain
   });
-
   helloPromises.set(win, newPromise);
   return newPromise;
 }
-
 function listenForHello({
   on
 }) {
@@ -62,7 +50,6 @@ function listenForHello({
     };
   });
 }
-
 function sayHello(win, {
   send
 }) {
@@ -87,11 +74,10 @@ function sayHello(win, {
     };
   });
 }
-
 function getWindowInstanceID(win, {
   send
 }) {
-  return (0, _global.windowStore)('windowInstanceIDPromises').getOrSet(win, () => {
+  return (0, _global.windowStore)("windowInstanceIDPromises").getOrSet(win, () => {
     return sayHello(win, {
       send
     }).then(({
@@ -99,38 +85,31 @@ function getWindowInstanceID(win, {
     }) => instanceID);
   });
 }
-
 function initHello({
   on,
   send
 }) {
-  return (0, _global.globalStore)('builtinListeners').getOrSet('helloListener', () => {
+  return (0, _global.globalStore)("builtinListeners").getOrSet("helloListener", () => {
     const listener = listenForHello({
       on
     });
     const parent = (0, _src.getAncestor)();
-
     if (parent) {
       sayHello(parent, {
         send
       }).catch(err => {
-        // $FlowFixMe
         if (__TEST__ && (0, _global.getGlobal)(parent)) {
           throw err;
         }
       });
     }
-
     return listener;
   });
 }
-
-function awaitWindowHello(win, timeout = 5000, name = 'Window') {
+function awaitWindowHello(win, timeout = 5000, name = "Window") {
   let promise = getHelloPromise(win);
-
   if (timeout !== -1) {
     promise = promise.timeout(timeout, new Error(`${name} did not load after ${timeout}ms`));
   }
-
   return promise;
 }

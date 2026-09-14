@@ -2,13 +2,9 @@
 
 exports.__esModule = true;
 exports.setupBridge = setupBridge;
-
 var _parent = require("./parent");
-
 var _bridge = require("./bridge");
-
 var _child = require("./child");
-
 function setupBridge({
   on,
   send,

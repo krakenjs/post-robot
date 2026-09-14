@@ -3,17 +3,11 @@
 exports.__esModule = true;
 exports.deserializePromise = deserializePromise;
 exports.serializePromise = serializePromise;
-
 var _src = require("@krakenjs/zalgo-promise/src");
-
 var _src2 = require("@krakenjs/universal-serialize/src");
-
 var _conf = require("../conf");
-
 var _function = require("./function");
-
 var _window = require("./window");
-
 function serializePromise(destination, domain, val, key, {
   on,
   send
@@ -25,7 +19,6 @@ function serializePromise(destination, domain, val, key, {
     })
   });
 }
-
 function deserializePromise(source, origin, {
   then
 }) {
